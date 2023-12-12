@@ -1,0 +1,25 @@
+Root
+{
+    Data = 1
+    Object
+    {
+        Flags = 0
+        Health = 100
+        LocationNum = 3
+        Location[0] = 0.000000
+        Location[1] = 0.000000
+        Location[2] = 0.000000
+        RotationNum = 4
+        Rotation[0] = 0.000000
+        Rotation[1] = 0.000000
+        Rotation[2] = 0.000000
+        Rotation[3] = 0.000000
+        ScaleNum = 3
+        Scale[0] = 1.000000
+        Scale[1] = 1.000000
+        Scale[2] = 1.000000
+        VisualName = None
+    }
+
+}
+
