@@ -4,28 +4,29 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_ERROR_HANDLERS 5
-static ErrorHandler s_ErrorHandlers[MAX_ERROR_HANDLERS];
-static uint16_t s_ErrorHandlersAssigned = 0;
+constexpr std::uint32_t MaxErrorHandlers = 5;
+
+static ErrorHandler ErrorHandlers[MaxErrorHandlers];
+static std::uint32_t ErrorHandlersAssigned = 0;
 
 void AddErrorHandler(const ErrorHandler* handler)
 {
     DO_ONCE(
-        memset(s_ErrorHandlers, 0, sizeof(s_ErrorHandlers));
-    s_ErrorHandlersAssigned = 0;
+        memset(ErrorHandlers, 0, sizeof(ErrorHandlers));
+    ErrorHandlersAssigned = 0;
     );
 
     ERR_FAIL_NULL(handler);
-    ERR_FAIL_EXPECTED_TRUE_MSG(s_ErrorHandlersAssigned < MAX_ERROR_HANDLERS, "Max error handlers assigned");
-    s_ErrorHandlers[s_ErrorHandlersAssigned++] = *handler;
+    ERR_FAIL_EXPECTED_TRUE_MSG(ErrorHandlersAssigned < MaxErrorHandlers, "Max error handlers assigned");
+    ErrorHandlers[ErrorHandlersAssigned++] = *handler;
 }
 
 void RemoveErrorHandler(const ErrorHandler* handler)
 {
-    ErrorHandler* lastIt = s_ErrorHandlers + MAX_ERROR_HANDLERS;
+    ErrorHandler* lastIt = ErrorHandlers + MaxErrorHandlers;
     ERR_FAIL_NULL(handler);
 
-    for (ErrorHandler* it = s_ErrorHandlers; it != lastIt; ++it)
+    for (ErrorHandler* it = ErrorHandlers; it != lastIt; ++it)
     {
         bool equal = handler->UserData == it->UserData && handler->ErrorHandlerFunc == it->ErrorHandlerFunc;
         if (equal)
@@ -35,11 +36,11 @@ void RemoveErrorHandler(const ErrorHandler* handler)
                 *it = *moveIt;
             }
 
-            s_ErrorHandlersAssigned--;
+            ErrorHandlersAssigned--;
 
-            if (s_ErrorHandlersAssigned)
+            if (ErrorHandlersAssigned)
             {
-                memset(s_ErrorHandlers, 0, sizeof(s_ErrorHandlers));
+                memset(ErrorHandlers, 0, sizeof(ErrorHandlers));
             }
 
             break;
@@ -57,18 +58,17 @@ void PrintError(const SourceLocation* location, const char* message)
 {
 #if defined(DEBUG) || defined(_DEBUG)
     printf("Error in %s: %u in %s msg: %s\n", location->FileName, location->Line, location->FunctionName, message);
-
 #endif
-    ErrorHandlerInfo info;
+
+    ErrorHandlerInfo info{};
     info.ErrorMessage = message;
     info.FileName = location->FileName;
     info.Line = location->Line;
     info.FunctionName = location->FunctionName;
 
-
-    for (uint16_t i = 0; i < s_ErrorHandlersAssigned; ++i)
+    for (std::uint32_t i = 0; i < ErrorHandlersAssigned; ++i)
     {
-        ErrorHandler* handler = &s_ErrorHandlers[i];
+        ErrorHandler* handler = &ErrorHandlers[i];
         handler->ErrorHandlerFunc(handler->UserData, &info);
     }
 }

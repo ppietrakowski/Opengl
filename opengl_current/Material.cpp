@@ -22,12 +22,12 @@ Material::Material(const std::shared_ptr<Shader>& shader) :
     }
 }
 
-bool Material::GetIntProperty(const char* name, int& outInt) const
+bool Material::GetIntProperty(const char* name, std::int32_t& outInt) const
 {
     return _ints.GetValue(name, outInt);
 }
 
-void Material::SetIntProperty(const char* name, int Value)
+void Material::SetIntProperty(const char* name, std::int32_t Value)
 {
     _ints.SetValue(name, Value);
 }
@@ -94,32 +94,32 @@ void Material::AddNewProperty(const UniformInfo& info)
 {
     switch (info.Type)
     {
-    case EUniformType::Vec4:
+    case UniformType::Vec4:
     {
         AddNewVec4(info);
         break;
     }
-    case EUniformType::Vec3:
+    case UniformType::Vec3:
     {
         AddNewVec3(info);
         break;
     }
-    case EUniformType::Vec2:
+    case UniformType::Vec2:
     {
         AddNewVec2(info);
         break;
     }
-    case EUniformType::Float:
+    case UniformType::Float:
     {
         AddNewFloat(info);
         break;
     }
-    case EUniformType::Int:
+    case UniformType::Int:
     {
         AddNewInt(info);
         break;
     }
-    case EUniformType::Sampler2D:
+    case UniformType::Sampler2D:
     {
         AddNewTexture(info);
         break;
@@ -138,7 +138,7 @@ void Material::AddNewTexture(const UniformInfo& info)
 
 void Material::AddNewInt(const UniformInfo& info)
 {
-    Property<int> property;
+    Property<std::int32_t> property;
     strncpy(property.UniformName, info.Name.c_str(), 96);
     property.UniformName[95] = 0;
     property.Value = 0;

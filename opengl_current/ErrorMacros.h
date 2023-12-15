@@ -1,25 +1,20 @@
 #pragma once
 
-#include <stdint.h>
-
-#ifndef __cplusplus
-#include <stdbool.h>
-#else
 #include <stdexcept>
-#endif
+#include <cstdint>
 
 typedef struct ErrorHandlerInfo
 {
     const char* FunctionName;
     const char* FileName;
-    unsigned int Line;
+    std::uint32_t Line;
     const char* ErrorMessage;
 } ErrorHandlerInfo;
 
 typedef struct SourceLocation
 {
     const char* FileName;
-    unsigned int Line;
+    std::uint32_t Line;
     const char* FunctionName;
 } SourceLocation;
 
@@ -56,7 +51,7 @@ extern "C" {
 }
 #endif
 
-#define CURRENT_SOURCE_LOCATION {__FILE__, (unsigned int)(__LINE__), FUNCTION_SIGNATURE}
+#define CURRENT_SOURCE_LOCATION {__FILE__, static_cast<std::uint32_t>(__LINE__), FUNCTION_SIGNATURE}
 
 #define ERR_FAIL() SourceLocation location = CURRENT_SOURCE_LOCATION;  PrintError(&location, "Method/function failed"); return
 #define ERR_FAIL_V(RetVal) SourceLocation location = CURRENT_SOURCE_LOCATION;  PrintError(&location, "Method/function failed"); return RetVal
@@ -126,12 +121,7 @@ extern "C" {
     } \
     } \
 
-#ifdef __cplusplus
 #define THROW_ERROR(Msg) throw std::runtime_error(Msg)
-#else
-#define THROW_ERROR(Msg) exit(EXIT_FAILURE)
-#endif
-
 
 #if defined(_DEBUG) || defined(DEBUG)
 #define ASSERT(Condition) if (!(Condition)) { SourceLocation location = CURRENT_SOURCE_LOCATION;  PrintError(&location, "Assertion " #Condition " evaluates to false"); DEBUG_BREAK(); THROW_ERROR("Fatal condition " #Condition " evaluates to false"); }

@@ -33,7 +33,7 @@ std::span<const StaticMeshVertex> StaticMeshImporter::GetVertices() const
     return _staticMeshLoader->GetVertices();
 }
 
-std::span<const unsigned int> StaticMeshImporter::GetIndices() const
+std::span<const std::uint32_t> StaticMeshImporter::GetIndices() const
 {
     ASSERT(!_errorOccured);
     return _staticMeshLoader->GetIndices();
@@ -60,14 +60,14 @@ bool StaticMeshImporter::HasErrorOccured() const
     return _errorOccured;
 }
 
-unsigned int StaticMeshImporter::GetNumIndices() const
+std::uint32_t StaticMeshImporter::GetNumIndices() const
 {
     ASSERT(!_errorOccured);
-    return static_cast<unsigned int>(_staticMeshLoader->GetIndices().size());
+    return static_cast<std::uint32_t>(_staticMeshLoader->GetIndices().size());
 }
 
-unsigned int StaticMeshImporter::GetNumVertices() const
+std::uint32_t StaticMeshImporter::GetNumVertices() const
 {
     ASSERT(!_errorOccured);
-    return static_cast<unsigned int>(_staticMeshLoader->GetVertices().size());
+    return static_cast<std::uint32_t>(_staticMeshLoader->GetVertices().size());
 }

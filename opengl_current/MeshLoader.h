@@ -18,7 +18,7 @@ struct StaticMeshVertex
     glm::vec3 Normal;
     glm::vec2 TextureCoords;
 
-    static inline constexpr VertexAttribute DataFormat[3] = { {3, EPrimitiveVertexType::Float}, {3, EPrimitiveVertexType::Float}, {2, EPrimitiveVertexType::Float} };
+    static inline constexpr VertexAttribute DataFormat[3] = { {3, PrimitiveVertexType::Float}, {3, PrimitiveVertexType::Float}, {2, PrimitiveVertexType::Float} };
 };
 
 class IStaticMeshLoader
@@ -33,7 +33,7 @@ public:
     virtual bool Load(const std::string& path) = 0;
 
     virtual std::span<const StaticMeshVertex> GetVertices() const = 0;
-    virtual std::span<const unsigned int> GetIndices() const = 0;
+    virtual std::span<const std::uint32_t> GetIndices() const = 0;
     virtual std::string_view GetModelName() const = 0;
 
     virtual std::string GetLastErrorMessage() const = 0;
@@ -45,7 +45,7 @@ public:
     StaticMeshImporter(std::filesystem::path path);
 
     std::span<const StaticMeshVertex> GetVertices() const;
-    std::span<const unsigned int> GetIndices() const;
+    std::span<const std::uint32_t> GetIndices() const;
     std::string_view GetModelName() const;
 
     std::string GetLastErrorMessage() const;
@@ -54,8 +54,8 @@ public:
 
     bool HasErrorOccured() const;
 
-    unsigned int GetNumIndices() const;
-    unsigned int GetNumVertices() const;
+    std::uint32_t GetNumIndices() const;
+    std::uint32_t GetNumVertices() const;
 
 private:
     std::unique_ptr<IStaticMeshLoader> _staticMeshLoader;

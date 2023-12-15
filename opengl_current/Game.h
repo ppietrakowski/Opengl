@@ -21,8 +21,8 @@
 
 struct WindowSettings
 {
-    unsigned int Width;
-    unsigned int Height;
+    std::uint32_t Width;
+    std::uint32_t Height;
     std::string Title;
 };
 
@@ -32,10 +32,10 @@ struct WindowData
 {
     std::function<void(const Event&)> EventCallback;
     bool MouseVisible{ true };
-    glm::ivec2 WindowPosition;
-    glm::ivec2 WindowSize;
-    glm::vec2 MousePosition;
-    glm::vec2 LastMousePosition;
+    glm::ivec2 WindowPosition{ 0, 0 };
+    glm::ivec2 WindowSize{ 0, 0 };
+    glm::vec2 MousePosition{ 0, 0 };
+    glm::vec2 LastMousePosition{ 0, 0 };
 };
 
 class Game : public IPlatform
@@ -53,7 +53,7 @@ public:
     virtual glm::vec2 GetMousePosition() const override;
     virtual glm::vec2 GetLastMousePosition() const override;
     virtual void SetMouseVisible(bool mouseVisible) override;
-    virtual bool IsKeyDown(int key) const override;
+    virtual bool IsKeyDown(std::int32_t key) const override;
 
     void AddLayer(Layer* gameLayer);
     void RemoveLayer(std::type_index index);

@@ -5,7 +5,7 @@
 
 #include <memory>
 
-enum class EPrimitiveVertexType : short
+enum class PrimitiveVertexType : std::uint8_t
 {
     Int,
     UnsignedInt,
@@ -15,17 +15,17 @@ enum class EPrimitiveVertexType : short
 
 struct VertexAttribute
 {
-    unsigned int NumComponents;
-    EPrimitiveVertexType Type;
+    std::uint8_t NumComponents : 5;
+    PrimitiveVertexType Type : 3;
 };
 
 class VertexArray
 {
 public:
     VertexArray();
-    VertexArray(VertexArray&& array) noexcept { *this = std::move(array); }
+    VertexArray(VertexArray&& tempVertexArray) noexcept { *this = std::move(tempVertexArray); }
 
-    VertexArray& operator=(VertexArray&& array) noexcept;
+    VertexArray& operator=(VertexArray&& tempVertexArray) noexcept;
     ~VertexArray();
 
     void Bind() const;
@@ -33,9 +33,9 @@ public:
     void AddBuffer(VertexBuffer&& vb, std::span<const VertexAttribute> attributes);
     void SetIndexBuffer(IndexBuffer&& ib);
 
-    unsigned int GetNumIndices() const;
+    std::uint32_t GetNumIndices() const;
 
-    VertexBuffer& GetVertexBufferAt(unsigned int index) { return _vertexBuffers[index]; }
+    VertexBuffer& GetVertexBufferAt(std::uint32_t index) { return _vertexBuffers[index]; }
     IndexBuffer& GetIndexBuffer()
     {
         return _indexBuffer;

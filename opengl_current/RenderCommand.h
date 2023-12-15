@@ -2,7 +2,7 @@
 
 #include "VertexArray.h"
 
-enum class ERenderPrimitive
+enum class RenderPrimitive
 {
     Points = GL_POINTS,
     Lines = GL_LINES,
@@ -18,10 +18,10 @@ public:
 
 public:
 
-    static void DrawIndexed(const VertexArray& vertexArray, unsigned int numIndices, ERenderPrimitive renderPrimitive = ERenderPrimitive::Triangles);
+    static void DrawIndexed(const VertexArray& vertexArray, std::uint32_t numIndices, RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
     
     static void SetClearColor(float red, float green, float blue, float alpha = 1.0f);
-    static void Clear(unsigned int clearFlags);
+    static void Clear(std::uint32_t clearFlags);
 
     static void ToggleWireframe();
     static void SetWireframe(bool wireframeEnabled);

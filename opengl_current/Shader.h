@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <memory>
 
-enum class EUniformType
+enum class UniformType
 {
     Undefined,
     Vec4,
@@ -30,9 +30,9 @@ enum class EUniformType
 
 struct UniformInfo
 {
-    EUniformType Type;
+    UniformType Type;
     std::string Name;
-    int Location;
+    std::int32_t Location;
 };
 
 struct ShaderCompilationFailedException : public std::runtime_error
@@ -74,7 +74,7 @@ public:
     void Use() const;
     void StopUsing() const;
 
-    void SetUniformInt(const char* name, int value);
+    void SetUniformInt(const char* name, std::int32_t value);
     void SetUniformFloat(const char* name, float value);
     void SetUniformVec2(const char* name, glm::vec2 value);
     void SetUniformVec3(const char* name, const glm::vec3& value);
@@ -83,7 +83,7 @@ public:
     void SetUniformMat4(const char* name, const glm::mat4& value);
     void SetUniformMat3(const char* name, const glm::mat3& value);
 
-    int GetUniformInt(const char* name) const;
+    std::int32_t GetUniformInt(const char* name) const;
 
     float GetUniformFloat(const char* name) const;
     glm::vec2 GetUniformVec2(const char* name) const;
@@ -92,13 +92,13 @@ public:
 
     void GetUniformInfos(std::vector<UniformInfo>& outUniformInfos) const;
 
-    void SetSamplerUniform(const char* uniformName, const Texture& texture, unsigned int textureUnit);
+    void SetSamplerUniform(const char* uniformName, const Texture& texture, std::uint32_t textureUnit);
 
 private:
     GLuint _shaderProgram;
-    mutable std::unordered_map<std::string, int> _uniformLocationsCache;
+    mutable std::unordered_map<std::string, std::int32_t> _uniformLocationsCache;
 
 private:
-    int GetUniformLocation(const char* uniformName) const;
+    std::int32_t GetUniformLocation(const char* uniformName) const;
     void AddNewUniformInfo(std::vector<UniformInfo>& outUniformInfos, GLint location) const;
 };

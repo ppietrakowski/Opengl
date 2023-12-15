@@ -51,18 +51,18 @@ StaticMesh::StaticMesh(const std::filesystem::path& filePath, const std::shared_
     }
 
     std::span<const StaticMeshVertex> loadedVertices = importer.GetVertices();
-    std::span<const unsigned int> loadedIndices = importer.GetIndices();
+    std::span<const std::uint32_t> loadedIndices = importer.GetIndices();
 
     VertexBuffer vertexBuffer(loadedVertices.data(),
-        static_cast<unsigned int>(loadedVertices.size_bytes()));
+        static_cast<std::uint32_t>(loadedVertices.size_bytes()));
 
     IndexBuffer indexBuffer(loadedIndices.data(),
-        static_cast<unsigned int>(loadedIndices.size()));
+        static_cast<std::uint32_t>(loadedIndices.size()));
 
     _vertexArray.AddBuffer(std::move(vertexBuffer), StaticMeshVertex::DataFormat);
     _vertexArray.SetIndexBuffer(std::move(indexBuffer));
 
-    _numTriangles = static_cast<unsigned int>(importer.GetIndices().size()) / 3;
+    _numTriangles = static_cast<std::uint32_t>(importer.GetIndices().size()) / 3;
 
     _indices.resize(importer.GetNumIndices());
     _vertices.resize(importer.GetNumVertices());

@@ -34,7 +34,7 @@ namespace
     struct GLTypeToUniformType
     {
         GLenum GLUniformType;
-        EUniformType Type;
+        UniformType Type;
     };
 
     /* Wraps shader object with RAII object */
@@ -88,7 +88,7 @@ namespace
     {
         std::vector<char> log;
 
-        int logLength;
+        std::int32_t logLength;
 
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 
@@ -106,14 +106,14 @@ namespace
         throw ShaderCompilationFailedException(msg.c_str());
     }
 
-    ShaderObject TryCompileShader(const char* shaderSource, int length, GLenum type)
+    ShaderObject TryCompileShader(const char* shaderSource, std::int32_t length, GLenum type)
     {
         GLuint shaderObj = glCreateShader(type);
 
         glShaderSource(shaderObj, 1, &shaderSource, &length);
         glCompileShader(shaderObj);
 
-        int compiledWithoutErrors;
+        std::int32_t compiledWithoutErrors;
 
         glGetShaderiv(shaderObj, GL_COMPILE_STATUS, &compiledWithoutErrors);
 
@@ -129,7 +129,7 @@ namespace
     {
         std::vector<char> log;
 
-        int logLength;
+        std::int32_t logLength;
 
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
 
@@ -163,17 +163,17 @@ namespace
 Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource)
 {
     ShaderObject vertexShader = TryCompileShader(vertexShaderSource.data(),
-        static_cast<int>(vertexShaderSource.length()), GL_VERTEX_SHADER);
+        static_cast<std::int32_t>(vertexShaderSource.length()), GL_VERTEX_SHADER);
 
     ShaderObject fragmentShader = TryCompileShader(fragmentShaderSource.data(),
-        static_cast<int>(fragmentShaderSource.length()), GL_FRAGMENT_SHADER);
+        static_cast<std::int32_t>(fragmentShaderSource.length()), GL_FRAGMENT_SHADER);
 
     _shaderProgram = glCreateProgram();
     vertexShader.AttachShaderToProgram(_shaderProgram);
     fragmentShader.AttachShaderToProgram(_shaderProgram);
     glLinkProgram(_shaderProgram);
 
-    int linkedWithoutErrors;
+    std::int32_t linkedWithoutErrors;
 
     glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &linkedWithoutErrors);
 
@@ -186,13 +186,13 @@ Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentSha
 Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource, std::string_view geometryShaderSource)
 {
     ShaderObject vertexShader = TryCompileShader(vertexShaderSource.data(),
-        static_cast<int>(vertexShaderSource.length()), GL_VERTEX_SHADER);
+        static_cast<std::int32_t>(vertexShaderSource.length()), GL_VERTEX_SHADER);
 
     ShaderObject fragmentShader = TryCompileShader(fragmentShaderSource.data(),
-        static_cast<int>(fragmentShaderSource.length()), GL_FRAGMENT_SHADER);
+        static_cast<std::int32_t>(fragmentShaderSource.length()), GL_FRAGMENT_SHADER);
 
     ShaderObject geometryShader = TryCompileShader(geometryShaderSource.data(),
-        static_cast<int>(geometryShaderSource.length()), GL_GEOMETRY_SHADER);
+        static_cast<std::int32_t>(geometryShaderSource.length()), GL_GEOMETRY_SHADER);
 
     _shaderProgram = glCreateProgram();
     vertexShader.AttachShaderToProgram(_shaderProgram);
@@ -201,7 +201,7 @@ Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentSha
 
     glLinkProgram(_shaderProgram);
 
-    int linkedWithoutErrors;
+    std::int32_t linkedWithoutErrors;
 
     glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &linkedWithoutErrors);
 
@@ -216,19 +216,19 @@ Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentSha
     std::string_view tesselationEvaluateShaderSource)
 {
     ShaderObject vertexShader = TryCompileShader(vertexShaderSource.data(),
-        static_cast<int>(vertexShaderSource.length()), GL_VERTEX_SHADER);
+        static_cast<std::int32_t>(vertexShaderSource.length()), GL_VERTEX_SHADER);
 
     ShaderObject fragmentShader = TryCompileShader(fragmentShaderSource.data(),
-        static_cast<int>(fragmentShaderSource.length()), GL_FRAGMENT_SHADER);
+        static_cast<std::int32_t>(fragmentShaderSource.length()), GL_FRAGMENT_SHADER);
 
     ShaderObject geometryShader = TryCompileShader(geometryShaderSource.data(),
-        static_cast<int>(geometryShaderSource.length()), GL_GEOMETRY_SHADER);
+        static_cast<std::int32_t>(geometryShaderSource.length()), GL_GEOMETRY_SHADER);
 
     ShaderObject tesselationControlShader = TryCompileShader(tesselationControlShaderSource.data(),
-        static_cast<int>(tesselationControlShaderSource.length()), GL_TESS_CONTROL_SHADER);
+        static_cast<std::int32_t>(tesselationControlShaderSource.length()), GL_TESS_CONTROL_SHADER);
 
     ShaderObject tesselationEvaluationShader = TryCompileShader(tesselationEvaluateShaderSource.data(),
-        static_cast<int>(tesselationEvaluateShaderSource.length()), GL_TESS_EVALUATION_SHADER);
+        static_cast<std::int32_t>(tesselationEvaluateShaderSource.length()), GL_TESS_EVALUATION_SHADER);
 
     _shaderProgram = glCreateProgram();
 
@@ -240,7 +240,7 @@ Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentSha
 
     glLinkProgram(_shaderProgram);
 
-    int linkedWithoutErrors;
+    std::int32_t linkedWithoutErrors;
 
     glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &linkedWithoutErrors);
 
@@ -306,7 +306,7 @@ void Shader::StopUsing() const
     glUseProgram(0);
 }
 
-void Shader::SetUniformInt(const char* name, int value)
+void Shader::SetUniformInt(const char* name, std::int32_t  value)
 {
     glUniform1i(GetUniformLocation(name), value);
 }
@@ -341,9 +341,9 @@ void Shader::SetUniformMat3(const char* name, const glm::mat3& value)
     glUniformMatrix3fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
 }
 
-int Shader::GetUniformInt(const char* name) const
+std::int32_t  Shader::GetUniformInt(const char* name) const
 {
-    int value;
+    std::int32_t value = 0;
     glGetUniformiv(_shaderProgram, GetUniformLocation(name), &value);
     return value;
 }
@@ -390,19 +390,19 @@ void Shader::GetUniformInfos(std::vector<UniformInfo>& outUniformInfo) const
     }
 }
 
-void Shader::SetSamplerUniform(const char* uniformName, const Texture& texture, unsigned int textureUnit)
+void Shader::SetSamplerUniform(const char* uniformName, const Texture& texture, std::uint32_t textureUnit)
 {
     texture.Bind(textureUnit);
-    SetUniformInt(uniformName, static_cast<int>(textureUnit));
+    SetUniformInt(uniformName, static_cast<std::int32_t>(textureUnit));
 }
 
-int Shader::GetUniformLocation(const char* uniformName) const
+std::int32_t Shader::GetUniformLocation(const char* uniformName) const
 {
     auto it = _uniformLocationsCache.find(uniformName);
 
     if (it == _uniformLocationsCache.end())
     {
-        int location = glGetUniformLocation(_shaderProgram, uniformName);
+        std::int32_t location = glGetUniformLocation(_shaderProgram, uniformName);
         _uniformLocationsCache[uniformName] = location;
 
         return location;
@@ -413,20 +413,20 @@ int Shader::GetUniformLocation(const char* uniformName) const
 
 void Shader::AddNewUniformInfo(std::vector<UniformInfo>& outUniformInfos, GLint location) const
 {
-    const unsigned int MaxNameLength = 96;
+    const std::uint32_t MaxNameLength = 96;
     GLTypeToUniformType GLTypesToUniformTypes[] =
     {
-        {GL_FLOAT, EUniformType::Float},
-        {GL_INT, EUniformType::Int},
-        {GL_FLOAT_VEC2, EUniformType::Vec2},
-        {GL_FLOAT_VEC3, EUniformType::Vec3},
-        {GL_FLOAT_VEC4, EUniformType::Vec4},
-        {GL_FLOAT_MAT4, EUniformType::Mat4x4},
-        {GL_FLOAT_MAT3, EUniformType::Mat3x3},
-        {GL_BOOL, EUniformType::Boolean},
-        {GL_INT_VEC2, EUniformType::Ivec2},
-        {GL_INT_VEC3, EUniformType::Ivec3},
-        {GL_SAMPLER_2D, EUniformType::Sampler2D},
+        {GL_FLOAT, UniformType::Float},
+        {GL_INT, UniformType::Int},
+        {GL_FLOAT_VEC2, UniformType::Vec2},
+        {GL_FLOAT_VEC3, UniformType::Vec3},
+        {GL_FLOAT_VEC4, UniformType::Vec4},
+        {GL_FLOAT_MAT4, UniformType::Mat4x4},
+        {GL_FLOAT_MAT3, UniformType::Mat3x3},
+        {GL_BOOL, UniformType::Boolean},
+        {GL_INT_VEC2, UniformType::Ivec2},
+        {GL_INT_VEC3, UniformType::Ivec3},
+        {GL_SAMPLER_2D, UniformType::Sampler2D},
     };
 
     GLchar name[MaxNameLength]; // variable name in GLSL

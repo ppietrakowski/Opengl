@@ -26,11 +26,11 @@ void SplitString(const std::string& str, std::string_view delimiter, std::vector
 // Indices for mapping value from already loaded array to vertices
 struct ObjIndices
 {
-    unsigned int IndexPosition = 0;
-    unsigned int IndexTextureCoords = 0;
-    unsigned int IndexNormal = 0;
+    std::uint32_t IndexPosition = 0;
+    std::uint32_t IndexTextureCoords = 0;
+    std::uint32_t IndexNormal = 0;
 
-    unsigned int IndicesID = 0;
+    std::uint32_t IndicesID = 0;
 
     bool operator==(const ObjIndices& other) const
     {
@@ -150,9 +150,9 @@ bool StaticObjMeshLoader::Load(const std::string& path)
         }
     }
 
-    unsigned int lastIndicesID = 0;
+    std::uint32_t lastIndicesID = 0;
 
-    for (std::size_t i = 0; i < indicesToVertex.size(); ++i)
+    for (std::uint32_t i = 0; i < indicesToVertex.size(); ++i)
     {
         auto endIterator = indicesToVertex.begin() + i;
 
@@ -204,7 +204,7 @@ std::span<const StaticMeshVertex> StaticObjMeshLoader::GetVertices() const
     return _vertices;
 }
 
-std::span<const unsigned int> StaticObjMeshLoader::GetIndices() const
+std::span<const std::uint32_t> StaticObjMeshLoader::GetIndices() const
 {
     return _indices;
 }

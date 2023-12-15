@@ -68,9 +68,9 @@ private:
 
 
 template<>
-struct PropertySetter<int>
+struct PropertySetter<std::int32_t>
 {
-    static void SetValue(Shader& shader, const Property<int> &property)
+    static void SetValue(Shader& shader, const Property<std::int32_t> &property)
     {
         shader.SetUniformInt(property.UniformName, property.Value);
     }
@@ -118,7 +118,7 @@ struct PropertySetter<glm::vec4>
 template<>
 struct PropertySetter<std::shared_ptr<Texture>>
 {
-    static inline unsigned int textureUnit = 0;
+    static inline std::uint32_t textureUnit = 0;
 
     static void SetValue(Shader& shader, const Property<std::shared_ptr<Texture>>& property)
     {

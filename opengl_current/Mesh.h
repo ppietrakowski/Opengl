@@ -18,11 +18,11 @@ public:
     void Render(const glm::mat4& transform) const;
     void Render(const Material &overrideMaterial, const glm::mat4& transform) const;
 
-    unsigned int GetNumPolygons() const;
-    unsigned int GetNumTriangles() const;
+    std::uint32_t GetNumPolygons() const;
+    std::uint32_t GetNumTriangles() const;
 
     std::span<const StaticMeshVertex> GetVertices() const;
-    std::span<const unsigned int> GetIndices() const;
+    std::span<const std::uint32_t> GetIndices() const;
 
     const glm::vec3& GetBBoxMin() const;
     const glm::vec3& GetBBoxMax() const;
@@ -33,10 +33,10 @@ public:
 
 private:
     VertexArray _vertexArray;
-    unsigned int _numTriangles;
+    std::uint32_t _numTriangles;
 
     std::vector<StaticMeshVertex> _vertices;
-    std::vector<unsigned int> _indices;
+    std::vector<std::uint32_t> _indices;
     std::shared_ptr<Material> _material;
 
     glm::vec3 _bboxMin;
@@ -50,7 +50,7 @@ inline std::span<const StaticMeshVertex> StaticMesh::GetVertices() const
     return _vertices;
 }
 
-inline std::span<const unsigned int> StaticMesh::GetIndices() const
+inline std::span<const std::uint32_t> StaticMesh::GetIndices() const
 {
     return _indices;
 }
@@ -65,12 +65,12 @@ inline const glm::vec3& StaticMesh::GetBBoxMax() const
     return _bboxMax;
 }
 
-inline unsigned int StaticMesh::GetNumPolygons() const
+inline std::uint32_t StaticMesh::GetNumPolygons() const
 {
     return _numTriangles;
 }
 
-inline unsigned int StaticMesh::GetNumTriangles() const
+inline std::uint32_t StaticMesh::GetNumTriangles() const
 {
     return _numTriangles;
 }

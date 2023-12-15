@@ -13,24 +13,24 @@ class VertexBuffer
 {
 public:
     VertexBuffer();
-    VertexBuffer(const void* data, unsigned int size, bool dynamic = false);
-    VertexBuffer(unsigned int size);
-    VertexBuffer(VertexBuffer&& buffer) noexcept
+    VertexBuffer(const void* data, std::uint32_t sizeBytes, bool dynamic = false);
+    VertexBuffer(std::uint32_t maxSizeBytes);
+    VertexBuffer(VertexBuffer&& tempVertexBuffer) noexcept
     {
-        *this = std::move(buffer);
+        *this = std::move(tempVertexBuffer);
     }
 
-    VertexBuffer& operator=(VertexBuffer&& buffer) noexcept;
+    VertexBuffer& operator=(VertexBuffer&& tempVertexBuffer) noexcept;
     ~VertexBuffer();
 
 public:
 
     void Bind() const;
     void Unbind() const;
-    void UpdateVertices(const void* data, unsigned int offset, unsigned int size);
-    void UpdateVertices(const void* data, unsigned int size) { UpdateVertices(data, 0, size); }
+    void UpdateVertices(const void* data, std::uint32_t offset, std::uint32_t size);
+    void UpdateVertices(const void* data, std::uint32_t size) { UpdateVertices(data, 0, size); }
 
-    unsigned int GetVerticesSizeBytes() const;
+    std::uint32_t GetVerticesSizeBytes() const { return _bufferSize; }
 
     bool IsValid() const { return _rendererID != 0; }
     GLuint GetRendererID() const { return _rendererID; }
@@ -39,5 +39,5 @@ public:
 
 private:
     GLuint _rendererID;
-    unsigned int _bufferSize;
+    std::uint32_t _bufferSize;
 };

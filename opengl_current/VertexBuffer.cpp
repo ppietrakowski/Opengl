@@ -9,26 +9,28 @@ VertexBuffer::VertexBuffer() :
 {
 }
 
-VertexBuffer::VertexBuffer(const void* data, unsigned int size, bool dynamic) :
-    _bufferSize{ size }
+VertexBuffer::VertexBuffer(const void* data, std::uint32_t sizeBytes, bool dynamic) :
+    _bufferSize{ sizeBytes }
 {
     GLenum bufferUsage = dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
     glGenBuffers(1, &_rendererID);
     glBindBuffer(GL_ARRAY_BUFFER, _rendererID);
-    glBufferData(GL_ARRAY_BUFFER, size, data, bufferUsage);
+    glBufferData(GL_ARRAY_BUFFER, sizeBytes, data, bufferUsage);
 }
 
-VertexBuffer::VertexBuffer(unsigned int size) :
-    VertexBuffer{ nullptr, size, true }
+VertexBuffer::VertexBuffer(std::uint32_t maxSizeBytes) :
+    VertexBuffer{ nullptr, maxSizeBytes, true }
 {
 }
 
-VertexBuffer& VertexBuffer::operator=(VertexBuffer&& buffer) noexcept
+VertexBuffer& VertexBuffer::operator=(VertexBuffer&& tempVertexBuffer) noexcept
 {
-    std::swap(buffer._bufferSize, _bufferSize);
-    std::swap(buffer._rendererID, _rendererID);
+    _bufferSize = tempVertexBuffer._bufferSize;
+    _rendererID = tempVertexBuffer._rendererID;
 
+    tempVertexBuffer._rendererID = 0;
+    tempVertexBuffer._bufferSize = 0;
     return *this;
 }
 
@@ -47,17 +49,12 @@ void VertexBuffer::Unbind() const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void VertexBuffer::UpdateVertices(const void* data, unsigned int offset, unsigned int size)
+void VertexBuffer::UpdateVertices(const void* data, std::uint32_t offset, std::uint32_t size)
 {
     ERR_FAIL_EXPECTED_TRUE(IsValid());
 
     glBindBuffer(GL_ARRAY_BUFFER, _rendererID);
     glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(offset), static_cast<GLintptr>(size), data);
-}
-
-unsigned int VertexBuffer::GetVerticesSizeBytes() const
-{
-    return _bufferSize;
 }
 
 void VertexBuffer::Release()

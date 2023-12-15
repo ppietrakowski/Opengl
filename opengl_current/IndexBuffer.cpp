@@ -9,7 +9,7 @@ IndexBuffer::IndexBuffer() :
 {
 }
 
-IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int numIndices, bool dynamic) :
+IndexBuffer::IndexBuffer(const std::uint32_t* data, std::uint32_t numIndices, bool dynamic) :
     _numIndices{ numIndices }
 {
     GLenum bufferUsage = dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
@@ -18,10 +18,10 @@ IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int numIndices, bool
 
     glGenBuffers(1, &_rendererID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _rendererID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(GLuint), data, bufferUsage);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(std::uint32_t), data, bufferUsage);
 }
 
-IndexBuffer::IndexBuffer(unsigned int totalNumIndices) :
+IndexBuffer::IndexBuffer(std::uint32_t totalNumIndices) :
     IndexBuffer{ nullptr, totalNumIndices, true }
 {
 }
@@ -50,17 +50,12 @@ void IndexBuffer::Unbind() const
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-int IndexBuffer::GetNumIndices() const
-{
-    return _numIndices;
-}
-
-void IndexBuffer::UpdateIndices(const unsigned int* data, unsigned int offset, unsigned int numElements)
+void IndexBuffer::UpdateIndices(const std::uint32_t* data, std::uint32_t offset, std::uint32_t numElements)
 {
     ERR_FAIL_EXPECTED_TRUE(IsValid());
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _rendererID);
-    unsigned int sizeBytes = numElements * sizeof(GLuint);
+    std::uint32_t sizeBytes = numElements * sizeof(std::uint32_t);
 
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, sizeBytes, data);
 }

@@ -41,19 +41,12 @@ Game::Game(const WindowSettings& settings) :
 
     glm::dvec2 pos;
     glfwGetCursorPos(_window, &pos.x, &pos.y);
-    WindowData& GameWindowData = _windowData;
-    GameWindowData.MousePosition = pos;
+    WindowData& gameWindowData = _windowData;
+    gameWindowData.MousePosition = pos;
+    gameWindowData.LastMousePosition = gameWindowData.MousePosition;
 
-    glfwGetWindowPos(_window, &GameWindowData.WindowPosition.x, &GameWindowData.WindowPosition.y);
-    glfwGetWindowSize(_window, &GameWindowData.WindowSize.x, &GameWindowData.WindowSize.y);
-
-    double lastMouseX;
-    double lastMouseY;
-
-    glfwGetCursorPos(_window, &lastMouseX, &lastMouseY);
-    
-    _windowData.MousePosition = glm::vec2{ lastMouseX, lastMouseY };
-    _windowData.LastMousePosition = glm::vec2{ lastMouseX, lastMouseY };
+    glfwGetWindowPos(_window, &gameWindowData.WindowPosition.x, &gameWindowData.WindowPosition.y);
+    glfwGetWindowSize(_window, &gameWindowData.WindowSize.x, &gameWindowData.WindowSize.y);
     BindWindowEvents();
 
     InitializeImGui();
@@ -82,7 +75,7 @@ Game::~Game()
     GameInstance = NULL;
 }
 
-constexpr unsigned int ClearFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+constexpr std::uint32_t ClearFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 
 void Game::Run()
 {
@@ -184,7 +177,7 @@ void Game::BindWindowEvents()
         if (gameWindowData->EventCallback)
         {
             Event evt{};
-            evt.Type = EEventType::MouseMoved;
+            evt.Type = EventType::MouseMoved;
             evt.MouseMove.MousePosition = gameWindowData->MousePosition;
             evt.MouseMove.LastMousePosition = gameWindowData->LastMousePosition;
             gameWindowData->EventCallback(evt);
@@ -198,7 +191,7 @@ void Game::BindWindowEvents()
         if (gameWindowData->EventCallback)
         {
             Event event{};
-            event.Type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EEventType::KeyPressed : EEventType::KeyReleased;
+            event.Type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EventType::KeyPressed : EventType::KeyReleased;
             event.Key = { key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER) };
 
             gameWindowData->EventCallback(event);
@@ -212,7 +205,7 @@ void Game::BindWindowEvents()
         if (gameWindowData->EventCallback)
         {
             Event event{};
-            event.Type = (action == GLFW_PRESS) ? EEventType::MouseButtonPressed : EEventType::MouseButtonReleased;
+            event.Type = (action == GLFW_PRESS) ? EventType::MouseButtonPressed : EventType::MouseButtonReleased;
             event.MouseButton = { button, gameWindowData->MousePosition };
             gameWindowData->EventCallback(event);
         }
@@ -225,7 +218,7 @@ void Game::BindWindowEvents()
         if (gameWindowData->EventCallback)
         {
             Event event{};
-            event.Type = (focused == GL_TRUE) ? EEventType::GainedFocus : EEventType::LostFocus;
+            event.Type = (focused == GL_TRUE) ? EventType::GainedFocus : EventType::LostFocus;
             gameWindowData->EventCallback(event);
         }
     });
@@ -237,7 +230,7 @@ void Game::BindWindowEvents()
         if (gameWindowData->EventCallback)
         {
             Event event{};
-            event.Type = EEventType::MouseWheelScrolled;
+            event.Type = EventType::MouseWheelScrolled;
             event.MouseWheel.Delta = { xoffset, yoffset };
             gameWindowData->EventCallback(event);
         }
@@ -279,7 +272,7 @@ void Game::SetMouseVisible(bool mouseVisible)
     }
 }
 
-bool Game::IsKeyDown(int key) const
+bool Game::IsKeyDown(std::int32_t key) const
 {
     return glfwGetKey(_window, key);
 }

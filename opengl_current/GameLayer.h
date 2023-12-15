@@ -16,7 +16,7 @@ public:
 
     virtual void SetMouseVisible(bool mouseVisible) = 0;
 
-    virtual bool IsKeyDown(int key) const = 0;
+    virtual bool IsKeyDown(std::int32_t key) const = 0;
 
     static IPlatform* GetInstance() { return Instance; }
 
@@ -49,7 +49,7 @@ public:
 
     void SetMouseVisible(bool mouseVisible) { _game->SetMouseVisible(mouseVisible); }
     
-    bool IsKeyDown(int key) const { return _game->IsKeyDown(key); }
+    bool IsKeyDown(std::int32_t key) const { return _game->IsKeyDown(key); }
 
 private:
     IPlatform* _game;

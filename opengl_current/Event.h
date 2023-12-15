@@ -2,8 +2,9 @@
 #include <chrono>
 
 #include <glm/glm.hpp>
+#include <cstdint>
 
-enum class EEventType
+enum class EventType
 {
     Invalid = 0,
     LostFocus,
@@ -21,14 +22,14 @@ struct Event
 {
     struct SizeEvent
     {
-        unsigned int  Width;
-        unsigned int  Height;
+        std::uint32_t Width;
+        std::uint32_t Height;
     };
 
     struct KeyEvent
     {
-        int Code;
-        int Scancode;
+        std::int32_t Code;
+        std::int32_t Scancode;
         bool AltClicked : 1;
         bool ControlClicked : 1;
         bool ShiftClicked : 1;
@@ -43,7 +44,7 @@ struct Event
 
     struct MouseButtonEvent
     {
-        int Button;
+        std::int32_t Button;
         glm::vec2 MousePosition;
     };
 
@@ -53,7 +54,7 @@ struct Event
     };
 
     // Member data
-    EEventType Type;
+    EventType Type;
 
     union
     {
@@ -64,7 +65,7 @@ struct Event
         MouseWheelEvent       MouseWheel;
     };
 
-    unsigned int  MillisecondsSinceGameStart;
+    std::uint32_t MillisecondsSinceGameStart;
 
     Event();
 };

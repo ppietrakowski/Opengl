@@ -11,8 +11,8 @@ public:
     Material& operator=(const Material&) = default;
 
 public:
-    bool GetIntProperty(const char* name, int& outInt) const;
-    void SetIntProperty(const char* name, int value);
+    bool GetIntProperty(const char* name, std::int32_t& outInt) const;
+    void SetIntProperty(const char* name, std::int32_t value);
 
     bool GetFloatProperty(const char* name, float& outFloat) const;
     void SetFloatProperty(const char* name, float value);
@@ -41,7 +41,7 @@ public:
     bool UsingTransparency : 1{ false };
 
 private:
-    PropertyList<int> _ints;
+    PropertyList<std::int32_t> _ints;
     PropertyList<float> _floats;
     PropertyList<glm::vec2> _vectors2;
     PropertyList<glm::vec3> _vectors3;

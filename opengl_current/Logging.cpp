@@ -11,14 +11,14 @@ IMPLEMENT_LOG_CATEGORY(RENDERER);
 IMPLEMENT_LOG_CATEGORY(ASSET_LOADING);
 IMPLEMENT_LOG_CATEGORY(GLOBAL);
 
-unsigned int Logging::IgnoredLogLevels = 0;
+std::uint32_t Logging::IgnoredLogLevels = 0;
 
 struct Device
 {
-    std::unique_ptr<ILogDevice> Log;
+    std::unique_ptr<LogDevice> Log;
     LogDeviceID ID;
 
-    ILogDevice* operator->() const { return Log.get(); }
+    LogDevice* operator->() const { return Log.get(); }
 };
 
 static std::vector<Device> LogDevices;
@@ -26,8 +26,8 @@ static LogDeviceID LastID = 1;
 
 namespace
 {
-#define CASE(x) case ELogLevel::##x: return #x
-    const char* ToString(ELogLevel logLevel)
+#define CASE(x) case LogLevel::##x: return #x
+    const char* ToString(LogLevel logLevel)
     {
         switch (logLevel)
         {
@@ -43,9 +43,9 @@ namespace
 #undef CASE
 }
 
-class StdLogDevice : public ILogDevice
+class StdLogDevice : public LogDevice
 {
-    void Print(const SourceLocation& location, const char* categoryName, ELogLevel logLevel, const std::string& format) override
+    void Print(const SourceLocation& location, const char* categoryName, LogLevel logLevel, const std::string& format) override
     {
         std::clog << "[" << categoryName << " " << ToString(logLevel) << "] \"" <<
             format << "\" in " << location.FunctionName << " in " << location.FileName << ": " << location.Line << std::endl << std::endl;
@@ -57,14 +57,14 @@ void Logging::Initialize()
     LogDevices.push_back(Device{ std::make_unique<StdLogDevice>(), STD_LOGGER_ID });
 }
 
-void Logging::IgnoreLogLevel(ELogLevel level)
+void Logging::IgnoreLogLevel(LogLevel level)
 {
-    IgnoredLogLevels = IgnoredLogLevels | static_cast<unsigned int>(level);
+    IgnoredLogLevels = IgnoredLogLevels | static_cast<std::uint32_t>(level);
 }
 
-void Logging::StopIgnoringLogLevel(ELogLevel level)
+void Logging::StopIgnoringLogLevel(LogLevel level)
 {
-    IgnoredLogLevels = IgnoredLogLevels & (~static_cast<unsigned int>(level));
+    IgnoredLogLevels = IgnoredLogLevels & (~static_cast<std::uint32_t>(level));
 }
 
 void Logging::Quit()
@@ -72,9 +72,9 @@ void Logging::Quit()
     LogDevices.clear();
 }
 
-void Logging::Log(const SourceLocation& location, const char* categoryName, ELogLevel logLevel, const std::string& format)
+void Logging::Log(const SourceLocation& location, const char* categoryName, LogLevel logLevel, const std::string& format)
 {
-    if (IgnoredLogLevels & static_cast<unsigned int>(logLevel))
+    if (IgnoredLogLevels & static_cast<std::uint32_t>(logLevel))
     {
         return;
     }
@@ -85,7 +85,7 @@ void Logging::Log(const SourceLocation& location, const char* categoryName, ELog
     }
 }
 
-LogDeviceID Logging::AddLogDevice(std::unique_ptr<ILogDevice>&& device)
+LogDeviceID Logging::AddLogDevice(std::unique_ptr<LogDevice>&& device)
 {
     LogDeviceID ID = LastID++;
     LogDevices.push_back(Device{ std::move(device), ID });
@@ -129,7 +129,7 @@ std::string FormatString(const char* format, ...)
     va_list list;
 
     va_start(list, format);
-    int sprintfSize = vsnprintf(buffer.data(), buffer.size(), format, list);
+    std::int32_t sprintfSize = vsnprintf(buffer.data(), buffer.size(), format, list);
     va_end(list);
 
     if (sprintfSize < 0)

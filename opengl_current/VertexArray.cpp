@@ -10,13 +10,13 @@ VertexArray::VertexArray() :
     glGenVertexArrays(1, &_rendererID);
 }
 
-VertexArray& VertexArray::operator=(VertexArray&& array) noexcept
+VertexArray& VertexArray::operator=(VertexArray&& tempVertexArray) noexcept
 {
-    _rendererID = array._rendererID;
-    _indexBuffer = std::move(array._indexBuffer);
-    _vertexBuffers = std::move(array._vertexBuffers);
+    _rendererID = tempVertexArray._rendererID;
+    _indexBuffer = std::move(tempVertexArray._indexBuffer);
+    _vertexBuffers = std::move(tempVertexArray._vertexBuffers);
 
-    array._rendererID = 0;
+    tempVertexArray._rendererID = 0;
     return *this;
 }
 
@@ -35,25 +35,25 @@ void VertexArray::Unbind() const
     glBindVertexArray(0);
 }
 
-#define GET_ATTRIBUTE_INDEX(attribute) static_cast<unsigned int>(attribute.Type)
-#define GET_GL_TYPE_INDEX(attribute) static_cast<unsigned int>(attribute.Type)
+#define GET_ATTRIBUTE_INDEX(attribute) static_cast<std::uint32_t>(attribute.Type)
+#define GET_GL_TYPE_INDEX(attribute) static_cast<std::uint32_t>(attribute.Type)
 
-void VertexArray::AddBuffer(VertexBuffer&& vb, std::span<const VertexAttribute> attributes)
+void VertexArray::AddBuffer(VertexBuffer&& vertexBuffer, std::span<const VertexAttribute> attributes)
 {
-    constexpr int MaxAttributes = static_cast<int>(EPrimitiveVertexType::MaxPrimitiveVertexType);
+    constexpr std::uint32_t MaxAttributes = static_cast<std::uint32_t>(PrimitiveVertexType::MaxPrimitiveVertexType);
 
     // start index for new buffer
-    int attributeStartIndex = static_cast<int>(_vertexBuffers.size());
-    int stride = 0;
-    int attributeSizes[MaxAttributes] = { 4, 4, 4 };
-    int attributeConversionTable[MaxAttributes] = { GL_INT, GL_UNSIGNED_INT, GL_FLOAT };
+    std::uint32_t attributeStartIndex = static_cast<std::uint32_t>(_vertexBuffers.size());
+    std::uint32_t stride = 0;
+    std::uint32_t attributeSizes[MaxAttributes] = { 4, 4, 4 };
+    std::uint32_t attributeConversionTable[MaxAttributes] = { GL_INT, GL_UNSIGNED_INT, GL_FLOAT };
 
     Bind();
-    vb.Bind();
+    vertexBuffer.Bind();
 
     for (const VertexAttribute& attribute : attributes)
     {
-        unsigned int sizeIndex = GET_ATTRIBUTE_INDEX(attribute);
+        std::uint32_t sizeIndex = GET_ATTRIBUTE_INDEX(attribute);
         ASSERT(sizeIndex < MaxAttributes);
         stride += attribute.NumComponents * attributeSizes[sizeIndex];
     }
@@ -65,23 +65,23 @@ void VertexArray::AddBuffer(VertexBuffer&& vb, std::span<const VertexAttribute> 
         glEnableVertexAttribArray(attributeStartIndex);
         GLenum dataNormalized = GL_FALSE;
 
-        int glTypeIndex = GET_GL_TYPE_INDEX(attribute);
+        std::uint32_t glTypeIndex = GET_GL_TYPE_INDEX(attribute);
         ASSERT(glTypeIndex < MaxAttributes);
         glVertexAttribPointer(attributeStartIndex, attribute.NumComponents, attributeConversionTable[glTypeIndex],
             dataNormalized, stride, reinterpret_cast<const void*>(offset));
 
-        unsigned int sizeIndex = GET_ATTRIBUTE_INDEX(attribute);
+        std::uint32_t sizeIndex = GET_ATTRIBUTE_INDEX(attribute);
         ASSERT(sizeIndex < MaxAttributes);
 
         offset += attribute.NumComponents * attributeSizes[sizeIndex];
         attributeStartIndex++;
     }
 
-    vb.Unbind();
-    _vertexBuffers.push_back(std::move(vb));
+    vertexBuffer.Unbind();
+    _vertexBuffers.push_back(std::move(vertexBuffer));
 }
 
-void VertexArray::SetIndexBuffer(IndexBuffer&& ib)
+void VertexArray::SetIndexBuffer(IndexBuffer&& indexBuffer)
 {
     Bind();
 
@@ -90,11 +90,11 @@ void VertexArray::SetIndexBuffer(IndexBuffer&& ib)
         _indexBuffer.Unbind();
     }
 
-    ib.Bind();
-    _indexBuffer = std::move(ib);
+    indexBuffer.Bind();
+    _indexBuffer = std::move(indexBuffer);
 }
 
-unsigned int VertexArray::GetNumIndices() const
+std::uint32_t VertexArray::GetNumIndices() const
 {
     ERR_FAIL_EXPECTED_TRUE_V(_indexBuffer.IsValid(), 0u);
     return _indexBuffer.GetNumIndices();

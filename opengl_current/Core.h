@@ -1,8 +1,7 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
-
 
 template <typename CharType>
 inline bool ContainsString(const std::basic_string<CharType>& str, const CharType* s)

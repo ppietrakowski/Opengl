@@ -23,16 +23,16 @@ public:
     static void Submit(const Material& material,
         const VertexArray& vertexArray,
         const glm::mat4& transform = glm::mat4{ 1.0f },
-        ERenderPrimitive renderPrimitive = ERenderPrimitive::Triangles);
+        RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
 
     static void Submit(Shader& shader,
         const VertexArray& vertexArray,
         const glm::mat4& transform = glm::mat4{ 1.0f },
-        ERenderPrimitive renderPrimitive = ERenderPrimitive::Triangles);
+        RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
 
     static void Submit(Shader& shader,
-        unsigned int numIndices, const VertexArray& vertexArray,
-        const glm::mat4& transform = glm::mat4{ 1.0f }, ERenderPrimitive renderPrimitive = ERenderPrimitive::Triangles);
+        std::uint32_t numIndices, const VertexArray& vertexArray,
+        const glm::mat4& transform = glm::mat4{ 1.0f }, RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();
 

@@ -29,12 +29,12 @@ private:
     std::unique_ptr<StaticMesh> _mesh;
     glm::vec3 _position;
 
-    std::unique_ptr<VertexArray> _debugVertexArray;
     glm::vec3 _cameraPosition;
     glm::quat _cameraRotation;
 
     std::shared_ptr<Material> _material;
     std::shared_ptr<Material> _wireframeMaterial;
+    std::shared_ptr<Material> _currentMaterial;
 
     float _yaw = -90.0f;
     float _pitch = 0.0f;
@@ -42,5 +42,9 @@ private:
     float _lastDeltaSeconds{ 0.0f };
     bool _wasPressedLastTime = false;
     bool _sterringEntity{ false };
+    
+    float _moveSpeed = 20.0f;
+    float _yawRotationRate = 80.0f;
+    float _ascendSpeed = 20.0f;
 };
 

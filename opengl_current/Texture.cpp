@@ -17,12 +17,12 @@ Texture::~Texture()
     glDeleteTextures(1, &_rendererID);
 }
 
-void Texture::Bind(unsigned int textureUnit) const
+void Texture::Bind(std::uint32_t textureUnit) const
 {
     glBindTextureUnit(textureUnit, _rendererID);
 }
 
-void Texture::Unbind(unsigned int textureUnit)
+void Texture::Unbind(std::uint32_t textureUnit)
 {
     glBindTextureUnit(textureUnit, 0);
 }
@@ -33,25 +33,18 @@ void Texture::GenerateMipmaps()
     _gotMinimaps = true;
 }
 
-ETextureFormat Texture::GetTextureFormat() const
+TextureFormat Texture::GetTextureFormat() const
 {
-    return _format == GL_RGB ? ETextureFormat::Rgb : ETextureFormat::Rgba;
+    return _format == GL_RGB ? TextureFormat::Rgb : TextureFormat::Rgba;
 }
 
-Texture::Texture(unsigned int width, unsigned int height, GLenum format) :
+Texture::Texture(std::uint32_t width, std::uint32_t height, GLenum format) :
     _width{ width },
     _height{ height },
     _format{ format },
     _gotMinimaps{ false },
     _rendererID{ 0 }
 {
-}
-
-void Texture::OverrideOptions(unsigned int width, unsigned int height, GLenum format)
-{
-    _width = width;
-    _height = height;
-    _format = format;
 }
 
 GLenum Texture::GetGlFormat() const
@@ -66,7 +59,7 @@ void Texture::GenerateTexture2D(const void* data)
 
     SetStandardTextureOptions();
 
-    glTextureSubImage2D(_rendererID, 0, 0, 0, _width, _height, GetGlFormat(), GL_UNSIGNED_BYTE, data);
+    glTextureStorage2D(_rendererID, 0, GetGlFormat() == GL_RGB ? GL_RGB8 : GL_RGBA8, _width, _height);
 
     if (data != nullptr)
     {
@@ -89,13 +82,13 @@ Texture2D::Texture2D(const std::string& filepath) :
     LoadFromFile(filepath);
 }
 
-Texture2D::Texture2D(const void* data, unsigned int width, unsigned int height, ETextureFormat format) :
-    Texture{ width, height, format == ETextureFormat::Rgb ? static_cast<GLenum>(GL_RGB) : static_cast<GLenum>(GL_RGBA) }
+Texture2D::Texture2D(const void* data, std::uint32_t width, std::uint32_t height, TextureFormat format) :
+    Texture{ width, height, format == TextureFormat::Rgb ? static_cast<GLenum>(GL_RGB) : static_cast<GLenum>(GL_RGBA) }
 {
     GenerateTexture2D(data);
 }
 
-Texture2D::Texture2D(unsigned int width, unsigned int height, ETextureFormat format) :
+Texture2D::Texture2D(std::uint32_t width, std::uint32_t height, TextureFormat format) :
     Texture2D{ nullptr, width, height, format }
 {
 }
@@ -112,14 +105,16 @@ void Texture2D::LoadFromFile(const std::string& filepath)
 {
     // Load texture using stb_image
     stbi_set_flip_vertically_on_load(GL_TRUE); // Flip the image vertically if needed
-    int width;
-    int height;
-    int channels;
+    std::int32_t width;
+    std::int32_t height;
+    std::int32_t channels;
     std::uint8_t* data = stbi_load(filepath.c_str(), &width, &height, &channels, 0);
 
     if (data != nullptr)
     {
-        OverrideOptions(static_cast<unsigned int>(width), static_cast<unsigned int>(height), channels == 3 ? GL_RGB : GL_RGBA);
+        _width = static_cast<std::uint32_t>(width);
+        _height = static_cast<std::uint32_t>(height);
+        _format = channels == 3 ? GL_RGB : GL_RGBA;
         GenerateTexture2D(data);
     }
     else
