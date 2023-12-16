@@ -41,12 +41,10 @@ struct BoxBatchData
 
         DebugVertexArray.AddBuffer(std::move(buffer), attributes);
 
-        IndexBuffer indexBuffer(ARRAY_NUM_ELEMENTS(BoxIndices) * MaxDebugNumBox);
-
         // prebatch indices
         std::vector<std::uint32_t> indices;
         std::uint32_t currentIndicesStartOffset = 0;
-        std::uint32_t maxNumIndices = static_cast<std::uint32_t>(indexBuffer.GetNumIndices() / MaxDebugNumBox);
+        std::uint32_t maxNumIndices = static_cast<std::uint32_t>(ARRAY_NUM_ELEMENTS(BoxIndices));
 
         indices.reserve(MaxDebugNumBox * maxNumIndices);
 
@@ -64,7 +62,8 @@ struct BoxBatchData
             currentIndicesStartOffset += offsetToNextFreeIndex;
         }
 
-        indexBuffer.UpdateIndices(indices.data(), static_cast<std::uint32_t>(indices.size()));
+
+        IndexBuffer indexBuffer(indices.data(), static_cast<std::uint32_t>(indices.size()));
         DebugVertexArray.SetIndexBuffer(std::move(indexBuffer));
     }
 

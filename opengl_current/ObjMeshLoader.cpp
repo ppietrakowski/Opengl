@@ -23,6 +23,29 @@ static std::vector<std::string> SplitString(const std::string& str, std::string_
     return tokens;
 }
 
+template <std::size_t N>
+static std::array<std::string, N> SplitStringFixed(const std::string& str, std::string_view delimiter)
+{
+    std::array<std::string, N> tokens;
+    std::size_t startOffset = 0;
+    std::size_t posOfDelimiter = str.find(delimiter, startOffset);
+
+    std::size_t index = 0;
+
+    while (posOfDelimiter != std::string::npos)
+    {
+        tokens[index++] = str.substr(startOffset, posOfDelimiter - startOffset);
+
+        startOffset = posOfDelimiter + delimiter.length();
+        posOfDelimiter = str.find(delimiter, startOffset);
+
+        if (index >= N - 1) { break; }
+    }
+
+    tokens[index] = str.substr(startOffset);
+    return tokens;
+}
+
 #define OBJ_LOCATION_INDEX 0
 #define OBJ_TEXTURE_COORD_INDEX 1
 #define OBJ_NORMAL_INDEX 2
@@ -44,10 +67,10 @@ namespace obj
         }
 
         Face(std::uint32_t indexPosition, std::uint32_t indexTextureCoords, std::uint32_t indexNormal) :
-            IndexPosition{indexPosition}, 
+            IndexPosition{ indexPosition },
             IndexTextureCoords{ indexTextureCoords },
             IndexNormal{ indexNormal },
-            IndicesID{0}
+            IndicesID{ 0 }
         {
         }
 
@@ -95,47 +118,26 @@ bool StaticObjMeshLoader::Load(const std::string& path)
         }
         else if (LINE_DEFINING_TEXTURE_COORD(line))
         {
-            std::vector<std::string> lines = std::move(SplitString(line, " "));
+            std::array<std::string, 3> lines = SplitStringFixed<3>(line, " ");
 
-            lines.erase(lines.begin());
-
-            if (lines.size() != 2)
-            {
-                _lastErrorMessage = "Mesh vertex texture coords are corrupted";
-                return false;
-            }
-
-            glm::vec2 vt = { std::stof(lines[0]), std::stof(lines[1]) };
+            // skip first (contains tag)
+            glm::vec2 vt = { std::stof(lines[1]), std::stof(lines[2]) };
             textureCoords.push_back(vt);
         }
         else if (LINE_DEFINING_MESH_NORMAL(line))
         {
-            std::vector<std::string> lines = std::move(SplitString(line, " "));
-
-            lines.erase(lines.begin());
-
-            if (lines.size() != 3)
-            {
-                _lastErrorMessage = "Mesh vertex normals are corrupted";
-                return false;
-            }
-
-            glm::vec3 normal = { std::stof(lines[0]), std::stof(lines[1]), std::stof(lines[2]) };
+            std::array<std::string, 4> lines = SplitStringFixed<4>(line, " ");
+            
+            // skip first (contains tag)
+            glm::vec3 normal = { std::stof(lines[1]), std::stof(lines[2]), std::stof(lines[3]) };
             normals.push_back(normal);
         }
         else if (LINE_DEFINING_MESH_POSITION(line))
         {
-            std::vector<std::string> lines = std::move(SplitString(line, " "));
+            std::array<std::string, 4> lines = SplitStringFixed<4>(line, " ");
 
-            lines.erase(lines.begin());
-
-            if (lines.size() != 3)
-            {
-                _lastErrorMessage = "Mesh vertex positions are corrupted";
-                return false;
-            }
-
-            glm::vec3 position = { std::stof(lines[0]), std::stof(lines[1]), std::stof(lines[2]) };
+            // skip first (contains tag)
+            glm::vec3 position = { std::stof(lines[1]), std::stof(lines[2]), std::stof(lines[3]) };
             positions.push_back(position);
         }
         else if (LINE_DEFINING_FACE(line))
@@ -153,7 +155,7 @@ bool StaticObjMeshLoader::Load(const std::string& path)
 
             for (const std::string& face : faceElements)
             {
-                std::vector<std::string> faceComponents = std::move(SplitString(face, "/"));
+                std::array<std::string, 3> faceComponents = std::move(SplitStringFixed<3>(face, "/"));
                 std::array<std::uint32_t, 3> convertedFaceComponents;
 
                 // convert all facecomponents to std::uint32_t and substract 1, because obj indices starts from 1
