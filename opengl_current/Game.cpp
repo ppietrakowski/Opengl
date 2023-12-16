@@ -107,7 +107,7 @@ void Game::Run()
             layer->OnRender(deltaSeconds.count());
         }
 
-        RunImguiFrame(deltaSeconds);
+        RunImguiFrame();
 
         glfwSwapBuffers(_window);
         glfwPollEvents();
@@ -145,7 +145,7 @@ bool Game::InitializeImGui()
     return imguiInitialized;
 }
 
-void Game::RunImguiFrame(TimeSeconds deltaSeconds)
+void Game::RunImguiFrame()
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();

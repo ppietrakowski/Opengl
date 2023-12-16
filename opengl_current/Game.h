@@ -67,7 +67,7 @@ private:
 
 private:
     bool InitializeImGui();
-    void RunImguiFrame(TimeSeconds deltaSeconds);
+    void RunImguiFrame();
 
     void BindWindowEvents();
 };
