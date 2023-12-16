@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <array>
 
 #include <glm/gtc/type_ptr.hpp>
 #include "Logging.h"
@@ -161,120 +162,39 @@ namespace
 
 Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource)
 {
-    ShaderObject vertexShader = TryCompileShader(vertexShaderSource.data(),
-        static_cast<std::int32_t>(vertexShaderSource.length()), GL_VERTEX_SHADER);
-
-    ShaderObject fragmentShader = TryCompileShader(fragmentShaderSource.data(),
-        static_cast<std::int32_t>(fragmentShaderSource.length()), GL_FRAGMENT_SHADER);
-
-    _shaderProgram = glCreateProgram();
-    vertexShader.AttachShaderToProgram(_shaderProgram);
-    fragmentShader.AttachShaderToProgram(_shaderProgram);
-    glLinkProgram(_shaderProgram);
-
-    std::int32_t linkedWithoutErrors;
-
-    glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &linkedWithoutErrors);
-
-    if (linkedWithoutErrors == GL_FALSE)
-    {
-        ThrowLinkingError(_shaderProgram);
-    }
+    std::array<std::string_view, 2> sources{ vertexShaderSource, fragmentShaderSource };
+    GenerateShaders(sources);
 }
 
 Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource, std::string_view geometryShaderSource)
 {
-    ShaderObject vertexShader = TryCompileShader(vertexShaderSource.data(),
-        static_cast<std::int32_t>(vertexShaderSource.length()), GL_VERTEX_SHADER);
-
-    ShaderObject fragmentShader = TryCompileShader(fragmentShaderSource.data(),
-        static_cast<std::int32_t>(fragmentShaderSource.length()), GL_FRAGMENT_SHADER);
-
-    ShaderObject geometryShader = TryCompileShader(geometryShaderSource.data(),
-        static_cast<std::int32_t>(geometryShaderSource.length()), GL_GEOMETRY_SHADER);
-
-    _shaderProgram = glCreateProgram();
-    vertexShader.AttachShaderToProgram(_shaderProgram);
-    fragmentShader.AttachShaderToProgram(_shaderProgram);
-    geometryShader.AttachShaderToProgram(_shaderProgram);
-
-    glLinkProgram(_shaderProgram);
-
-    std::int32_t linkedWithoutErrors;
-
-    glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &linkedWithoutErrors);
-
-    if (linkedWithoutErrors == GL_FALSE)
-    {
-        ThrowLinkingError(_shaderProgram);
-    }
+    std::array<std::string_view, 3> sources{ vertexShaderSource, fragmentShaderSource, geometryShaderSource };
+    GenerateShaders(sources);
 }
 
 Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource,
     std::string_view geometryShaderSource, std::string_view tesselationControlShaderSource,
     std::string_view tesselationEvaluateShaderSource)
 {
-    ShaderObject vertexShader = TryCompileShader(vertexShaderSource.data(),
-        static_cast<std::int32_t>(vertexShaderSource.length()), GL_VERTEX_SHADER);
+    std::array<std::string_view, 5> sources{ vertexShaderSource, fragmentShaderSource,
+        geometryShaderSource, tesselationControlShaderSource, tesselationEvaluateShaderSource };
 
-    ShaderObject fragmentShader = TryCompileShader(fragmentShaderSource.data(),
-        static_cast<std::int32_t>(fragmentShaderSource.length()), GL_FRAGMENT_SHADER);
-
-    ShaderObject geometryShader = TryCompileShader(geometryShaderSource.data(),
-        static_cast<std::int32_t>(geometryShaderSource.length()), GL_GEOMETRY_SHADER);
-
-    ShaderObject tesselationControlShader = TryCompileShader(tesselationControlShaderSource.data(),
-        static_cast<std::int32_t>(tesselationControlShaderSource.length()), GL_TESS_CONTROL_SHADER);
-
-    ShaderObject tesselationEvaluationShader = TryCompileShader(tesselationEvaluateShaderSource.data(),
-        static_cast<std::int32_t>(tesselationEvaluateShaderSource.length()), GL_TESS_EVALUATION_SHADER);
-
-    _shaderProgram = glCreateProgram();
-
-    vertexShader.AttachShaderToProgram(_shaderProgram);
-    fragmentShader.AttachShaderToProgram(_shaderProgram);
-    geometryShader.AttachShaderToProgram(_shaderProgram);
-    tesselationEvaluationShader.AttachShaderToProgram(_shaderProgram);
-    tesselationControlShader.AttachShaderToProgram(_shaderProgram);
-
-    glLinkProgram(_shaderProgram);
-
-    std::int32_t linkedWithoutErrors;
-
-    glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &linkedWithoutErrors);
-
-    if (linkedWithoutErrors == GL_FALSE)
-    {
-        ThrowLinkingError(_shaderProgram);
-    }
+    GenerateShaders(sources);
 }
 
 std::shared_ptr<Shader> Shader::LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath)
 {
-    std::string vertexSource = LoadFileContent(vertexShaderPath.data());
-    std::string fragmentSource = LoadFileContent(fragmentShaderPath.data());
-
-    return std::make_shared<Shader>(vertexSource, fragmentSource);
+    return LoadShader({ vertexShaderPath, fragmentShaderPath });
 }
 
 std::shared_ptr<Shader> Shader::LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath, std::string_view geometryShaderPath)
 {
-    std::string vertexSource = LoadFileContent(vertexShaderPath.data());
-    std::string fragmentSource = LoadFileContent(fragmentShaderPath.data());
-    std::string geometrySource = LoadFileContent(geometryShaderPath.data());
-
-    return std::make_shared<Shader>(vertexSource, fragmentSource, geometrySource);
+    return LoadShader({ vertexShaderPath, fragmentShaderPath, geometryShaderPath });
 }
 
 std::shared_ptr<Shader> Shader::LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath, std::string_view geometryShaderPath, std::string_view tesselationControlShaderPath, std::string_view tesselationEvaluateShaderPath)
 {
-    std::string vertexSource = LoadFileContent(vertexShaderPath.data());
-    std::string fragmentSource = LoadFileContent(fragmentShaderPath.data());
-    std::string geometrySource = LoadFileContent(geometryShaderPath.data());
-    std::string tessControlSource = LoadFileContent(tesselationControlShaderPath.data());
-    std::string tessEvaluateSource = LoadFileContent(tesselationEvaluateShaderPath.data());
-
-    return std::make_shared<Shader>(vertexSource, fragmentSource, geometrySource, tessControlSource, tessEvaluateSource);
+    return LoadShader({ vertexShaderPath, fragmentShaderPath, geometryShaderPath, tesselationControlShaderPath, tesselationEvaluateShaderPath });
 }
 
 Shader::Shader(Shader&& shader) noexcept
@@ -393,6 +313,59 @@ void Shader::SetSamplerUniform(const char* uniformName, const Texture& texture, 
 {
     texture.Bind(TextureUnit);
     SetUniformInt(uniformName, static_cast<std::int32_t>(TextureUnit));
+}
+
+std::shared_ptr<Shader> Shader::LoadShader(const std::initializer_list<std::string_view>& paths)
+{
+    std::array<std::string, ShaderIndex::Count> sources;
+    std::size_t index = 0;
+
+    auto it = sources.begin();
+
+    for (const std::string_view& path : paths)
+    {
+        sources[index++] = LoadFileContent(std::string{ path.begin(), path.end() });
+        ++it;
+    }
+
+    std::array<std::string_view, ShaderIndex::Count> convertexToStringViewSources;
+    std::transform(sources.begin(), it, convertexToStringViewSources.begin(), [](const std::string& s) { return (std::string_view)s; });
+
+    std::shared_ptr<Shader> shader = std::make_shared<Shader>();
+    shader->GenerateShaders(std::span<std::string_view>{ convertexToStringViewSources.begin(), index });
+    return shader;
+}
+
+void Shader::GenerateShaders(std::span<std::string_view> sources)
+{
+    GLenum types[ShaderIndex::Count] = { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER };
+
+    std::size_t shaderIndex = 0;
+    std::array<ShaderObject, ShaderIndex::Count> shaders;
+
+    for (const std::string_view& source : sources)
+    {
+        shaders[shaderIndex] = TryCompileShader(source.data(), static_cast<std::int32_t>(source.length()), types[shaderIndex]);
+        shaderIndex++;
+    }
+
+    _shaderProgram = glCreateProgram();
+
+    for (std::size_t i = 0; i < shaderIndex; ++i)
+    {
+        shaders[i].AttachShaderToProgram(_shaderProgram);
+    }
+
+    glLinkProgram(_shaderProgram);
+
+    std::int32_t linkedWithoutErrors;
+
+    glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &linkedWithoutErrors);
+
+    if (linkedWithoutErrors == GL_FALSE)
+    {
+        ThrowLinkingError(_shaderProgram);
+    }
 }
 
 std::int32_t Shader::GetUniformLocation(const char* uniformName) const

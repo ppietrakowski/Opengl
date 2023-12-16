@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 #include <stdexcept>
 #include <memory>
+#include <span>
 
 enum class UniformType
 {
@@ -56,7 +57,18 @@ class Texture;
 
 class Shader
 {
+    enum ShaderIndex
+    {
+        Vertex,
+        Fragment,
+        Geometry,
+        TesselationControlShader,
+        TesselationEvaluateShader,
+        Count
+    };
+
 public:
+    Shader() = default;
     Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource);
     Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource, std::string_view geometryShaderSource);
     Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource, std::string_view geometryShaderSource, std::string_view tesselationControlShader, std::string_view tesselationEvaluateShader);
@@ -97,6 +109,10 @@ public:
 private:
     GLuint _shaderProgram;
     mutable std::unordered_map<std::string, std::int32_t> _uniformLocationsCache;
+
+private:
+    static std::shared_ptr<Shader> LoadShader(const std::initializer_list<std::string_view>& paths);
+    void GenerateShaders(std::span<std::string_view> sources);
 
 private:
     std::int32_t GetUniformLocation(const char* uniformName) const;
