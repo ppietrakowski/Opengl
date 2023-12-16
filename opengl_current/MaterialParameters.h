@@ -7,6 +7,8 @@
 #include "Texture.h"
 #include "Shader.h"
 
+#include <cstring>
+
 template<typename>
 struct PropertySetter;
 
@@ -15,6 +17,17 @@ struct Property
 {
     PropertyType Value;
     char UniformName[96];
+
+    Property() = default;
+    Property(const PropertyType& value, const std::string& uniformName):
+        Value{value}
+    {
+        strncpy(UniformName, uniformName.c_str(), 96);
+        UniformName[95] = 0;
+    }
+
+    Property(const Property<PropertyType>&) = default;
+    Property& operator=(const Property<PropertyType>&) = default;
 };
 
 template <typename T>
@@ -118,10 +131,10 @@ struct PropertySetter<glm::vec4>
 template<>
 struct PropertySetter<std::shared_ptr<Texture>>
 {
-    static inline std::uint32_t textureUnit = 0;
+    static inline std::uint32_t TextureUnit = 0;
 
     static void SetValue(Shader& shader, const Property<std::shared_ptr<Texture>>& property)
     {
-        shader.SetSamplerUniform(property.UniformName, *property.Value, textureUnit++);
+        shader.SetSamplerUniform(property.UniformName, *property.Value, TextureUnit++);
     }
 };

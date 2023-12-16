@@ -63,11 +63,11 @@ bool StaticMeshImporter::HasErrorOccured() const
 std::uint32_t StaticMeshImporter::GetNumIndices() const
 {
     ASSERT(!_errorOccured);
-    return static_cast<std::uint32_t>(_staticMeshLoader->GetIndices().size());
+    return static_cast<std::uint32_t>(GetIndices().size());
 }
 
 std::uint32_t StaticMeshImporter::GetNumVertices() const
 {
     ASSERT(!_errorOccured);
-    return static_cast<std::uint32_t>(_staticMeshLoader->GetVertices().size());
+    return static_cast<std::uint32_t>(GetVertices().size());
 }

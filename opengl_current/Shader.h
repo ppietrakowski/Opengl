@@ -92,7 +92,7 @@ public:
 
     void GetUniformInfos(std::vector<UniformInfo>& outUniformInfos) const;
 
-    void SetSamplerUniform(const char* uniformName, const Texture& texture, std::uint32_t textureUnit);
+    void SetSamplerUniform(const char* uniformName, const Texture& texture, std::uint32_t TextureUnit);
 
 private:
     GLuint _shaderProgram;

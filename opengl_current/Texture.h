@@ -28,8 +28,8 @@ public:
     GLuint GetRendererID() const { return _rendererID; }
 
     virtual void SetData(const void* data, glm::uvec2 size, glm::uvec2 offset = { 0, 0 }) = 0;
-    void Bind(std::uint32_t textureUnit) const;
-    static void Unbind(std::uint32_t textureUnit);
+    void Bind(std::uint32_t TextureUnit) const;
+    static void Unbind(std::uint32_t TextureUnit);
 
     bool GotMinimaps() const { return _gotMinimaps; }
 

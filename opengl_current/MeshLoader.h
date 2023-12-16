@@ -14,11 +14,23 @@
 
 struct StaticMeshVertex
 {
-    glm::vec3 Position;
-    glm::vec3 Normal;
-    glm::vec2 TextureCoords;
+    glm::vec3 Position{ 0, 0,0 };
+    glm::vec3 Normal{ 0, 0, 0 };
+    glm::vec2 TextureCoords{ 0, 0 };
+
 
     static inline constexpr VertexAttribute DataFormat[3] = { {3, PrimitiveVertexType::Float}, {3, PrimitiveVertexType::Float}, {2, PrimitiveVertexType::Float} };
+
+    StaticMeshVertex() = default;
+    StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& textureCoords) :
+        Position{ position },
+        Normal{ normal },
+        TextureCoords{ textureCoords }
+    {
+    }
+
+    StaticMeshVertex(const StaticMeshVertex&) = default;
+    StaticMeshVertex& operator=(const StaticMeshVertex&) = default;
 };
 
 class IStaticMeshLoader

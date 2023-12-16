@@ -5,10 +5,11 @@ namespace
 {
     void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax)
     {
+        // assume mesh has infinite bounds
         outBoxMin = glm::vec3{ std::numeric_limits<float>::max() };
         outBoxMax = glm::vec3{ std::numeric_limits<float>::min() };
 
-        for (size_t i = 0; i < vertices.size(); ++i)
+        for (std::size_t i = 0; i < vertices.size(); ++i)
         {
             const glm::vec3* vertex = &vertices[i].Position;
 
@@ -43,7 +44,7 @@ namespace
 StaticMesh::StaticMesh(const std::filesystem::path& filePath, const std::shared_ptr<Material>& material) :
     _material{ material }
 {
-    StaticMeshImporter importer(filePath);
+    StaticMeshImporter importer{ filePath };
 
     if (importer.HasErrorOccured())
     {
@@ -62,16 +63,16 @@ StaticMesh::StaticMesh(const std::filesystem::path& filePath, const std::shared_
     _vertexArray.AddBuffer(std::move(vertexBuffer), StaticMeshVertex::DataFormat);
     _vertexArray.SetIndexBuffer(std::move(indexBuffer));
 
-    _numTriangles = static_cast<std::uint32_t>(importer.GetIndices().size()) / 3;
+    _numTriangles = static_cast<std::uint32_t>(loadedIndices.size()) / 3;
 
-    _indices.resize(importer.GetNumIndices());
-    _vertices.resize(importer.GetNumVertices());
+    _indices.resize(loadedIndices.size());
+    _vertices.resize(loadedVertices.size());
 
     std::copy(loadedVertices.begin(), loadedVertices.end(), _vertices.begin());
     std::copy(loadedIndices.begin(), loadedIndices.end(), _indices.begin());
 
     _meshName = importer.GetModelName();
-    FindAabCollision(importer.GetVertices(), _bboxMin, _bboxMax);
+    FindAabCollision(loadedVertices, _bboxMin, _bboxMax);
 }
 
 

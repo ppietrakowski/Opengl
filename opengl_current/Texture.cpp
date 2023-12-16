@@ -17,14 +17,14 @@ Texture::~Texture()
     glDeleteTextures(1, &_rendererID);
 }
 
-void Texture::Bind(std::uint32_t textureUnit) const
+void Texture::Bind(std::uint32_t TextureUnit) const
 {
-    glBindTextureUnit(textureUnit, _rendererID);
+    glBindTextureUnit(TextureUnit, _rendererID);
 }
 
-void Texture::Unbind(std::uint32_t textureUnit)
+void Texture::Unbind(std::uint32_t TextureUnit)
 {
-    glBindTextureUnit(textureUnit, 0);
+    glBindTextureUnit(TextureUnit, 0);
 }
 
 void Texture::GenerateMipmaps()

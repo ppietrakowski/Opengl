@@ -2,6 +2,7 @@
 
 #include "Renderer.h"
 #include "Imgui/imgui.h"
+#include "ErrorMacros.h"
 
 SandboxGameLayer::SandboxGameLayer() :
     _cameraRotation{ glm::vec3{0, 0, 0} },

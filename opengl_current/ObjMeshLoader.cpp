@@ -2,46 +2,69 @@
 #include "Core.h"
 
 #include <fstream>
+#include <array>
+#include <algorithm>
 
-void SplitString(const std::string& str, std::string_view delimiter, std::vector<std::string>& outTokens)
+static std::vector<std::string> SplitString(const std::string& str, std::string_view delimiter)
 {
+    std::vector<std::string> tokens;
     std::size_t startOffset = 0;
     std::size_t posOfDelimiter = str.find(delimiter, startOffset);
 
     while (posOfDelimiter != std::string::npos)
     {
-        outTokens.push_back(str.substr(startOffset, posOfDelimiter - startOffset));
+        tokens.push_back(str.substr(startOffset, posOfDelimiter - startOffset));
 
         startOffset = posOfDelimiter + delimiter.length();
         posOfDelimiter = str.find(delimiter, startOffset);
     }
 
-    outTokens.push_back(str.substr(startOffset));
+    tokens.push_back(str.substr(startOffset));
+    return tokens;
 }
 
 #define OBJ_LOCATION_INDEX 0
 #define OBJ_TEXTURE_COORD_INDEX 1
 #define OBJ_NORMAL_INDEX 2
 
-// Indices for mapping value from already loaded array to vertices
-struct ObjIndices
+namespace obj
 {
-    std::uint32_t IndexPosition = 0;
-    std::uint32_t IndexTextureCoords = 0;
-    std::uint32_t IndexNormal = 0;
-
-    std::uint32_t IndicesID = 0;
-
-    bool operator==(const ObjIndices& other) const
+    // Indices for mapping value from already loaded array to vertices
+    struct Face
     {
-        return IndexPosition == other.IndexPosition && IndexTextureCoords == other.IndexTextureCoords && IndexNormal == other.IndexNormal;
-    }
-};
+        std::uint32_t IndexPosition = 0;
+        std::uint32_t IndexTextureCoords = 0;
+        std::uint32_t IndexNormal = 0;
+
+        std::uint32_t IndicesID = 0;
+
+        bool operator==(const Face& other) const
+        {
+            return IndexPosition == other.IndexPosition && IndexTextureCoords == other.IndexTextureCoords && IndexNormal == other.IndexNormal;
+        }
+
+        Face(std::uint32_t indexPosition, std::uint32_t indexTextureCoords, std::uint32_t indexNormal) :
+            IndexPosition{indexPosition}, 
+            IndexTextureCoords{ indexTextureCoords },
+            IndexNormal{ indexNormal },
+            IndicesID{0}
+        {
+        }
+
+        Face(const Face&) = default;
+        Face& operator=(const Face&) = default;
+    };
+}
+
+#define LINE_DEFINING_MESH_NAME(Line) (Line[0] == 'o')
+#define LINE_DEFINING_TEXTURE_COORD(Line) (ContainsString(Line, "vt"))
+#define LINE_DEFINING_MESH_NORMAL(Line) (ContainsString(Line, "vn"))
+#define LINE_DEFINING_MESH_POSITION(Line) (Line[0] == 'v')
+#define LINE_DEFINING_FACE(Line) (Line[0] == 'f')
 
 bool StaticObjMeshLoader::Load(const std::string& path)
 {
-    std::vector<ObjIndices> indicesToVertex;
-
+    std::vector<obj::Face> indicesToVertex;
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> textureCoords;
@@ -61,18 +84,18 @@ bool StaticObjMeshLoader::Load(const std::string& path)
 
     while (std::getline(file, line))
     {
+        // # - comment/mtllib - material file/usetml - got material file
         if (line[0] == 's' || line[0] == '#' || line == "mtllib" || line == "usemtl")
         {
             continue;
         }
-        else if (line[0] == 'o')
+        else if (LINE_DEFINING_MESH_NAME(line))
         {
             AssignNewName(line);
         }
-        else if (ContainsString(line, "vt"))
+        else if (LINE_DEFINING_TEXTURE_COORD(line))
         {
-            std::vector<std::string> lines;
-            SplitString(line, " ", lines);
+            std::vector<std::string> lines = std::move(SplitString(line, " "));
 
             lines.erase(lines.begin());
 
@@ -85,10 +108,9 @@ bool StaticObjMeshLoader::Load(const std::string& path)
             glm::vec2 vt = { std::stof(lines[0]), std::stof(lines[1]) };
             textureCoords.push_back(vt);
         }
-        else if (ContainsString(line, "vn"))
+        else if (LINE_DEFINING_MESH_NORMAL(line))
         {
-            std::vector<std::string> lines;
-            SplitString(line, " ", lines);
+            std::vector<std::string> lines = std::move(SplitString(line, " "));
 
             lines.erase(lines.begin());
 
@@ -101,10 +123,9 @@ bool StaticObjMeshLoader::Load(const std::string& path)
             glm::vec3 normal = { std::stof(lines[0]), std::stof(lines[1]), std::stof(lines[2]) };
             normals.push_back(normal);
         }
-        else if (line[0] == 'v')
+        else if (LINE_DEFINING_MESH_POSITION(line))
         {
-            std::vector<std::string> lines;
-            SplitString(line, " ", lines);
+            std::vector<std::string> lines = std::move(SplitString(line, " "));
 
             lines.erase(lines.begin());
 
@@ -117,11 +138,9 @@ bool StaticObjMeshLoader::Load(const std::string& path)
             glm::vec3 position = { std::stof(lines[0]), std::stof(lines[1]), std::stof(lines[2]) };
             positions.push_back(position);
         }
-        else if (ContainsString(line, "f"))
+        else if (LINE_DEFINING_FACE(line))
         {
-            std::vector<std::string> faceElements;
-
-            SplitString(line, " ", faceElements);
+            std::vector<std::string> faceElements = std::move(SplitString(line, " "));
 
             // omit first element, because it contains tag of line
             faceElements.erase(faceElements.begin());
@@ -134,18 +153,15 @@ bool StaticObjMeshLoader::Load(const std::string& path)
 
             for (const std::string& face : faceElements)
             {
-                std::vector<std::string> faceComponents;
+                std::vector<std::string> faceComponents = std::move(SplitString(face, "/"));
+                std::array<std::uint32_t, 3> convertedFaceComponents;
 
-                SplitString(face, "/", faceComponents);
+                // convert all facecomponents to std::uint32_t and substract 1, because obj indices starts from 1
+                std::transform(faceComponents.begin(), faceComponents.end(), convertedFaceComponents.begin(),
+                    [](const std::string& component) { return std::stoul(component) - 1; });
 
-                ObjIndices indices;
-
-                // Any index in obj file is 1-index based, but we need to convert it to 0-based, means just subtract 1
-                indices.IndexPosition = std::stoul(faceComponents[OBJ_LOCATION_INDEX]) - 1;
-                indices.IndexTextureCoords = std::stoul(faceComponents[OBJ_TEXTURE_COORD_INDEX]) - 1;
-                indices.IndexNormal = std::stoul(faceComponents[OBJ_NORMAL_INDEX]) - 1;
-
-                indicesToVertex.emplace_back(indices);
+                indicesToVertex.emplace_back(convertedFaceComponents[OBJ_LOCATION_INDEX],
+                    convertedFaceComponents[OBJ_TEXTURE_COORD_INDEX], convertedFaceComponents[OBJ_NORMAL_INDEX]);
             }
         }
     }
@@ -166,23 +182,17 @@ bool StaticObjMeshLoader::Load(const std::string& path)
         {
             // in that case just take indices number of already defined element
             indicesToVertex[i].IndicesID = it->IndicesID;
-            _indices.push_back(it->IndicesID);
+            _indices.emplace_back(it->IndicesID);
         }
         else
         {
             // this index doesn't appear earlier, so it is possible to update vertices and indices
-            ObjIndices& indexToVertex = indicesToVertex[i];
+            obj::Face& indexToVertex = indicesToVertex[i];
             indexToVertex.IndicesID = lastIndicesID;
+            _indices.emplace_back(lastIndicesID);
+            _vertices.emplace_back(positions.at(indexToVertex.IndexPosition), normals.at(indexToVertex.IndexNormal),
+                textureCoords.at(indexToVertex.IndexTextureCoords));
 
-            _indices.push_back(lastIndicesID);
-
-            StaticMeshVertex vertex;
-
-            vertex.Position = positions.at(indexToVertex.IndexPosition);
-            vertex.TextureCoords = textureCoords.at(indexToVertex.IndexTextureCoords);
-            vertex.Normal = normals.at(indexToVertex.IndexNormal);
-
-            _vertices.push_back(vertex);
             lastIndicesID++;
         }
     }
@@ -192,10 +202,7 @@ bool StaticObjMeshLoader::Load(const std::string& path)
 
 void StaticObjMeshLoader::AssignNewName(std::string& line)
 {
-    std::vector<std::string> names;
-
-    SplitString(line, " ", names);
-
+    std::vector<std::string> names = std::move(SplitString(line, " "));
     _meshName = names.back();
 }
 

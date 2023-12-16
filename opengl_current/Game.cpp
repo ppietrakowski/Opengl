@@ -10,9 +10,9 @@
 #include <functional>
 #include <glm/gtc/matrix_transform.hpp>
 
-static Game* GameInstance = NULL;
+static Game* GameInstance = nullptr;
 
-static std::chrono::milliseconds GetNowTimestamp()
+static std::chrono::milliseconds GetNow()
 {
     using namespace std::chrono;
     auto duration = steady_clock::now().time_since_epoch();
@@ -24,55 +24,60 @@ Game::Game(const WindowSettings& settings) :
 {
     Logging::Initialize();
 
+    // initialize glfw and create window with opengl 4.3 context
     CRASH_EXPECTED_TRUE(glfwInit());
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-    _window = glfwCreateWindow(settings.Width, settings.Height, settings.Title.c_str(), NULL, NULL);
-    CRASH_EXPECTED_TRUE(_window != NULL);
+    _window = glfwCreateWindow(settings.Width, settings.Height, settings.Title.c_str(), nullptr, nullptr);
+    CRASH_EXPECTED_NOT_NULL(_window);
+
     glfwMakeContextCurrent(_window);
     glfwSwapInterval(1);
     GLenum errorCode = glewInit();
     CRASH_EXPECTED_TRUE_MSG(errorCode == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(errorCode)));
 
+    // initialize subsystems
     Renderer::Initialize();
     Renderer::UpdateProjection(static_cast<float>(settings.Width), static_cast<float>(settings.Height), 45.0f, 0.01f);
+    
+    BindWindowEvents();
+    InitializeImGui();
 
-    glm::dvec2 pos;
-    glfwGetCursorPos(_window, &pos.x, &pos.y);
+    // fill window data
+    glm::dvec2 mousePosition;
+    glfwGetCursorPos(_window, &mousePosition.x, &mousePosition.y);
     WindowData& gameWindowData = _windowData;
-    gameWindowData.MousePosition = pos;
+    gameWindowData.MousePosition = mousePosition;
     gameWindowData.LastMousePosition = gameWindowData.MousePosition;
 
     glfwGetWindowPos(_window, &gameWindowData.WindowPosition.x, &gameWindowData.WindowPosition.y);
     glfwGetWindowSize(_window, &gameWindowData.WindowSize.x, &gameWindowData.WindowSize.y);
-    BindWindowEvents();
 
-    InitializeImGui();
     GameInstance = this;
 }
 
 Game::~Game()
 {
+    // layers are are allocating using heap so they should be deleted
     for (Layer* layer : _layers)
     {
         delete layer;
     }
 
+    // deinitialize all libraries
+    Renderer::Quit();
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
-
     ImGui::DestroyContext();
-
-    Renderer::Quit();
 
     glfwDestroyWindow(_window);
     glfwTerminate();
 
     Logging::Quit();
-
-    GameInstance = NULL;
+    GameInstance = nullptr;
 }
 
 constexpr std::uint32_t ClearFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
@@ -80,21 +85,23 @@ constexpr std::uint32_t ClearFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 void Game::Run()
 {
     TimeSeconds deltaSeconds = TimeSeconds::zero();
-    std::chrono::milliseconds lastFrameTime = GetNowTimestamp();
+    auto lastFrameTime = GetNow();
 
-    while (!glfwWindowShouldClose(_window))
+    while (_windowData.GameRunning)
     {
         for (Layer* layer : _layers)
         {
             layer->OnUpdate(deltaSeconds.count());
         }
-
+        
         RenderCommand::Clear(ClearFlags);
 
-        std::chrono::milliseconds time = GetNowTimestamp();
-        deltaSeconds = (time - lastFrameTime);
-        lastFrameTime = time;
+        // calculate delta time using chrono library
+        auto now = GetNow();
+        deltaSeconds = (now - lastFrameTime);
+        lastFrameTime = now;
 
+        // broadcast render command
         for (Layer* layer : _layers)
         {
             layer->OnRender(deltaSeconds.count());
@@ -109,12 +116,13 @@ void Game::Run()
 
 bool Game::IsRunning() const
 {
-    return !glfwWindowShouldClose(_window);
+    return _windowData.GameRunning;
 }
 
 void Game::Quit()
 {
     glfwSetWindowShouldClose(_window, GL_TRUE);
+    _windowData.GameRunning = false;
 }
 
 bool Game::InitializeImGui()
@@ -143,7 +151,7 @@ void Game::RunImguiFrame(TimeSeconds deltaSeconds)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // imgui draw
+    // broadcast imgui frame draw
     for (Layer* layer : _layers)
     {
         layer->OnImguiFrame();
@@ -155,6 +163,7 @@ void Game::RunImguiFrame(TimeSeconds deltaSeconds)
 
     ImGuiIO& io = ImGui::GetIO();
 
+    // update viewport if enabled
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         GLFWwindow* backupCurrentContext = glfwGetCurrentContext();
@@ -236,8 +245,15 @@ void Game::BindWindowEvents()
         }
     });
 
-    _windowData.EventCallback = [&](const Event& evt)
+    glfwSetWindowCloseCallback(_window, [](GLFWwindow* window)
     {
+        WindowData* gameWindowData = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+        gameWindowData->GameRunning = false;
+    });
+
+    _windowData.EventCallback = [this](const Event& evt)
+    {
+        // events in layer are processed from last to first
         for (auto it = _layers.rbegin(); it != _layers.rend(); ++it)
         {
             Layer* layer = *it;

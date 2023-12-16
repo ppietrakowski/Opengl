@@ -9,11 +9,13 @@ namespace
     constexpr std::string_view MaterialTag = "u_Material.";
 }
 
+using TextureSetter = PropertySetter<std::shared_ptr<Texture>>;
+
 Material::Material(const std::shared_ptr<Shader>& shader) :
     _shader{ shader }
 {
+    // retrieve all uniforms information from shader
     std::vector<UniformInfo> uniformInfos;
-
     shader->GetUniformInfos(uniformInfos);
 
     for (const UniformInfo& info : uniformInfos)
@@ -84,7 +86,9 @@ void Material::SetTextureProperty(const char* name, const std::shared_ptr<Textur
 
 void Material::TryAddNewProperty(const UniformInfo& info)
 {
-    if (ContainsString(info.Name, MaterialTag.data()))
+    bool isMaterialUniform = ContainsString(info.Name, MaterialTag.data());
+
+    if (isMaterialUniform)
     {
         AddNewProperty(info);
     }
@@ -129,55 +133,37 @@ void Material::AddNewProperty(const UniformInfo& info)
 
 void Material::AddNewTexture(const UniformInfo& info)
 {
-    Property<std::shared_ptr<Texture>> property;
-    strncpy(property.UniformName, info.Name.c_str(), 96);
-    property.UniformName[95] = 0;
-    property.Value = Renderer::GetDefaultTexture();
+    Property<std::shared_ptr<Texture>> property{ Renderer::GetDefaultTexture(), info.Name };
     _textures.Add(property, info.Name.substr(MaterialTag.length()));
 }
 
 void Material::AddNewInt(const UniformInfo& info)
 {
-    Property<std::int32_t> property;
-    strncpy(property.UniformName, info.Name.c_str(), 96);
-    property.UniformName[95] = 0;
-    property.Value = 0;
+    Property<std::int32_t> property{ 0, info.Name };
     _ints.Add(property, info.Name.substr(MaterialTag.length()));
 }
 
 void Material::AddNewFloat(const UniformInfo& info)
 {
-    Property<float> property;
-    strncpy(property.UniformName, info.Name.c_str(), 96);
-    property.UniformName[95] = 0;
-    property.Value = 0.0f;
+    Property<float> property{ 0.0f, info.Name };
     _floats.Add(property, info.Name.substr(MaterialTag.length()));
 }
 
 void Material::AddNewVec2(const UniformInfo& info)
 {
-    Property<glm::vec2> property;
-    strncpy(property.UniformName, info.Name.c_str(), 96);
-    property.UniformName[95] = 0;
-    property.Value = glm::vec2{ 0.0f, 0.0f };
+    Property<glm::vec2> property{ glm::vec2{0, 0}, info.Name };
     _vectors2.Add(property, info.Name.substr(MaterialTag.length()));
 }
 
 void Material::AddNewVec3(const UniformInfo& info)
 {
-    Property<glm::vec3> property;
-    strncpy(property.UniformName, info.Name.c_str(), 96);
-    property.UniformName[95] = 0;
-    property.Value = glm::vec3{ 0.0f, 0.0f, 0.0f };
+    Property<glm::vec3> property{ glm::vec3{ 0.0f, 0.0f, 0.0f }, info.Name };
     _vectors3.Add(property, info.Name.substr(MaterialTag.length()));
 }
 
 void Material::AddNewVec4(const UniformInfo& info)
 {
-    Property<glm::vec4> property;
-    strncpy(property.UniformName, info.Name.c_str(), 96);
-    property.UniformName[95] = 0;
-    property.Value = glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f };
+    Property<glm::vec4> property{ glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f },info.Name };
     _vectors4.Add(property, info.Name.substr(MaterialTag.length()));
 }
 
@@ -189,7 +175,7 @@ void Material::SetupRenderState() const
 
 void Material::SetShaderUniforms() const
 {
-    Shader& shader = *this->_shader;
+    Shader& shader = GetShader();
 
     _floats.RefreshVars(shader);
     _ints.RefreshVars(shader);
@@ -198,6 +184,6 @@ void Material::SetShaderUniforms() const
     _vectors3.RefreshVars(shader);
     _vectors4.RefreshVars(shader);
 
-    PropertySetter<std::shared_ptr<Texture>>::textureUnit = 0;
+    TextureSetter::TextureUnit = 0;
     _textures.RefreshVars(shader);
 }

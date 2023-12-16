@@ -45,7 +45,9 @@ void VertexArray::AddBuffer(VertexBuffer&& vertexBuffer, std::span<const VertexA
     // start index for new buffer
     std::uint32_t attributeStartIndex = static_cast<std::uint32_t>(_vertexBuffers.size());
     std::uint32_t stride = 0;
-    std::uint32_t attributeSizes[MaxAttributes] = { 4, 4, 4 };
+
+
+    std::uint32_t attributeSizes[MaxAttributes] = { sizeof(std::int32_t), sizeof(std::uint32_t), sizeof(float) };
     std::uint32_t attributeConversionTable[MaxAttributes] = { GL_INT, GL_UNSIGNED_INT, GL_FLOAT };
 
     Bind();

@@ -15,6 +15,7 @@ glm::mat4 Renderer::ProjectionView{ 1.0f };
 glm::vec3 Renderer::CameraLocation{ 0.0f, 0.0f, 0.0f };
 std::shared_ptr<Texture2D> Renderer::DefaultTexture;
 
+// Predefined box indices (base for offsets for IndexBuffer)
 static std::uint32_t BoxIndices[] =
 {
     0, 1, 1, 2, 2, 3, 3, 0,
@@ -22,18 +23,96 @@ static std::uint32_t BoxIndices[] =
     0, 4, 1, 5, 2, 6, 3, 7
 };
 
-#define MAX_DEBUG_NUM_BOX 100
-#define NUM_BOX_VERTICES 8
+constexpr std::uint32_t MaxDebugNumBox = 100;
+constexpr std::uint32_t NumBoxVertices = 8;
 
 struct BoxBatchData
 {
-    glm::vec3 Vertices[MAX_DEBUG_NUM_BOX * NUM_BOX_VERTICES];
-    std::uint32_t NumBoxes{ MAX_DEBUG_NUM_BOX };
+    glm::vec3 Vertices[MaxDebugNumBox * NumBoxVertices];
+    std::uint32_t NumBoxes{ MaxDebugNumBox };
     std::uint32_t CurrentNumBox{ 0 };
-    std::unique_ptr<VertexArray> VertexArray;
+    VertexArray DebugVertexArray;
+
+    BoxBatchData()
+    {
+        // initialize box batching
+        VertexAttribute attributes[] = { {3, PrimitiveVertexType::Float} };
+        VertexBuffer buffer(NumBoxVertices * MaxDebugNumBox * sizeof(glm::vec3));
+
+        DebugVertexArray.AddBuffer(std::move(buffer), attributes);
+
+        IndexBuffer indexBuffer(ARRAY_NUM_ELEMENTS(BoxIndices) * MaxDebugNumBox);
+
+        // prebatch indices
+        std::vector<std::uint32_t> indices;
+        std::uint32_t currentIndicesStartOffset = 0;
+        std::uint32_t maxNumIndices = static_cast<std::uint32_t>(indexBuffer.GetNumIndices() / MaxDebugNumBox);
+
+        indices.reserve(MaxDebugNumBox * maxNumIndices);
+
+        // current starting index of mesh index
+        std::uint32_t offsetToNextFreeIndex = NumBoxVertices;
+
+        for (std::uint32_t currentMeshNo = 0; currentMeshNo < MaxDebugNumBox; currentMeshNo++)
+        {
+            for (std::uint32_t i = 0; i < maxNumIndices; i++)
+            {
+                std::uint32_t vertexIndex = BoxIndices[i] + currentIndicesStartOffset;
+                indices.emplace_back(vertexIndex);
+            }
+
+            currentIndicesStartOffset += offsetToNextFreeIndex;
+        }
+
+        indexBuffer.UpdateIndices(indices.data(), static_cast<std::uint32_t>(indices.size()));
+        DebugVertexArray.SetIndexBuffer(std::move(indexBuffer));
+    }
+
+    void UpdateBuffers()
+    {
+        // only the vertex buffer should be updated, because indices are prebatched 
+        VertexBuffer& vertexBuffer = DebugVertexArray.GetVertexBufferAt(0);
+        vertexBuffer.UpdateVertices(Vertices, sizeof(glm::vec3) * CurrentNumBox * NumBoxVertices);
+    }
+
+    void FlushDraw(Shader& shader)
+    {
+        Renderer::Submit(shader, CurrentNumBox * ARRAY_NUM_ELEMENTS(BoxIndices), DebugVertexArray, glm::mat4{1.0}, RenderPrimitive::Lines);
+        CurrentNumBox = 0;
+    }
+
+    void AddInstance(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform)
+    {
+        std::array<glm::vec3, 8> vertices = {
+            glm::vec3{boxmin[0], boxmin[1], boxmin[2]},
+            glm::vec3{boxmax[0], boxmin[1], boxmin[2]},
+            glm::vec3{boxmax[0], boxmax[1], boxmin[2]},
+            glm::vec3{boxmin[0], boxmax[1], boxmin[2]},
+
+            glm::vec3{boxmin[0], boxmin[1], boxmax[2]},
+            glm::vec3{boxmax[0], boxmin[1], boxmax[2]},
+            glm::vec3{boxmax[0], boxmax[1], boxmax[2]},
+            glm::vec3{boxmin[0], boxmax[1], boxmax[2]}
+        };
+
+        if (CurrentNumBox >= NumBoxes)
+        {
+            return;
+        }
+
+        std::uint32_t maxNumVertices = static_cast<std::uint32_t>(vertices.size());
+
+        for (std::uint32_t i = 0; i < maxNumVertices; ++i)
+        {
+            glm::vec3& vertex = Vertices[i + CurrentNumBox * NumBoxVertices];
+            vertex = transform * glm::vec4{ vertices[i], 1.0f };
+        }
+
+        CurrentNumBox++;
+    }
 };
 
-static BoxBatchData *BoxBatch = nullptr;
+static BoxBatchData* BoxBatch = nullptr;
 
 void Renderer::Quit()
 {
@@ -46,50 +125,39 @@ struct RgbColor
     std::uint8_t Red;
     std::uint8_t Green;
     std::uint8_t Blue;
+
+    RgbColor() = default;
+    RgbColor(const RgbColor&) = default;
+    RgbColor& operator=(const RgbColor&) = default;
+
+    constexpr RgbColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) :
+        Red{ red },
+        Green{green},
+        Blue{ blue }
+    {
+    }
 };
+
+static constexpr RgbColor Black{0, 0, 0};
+static constexpr RgbColor Magenta{255, 0, 255};
 
 void Renderer::Initialize()
 {
+    // array of checkerboard with black and magenta
     RgbColor colors[4 * 4] =
     {
-        {0, 0, 0}, {0, 0, 0},         {255, 0, 255}, {255, 0, 255},
-        {0, 0, 0}, {0, 0, 0},         {255, 0, 255}, {255, 0, 255},
-        {255, 0, 255}, {255, 0, 255}, {0, 0, 0},
-        {255, 0, 255}, {255, 0, 255}, {0, 0, 0},
+        Black, Black, Magenta, Magenta,
+        Black, Black, Magenta, Magenta,
+        Magenta, Magenta, Black, Black,
+        Magenta, Magenta, Black, Black
     };
 
     DefaultTexture = std::make_shared<Texture2D>(colors, 4, 4, TextureFormat::Rgb);
+
     glEnable(GL_DEPTH_TEST);
+
     BoxBatch = new BoxBatchData();
-    BoxBatch->VertexArray = std::make_unique<VertexArray>();
-    VertexAttribute attributes[] = { {3, PrimitiveVertexType::Float} };
-    VertexBuffer buffer(NUM_BOX_VERTICES * MAX_DEBUG_NUM_BOX * sizeof(glm::vec3));
 
-    BoxBatch->VertexArray->AddBuffer(std::move(buffer), attributes);
-
-    IndexBuffer indexBuffer(sizeof(BoxIndices) / sizeof(BoxIndices[0]) * MAX_DEBUG_NUM_BOX);
-
-    std::vector<std::uint32_t> indices;
-    std::uint32_t currentIndiceOffset = 0;
-    std::uint32_t maxNumIndices = static_cast<std::uint32_t>(indexBuffer.GetNumIndices() / MAX_DEBUG_NUM_BOX);
-
-    indices.reserve(MAX_DEBUG_NUM_BOX *maxNumIndices);
-
-    std::uint32_t offsetToNextFreeIndex = NUM_BOX_VERTICES;
-
-    for (std::uint32_t currentMeshNo = 0; currentMeshNo < MAX_DEBUG_NUM_BOX; currentMeshNo++)
-    {
-        for (std::uint32_t i = 0; i < maxNumIndices; i++)
-        {
-            std::uint32_t vertexIndex = BoxIndices[i] + currentIndiceOffset;
-            indices.push_back(vertexIndex);
-        }
-
-        currentIndiceOffset += offsetToNextFreeIndex;
-    }
-    indexBuffer.UpdateIndices(indices.data(), static_cast<std::uint32_t>(indices.size()));
-
-    BoxBatch->VertexArray->SetIndexBuffer(std::move(indexBuffer));
     RenderCommand::SetCullFace(true);
 }
 
@@ -108,7 +176,6 @@ void Renderer::BeginScene(const glm::mat4& view, glm::vec3 cameraPosition)
 
 void Renderer::EndScene()
 {
-    BoxBatch->CurrentNumBox = 0;
 }
 
 void Renderer::Submit(const Material& material, const VertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
@@ -138,7 +205,7 @@ void Renderer::Submit(Shader& shader,
 
 void Renderer::Submit(Shader& shader, std::uint32_t numIndices, const VertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
 {
-    MAYBE(numIndices <= vertexArray.GetNumIndices());
+    ASSERT(numIndices <= vertexArray.GetNumIndices());
 
     shader.Use();
     shader.SetUniformMat4("u_ProjectionView", ProjectionView);
@@ -153,36 +220,11 @@ void Renderer::Submit(Shader& shader, std::uint32_t numIndices, const VertexArra
 
 void Renderer::AddDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform)
 {
-    std::array<glm::vec3, 8> vertices = {
-        glm::vec3{boxmin[0], boxmin[1], boxmin[2]},
-        glm::vec3{boxmax[0], boxmin[1], boxmin[2]},
-        glm::vec3{boxmax[0], boxmax[1], boxmin[2]},
-        glm::vec3{boxmin[0], boxmax[1], boxmin[2]},
-
-        glm::vec3{boxmin[0], boxmin[1], boxmax[2]},
-        glm::vec3{boxmax[0], boxmin[1], boxmax[2]},
-        glm::vec3{boxmax[0], boxmax[1], boxmax[2]},
-        glm::vec3{boxmin[0], boxmax[1], boxmax[2]}
-    };
-
-    if (BoxBatch->CurrentNumBox >= BoxBatch->NumBoxes)
-    {
-        return;
-    }
-
-    std::uint32_t maxNumVertices = static_cast<std::uint32_t>(vertices.size());
-
-    for (std::uint32_t i = 0; i < maxNumVertices; ++i)
-    {
-        glm::vec3& vertex = BoxBatch->Vertices[i + BoxBatch->CurrentNumBox * NUM_BOX_VERTICES];
-        vertex = transform * glm::vec4{ vertices[i], 1.0f };
-    }
-
-    BoxBatch->CurrentNumBox++;
+    BoxBatch->AddInstance(boxmin, boxmax, transform);
 }
 
 void Renderer::FlushDrawDebug(Shader& shader)
 {
-    BoxBatch->VertexArray->GetVertexBufferAt(0).UpdateVertices(BoxBatch->Vertices, sizeof(glm::vec3) * BoxBatch->CurrentNumBox * NUM_BOX_VERTICES);
-    Submit(shader, BoxBatch->CurrentNumBox * (sizeof(BoxIndices) / sizeof(BoxIndices[0])), *BoxBatch->VertexArray, glm::mat4{ 1.0 }, RenderPrimitive::Lines);
+    BoxBatch->UpdateBuffers();
+    BoxBatch->FlushDraw(shader);
 }

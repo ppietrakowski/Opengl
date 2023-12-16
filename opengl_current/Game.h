@@ -31,11 +31,12 @@ typedef std::chrono::duration<float, std::ratio<1, 1>> TimeSeconds;
 struct WindowData
 {
     std::function<void(const Event&)> EventCallback;
-    bool MouseVisible{ true };
+    bool MouseVisible : 1{ true };
     glm::ivec2 WindowPosition{ 0, 0 };
     glm::ivec2 WindowSize{ 0, 0 };
     glm::vec2 MousePosition{ 0, 0 };
     glm::vec2 LastMousePosition{ 0, 0 };
+    bool GameRunning : 1{ true };
 };
 
 class Game : public IPlatform

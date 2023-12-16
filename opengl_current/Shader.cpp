@@ -45,7 +45,7 @@ namespace
 
         ShaderObject() = default;
         ShaderObject(GLuint object) :
-            GLShader(object)
+            GLShader{ object }
         {
         }
 
@@ -87,7 +87,6 @@ namespace
     void ThrowShaderCompilationError(GLuint shader, GLenum type)
     {
         std::vector<char> log;
-
         std::int32_t logLength;
 
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
@@ -211,7 +210,7 @@ Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentSha
     }
 }
 
-Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource, 
+Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource,
     std::string_view geometryShaderSource, std::string_view tesselationControlShaderSource,
     std::string_view tesselationEvaluateShaderSource)
 {
@@ -383,17 +382,17 @@ void Shader::GetUniformInfos(std::vector<UniformInfo>& outUniformInfo) const
     glGetProgramiv(_shaderProgram, GL_ACTIVE_UNIFORMS, &numUniforms);
 
     outUniformInfo.reserve(numUniforms);
-    
+
     for (GLint uniformLocation = 0; uniformLocation < numUniforms; uniformLocation++)
     {
         AddNewUniformInfo(outUniformInfo, uniformLocation);
     }
 }
 
-void Shader::SetSamplerUniform(const char* uniformName, const Texture& texture, std::uint32_t textureUnit)
+void Shader::SetSamplerUniform(const char* uniformName, const Texture& texture, std::uint32_t TextureUnit)
 {
-    texture.Bind(textureUnit);
-    SetUniformInt(uniformName, static_cast<std::int32_t>(textureUnit));
+    texture.Bind(TextureUnit);
+    SetUniformInt(uniformName, static_cast<std::int32_t>(TextureUnit));
 }
 
 std::int32_t Shader::GetUniformLocation(const char* uniformName) const

@@ -1,48 +1,38 @@
 #include "ErrorMacros.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+
+#include <array>
+
+#if defined(_WIN32) || defined(WIN32)     /* _Win32 is usually defined by compilers targeting 32 or   64 bit Windows systems */
+#include <Windows.h>
+#endif
 
 constexpr std::uint32_t MaxErrorHandlers = 5;
 
-static ErrorHandler ErrorHandlers[MaxErrorHandlers];
+static std::array<ErrorHandler, MaxErrorHandlers> ErrorHandlers;
 static std::uint32_t ErrorHandlersAssigned = 0;
 
-void AddErrorHandler(const ErrorHandler* handler)
+void AddErrorHandler(const ErrorHandler& handler)
 {
-    DO_ONCE(
-        memset(ErrorHandlers, 0, sizeof(ErrorHandlers));
-    ErrorHandlersAssigned = 0;
-    );
-
-    ERR_FAIL_NULL(handler);
     ERR_FAIL_EXPECTED_TRUE_MSG(ErrorHandlersAssigned < MaxErrorHandlers, "Max error handlers assigned");
-    ErrorHandlers[ErrorHandlersAssigned++] = *handler;
+    ErrorHandlers[ErrorHandlersAssigned++] = handler;
 }
 
-void RemoveErrorHandler(const ErrorHandler* handler)
+void RemoveErrorHandler(const ErrorHandler& handler)
 {
-    ErrorHandler* lastIt = ErrorHandlers + MaxErrorHandlers;
-    ERR_FAIL_NULL(handler);
-
-    for (ErrorHandler* it = ErrorHandlers; it != lastIt; ++it)
+    // find first item that's equal to handler
+    for (auto it = ErrorHandlers.begin(); it != ErrorHandlers.end(); ++it)
     {
-        bool equal = handler->UserData == it->UserData && handler->ErrorHandlerFunc == it->ErrorHandlerFunc;
+        bool equal = handler.UserData == it->UserData && handler.ErrorHandlerFunc == it->ErrorHandlerFunc;
+
         if (equal)
         {
-            for (ErrorHandler* moveIt = it + 1; moveIt != lastIt - 1; ++moveIt, ++it)
-            {
-                *it = *moveIt;
-            }
-
+            // if found, move element to front of array
+            std::move(it + 1, ErrorHandlers.end(), it);
             ErrorHandlersAssigned--;
-
-            if (ErrorHandlersAssigned)
-            {
-                memset(ErrorHandlers, 0, sizeof(ErrorHandlers));
-            }
-
             break;
         }
     }
@@ -51,7 +41,10 @@ void RemoveErrorHandler(const ErrorHandler* handler)
 void Crash(const SourceLocation* location, const char* description)
 {
     PrintError(location, description);
-    exit(EXIT_FAILURE);
+#if defined(_WIN32) || defined(WIN32)     /* _Win32 is usually defined by compilers targeting 32 or   64 bit Windows systems */
+    MessageBoxA(nullptr, description, "Crash report", MB_OK);
+#endif
+    std::exit(EXIT_FAILURE);
 }
 
 void PrintError(const SourceLocation* location, const char* message)
@@ -60,15 +53,10 @@ void PrintError(const SourceLocation* location, const char* message)
     printf("Error in %s: %u in %s msg: %s\n", location->FileName, location->Line, location->FunctionName, message);
 #endif
 
-    ErrorHandlerInfo info{};
-    info.ErrorMessage = message;
-    info.FileName = location->FileName;
-    info.Line = location->Line;
-    info.FunctionName = location->FunctionName;
-
+    ErrorHandlerInfo info{ *location,  message };
     for (std::uint32_t i = 0; i < ErrorHandlersAssigned; ++i)
     {
-        ErrorHandler* handler = &ErrorHandlers[i];
-        handler->ErrorHandlerFunc(handler->UserData, &info);
+        const ErrorHandler& errorHandler = ErrorHandlers[i];
+        errorHandler.ErrorHandlerFunc(errorHandler.UserData, info);
     }
 }

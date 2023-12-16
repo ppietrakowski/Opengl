@@ -7,7 +7,7 @@ static bool BlendingEnabled = false;
 void RenderCommand::DrawIndexed(const VertexArray& vertexArray, std::uint32_t numIndices, RenderPrimitive renderPrimitive)
 {
     vertexArray.Bind();
-    glDrawElements(static_cast<GLenum>(renderPrimitive), static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, NULL);
+    glDrawElements(static_cast<GLenum>(renderPrimitive), static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, nullptr);
 }
 
 void RenderCommand::SetClearColor(float red, float green, float blue, float alpha)
