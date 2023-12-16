@@ -166,7 +166,8 @@ Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentSha
     GenerateShaders(sources);
 }
 
-Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource, std::string_view geometryShaderSource)
+Shader::Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource,
+    std::string_view geometryShaderSource)
 {
     std::array<std::string_view, 3> sources{ vertexShaderSource, fragmentShaderSource, geometryShaderSource };
     GenerateShaders(sources);
@@ -187,12 +188,14 @@ std::shared_ptr<Shader> Shader::LoadShader(std::string_view vertexShaderPath, st
     return LoadShader({ vertexShaderPath, fragmentShaderPath });
 }
 
-std::shared_ptr<Shader> Shader::LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath, std::string_view geometryShaderPath)
+std::shared_ptr<Shader> Shader::LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath,
+    std::string_view geometryShaderPath)
 {
     return LoadShader({ vertexShaderPath, fragmentShaderPath, geometryShaderPath });
 }
 
-std::shared_ptr<Shader> Shader::LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath, std::string_view geometryShaderPath, std::string_view tesselationControlShaderPath, std::string_view tesselationEvaluateShaderPath)
+std::shared_ptr<Shader> Shader::LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath,
+    std::string_view geometryShaderPath, std::string_view tesselationControlShaderPath, std::string_view tesselationEvaluateShaderPath)
 {
     return LoadShader({ vertexShaderPath, fragmentShaderPath, geometryShaderPath, tesselationControlShaderPath, tesselationEvaluateShaderPath });
 }
@@ -329,7 +332,8 @@ std::shared_ptr<Shader> Shader::LoadShader(const std::initializer_list<std::stri
     }
 
     std::array<std::string_view, ShaderIndex::Count> convertexToStringViewSources;
-    std::transform(sources.begin(), it, convertexToStringViewSources.begin(), [](const std::string& s) { return (std::string_view)s; });
+    std::transform(sources.begin(), it, convertexToStringViewSources.begin(),
+        [](const std::string& s) { return (std::string_view)s; });
 
     std::shared_ptr<Shader> shader = std::make_shared<Shader>();
     shader->GenerateShaders(std::span<std::string_view>{ convertexToStringViewSources.begin(), index });
@@ -338,7 +342,8 @@ std::shared_ptr<Shader> Shader::LoadShader(const std::initializer_list<std::stri
 
 void Shader::GenerateShaders(std::span<std::string_view> sources)
 {
-    GLenum types[ShaderIndex::Count] = { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER };
+    GLenum types[ShaderIndex::Count] = { GL_VERTEX_SHADER, 
+        GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER };
 
     std::size_t shaderIndex = 0;
     std::array<ShaderObject, ShaderIndex::Count> shaders;
