@@ -197,7 +197,8 @@ std::shared_ptr<Shader> Shader::LoadShader(std::string_view vertexShaderPath, st
 std::shared_ptr<Shader> Shader::LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath,
     std::string_view geometryShaderPath, std::string_view tesselationControlShaderPath, std::string_view tesselationEvaluateShaderPath)
 {
-    return LoadShader({ vertexShaderPath, fragmentShaderPath, geometryShaderPath, tesselationControlShaderPath, tesselationEvaluateShaderPath });
+    return LoadShader({ vertexShaderPath, fragmentShaderPath,
+        geometryShaderPath, tesselationControlShaderPath, tesselationEvaluateShaderPath });
 }
 
 Shader::Shader(Shader&& shader) noexcept
