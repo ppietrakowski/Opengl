@@ -133,38 +133,36 @@ void Material::AddNewProperty(const UniformInfo& info)
 
 void Material::AddNewTexture(const UniformInfo& info)
 {
-    Property<std::shared_ptr<Texture>> property{ Renderer::GetDefaultTexture(), info.Name };
-    _textures.Add(property, info.Name.substr(MaterialTag.length()));
+    _textures.Add(Renderer::GetDefaultTexture(),
+        info.Name, info.Name.substr(MaterialTag.length()));
 }
 
 void Material::AddNewInt(const UniformInfo& info)
 {
-    Property<std::int32_t> property{ 0, info.Name };
-    _ints.Add(property, info.Name.substr(MaterialTag.length()));
+    _ints.Add(0, info.Name, info.Name.substr(MaterialTag.length()));
 }
 
 void Material::AddNewFloat(const UniformInfo& info)
 {
-    Property<float> property{ 0.0f, info.Name };
-    _floats.Add(property, info.Name.substr(MaterialTag.length()));
+    _floats.Add(0.0f, info.Name, info.Name.substr(MaterialTag.length()));
 }
 
 void Material::AddNewVec2(const UniformInfo& info)
 {
-    Property<glm::vec2> property{ glm::vec2{0, 0}, info.Name };
-    _vectors2.Add(property, info.Name.substr(MaterialTag.length()));
+    _vectors2.Add(glm::vec2{ 0, 0 }, info.Name,
+        info.Name.substr(MaterialTag.length()));
 }
 
 void Material::AddNewVec3(const UniformInfo& info)
 {
-    Property<glm::vec3> property{ glm::vec3{ 0.0f, 0.0f, 0.0f }, info.Name };
-    _vectors3.Add(property, info.Name.substr(MaterialTag.length()));
+    _vectors3.Add(glm::vec3{ 0.0f, 0.0f, 0.0f }, info.Name,
+        info.Name.substr(MaterialTag.length()));
 }
 
 void Material::AddNewVec4(const UniformInfo& info)
 {
-    Property<glm::vec4> property{ glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f },info.Name };
-    _vectors4.Add(property, info.Name.substr(MaterialTag.length()));
+    _vectors4.Add(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f },
+        info.Name, info.Name.substr(MaterialTag.length()));
 }
 
 void Material::SetupRenderState() const

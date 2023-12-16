@@ -39,9 +39,9 @@ public:
     PropertyList& operator=(const PropertyList<T>&) = default;
 
 public:
-    void Add(const Property<T>& property, const std::string& name)
+    void Add(const T& property, const std::string& uniformName, const std::string& name)
     {
-        _properties[name] = property;
+        _properties[name] = Property<T>{ property, uniformName };
     }
 
     void RefreshVars(Shader& shader) const
