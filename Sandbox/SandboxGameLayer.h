@@ -3,6 +3,7 @@
 
 #include "Shader.h"
 #include "Mesh.h"
+
 #include <glm/gtc/quaternion.hpp>
 
 class SandboxGameLayer : public Layer
@@ -46,5 +47,13 @@ private:
     float _moveSpeed = 20.0f;
     float _yawRotationRate = 80.0f;
     float _ascendSpeed = 20.0f;
+
+    std::vector<glm::mat4> boneTransforms;
+    float CurrentTime{ 0.0f };
+    VertexArray SkeletonVertexArray;
+    std::shared_ptr<Shader> SkeletonShader;
+    Animation animation;
+    Joint _root;
+    glm::mat4 GlobalInverseTransform;
 };
 
