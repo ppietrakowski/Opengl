@@ -14,6 +14,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
+
 
 StaticMeshImporter::StaticMeshImporter(std::filesystem::path path)
 {
@@ -104,159 +108,8 @@ inline glm::quat ToGlm(aiQuaternion v)
     return glm::quat{ v.w, v.x, v.y, v.z };
 }
 
-bool readSkeleton(Joint& boneOutput, aiNode* node, std::unordered_map<std::string, std::pair<std::uint32_t, glm::mat4>>& boneInfoTable)
-{
-    auto it = boneInfoTable.find(node->mName.C_Str());
-
-    if (it != boneInfoTable.end())
-    { // if node is actually a bone
-        boneOutput.Name = node->mName.C_Str();
-        auto& boneInfo = it->second;
-
-        boneOutput.IndexInBoneTransformArray = boneInfo.first;
-        boneOutput.RelativeTransformMatrix = boneInfo.second;
-
-        for (std::uint32_t i = 0; i < node->mNumChildren; i++)
-        {
-            Joint child;
-            readSkeleton(child, node->mChildren[i], boneInfoTable);
-            boneOutput.Children.emplace_back(child);
-        }
-        return true;
-    }
-    else
-    { // find bones in children
-        for (std::uint32_t i = 0; i < node->mNumChildren; i++)
-        {
-            if (readSkeleton(boneOutput, node->mChildren[i], boneInfoTable))
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 SkeletonMeshImporter::SkeletonMeshImporter(std::filesystem::path path)
 {
-    Assimp::Importer importer;
-
-    const aiScene* scene = importer.ReadFile(path.string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals |
-        aiProcess_FlipUVs);
-
-    if (scene == nullptr)
-    {
-        throw importer.GetException();
-    }
-
-    std::vector<BonesInfluencingVertex> vertexToBones;
-    std::unordered_map<std::string, std::uint32_t> boneNameToIndex;
-
-    auto getBoneID = [&](const aiBone* bone)
-    {
-        std::uint32_t boneID;
-        std::string boneName(bone->mName.C_Str());
-
-        auto it = boneNameToIndex.find(boneName);
-
-        if (it != boneNameToIndex.end())
-        {
-            boneID = it->second;
-        }
-        else
-        {
-            boneID = boneNameToIndex.size();
-            boneNameToIndex[boneName] = boneID;
-        }
-
-        return boneID;
-    };
-
-    const aiMesh* mesh = scene->mMeshes[0];
-
-    vertexToBones.resize(mesh->mNumVertices);
-    _vertices.reserve(mesh->mNumVertices);
-
-    for (std::uint32_t i = 0; i < mesh->mNumVertices; ++i)
-    {
-        _vertices.emplace_back(ToGlm(mesh->mVertices[i]), ToGlm(mesh->mNormals[i]), ToGlm(mesh->mTextureCoords[0][i]));
-    }
-
-    std::vector<std::uint32_t> boneCounts(_vertices.size(), 0);
-    std::unordered_map<std::string, std::pair<std::uint32_t, glm::mat4>> boneInfo;
-
-    
-
-    for (int i = 0; i < _vertices.size(); i++)
-    {
-        auto& boneWeights = _vertices[i].Weights;
-        float totalWeight = boneWeights[0] + boneWeights[1] + boneWeights[2] + boneWeights[3];
-        if (totalWeight > 0.0f)
-        {
-            for (size_t j = 0; j < boneWeights.size(); ++j)
-            {
-                boneWeights[j] = boneWeights[j] / totalWeight;
-            }
-        }
-
-    }
-    for (std::uint32_t i = 0; i < mesh->mNumFaces; i++)
-    {
-        aiFace& face = mesh->mFaces[i];
-        for (std::uint32_t j = 0; j < face.mNumIndices; j++)
-            _indices.emplace_back(face.mIndices[j]);
-    }
-
-    readSkeleton(_rootJoint, scene->mRootNode, boneInfo);
-
-    for (std::uint32_t i = 0; i < scene->mNumAnimations; ++i)
-    {
-        const aiAnimation* anim = scene->mAnimations[i];
-
-        Animation animation{};
-        if (anim->mTicksPerSecond != 0.0f)
-            animation.TicksPerSecond = anim->mTicksPerSecond;
-        else
-            animation.TicksPerSecond = 1;
-
-
-        animation.Duration = anim->mDuration * anim->mTicksPerSecond;
-
-        for (std::uint32_t i = 0; i < anim->mNumChannels; i++)
-        {
-            aiNodeAnim* channel = anim->mChannels[i];
-            BoneAnimationTrack track;
-            for (std::uint32_t j = 0; j < channel->mNumPositionKeys; j++)
-            {
-                track.AddNewPositionTimestamp(ToGlm(channel->mPositionKeys[j].mValue), channel->mPositionKeys[j].mTime);
-            }
-            for (std::uint32_t j = 0; j < channel->mNumRotationKeys; j++)
-            {
-                track.AddNewRotationTimestamp(ToGlm(channel->mRotationKeys[j].mValue), channel->mRotationKeys[j].mTime);
-            }
-
-            animation.BoneNamesToTracks[channel->mNodeName.C_Str()] = track;
-        }
-        _animations[anim->mName.C_Str()] = animation;
-    }
-
-    _boneCount = mesh->mNumBones;
-    GlobalInversedTransform = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
-    std::int32_t j{ 0 };
-    std::cout << j << std::endl;
-}
-
-void BonesInfluencingVertex::AddNewBone(std::uint32_t boneID, float weight)
-{
-    auto it = std::find(Weights.begin(), Weights.end(), 0.0f);
-
-    if (it != Weights.end())
-    {
-        std::size_t index = std::distance(Weights.begin(), it);
-
-        Weights[index] = weight;
-        BoneIDs[index] = boneID;
-    }
 }
 
 void BoneAnimationTrack::AddNewPositionTimestamp(glm::vec3 Position, float Timestamp)
@@ -269,4 +122,85 @@ void BoneAnimationTrack::AddNewRotationTimestamp(glm::quat Rotation, float Times
 {
     Rotations.emplace_back(Rotation);
     RotationsTimestamps.push_back(Timestamp);
+}
+
+
+std::uint32_t BoneAnimationTrack::GetIndex(float animationTime, const std::vector<float>& timestamps) const
+{
+    ASSERT(timestamps.size() > 0);
+
+    for (std::uint32_t i = 0; i < timestamps.size() - 1; i++)
+    {
+        float t = (float)timestamps[i + 1];
+        if (animationTime < t)
+        {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+glm::mat4 Animation::GetBoneTransformOrRelative(const std::string& boneName, float animationTime, glm::mat4 relativeTransform) const
+{
+    glm::mat4 transform = GetBoneTransform(boneName, animationTime);
+
+    if (transform == glm::mat4{ 1.0f }) 
+    { 
+        return relativeTransform; 
+    }
+
+    return transform;
+}
+
+glm::mat4 Animation::GetBoneTransform(const std::string& boneName, float animationTime) const
+{
+    auto it = BoneNamesToTracks.find(boneName);
+
+    if (it != BoneNamesToTracks.end())
+    {
+        const BoneAnimationTrack& track = it->second;
+
+        // interpolate
+        glm::vec3 position = track.Interpolate<glm::vec3>(animationTime);
+        glm::quat rotation = track.Interpolate<glm::quat>(animationTime);
+        return glm::translate(position) * glm::mat4_cast(rotation);
+    }
+
+    return glm::mat4{ 1.0f };
+}
+
+bool Joint::AssignHierarchy(const aiNode* node, const std::unordered_map<std::string, BoneInfo>& BoneInfos)
+{
+    auto it = BoneInfos.find(node->mName.C_Str());
+
+    if (it != BoneInfos.end())
+    {
+        Name = node->mName.C_Str();
+        const BoneInfo& boneInfo = it->second;
+
+        IndexInBoneTransformArray = boneInfo.IndexInBoneTransformArray;
+        RelativeTransformMatrix = ToGlm(node->mTransformation);
+        BoneOffset = boneInfo.OffsetMatrix;
+
+        for (std::uint32_t i = 0; i < node->mNumChildren; i++)
+        {
+            Joint child;
+            child.AssignHierarchy(node->mChildren[i], BoneInfos);
+            Children.emplace_back(child);
+        }
+        return true;
+    }
+    else
+    {
+        for (std::uint32_t i = 0; i < node->mNumChildren; i++)
+        {
+            if (AssignHierarchy(node->mChildren[i], BoneInfos))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }

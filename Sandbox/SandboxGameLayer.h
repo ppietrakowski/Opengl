@@ -8,20 +8,13 @@
 
 constexpr inline std::size_t kNumBonesPerVertex = 4;
 
-struct VertexBoneData
-{
-    std::uint32_t bone_ids[kNumBonesPerVertex]{ 0 };
-    float weights[kNumBonesPerVertex]{ 0.0f };
-
-    void AddBoneData(std::uint32_t boneID, float weight);
-};
-
 class SkinnedMesh
 {
 public:
     SkinnedMesh();
 
-    void Draw(Shader& shader);
+    void UpdateAnimation(float elapsedTime) { CalculateTransform(elapsedTime, RootJoint); }
+
     void Draw(Material& material, float dt);
 
     Joint RootJoint;
@@ -32,20 +25,9 @@ public:
     std::uint32_t BoneCount;
 
 private:
-    enum BufferIndex
-    {
-        kBuffer_Position = 0,
-        kBuffer_Normal,
-        kBuffer_TextureCoord,
-        kBuffer_BoneIDs,
-        kBuffer_BoneWeights,
-        kBuffer_NumBuffers
-    };
-
     std::vector<std::shared_ptr<Texture2D>> textures_;
     VertexArray vertexArray_;
     std::vector<glm::mat4> BoneTransforms;
-    std::uint32_t ticks = 0;
 
 private:
     void CalculateTransform(float elapsedTime, const Joint& joint, const glm::mat4& parentTransform = glm::mat4{ 1.0f });
@@ -94,20 +76,9 @@ private:
     float _yawRotationRate = 80.0f;
     float _ascendSpeed = 20.0f;
 
-    std::vector<glm::mat4> boneTransforms;
-    float CurrentTime{ 0.0f };
-    VertexArray SkeletonVertexArray;
-    std::shared_ptr<Shader> SkeletonShader;
-    Animation animation;
-    Joint _root;
-    glm::mat4 GlobalInverseTransform;
     glm::vec3 BboxMin;
     glm::vec3 BboxMax;
 
     SkinnedMesh mesh;
-
-private:
-
-    void getPose(Animation& animation, Joint& skeletion, float dt, std::vector<glm::mat4>& output, glm::mat4& parentTransform, glm::mat4& globalInverseTransform);
 };
 
