@@ -3,6 +3,22 @@
 
 #include "Logging.h"
 
+#include <assimp/scene.h>
+#include <assimp/mesh.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+
+#include <stdexcept>
+#include <unordered_map>
+#include <string>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <iostream>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
+
+
 StaticMeshImporter::StaticMeshImporter(std::filesystem::path path)
 {
     if (path.has_extension() && path.extension() == ".obj")

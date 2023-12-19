@@ -93,6 +93,7 @@ public:
     void SetUniformVec4(const char* name, const glm::vec4& value);
 
     void SetUniformMat4(const char* name, const glm::mat4& value);
+    void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, std::uint32_t count);
     void SetUniformMat3(const char* name, const glm::mat3& value);
 
     std::int32_t GetUniformInt(const char* name) const;

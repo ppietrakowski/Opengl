@@ -259,6 +259,11 @@ void Shader::SetUniformMat4(const char* name, const glm::mat4& value)
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
 }
 
+void Shader::SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, std::uint32_t count)
+{
+    glUniformMatrix4fv(GetUniformLocation(name), count, GL_FALSE, glm::value_ptr(values[0]));
+}
+
 void Shader::SetUniformMat3(const char* name, const glm::mat3& value)
 {
     glUniformMatrix3fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));

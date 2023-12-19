@@ -30,7 +30,7 @@ public:
 
     void Bind() const;
     void Unbind() const;
-    void AddBuffer(VertexBuffer&& vb, std::span<const VertexAttribute> attributes);
+    
     void SetIndexBuffer(IndexBuffer&& ib);
 
     std::uint32_t GetNumIndices() const;
@@ -41,9 +41,29 @@ public:
         return _indexBuffer;
     }
 
+    template <typename T>
+    void AddBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes)
+    {
+        AddBufferInternal(VertexBuffer(data.data(), static_cast<std::uint32_t>(data.size_bytes())), attributes);
+    }
+
+    template <typename T>
+    void AddDynamicBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes)
+    {
+        AddBufferInternal(VertexBuffer(data.data(), data.size_bytes(), true), attributes);
+    }
+
+    void AddDynamicBuffer(std::uint32_t maxSize, std::span<const VertexAttribute> attributes)
+    {
+        AddBufferInternal(VertexBuffer(maxSize), attributes);
+    }
+
 private:
     GLuint _rendererID;
     std::vector<VertexBuffer> _vertexBuffers;
     IndexBuffer _indexBuffer;
+
+private:
+    void AddBufferInternal(VertexBuffer&& vb, std::span<const VertexAttribute> attributes);
 };
 

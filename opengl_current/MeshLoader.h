@@ -10,16 +10,20 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <array>
 
+#include <glm/gtc/quaternion.hpp>
+#include <unordered_map>
+#include "ErrorMacros.h"
 
 struct StaticMeshVertex
 {
     glm::vec3 Position{ 0, 0,0 };
     glm::vec3 Normal{ 0, 0, 0 };
     glm::vec2 TextureCoords{ 0, 0 };
+    std::uint32_t ID{ 0 };
 
-
-    static inline constexpr VertexAttribute DataFormat[3] = { {3, PrimitiveVertexType::Float}, {3, PrimitiveVertexType::Float}, {2, PrimitiveVertexType::Float} };
+    static inline constexpr VertexAttribute DataFormat[4] = { {3, PrimitiveVertexType::Float}, {3, PrimitiveVertexType::Float}, {2, PrimitiveVertexType::Float}, {1, PrimitiveVertexType::UnsignedInt} };
 
     StaticMeshVertex() = default;
     StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& textureCoords) :
@@ -32,6 +36,7 @@ struct StaticMeshVertex
     StaticMeshVertex(const StaticMeshVertex&) = default;
     StaticMeshVertex& operator=(const StaticMeshVertex&) = default;
 };
+
 
 class IStaticMeshLoader
 {
@@ -74,3 +79,4 @@ private:
     std::string _errorMessage;
     bool _errorOccured : 1;
 };
+

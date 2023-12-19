@@ -26,8 +26,6 @@ struct WindowSettings
     std::string Title;
 };
 
-typedef std::chrono::duration<float, std::ratio<1, 1>> TimeSeconds;
-
 struct WindowData
 {
     std::function<void(const Event&)> EventCallback;

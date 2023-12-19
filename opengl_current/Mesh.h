@@ -9,6 +9,7 @@
 
 #include "Material.h"
 
+
 class StaticMesh
 {
 public:
@@ -43,7 +44,6 @@ private:
     glm::vec3 _bboxMax;
     std::string _meshName;
 };
-
 
 inline std::span<const StaticMeshVertex> StaticMesh::GetVertices() const
 {

@@ -59,7 +59,7 @@ void Texture::GenerateTexture2D(const void* data)
 
     SetStandardTextureOptions();
 
-    glTextureStorage2D(_rendererID, 0, GetGlFormat() == GL_RGB ? GL_RGB8 : GL_RGBA8, _width, _height);
+    glTextureStorage2D(_rendererID, 1, GetGlFormat() == GL_RGB ? GL_RGB8 : GL_RGBA8, _width, _height);
 
     if (data != nullptr)
     {

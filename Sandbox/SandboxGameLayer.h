@@ -3,7 +3,12 @@
 
 #include "Shader.h"
 #include "Mesh.h"
+#include "SkeletalMesh.h"
+
 #include <glm/gtc/quaternion.hpp>
+
+constexpr inline std::size_t kNumBonesPerVertex = 4;
+
 
 class SandboxGameLayer : public Layer
 {
@@ -35,6 +40,7 @@ private:
     std::shared_ptr<Material> _material;
     std::shared_ptr<Material> _wireframeMaterial;
     std::shared_ptr<Material> _currentMaterial;
+    std::shared_ptr<Material> _materialTest;
 
     float _yaw = -90.0f;
     float _pitch = 0.0f;
@@ -46,5 +52,10 @@ private:
     float _moveSpeed = 20.0f;
     float _yawRotationRate = 80.0f;
     float _ascendSpeed = 20.0f;
+
+    glm::vec3 BboxMin;
+    glm::vec3 BboxMax;
+
+    SkeletalMesh mesh;
 };
 

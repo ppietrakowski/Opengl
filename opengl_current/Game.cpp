@@ -12,13 +12,6 @@
 
 static Game* GameInstance = nullptr;
 
-static std::chrono::milliseconds GetNow()
-{
-    using namespace std::chrono;
-    auto duration = steady_clock::now().time_since_epoch();
-    return duration_cast<milliseconds>(duration);
-}
-
 Game::Game(const WindowSettings& settings) :
     _imguiContext{ nullptr }
 {

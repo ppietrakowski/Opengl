@@ -35,6 +35,15 @@
     <None Include="shaders\Unshaded.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="skeleton.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="skeleton.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="textured.frag">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SandboxGameLayer.h">

@@ -4,11 +4,21 @@
 #include "Imgui/imgui.h"
 #include "ErrorMacros.h"
 
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
+
+#include "Logging.h"
+
 SandboxGameLayer::SandboxGameLayer() :
     _cameraRotation{ glm::vec3{0, 0, 0} },
-    _cameraPosition{ 0.0f, 0.0f, 0.0f }
+    _cameraPosition{ 0.0f, 0.0f, 0.0f },
+    mesh{"Walking.fbx"}
 {
-
     _shader = Shader::LoadShader("shaders/default.vert", "shaders/default.frag");
     _unshaded = Shader::LoadShader("shaders/default.vert", "shaders/Unshaded.frag");
 
@@ -42,12 +52,17 @@ SandboxGameLayer::SandboxGameLayer() :
     _wireframeMaterial->UseWireframe = true;
     _currentMaterial = _material;
 
+    ELOG_INFO(LOG_GLOBAL, "Loading postac.obj");
     _mesh = std::make_unique<StaticMesh>("postac.obj", _material);
-    
+
     _cameraRotation = glm::quat{ glm::radians(glm::vec3{_pitch, _yaw, 0.0f}) };
     _position = { 2, 0, -10 };
 
     RenderCommand::SetClearColor(0.2f, 0.3f, 0.6f);
+    ELOG_INFO(LOG_GLOBAL, "Loading skeleton.vert and textured.frag");
+    _materialTest = std::make_shared<Material>(Shader::LoadShader("skeleton.vert", "textured.frag"));
+    ELOG_INFO(LOG_GLOBAL, "Loading skeleton.vert and textured.frag");
+    _materialTest->SetTextureProperty("diffuse", std::make_shared<Texture2D>("photomode_30112023_222913.png"));
 }
 
 void SandboxGameLayer::OnUpdate(float deltaTime)
@@ -103,14 +118,17 @@ void SandboxGameLayer::OnRender(float deltaTime)
     Renderer::AddDebugBox(_mesh->GetBBoxMin(), _mesh->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), _position));
     Renderer::AddDebugBox(_mesh->GetBBoxMin(), _mesh->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), _position + glm::vec3{ 10, 0, 0 }));
 
+    Renderer::AddDebugBox(BboxMin, BboxMax, glm::translate(glm::identity<glm::mat4>(), glm::vec3{ 10, 2, 10 }));
     Renderer::FlushDrawDebug(*_unshaded);
+    mesh.Draw(*_materialTest);
+
     Renderer::EndScene();
     glLineWidth(1);
 }
 
 bool SandboxGameLayer::OnEvent(const Event& event)
 {
-    if (0 && event.Type == EventType::MouseMoved)
+    if (event.Type == EventType::MouseMoved)
     {
         glm::vec2 delta = event.MouseMove.MousePosition - event.MouseMove.LastMousePosition;
 
@@ -135,7 +153,7 @@ bool SandboxGameLayer::OnEvent(const Event& event)
         _sterringEntity = !_sterringEntity;
     }
 
-    if (event.Type == EventType::KeyPressed && event.Key.Code == GLFW_KEY_P) 
+    if (event.Type == EventType::KeyPressed && event.Key.Code == GLFW_KEY_P)
     {
         if (_currentMaterial.get() == _wireframeMaterial.get())
         {

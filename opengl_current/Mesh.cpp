@@ -1,46 +1,54 @@
 #include "Mesh.h"
 #include "Renderer.h"
 
-namespace
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
+
+void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax)
 {
-    void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax)
+    // assume mesh has infinite bounds
+    outBoxMin = glm::vec3{ std::numeric_limits<float>::max() };
+    outBoxMax = glm::vec3{ std::numeric_limits<float>::min() };
+
+    for (std::size_t i = 0; i < vertices.size(); ++i)
     {
-        // assume mesh has infinite bounds
-        outBoxMin = glm::vec3{ std::numeric_limits<float>::max() };
-        outBoxMax = glm::vec3{ std::numeric_limits<float>::min() };
+        const glm::vec3* vertex = &vertices[i].Position;
 
-        for (std::size_t i = 0; i < vertices.size(); ++i)
+        if (vertex->x < outBoxMin.x)
         {
-            const glm::vec3* vertex = &vertices[i].Position;
+            outBoxMin.x = vertex->x;
+        }
+        if (vertex->y < outBoxMin.y)
+        {
+            outBoxMin.y = vertex->y;
+        }
+        if (vertex->z < outBoxMin.z)
+        {
+            outBoxMin.z = vertex->z;
+        }
 
-            if (vertex->x < outBoxMin.x)
-            {
-                outBoxMin.x = vertex->x;
-            }
-            if (vertex->y < outBoxMin.y)
-            {
-                outBoxMin.y = vertex->y;
-            }
-            if (vertex->z < outBoxMin.z)
-            {
-                outBoxMin.z = vertex->z;
-            }
-
-            if (vertex->x > outBoxMax.x)
-            {
-                outBoxMax.x = vertex->x;
-            }
-            if (vertex->y > outBoxMax.y)
-            {
-                outBoxMax.y = vertex->y;
-            }
-            if (vertex->z > outBoxMax.z)
-            {
-                outBoxMax.z = vertex->z;
-            }
+        if (vertex->x > outBoxMax.x)
+        {
+            outBoxMax.x = vertex->x;
+        }
+        if (vertex->y > outBoxMax.y)
+        {
+            outBoxMax.y = vertex->y;
+        }
+        if (vertex->z > outBoxMax.z)
+        {
+            outBoxMax.z = vertex->z;
         }
     }
 }
+
+
 StaticMesh::StaticMesh(const std::filesystem::path& filePath, const std::shared_ptr<Material>& material) :
     _material{ material }
 {
@@ -54,13 +62,10 @@ StaticMesh::StaticMesh(const std::filesystem::path& filePath, const std::shared_
     std::span<const StaticMeshVertex> loadedVertices = importer.GetVertices();
     std::span<const std::uint32_t> loadedIndices = importer.GetIndices();
 
-    VertexBuffer vertexBuffer(loadedVertices.data(),
-        static_cast<std::uint32_t>(loadedVertices.size_bytes()));
-
     IndexBuffer indexBuffer(loadedIndices.data(),
         static_cast<std::uint32_t>(loadedIndices.size()));
 
-    _vertexArray.AddBuffer(std::move(vertexBuffer), StaticMeshVertex::DataFormat);
+    _vertexArray.AddBuffer(loadedVertices, StaticMeshVertex::DataFormat);
     _vertexArray.SetIndexBuffer(std::move(indexBuffer));
 
     _numTriangles = static_cast<std::uint32_t>(loadedIndices.size()) / 3;
@@ -85,3 +90,4 @@ void StaticMesh::Render(const Material& overrideMaterial, const glm::mat4& trans
 {
     Renderer::Submit(overrideMaterial, _vertexArray, transform);
 }
+
