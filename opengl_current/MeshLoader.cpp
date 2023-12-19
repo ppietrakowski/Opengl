@@ -86,7 +86,7 @@ std::uint32_t StaticMeshImporter::GetNumVertices() const
 
 inline glm::mat4 ToGlm(aiMatrix4x4 mat)
 {
-    return glm::make_mat4(&mat.Transpose().a1);
+    return glm::make_mat4(mat.Transpose()[0]);
 }
 
 inline glm::vec3 ToGlm(aiVector3D v)
@@ -114,7 +114,7 @@ bool readSkeleton(Joint& boneOutput, aiNode* node, std::unordered_map<std::strin
         auto& boneInfo = it->second;
 
         boneOutput.IndexInBoneTransformArray = boneInfo.first;
-        boneOutput.OffsetMatrix = boneInfo.second;
+        boneOutput.RelativeTransformMatrix = boneInfo.second;
 
         for (std::uint32_t i = 0; i < node->mNumChildren; i++)
         {
@@ -132,7 +132,6 @@ bool readSkeleton(Joint& boneOutput, aiNode* node, std::unordered_map<std::strin
             {
                 return true;
             }
-
         }
     }
     return false;
@@ -186,48 +185,7 @@ SkeletonMeshImporter::SkeletonMeshImporter(std::filesystem::path path)
     std::vector<std::uint32_t> boneCounts(_vertices.size(), 0);
     std::unordered_map<std::string, std::pair<std::uint32_t, glm::mat4>> boneInfo;
 
-    for (std::uint32_t i = 0; i < mesh->mNumBones; ++i)
-    {
-        const aiBone* bone = mesh->mBones[i];
-        std::uint32_t boneID = getBoneID(bone);
-
-        glm::mat4 offsetMatrix = ToGlm(bone->mOffsetMatrix);
-        boneInfo[bone->mName.C_Str()] = { i, offsetMatrix };
-
-        std::uint32_t numWeights = std::min(bone->mNumWeights, static_cast<std::uint32_t>(boneCounts.size()));
-
-        for (std::uint32_t j = 0; j < numWeights; j++)
-        {
-            std::uint32_t id = bone->mWeights[j].mVertexId;
-            float weight = bone->mWeights[j].mWeight;
-
-            boneCounts[id]++;
-
-            switch (boneCounts[id])
-            {
-            case 1:
-                _vertices[id].BoneIds[0] = i;
-                _vertices[id].Weights[0] = weight;
-                break;
-            case 2:
-                _vertices[id].BoneIds[1] = i;
-                _vertices[id].Weights[1] = weight;
-                break;
-            case 3:
-                _vertices[id].BoneIds[2] = i;
-                _vertices[id].Weights[2] = weight;
-                break;
-            case 4:
-                _vertices[id].BoneIds[3] = i;
-                _vertices[id].Weights[3] = weight;
-                break;
-            default:
-                //std::cout << "err: unable to allocate bone to vertex" << std::endl;
-                break;
-
-            }
-        }
-    }
+    
 
     for (int i = 0; i < _vertices.size(); i++)
     {

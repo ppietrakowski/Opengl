@@ -10,6 +10,10 @@
 #include <filesystem>
 #include <span>
 
+extern "C" {
+#include "stb_image.h"
+}
+
 enum class TextureFormat
 {
     Rgb,

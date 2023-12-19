@@ -38,7 +38,7 @@ void VertexArray::Unbind() const
 #define GET_ATTRIBUTE_INDEX(attribute) static_cast<std::uint32_t>(attribute.Type)
 #define GET_GL_TYPE_INDEX(attribute) static_cast<std::uint32_t>(attribute.Type)
 
-void VertexArray::AddBuffer(VertexBuffer&& vertexBuffer, std::span<const VertexAttribute> attributes)
+void VertexArray::AddBufferInternal(VertexBuffer&& vertexBuffer, std::span<const VertexAttribute> attributes)
 {
     constexpr std::uint32_t MaxAttributes = static_cast<std::uint32_t>(PrimitiveVertexType::MaxPrimitiveVertexType);
 
@@ -69,6 +69,7 @@ void VertexArray::AddBuffer(VertexBuffer&& vertexBuffer, std::span<const VertexA
 
         std::uint32_t glTypeIndex = GET_GL_TYPE_INDEX(attribute);
         ASSERT(glTypeIndex < MaxAttributes);
+
         glVertexAttribPointer(attributeStartIndex, attribute.NumComponents, attributeConversionTable[glTypeIndex],
             dataNormalized, stride, reinterpret_cast<const void*>(offset));
 

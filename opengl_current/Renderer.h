@@ -25,6 +25,11 @@ public:
         const glm::mat4& transform = glm::mat4{ 1.0f },
         RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
 
+    static void SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, std::uint32_t count,
+        const VertexArray& vertexArray,
+        const glm::mat4& transform = glm::mat4{ 1.0f },
+        RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
+
     static void Submit(Shader& shader,
         const VertexArray& vertexArray,
         const glm::mat4& transform = glm::mat4{ 1.0f },

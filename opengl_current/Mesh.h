@@ -44,6 +44,7 @@ private:
     std::string _meshName;
 };
 
+void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax);
 
 inline std::span<const StaticMeshVertex> StaticMesh::GetVertices() const
 {

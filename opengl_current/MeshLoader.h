@@ -20,9 +20,9 @@ struct StaticMeshVertex
     glm::vec3 Position{ 0, 0,0 };
     glm::vec3 Normal{ 0, 0, 0 };
     glm::vec2 TextureCoords{ 0, 0 };
+    std::uint32_t ID{ 0 };
 
-
-    static inline constexpr VertexAttribute DataFormat[3] = { {3, PrimitiveVertexType::Float}, {3, PrimitiveVertexType::Float}, {2, PrimitiveVertexType::Float} };
+    static inline constexpr VertexAttribute DataFormat[4] = { {3, PrimitiveVertexType::Float}, {3, PrimitiveVertexType::Float}, {2, PrimitiveVertexType::Float}, {1, PrimitiveVertexType::UnsignedInt} };
 
     StaticMeshVertex() = default;
     StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& textureCoords) :
@@ -59,8 +59,8 @@ struct SkeletonMeshVertex
         {3, PrimitiveVertexType::Float},
         {3, PrimitiveVertexType::Float},
         {2, PrimitiveVertexType::Float}, 
-        {3, PrimitiveVertexType::UnsignedInt},
-        {3, PrimitiveVertexType::Float}
+        {4, PrimitiveVertexType::UnsignedInt},
+        {4, PrimitiveVertexType::Float}
     };
 
     SkeletonMeshVertex() = default;
@@ -149,7 +149,8 @@ struct Joint
 {
     std::vector<Joint> Children;
     std::uint32_t IndexInBoneTransformArray{ 0 };
-    glm::mat4 OffsetMatrix{ glm::identity<glm::mat4>()};
+    glm::mat4 RelativeTransformMatrix{ glm::identity<glm::mat4>()};
+    glm::mat4 BoneOffset{ glm::identity<glm::mat4>()};
     std::string Name;
 };
 

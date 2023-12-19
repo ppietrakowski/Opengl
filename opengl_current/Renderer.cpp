@@ -23,8 +23,8 @@ static std::uint32_t BoxIndices[] =
     0, 4, 1, 5, 2, 6, 3, 7
 };
 
-constexpr std::uint32_t MaxDebugNumBox = 100;
-constexpr std::uint32_t NumBoxVertices = 8;
+constexpr std::size_t MaxDebugNumBox = 100;
+constexpr std::size_t NumBoxVertices = 8;
 
 struct BoxBatchData
 {
@@ -37,9 +37,9 @@ struct BoxBatchData
     {
         // initialize box batching
         VertexAttribute attributes[] = { {3, PrimitiveVertexType::Float} };
-        VertexBuffer buffer(NumBoxVertices * MaxDebugNumBox * sizeof(glm::vec3));
+        VertexBuffer buffer();
 
-        DebugVertexArray.AddBuffer(std::move(buffer), attributes);
+        DebugVertexArray.AddDynamicBuffer(static_cast<std::uint32_t>(NumBoxVertices * MaxDebugNumBox * sizeof(glm::vec3)), attributes);
 
         // prebatch indices
         std::vector<std::uint32_t> indices;
@@ -156,6 +156,9 @@ void Renderer::Initialize()
     glEnable(GL_DEPTH_TEST);
 
     BoxBatch = new BoxBatchData();
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     RenderCommand::SetCullFace(true);
 }
@@ -191,6 +194,23 @@ void Renderer::Submit(const Material& material, const VertexArray& vertexArray, 
     glm::mat3 normalMatrix = glm::inverseTranspose(transform);
     shader.SetUniformMat3("u_NormalTransform", normalMatrix);
 
+    RenderCommand::DrawIndexed(vertexArray, vertexArray.GetNumIndices(), renderPrimitive);
+}
+
+void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, std::uint32_t count, const VertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
+{
+    Shader& shader = material.GetShader();
+    shader.Use();
+    material.SetupRenderState();
+    material.SetShaderUniforms();
+
+    shader.SetUniformMat4("u_ProjectionView", ProjectionView);
+    shader.SetUniformMat4("u_Transform", transform);
+    shader.SetUniformVec3("u_CameraLocation", CameraLocation);
+
+    glm::mat3 normalMatrix = glm::inverseTranspose(transform);
+    shader.SetUniformMat3("u_NormalTransform", normalMatrix);
+    shader.SetUniformMat4Array("bone_transforms", transforms, count);
     RenderCommand::DrawIndexed(vertexArray, vertexArray.GetNumIndices(), renderPrimitive);
 }
 

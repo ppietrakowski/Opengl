@@ -148,6 +148,7 @@
     <None Include="shaders\Unshaded.frag" />
     <None Include="skeleton.frag" />
     <None Include="skeleton.vert" />
+    <None Include="textured.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SandboxGameLayer.h" />

@@ -4,6 +4,8 @@
 #include <GL/glew.h>
 #include "Event.h"
 
+#include <chrono>
+
 class IPlatform
 {
 public:
@@ -23,6 +25,16 @@ public:
 private:
     static inline IPlatform* Instance = nullptr;
 };
+
+
+typedef std::chrono::duration<float, std::ratio<1, 1>> TimeSeconds;
+
+inline std::chrono::milliseconds GetNow()
+{
+    using namespace std::chrono;
+    auto duration = steady_clock::now().time_since_epoch();
+    return duration_cast<milliseconds>(duration);
+}
 
 class Layer
 {
