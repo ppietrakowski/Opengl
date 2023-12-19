@@ -272,7 +272,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path) :
     vertexArray_.SetIndexBuffer(IndexBuffer(indices_.data(), static_cast<std::uint32_t>(indices_.size())));
 
     GlobalInversedTransform = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
-    boneTransforms_.resize(200, glm::identity<glm::mat4>());
+    boneTransforms_.resize(totalBones, glm::identity<glm::mat4>());
 
     FindAabCollision(vertices_, bboxMin_, bboxMax_);
     bboxMin_.x *= 0.2f;
