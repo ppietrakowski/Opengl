@@ -1,45 +1,16 @@
 #include "Mesh.h"
 #include "Renderer.h"
 
+#include <assimp/mesh.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
+
 void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax)
-{
-    // assume mesh has infinite bounds
-    outBoxMin = glm::vec3{ std::numeric_limits<float>::max() };
-    outBoxMax = glm::vec3{ std::numeric_limits<float>::min() };
-
-    for (std::size_t i = 0; i < vertices.size(); ++i)
-    {
-        const glm::vec3* vertex = &vertices[i].Position;
-
-        if (vertex->x < outBoxMin.x)
-        {
-            outBoxMin.x = vertex->x;
-        }
-        if (vertex->y < outBoxMin.y)
-        {
-            outBoxMin.y = vertex->y;
-        }
-        if (vertex->z < outBoxMin.z)
-        {
-            outBoxMin.z = vertex->z;
-        }
-
-        if (vertex->x > outBoxMax.x)
-        {
-            outBoxMax.x = vertex->x;
-        }
-        if (vertex->y > outBoxMax.y)
-        {
-            outBoxMax.y = vertex->y;
-        }
-        if (vertex->z > outBoxMax.z)
-        {
-            outBoxMax.z = vertex->z;
-        }
-    }
-}
-
-void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax)
 {
     // assume mesh has infinite bounds
     outBoxMin = glm::vec3{ std::numeric_limits<float>::max() };
@@ -119,3 +90,4 @@ void StaticMesh::Render(const Material& overrideMaterial, const glm::mat4& trans
 {
     Renderer::Submit(overrideMaterial, _vertexArray, transform);
 }
+

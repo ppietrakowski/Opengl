@@ -37,7 +37,7 @@ struct BoxBatchData
     {
         // initialize box batching
         VertexAttribute attributes[] = { {3, PrimitiveVertexType::Float} };
-        VertexBuffer buffer();
+        VertexBuffer buffer{};
 
         DebugVertexArray.AddDynamicBuffer(static_cast<std::uint32_t>(NumBoxVertices * MaxDebugNumBox * sizeof(glm::vec3)), attributes);
 

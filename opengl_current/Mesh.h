@@ -9,6 +9,7 @@
 
 #include "Material.h"
 
+
 class StaticMesh
 {
 public:
@@ -43,8 +44,6 @@ private:
     glm::vec3 _bboxMax;
     std::string _meshName;
 };
-
-void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax);
 
 inline std::span<const StaticMeshVertex> StaticMesh::GetVertices() const
 {

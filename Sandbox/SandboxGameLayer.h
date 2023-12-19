@@ -3,35 +3,12 @@
 
 #include "Shader.h"
 #include "Mesh.h"
+#include "SkeletalMesh.h"
 
 #include <glm/gtc/quaternion.hpp>
 
 constexpr inline std::size_t kNumBonesPerVertex = 4;
 
-class SkinnedMesh
-{
-public:
-    SkinnedMesh();
-
-    void UpdateAnimation(float elapsedTime) { CalculateTransform(elapsedTime, RootJoint); }
-
-    void Draw(Material& material, float dt);
-
-    Joint RootJoint;
-    std::unordered_map<std::string, Animation> _animations;
-    glm::mat4 GlobalInversedTransform;
-
-    TimeSeconds InitializationTime;
-    std::uint32_t BoneCount;
-
-private:
-    std::vector<std::shared_ptr<Texture2D>> textures_;
-    VertexArray vertexArray_;
-    std::vector<glm::mat4> BoneTransforms;
-
-private:
-    void CalculateTransform(float elapsedTime, const Joint& joint, const glm::mat4& parentTransform = glm::mat4{ 1.0f });
-};
 
 class SandboxGameLayer : public Layer
 {
@@ -79,6 +56,6 @@ private:
     glm::vec3 BboxMin;
     glm::vec3 BboxMax;
 
-    SkinnedMesh mesh;
+    SkeletalMesh mesh;
 };
 
