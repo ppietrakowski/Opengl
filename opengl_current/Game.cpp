@@ -10,11 +10,10 @@
 #include <functional>
 #include <glm/gtc/matrix_transform.hpp>
 
-static Game* GameInstance = nullptr;
+static Game* game_instance_ = nullptr;
 
 Game::Game(const WindowSettings& settings) :
-    _imguiContext{ nullptr }
-{
+    imgui_context_{ nullptr } {
     Logging::Initialize();
 
     // initialize glfw and create window with opengl 4.3 context
@@ -23,41 +22,36 @@ Game::Game(const WindowSettings& settings) :
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-    _window = glfwCreateWindow(settings.Width, settings.Height, settings.Title.c_str(), nullptr, nullptr);
-    CRASH_EXPECTED_NOT_NULL(_window);
+    window_ = glfwCreateWindow(settings.width, settings.height, settings.title.c_str(), nullptr, nullptr);
+    CRASH_EXPECTED_NOT_NULL(window_);
 
-    glfwMakeContextCurrent(_window);
+    glfwMakeContextCurrent(window_);
     glfwSwapInterval(1);
-    GLenum errorCode = glewInit();
-    CRASH_EXPECTED_TRUE_MSG(errorCode == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(errorCode)));
+    GLenum error_code = glewInit();
+    CRASH_EXPECTED_TRUE_MSG(error_code == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(error_code)));
 
     // initialize subsystems
     Renderer::Initialize();
-    Renderer::UpdateProjection(static_cast<float>(settings.Width), static_cast<float>(settings.Height), 45.0f, 0.01f);
-    
+    Renderer::UpdateProjection(static_cast<float>(settings.width), static_cast<float>(settings.height), 45.0f, 0.01f);
+
     BindWindowEvents();
     InitializeImGui();
 
     // fill window data
-    glm::dvec2 mousePosition;
-    glfwGetCursorPos(_window, &mousePosition.x, &mousePosition.y);
-    WindowData& gameWindowData = _windowData;
-    gameWindowData.MousePosition = mousePosition;
-    gameWindowData.LastMousePosition = gameWindowData.MousePosition;
+    glm::dvec2 mouse_position;
+    glfwGetCursorPos(window_, &mouse_position.x, &mouse_position.y);
+    WindowData& game_window_data = window_data_;
+    game_window_data.mouse_position = mouse_position;
+    game_window_data.last_mouse_position = game_window_data.mouse_position;
 
-    glfwGetWindowPos(_window, &gameWindowData.WindowPosition.x, &gameWindowData.WindowPosition.y);
-    glfwGetWindowSize(_window, &gameWindowData.WindowSize.x, &gameWindowData.WindowSize.y);
+    glfwGetWindowPos(window_, &game_window_data.window_position.x, &game_window_data.window_position.y);
+    glfwGetWindowSize(window_, &game_window_data.window_size.x, &game_window_data.window_size.y);
 
-    GameInstance = this;
+    game_instance_ = this;
 }
 
-Game::~Game()
-{
-    // layers are are allocating using heap so they should be deleted
-    for (Layer* layer : _layers)
-    {
-        delete layer;
-    }
+Game::~Game() {
+    layers_.clear();
 
     // deinitialize all libraries
     Renderer::Quit();
@@ -66,62 +60,55 @@ Game::~Game()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(_window);
+    glfwDestroyWindow(window_);
     glfwTerminate();
 
     Logging::Quit();
-    GameInstance = nullptr;
+    game_instance_ = nullptr;
 }
 
-constexpr std::uint32_t ClearFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+constexpr std::uint32_t kClearFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 
-void Game::Run()
-{
-    TimeSeconds deltaSeconds = TimeSeconds::zero();
-    auto lastFrameTime = GetNow();
+void Game::Run() {
+    TimeSeconds delta_seconds = TimeSeconds::zero();
+    auto last_frame_time = GetNow();
 
-    while (_windowData.GameRunning)
-    {
-        for (Layer* layer : _layers)
-        {
-            layer->OnUpdate(deltaSeconds.count());
+    while (window_data_.game_running) {
+        for (const std::unique_ptr<Layer>& layer : layers_) {
+            layer->OnUpdate(delta_seconds.count());
         }
-        
-        RenderCommand::Clear(ClearFlags);
+
+        RenderCommand::Clear(kClearFlags);
 
         // calculate delta time using chrono library
         auto now = GetNow();
-        deltaSeconds = (now - lastFrameTime);
-        lastFrameTime = now;
+        delta_seconds = (now - last_frame_time);
+        last_frame_time = now;
 
         // broadcast render command
-        for (Layer* layer : _layers)
-        {
-            layer->OnRender(deltaSeconds.count());
+        for (const std::unique_ptr<Layer>& layer : layers_) {
+            layer->OnRender(delta_seconds.count());
         }
 
         RunImguiFrame();
 
-        glfwSwapBuffers(_window);
+        glfwSwapBuffers(window_);
         glfwPollEvents();
     }
 }
 
-bool Game::IsRunning() const
-{
-    return _windowData.GameRunning;
+bool Game::IsRunning() const {
+    return window_data_.game_running;
 }
 
-void Game::Quit()
-{
-    glfwSetWindowShouldClose(_window, GL_TRUE);
-    _windowData.GameRunning = false;
+void Game::Quit() {
+    glfwSetWindowShouldClose(window_, GL_TRUE);
+    window_data_.game_running = false;
 }
 
-bool Game::InitializeImGui()
-{
-    _imguiContext = ImGui::CreateContext();
-    ImGui::SetCurrentContext(_imguiContext);
+bool Game::InitializeImGui() {
+    imgui_context_ = ImGui::CreateContext();
+    ImGui::SetCurrentContext(imgui_context_);
 
     ImGui::StyleColorsDark();
     ImGuiIO& io = ImGui::GetIO();
@@ -130,23 +117,21 @@ bool Game::InitializeImGui()
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 
-    bool imguiInitialized = ImGui_ImplGlfw_InitForOpenGL(_window, true);
-    ERR_FAIL_EXPECTED_TRUE_V(imguiInitialized, false);
+    bool imgui_initialized = ImGui_ImplGlfw_InitForOpenGL(window_, true);
+    ERR_FAIL_EXPECTED_TRUE_V(imgui_initialized, false);
 
-    const char* glslVersion = "#version 430 core";
-    imguiInitialized = ImGui_ImplOpenGL3_Init(glslVersion);
-    return imguiInitialized;
+    const char* glsl_version = "#version 430 core";
+    imgui_initialized = ImGui_ImplOpenGL3_Init(glsl_version);
+    return imgui_initialized;
 }
 
-void Game::RunImguiFrame()
-{
+void Game::RunImguiFrame() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
     // broadcast imgui frame draw
-    for (Layer* layer : _layers)
-    {
+    for (const std::unique_ptr<Layer>& layer : layers_) {
         layer->OnImguiFrame();
     }
 
@@ -157,149 +142,122 @@ void Game::RunImguiFrame()
     ImGuiIO& io = ImGui::GetIO();
 
     // update viewport if enabled
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        GLFWwindow* backupCurrentContext = glfwGetCurrentContext();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        GLFWwindow* backup_current_context = glfwGetCurrentContext();
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
-        glfwMakeContextCurrent(backupCurrentContext);
+        glfwMakeContextCurrent(backup_current_context);
     }
 }
 
-void Game::BindWindowEvents()
-{
-    glfwSetWindowUserPointer(_window, &_windowData);
+void Game::BindWindowEvents() {
+    glfwSetWindowUserPointer(window_, &window_data_);
 
-    glfwSetCursorPosCallback(_window, [](GLFWwindow* window, double xpos, double ypos)
-    {
-        WindowData* gameWindowData = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
-        gameWindowData->LastMousePosition = gameWindowData->MousePosition;
-        gameWindowData->MousePosition = glm::vec2{ xpos, ypos };
+    glfwSetCursorPosCallback(window_, [](GLFWwindow* window, double xpos, double ypos) {
+        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+        game_window_data->last_mouse_position = game_window_data->mouse_position;
+        game_window_data->mouse_position = glm::vec2{ xpos, ypos };
 
-        if (gameWindowData->EventCallback)
-        {
+        if (game_window_data->event_callback) {
             Event evt{};
-            evt.Type = EventType::MouseMoved;
-            evt.MouseMove.MousePosition = gameWindowData->MousePosition;
-            evt.MouseMove.LastMousePosition = gameWindowData->LastMousePosition;
-            gameWindowData->EventCallback(evt);
+            evt.type = EventType::kMouseMoved;
+            evt.mouse_move.mouse_position = game_window_data->mouse_position;
+            evt.mouse_move.last_mouse_position = game_window_data->last_mouse_position;
+            game_window_data->event_callback(evt);
         }
     });
 
-    glfwSetKeyCallback(_window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
-    {
-        WindowData* gameWindowData = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetKeyCallback(window_, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
-        if (gameWindowData->EventCallback)
-        {
+        if (game_window_data->event_callback) {
             Event event{};
-            event.Type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EventType::KeyPressed : EventType::KeyReleased;
-            event.Key = { key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER) };
+            event.type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EventType::kKeyPressed : EventType::kKeyReleased;
+            event.key = { key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER) };
 
-            gameWindowData->EventCallback(event);
+            game_window_data->event_callback(event);
         }
     });
 
-    glfwSetMouseButtonCallback(_window, [](GLFWwindow* window, int button, int action, int mods)
-    {
-        WindowData* gameWindowData = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetMouseButtonCallback(window_, [](GLFWwindow* window, int button, int action, int mods) {
+        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
-        if (gameWindowData->EventCallback)
-        {
+        if (game_window_data->event_callback) {
             Event event{};
-            event.Type = (action == GLFW_PRESS) ? EventType::MouseButtonPressed : EventType::MouseButtonReleased;
-            event.MouseButton = { button, gameWindowData->MousePosition };
-            gameWindowData->EventCallback(event);
+            event.type = (action == GLFW_PRESS) ? EventType::kMouseButtonPressed : EventType::kMouseButtonReleased;
+            event.mouse_button = { button, game_window_data->mouse_position };
+            game_window_data->event_callback(event);
         }
     });
 
-    glfwSetWindowFocusCallback(_window, [](GLFWwindow* window, int focused)
-    {
-        WindowData* gameWindowData = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetWindowFocusCallback(window_, [](GLFWwindow* window, int focused) {
+        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
-        if (gameWindowData->EventCallback)
-        {
+        if (game_window_data->event_callback) {
             Event event{};
-            event.Type = (focused == GL_TRUE) ? EventType::GainedFocus : EventType::LostFocus;
-            gameWindowData->EventCallback(event);
+            event.type = (focused == GL_TRUE) ? EventType::kGainedFocus : EventType::kLostFocus;
+            game_window_data->event_callback(event);
         }
     });
 
-    glfwSetScrollCallback(_window, [](GLFWwindow* window, double xoffset, double yoffset)
-    {
-        WindowData* gameWindowData = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetScrollCallback(window_, [](GLFWwindow* window, double xoffset, double yoffset) {
+        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
-        if (gameWindowData->EventCallback)
-        {
+        if (game_window_data->event_callback) {
             Event event{};
-            event.Type = EventType::MouseWheelScrolled;
-            event.MouseWheel.Delta = { xoffset, yoffset };
-            gameWindowData->EventCallback(event);
+            event.type = EventType::kMouseWheelScrolled;
+            event.mouse_wheel.delta = { xoffset, yoffset };
+            game_window_data->event_callback(event);
         }
     });
 
-    glfwSetWindowCloseCallback(_window, [](GLFWwindow* window)
-    {
-        WindowData* gameWindowData = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
-        gameWindowData->GameRunning = false;
+    glfwSetWindowCloseCallback(window_, [](GLFWwindow* window) {
+        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+        game_window_data->game_running = false;
     });
 
-    _windowData.EventCallback = [this](const Event& evt)
-    {
+    window_data_.event_callback = [this](const Event& evt) {
         // events in layer are processed from last to first
-        for (auto it = _layers.rbegin(); it != _layers.rend(); ++it)
-        {
-            Layer* layer = *it;
+        for (auto it = layers_.rbegin(); it != layers_.rend(); ++it) {
+            std::unique_ptr<Layer>& layer = *it;
 
-            if (layer->OnEvent(evt))
-            {
+            if (layer->OnEvent(evt)) {
                 return;
             }
         }
     };
 }
 
-glm::vec2 Game::GetMousePosition() const
-{
-    return _windowData.MousePosition;
+glm::vec2 Game::GetMousePosition() const {
+    return window_data_.mouse_position;
 }
 
-glm::vec2 Game::GetLastMousePosition() const
-{
-    return _windowData.LastMousePosition;
+glm::vec2 Game::GetLastMousePosition() const {
+    return window_data_.last_mouse_position;
 }
 
-void Game::SetMouseVisible(bool mouseVisible)
-{
-    if (mouseVisible)
-    {
-        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
-    else
-    {
-        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+void Game::SetMouseVisible(bool mouse_visible) {
+    if (mouse_visible) {
+        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    } else {
+        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
 
-bool Game::IsKeyDown(std::int32_t key) const
-{
-    return glfwGetKey(_window, key);
+bool Game::IsKeyDown(std::int32_t key) const {
+    return glfwGetKey(window_, key);
 }
 
-void Game::AddLayer(Layer* gameLayer)
-{
-    _layers.push_back(gameLayer);
+void Game::AddLayer(std::unique_ptr<Layer>&& game_layer) {
+    layers_.emplace_back(std::move(game_layer));
 }
 
-void Game::RemoveLayer(std::type_index index)
-{
-    auto it = std::remove_if(_layers.begin(),
-        _layers.end(),
-        [index](const Layer* layer) { return layer->GetTypeIndex() == index; });
+void Game::RemoveLayer(std::type_index index) {
+    auto it = std::remove_if(layers_.begin(),
+        layers_.end(),
+        [index](const std::unique_ptr<Layer>& layer) { return layer->GetTypeIndex() == index; });
 
-    if (it != _layers.end())
-    {
-        delete* it;
-        _layers.erase(it);
+    if (it != layers_.end()) {
+        layers_.erase(it);
     }
 }

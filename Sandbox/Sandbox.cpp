@@ -2,22 +2,16 @@
 
 #include "SandboxGameLayer.h"
 
-int main()
-{
+int main() {
     Game game(WindowSettings{ 1280, 720, "Game" });
-    try
-    {
-        game.AddLayer(new SandboxGameLayer());
+    try {
+        game.AddLayer(std::make_unique<SandboxGameLayer>());
         game.SetMouseVisible(false);
 
         game.Run();
-    }
-    catch (const std::exception& e)
-    {
+    } catch (const std::exception& e) {
         ELOG_ERROR(LOG_CORE, "%s", e.what());
-    }
-    catch (...)
-    {
+    } catch (...) {
         ELOG_ERROR(LOG_CORE, "XD");
     }
 

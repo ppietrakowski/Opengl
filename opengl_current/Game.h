@@ -19,26 +19,23 @@
 
 #include <functional>
 
-struct WindowSettings
-{
-    std::uint32_t Width;
-    std::uint32_t Height;
-    std::string Title;
+struct WindowSettings {
+    std::uint32_t width;
+    std::uint32_t height;
+    std::string title;
 };
 
-struct WindowData
-{
-    std::function<void(const Event&)> EventCallback;
-    bool MouseVisible : 1{ true };
-    glm::ivec2 WindowPosition{ 0, 0 };
-    glm::ivec2 WindowSize{ 0, 0 };
-    glm::vec2 MousePosition{ 0, 0 };
-    glm::vec2 LastMousePosition{ 0, 0 };
-    bool GameRunning : 1{ true };
+struct WindowData {
+    std::function<void(const Event&)> event_callback;
+    bool mouse_visible : 1{ true };
+    glm::ivec2 window_position{ 0, 0 };
+    glm::ivec2 window_size{ 0, 0 };
+    glm::vec2 mouse_position{ 0, 0 };
+    glm::vec2 last_mouse_position{ 0, 0 };
+    bool game_running : 1{ true };
 };
 
-class Game : public IPlatform
-{
+class Game : public IPlatform {
 public:
     Game(const WindowSettings& settings);
     ~Game();
@@ -49,19 +46,19 @@ public:
     bool IsRunning() const;
     void Quit();
 
-    virtual glm::vec2 GetMousePosition() const override;
-    virtual glm::vec2 GetLastMousePosition() const override;
-    virtual void SetMouseVisible(bool mouseVisible) override;
-    virtual bool IsKeyDown(std::int32_t key) const override;
+    glm::vec2 GetMousePosition() const override;
+    glm::vec2 GetLastMousePosition() const override;
+    void SetMouseVisible(bool mouse_visible) override;
+    bool IsKeyDown(std::int32_t key) const override;
 
-    void AddLayer(Layer* gameLayer);
+    void AddLayer(std::unique_ptr<Layer>&& game_layer);
     void RemoveLayer(std::type_index index);
 
 private:
-    GLFWwindow* _window;
-    ImGuiContext* _imguiContext;
-    WindowData _windowData;
-    std::vector<Layer*> _layers;
+    GLFWwindow* window_;
+    ImGuiContext* imgui_context_;
+    WindowData window_data_;
+    std::vector<std::unique_ptr<Layer>> layers_;
 
 private:
     bool InitializeImGui();

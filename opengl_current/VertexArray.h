@@ -7,38 +7,38 @@
 
 enum class PrimitiveVertexType : std::uint8_t
 {
-    Int,
-    UnsignedInt,
-    Float,
-    MaxPrimitiveVertexType
+    kInt,
+    kUnsignedInt,
+    kFloat,
+    kMaxPrimitiveVertexType
 };
 
 struct VertexAttribute
 {
-    std::uint8_t NumComponents : 5;
-    PrimitiveVertexType Type : 3;
+    std::uint8_t num_components : 5;
+    PrimitiveVertexType vertex_type : 3;
 };
 
 class VertexArray
 {
 public:
     VertexArray();
-    VertexArray(VertexArray&& tempVertexArray) noexcept { *this = std::move(tempVertexArray); }
+    VertexArray(VertexArray&& temp_vertex_array) noexcept { *this = std::move(temp_vertex_array); }
 
-    VertexArray& operator=(VertexArray&& tempVertexArray) noexcept;
+    VertexArray& operator=(VertexArray&& temp_vertex_array) noexcept;
     ~VertexArray();
 
     void Bind() const;
     void Unbind() const;
     
-    void SetIndexBuffer(IndexBuffer&& ib);
+    void SetIndexBuffer(IndexBuffer&& index_buffer);
 
     std::uint32_t GetNumIndices() const;
 
-    VertexBuffer& GetVertexBufferAt(std::uint32_t index) { return _vertexBuffers[index]; }
+    VertexBuffer& GetVertexBufferAt(std::uint32_t index) { return vertex_buffers_[index]; }
     IndexBuffer& GetIndexBuffer()
     {
-        return _indexBuffer;
+        return index_buffer_;
     }
 
     template <typename T>
@@ -53,17 +53,17 @@ public:
         AddBufferInternal(VertexBuffer(data.data(), data.size_bytes(), true), attributes);
     }
 
-    void AddDynamicBuffer(std::uint32_t maxSize, std::span<const VertexAttribute> attributes)
+    void AddDynamicBuffer(std::uint32_t max_size, std::span<const VertexAttribute> attributes)
     {
-        AddBufferInternal(VertexBuffer(maxSize), attributes);
+        AddBufferInternal(VertexBuffer(max_size), attributes);
     }
 
 private:
-    GLuint _rendererID;
-    std::vector<VertexBuffer> _vertexBuffers;
-    IndexBuffer _indexBuffer;
+    GLuint renderer_id_;
+    std::vector<VertexBuffer> vertex_buffers_;
+    IndexBuffer index_buffer_;
 
 private:
-    void AddBufferInternal(VertexBuffer&& vb, std::span<const VertexAttribute> attributes);
+    void AddBufferInternal(VertexBuffer&& vertex_buffer, std::span<const VertexAttribute> attributes);
 };
 

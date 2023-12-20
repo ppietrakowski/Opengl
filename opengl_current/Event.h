@@ -1,71 +1,63 @@
 #include <GLFW/glfw3.h>
+
 #include <chrono>
-
-#include <glm/glm.hpp>
 #include <cstdint>
+#include <glm/glm.hpp>
 
-enum class EventType
-{
-    Invalid = 0,
-    LostFocus,
-    GainedFocus,
-    KeyPressed,
-    KeyReleased,
-    MouseWheelScrolled,
-    MouseButtonPressed,
-    MouseButtonReleased,
-    MouseMoved,
-    Count
+enum class EventType {
+    kInvalid = 0,
+    kLostFocus,
+    kGainedFocus,
+    kKeyPressed,
+    kKeyReleased,
+    kMouseWheelScrolled,
+    kMouseButtonPressed,
+    kMouseButtonReleased,
+    kMouseMoved,
+    kCount
 };
 
-struct Event
-{
-    struct SizeEvent
-    {
-        std::uint32_t Width;
-        std::uint32_t Height;
+struct Event {
+    struct SizeEvent {
+        std::uint32_t width;
+        std::uint32_t height;
     };
 
-    struct KeyEvent
-    {
-        std::int32_t Code;
-        std::int32_t Scancode;
-        bool AltClicked : 1;
-        bool ControlClicked : 1;
-        bool ShiftClicked : 1;
-        bool SystemClicked : 1;
+    struct KeyEvent {
+        std::int32_t code;
+        std::int32_t scan_code;
+        bool alt_clicked : 1;
+        bool control_clicked : 1;
+        bool shift_clicked : 1;
+        bool system_clicked : 1;
     };
 
-    struct MouseMoveEvent
-    {
-        glm::vec2 MousePosition;
-        glm::vec2 LastMousePosition;
+    struct MouseMoveEvent {
+        glm::vec2 mouse_position;
+        glm::vec2 last_mouse_position;
     };
 
-    struct MouseButtonEvent
-    {
-        std::int32_t Button;
-        glm::vec2 MousePosition;
+    struct MouseButtonEvent {
+        std::int32_t button;
+        glm::vec2 mouse_position;
     };
 
-    struct MouseWheelEvent
-    {
-        glm::vec2 Delta;
+    struct MouseWheelEvent {
+        glm::vec2 delta;
     };
 
     // Member data
-    EventType Type;
+    EventType type;
 
-    union
-    {
-        SizeEvent             Size;
-        KeyEvent              Key;
-        MouseMoveEvent        MouseMove;
-        MouseButtonEvent      MouseButton;
-        MouseWheelEvent       MouseWheel;
+    union {
+        SizeEvent size;
+        KeyEvent key;
+        MouseMoveEvent mouse_move;
+        MouseButtonEvent mouse_button;
+        MouseWheelEvent mouse_wheel;
     };
 
-    std::uint32_t MillisecondsSinceGameStart;
+    std::uint32_t milliseconds_since_game_start;
 
     Event();
 };

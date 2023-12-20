@@ -4,33 +4,33 @@
 #include <GL/glew.h>
 
 VertexBuffer::VertexBuffer() :
-    _bufferSize{ 0 },
-    _rendererID{ 0 }
+    buffer_size_{ 0 },
+    renderer_id_{ 0 }
 {
 }
 
-VertexBuffer::VertexBuffer(const void* data, std::uint32_t sizeBytes, bool dynamic) :
-    _bufferSize{ sizeBytes }
+VertexBuffer::VertexBuffer(const void* data, std::uint32_t size_bytes, bool dynamic) :
+    buffer_size_{ size_bytes }
 {
     GLenum bufferUsage = dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
-    glGenBuffers(1, &_rendererID);
-    glBindBuffer(GL_ARRAY_BUFFER, _rendererID);
-    glBufferData(GL_ARRAY_BUFFER, sizeBytes, data, bufferUsage);
+    glGenBuffers(1, &renderer_id_);
+    glBindBuffer(GL_ARRAY_BUFFER, renderer_id_);
+    glBufferData(GL_ARRAY_BUFFER, size_bytes, data, bufferUsage);
 }
 
-VertexBuffer::VertexBuffer(std::uint32_t maxSizeBytes) :
-    VertexBuffer{ nullptr, maxSizeBytes, true }
+VertexBuffer::VertexBuffer(std::uint32_t max_size_bytes) :
+    VertexBuffer{ nullptr, max_size_bytes, true }
 {
 }
 
-VertexBuffer& VertexBuffer::operator=(VertexBuffer&& tempVertexBuffer) noexcept
+VertexBuffer& VertexBuffer::operator=(VertexBuffer&& temp_vertex_buffer) noexcept
 {
-    _bufferSize = tempVertexBuffer._bufferSize;
-    _rendererID = tempVertexBuffer._rendererID;
+    buffer_size_ = temp_vertex_buffer.buffer_size_;
+    renderer_id_ = temp_vertex_buffer.renderer_id_;
 
-    tempVertexBuffer._rendererID = 0;
-    tempVertexBuffer._bufferSize = 0;
+    temp_vertex_buffer.renderer_id_ = 0;
+    temp_vertex_buffer.buffer_size_ = 0;
     return *this;
 }
 
@@ -41,7 +41,7 @@ VertexBuffer::~VertexBuffer()
 
 void VertexBuffer::Bind() const
 {
-    glBindBuffer(GL_ARRAY_BUFFER, _rendererID);
+    glBindBuffer(GL_ARRAY_BUFFER, renderer_id_);
 }
 
 void VertexBuffer::Unbind() const
@@ -53,13 +53,13 @@ void VertexBuffer::UpdateVertices(const void* data, std::uint32_t offset, std::u
 {
     ERR_FAIL_EXPECTED_TRUE(IsValid());
 
-    glBindBuffer(GL_ARRAY_BUFFER, _rendererID);
+    glBindBuffer(GL_ARRAY_BUFFER, renderer_id_);
     glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(offset), static_cast<GLintptr>(size), data);
 }
 
 void VertexBuffer::Release()
 {
-    glDeleteBuffers(1, &_rendererID);
-    _rendererID = 0;
-    _bufferSize = 0;
+    glDeleteBuffers(1, &renderer_id_);
+    renderer_id_ = 0;
+    buffer_size_ = 0;
 }

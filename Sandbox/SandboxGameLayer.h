@@ -7,55 +7,50 @@
 
 #include <glm/gtc/quaternion.hpp>
 
-constexpr inline std::size_t kNumBonesPerVertex = 4;
-
-
-class SandboxGameLayer : public Layer
-{
+class SandboxGameLayer : public Layer {
 public:
     SandboxGameLayer();
 
     // Inherited via IGameLayer
-    void OnUpdate(float deltaTime) override;
-    void OnRender(float deltaTime) override;
+    void OnUpdate(float delta_time) override;
+    void OnRender(float delta_time) override;
     bool OnEvent(const Event& event) override;
     void OnImguiFrame() override;
 
-    virtual std::type_index GetTypeIndex() const override
-    {
+    virtual std::type_index GetTypeIndex() const override {
         return typeid(SandboxGameLayer);
     }
 
 private:
-    std::shared_ptr<Shader> _shader;
-    std::shared_ptr<Shader> _unshaded;
-    std::shared_ptr<Shader> _currentUsed;
+    std::shared_ptr<Shader> shader_;
+    std::shared_ptr<Shader> unshaded_;
+    std::shared_ptr<Shader> current_used_;
 
-    std::unique_ptr<StaticMesh> _mesh;
-    glm::vec3 _position;
+    std::unique_ptr<StaticMesh> static_mesh_;
+    glm::vec3 static_mesh_position_;
 
-    glm::vec3 _cameraPosition;
-    glm::quat _cameraRotation;
+    glm::vec3 camera_position_;
+    glm::quat camera_rotation_;
 
-    std::shared_ptr<Material> _material;
-    std::shared_ptr<Material> _wireframeMaterial;
-    std::shared_ptr<Material> _currentMaterial;
-    std::shared_ptr<Material> _materialTest;
+    std::shared_ptr<Material> material_;
+    std::shared_ptr<Material> wireframe_material_;
+    std::shared_ptr<Material> current_material_;
+    std::shared_ptr<Material> material_test_;
 
-    float _yaw = -90.0f;
-    float _pitch = 0.0f;
+    float yaw_ = -90.0f;
+    float pitch_ = 0.0f;
 
-    float _lastDeltaSeconds{ 0.0f };
-    bool _wasPressedLastTime = false;
-    bool _sterringEntity{ false };
-    
-    float _moveSpeed = 20.0f;
-    float _yawRotationRate = 80.0f;
-    float _ascendSpeed = 20.0f;
+    float last_delta_seconds_{ 0.0f };
+    bool was_pressed_last_time_ = false;
+    bool sterring_entity_{ false };
 
-    glm::vec3 BboxMin;
-    glm::vec3 BboxMax;
+    float move_speed_ = 20.0f;
+    float yaw_rotation_rate_ = 80.0f;
+    float ascend_speed_ = 20.0f;
 
-    SkeletalMesh mesh;
+    glm::vec3 bbox_min_;
+    glm::vec3 bbox_max_;
+    TimeSeconds startup_time_{ std::chrono::duration_cast<TimeSeconds>(GetNow()) };
+    SkeletalMesh skeletal_mesh_;
 };
 

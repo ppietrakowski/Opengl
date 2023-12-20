@@ -6,27 +6,23 @@
 #define ARRAY_NUM_ELEMENTS(Array) static_cast<std::uint32_t>(sizeof(Array) / sizeof(Array[0]))
 
 
-struct SourceLocation
-{
-    const char* FileName;
-    std::uint32_t Line;
-    const char* FunctionName;
+struct SourceLocation {
+    const char* file_name;
+    std::uint32_t line;
+    const char* function_name;
 };
 
-struct ErrorHandlerInfo
-{
-    const char* FunctionName;
-    const char* FileName;
-    std::uint32_t Line;
-    const char* ErrorMessage;
+struct ErrorHandlerInfo {
+    const char* function_name;
+    const char* file_name;
+    std::uint32_t line;
+    const char* error_message;
 
-    ErrorHandlerInfo(const SourceLocation& sourceLocation, const char* errorMessage) :
-        FunctionName{ sourceLocation.FunctionName },
-        FileName{ sourceLocation.FileName },
-        Line{ sourceLocation.Line },
-        ErrorMessage{ errorMessage }
-    {
-    }
+    ErrorHandlerInfo(const SourceLocation& source_location, const char* error_message) :
+        function_name{ source_location.function_name },
+        file_name{ source_location.file_name },
+        line{ source_location.line },
+        error_message{ error_message } {}
 
     ErrorHandlerInfo(const ErrorHandlerInfo&) = default;
     ErrorHandlerInfo& operator=(const ErrorHandlerInfo&) = default;
@@ -45,12 +41,11 @@ struct ErrorHandlerInfo
 #define DEBUG_BREAK() __builtin_trap()
 #endif
 
-typedef void (*ErrorHandlerFn)(void* userData, const ErrorHandlerInfo& info);
+typedef void (*ErrorHandlerFn)(void* user_data, const ErrorHandlerInfo& info);
 
-struct ErrorHandler
-{
-    ErrorHandlerFn ErrorHandlerFunc{ nullptr };
-    void* UserData{ nullptr };
+struct ErrorHandler {
+    ErrorHandlerFn error_handler_func{ nullptr };
+    void* user_data{ nullptr };
 };
 
 #ifdef __cplusplus
@@ -67,11 +62,11 @@ extern "C" {
 
 #define CURRENT_SOURCE_LOCATION {__FILE__, static_cast<std::uint32_t>(__LINE__), FUNCTION_SIGNATURE}
 
-#define ERR_FAIL() SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION;  PrintError(&sourceLocation, "Method/function failed"); return
-#define ERR_FAIL_V(RetVal) SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION;  PrintError(&sourceLocation, "Method/function failed"); return RetVal
+#define ERR_FAIL() SourceLocation source_location = CURRENT_SOURCE_LOCATION;  PrintError(&source_location, "Method/function failed"); return
+#define ERR_FAIL_V(RetVal) SourceLocation source_location = CURRENT_SOURCE_LOCATION;  PrintError(&source_location, "Method/function failed"); return RetVal
 
-#define ERR_FAIL_MSG(Msg) SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION;  PrintError(&sourceLocation, Msg); return
-#define ERR_FAIL_MSG_V(Msg, RetVal) SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION;  PrintError(&sourceLocation, Msg); return RetVal
+#define ERR_FAIL_MSG(Msg) SourceLocation source_location = CURRENT_SOURCE_LOCATION;  PrintError(&source_location, Msg); return
+#define ERR_FAIL_MSG_V(Msg, RetVal) SourceLocation source_location = CURRENT_SOURCE_LOCATION;  PrintError(&source_location, Msg); return (RetVal)
 
 #define ERR_FAIL_NULL(Param) \
     if (Param == nullptr) { ERR_FAIL_MSG(" Expression \"" #Param "\" evaluated to nullptr"); }
@@ -116,7 +111,7 @@ extern "C" {
 #define ERR_FAIL_EXPECTED_TRUE_V(Condition, RetVal) ERR_FAIL_EXPECTED_TRUE_V_MSG(Condition, "Expression \"" #Condition "\" evaluated to false", RetVal)
 
 #define CRASH_EXPECTED_TRUE_MSG(Condition, Msg) \
-    if (!(Condition)) { DEBUG_BREAK(); SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION; Crash(&sourceLocation, Msg); }
+    if (!(Condition)) { DEBUG_BREAK(); SourceLocation source_location = CURRENT_SOURCE_LOCATION; Crash(&source_location, Msg); }
 
 #define CRASH_EXPECTED_TRUE(Condition) CRASH_EXPECTED_TRUE_MSG(Condition, "Fatal condition \"" #Condition "\" is false ")
 #define CRASH_EXPECTED_NOT_NULL(Obj) CRASH_EXPECTED_TRUE_MSG(Obj != nullptr, "Fatal condition \"" #Obj "\" is nullptr ")
@@ -128,18 +123,18 @@ extern "C" {
 
 
 #define DO_ONCE(Expression) { \
-    static bool doneOnce = false; \
+    static bool done_once = false; \
     \
-    if (!doneOnce) { \
+    if (!done_once) { \
         do { Expression } while(0); \
-        doneOnce=true; \
+        done_once=true; \
     } \
     } \
 
 #define THROW_ERROR(Msg) throw std::runtime_error(Msg)
 
 #if defined(_DEBUG) || defined(DEBUG)
-#define ASSERT(Condition) if (!(Condition)) { SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION;  PrintError(&sourceLocation, "Assertion " #Condition " evaluates to false"); DEBUG_BREAK(); THROW_ERROR("Fatal condition " #Condition " evaluates to false"); }
+#define ASSERT(Condition) if (!(Condition)) { SourceLocation source_location = CURRENT_SOURCE_LOCATION;  PrintError(&source_location, "Assertion " #Condition " evaluates to false"); DEBUG_BREAK(); THROW_ERROR("Fatal condition " #Condition " evaluates to false"); }
 #else
 #define ASSERT(Condition) ((void)0)
 #endif

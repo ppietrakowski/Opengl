@@ -6,63 +6,55 @@
 
 #include <chrono>
 
-class IPlatform
-{
+class IPlatform {
 public:
-    IPlatform() { Instance = this; }
+    IPlatform() {
+        instance_ = this;
+    }
     virtual ~IPlatform() = default;
 
 public:
     virtual glm::vec2 GetMousePosition() const = 0;
     virtual glm::vec2 GetLastMousePosition() const = 0;
 
-    virtual void SetMouseVisible(bool mouseVisible) = 0;
+    virtual void SetMouseVisible(bool mouse_visible) = 0;
 
     virtual bool IsKeyDown(std::int32_t key) const = 0;
 
-    static IPlatform* GetInstance() { return Instance; }
+    static IPlatform* GetInstance() {
+        return instance_;
+    }
 
 private:
-    static inline IPlatform* Instance = nullptr;
+    static inline IPlatform* instance_ = nullptr;
 };
 
 
-typedef std::chrono::duration<float, std::ratio<1, 1>> TimeSeconds;
+using TimeSeconds = std::chrono::duration<float, std::ratio<1, 1>>;
 
-inline std::chrono::milliseconds GetNow()
-{
+inline std::chrono::milliseconds GetNow() {
     using namespace std::chrono;
     auto duration = steady_clock::now().time_since_epoch();
     return duration_cast<milliseconds>(duration);
 }
 
-class Layer
-{
-public:
-    Layer() :
-        _game{ IPlatform::GetInstance() }
-    {
-    }
+glm::vec2 GetMousePosition();
+glm::vec2 GetLastMousePosition();
 
+void SetMouseVisible(bool mouse_visible);
+bool IsKeyDown(std::int32_t key);
+
+class Layer {
+public:
     virtual ~Layer() = default;
 
-    virtual void OnUpdate(float deltaTime) = 0;
-    virtual void OnRender(float deltaTime) = 0;
+public:
+    virtual void OnUpdate(float delta_time) = 0;
+    virtual void OnRender(float delta_time) = 0;
     virtual bool OnEvent(const Event& event) = 0;
     virtual void OnImguiFrame() = 0;
 
-    virtual std::type_index GetTypeIndex() const
-    {
+    virtual std::type_index GetTypeIndex() const {
         return typeid(Layer);
     }
-
-    glm::vec2 GetMousePosition() const { return _game->GetMousePosition(); }
-    glm::vec2 GetLastMousePosition() const { return _game->GetLastMousePosition(); }
-
-    void SetMouseVisible(bool mouseVisible) { _game->SetMouseVisible(mouseVisible); }
-    
-    bool IsKeyDown(std::int32_t key) const { return _game->IsKeyDown(key); }
-
-private:
-    IPlatform* _game;
 };

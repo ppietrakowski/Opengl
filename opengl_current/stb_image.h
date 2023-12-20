@@ -384,7 +384,7 @@ enum
 #include <stdint.h>
 
 typedef uint8_t uint8_t;
-typedef uint8_t Boolean;
+typedef uint8_t kBoolean;
 typedef uint16_t Ushort;
 typedef int16_t Short;
 typedef uint32_t uint32_t;

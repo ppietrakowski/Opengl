@@ -4,10 +4,10 @@
 
 enum class RenderPrimitive
 {
-    Points = GL_POINTS,
-    Lines = GL_LINES,
-    Triangles = GL_TRIANGLES,
-    TrianglesAdjancency = GL_TRIANGLES_ADJACENCY
+    kPoints = GL_POINTS,
+    kLines = GL_LINES,
+    kTriangles = GL_TRIANGLES,
+    kTrianglesAdjancency = GL_TRIANGLES_ADJACENCY
 };
 
 class RenderCommand
@@ -18,18 +18,20 @@ public:
 
 public:
 
-    static void DrawIndexed(const VertexArray& vertexArray, std::uint32_t numIndices, RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
+    static void DrawIndexed(const VertexArray& vertex_array, std::uint32_t num_indices, RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
     
     static void SetClearColor(float red, float green, float blue, float alpha = 1.0f);
-    static void Clear(std::uint32_t clearFlags);
+    static void Clear(std::uint32_t clear_flags);
 
     static void ToggleWireframe();
-    static void SetWireframe(bool wireframeEnabled);
+    static void SetWireframe(bool wireframe_enabled);
     static bool IsWireframeEnabled();
 
     static void SetCullFace(bool cullFace);
     static bool DoesCullFaces();
 
-    static void SetBlendingEnabled(bool blendingEnabled);
+    static void SetBlendingEnabled(bool blending_enabled);
+
+    static void SetLineWidth(float line_width);
 };
 

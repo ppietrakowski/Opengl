@@ -13,41 +13,37 @@
 #include <memory>
 #include <span>
 
-enum class UniformType
-{
-    Undefined,
-    Vec4,
-    Vec3,
-    Vec2,
-    Float,
-    Int,
-    Ivec2,
-    Ivec3,
-    Mat4x4,
-    Mat3x3,
-    Boolean,
-    Sampler2D,
+enum class UniformType {
+    kUndefined,
+    kVec4,
+    kVec3,
+    kVec2,
+    kFloat,
+    kInt,
+    kIvec2,
+    kIvec3,
+    kMat4x4,
+    kMat3x3,
+    kBoolean,
+    kSampler2D,
 };
 
-struct UniformInfo
-{
-    UniformType Type;
-    std::string Name;
-    std::int32_t Location;
+struct UniformInfo {
+    UniformType vertex_type;
+    std::string name;
+    std::int32_t location;
 };
 
-struct ShaderCompilationFailedException : public std::runtime_error
-{
-    ShaderCompilationFailedException(const char* errorMessage):
-        std::runtime_error{ errorMessage }
+struct ShaderCompilationFailedException : public std::runtime_error {
+    ShaderCompilationFailedException(const char* error_message) :
+        std::runtime_error{ error_message }
     {
     }
 };
 
-struct ShaderProgramLinkingFailedException : public std::runtime_error
-{
-    ShaderProgramLinkingFailedException(const char* errorMessage) :
-        std::runtime_error{ errorMessage }
+struct ShaderProgramLinkingFailedException : public std::runtime_error {
+    ShaderProgramLinkingFailedException(const char* error_message) :
+        std::runtime_error{ error_message }
     {
     }
 };
@@ -55,27 +51,29 @@ struct ShaderProgramLinkingFailedException : public std::runtime_error
 class Texture;
 
 
-class Shader
-{
-    enum ShaderIndex
-    {
-        Vertex,
-        Fragment,
-        Geometry,
-        TesselationControlShader,
-        TesselationEvaluateShader,
-        Count
+class Shader {
+    enum ShaderIndex {
+        kVertex,
+        kFragment,
+        kGeometry,
+        kTesselationControlShader,
+        kTesselationEvaluateShader,
+        kCount
     };
 
 public:
     Shader() = default;
-    Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource);
-    Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource, std::string_view geometryShaderSource);
-    Shader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource, std::string_view geometryShaderSource, std::string_view tesselationControlShader, std::string_view tesselationEvaluateShader);
+    Shader(std::string_view vertex_shader_source, std::string_view fragment_shader_source);
+    Shader(std::string_view vertex_shader_source, std::string_view fragment_shader_source, std::string_view geometry_shader_source);
+    Shader(std::string_view vertex_shader_source, std::string_view fragment_shader_source, std::string_view geometry_shader_source,
+        std::string_view tesselation_control_shader, std::string_view tesselation_evaluate_shader);
 
-    static std::shared_ptr<Shader> LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath);
-    static std::shared_ptr<Shader> LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath, std::string_view geometryShaderPath);
-    static std::shared_ptr<Shader> LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath, std::string_view geometryShaderPath, std::string_view tesselationControlShaderPath, std::string_view tesselationEvaluateShaderPath);
+    static std::shared_ptr<Shader> LoadShader(std::string_view vertex_shader_path, std::string_view fragment_shader_path);
+    static std::shared_ptr<Shader> LoadShader(std::string_view vertex_shader_path, std::string_view fragment_shader_path,
+        std::string_view geometry_shader_path);
+
+    static std::shared_ptr<Shader> LoadShader(std::string_view vertex_shader_path, std::string_view fragment_shader_path,
+        std::string_view geometry_shader_path, std::string_view tesselationControlShaderPath, std::string_view tesselationEvaluateShaderPath);
 
     Shader(Shader&& shader) noexcept;
     Shader& operator=(Shader&& shader) noexcept;
@@ -103,19 +101,18 @@ public:
     glm::vec3 GetUniformVec3(const char* name) const;
     glm::vec4 GetUniformVec4(const char* name) const;
 
-    void GetUniformInfos(std::vector<UniformInfo>& outUniformInfos) const;
-
-    void SetSamplerUniform(const char* uniformName, const Texture& texture, std::uint32_t TextureUnit);
+    std::vector<UniformInfo> GetUniformInfos() const;
+    void SetSamplerUniform(const char* uniform_name, const Texture& texture, std::uint32_t texture_unit);
 
 private:
-    GLuint _shaderProgram;
-    mutable std::unordered_map<std::string, std::int32_t> _uniformLocationsCache;
+    GLuint shader_program_{ 0 };
+    mutable std::unordered_map<std::string, std::int32_t> uniform_locations_cache_;
 
 private:
     static std::shared_ptr<Shader> LoadShader(const std::initializer_list<std::string_view>& paths);
     void GenerateShaders(std::span<std::string_view> sources);
 
 private:
-    std::int32_t GetUniformLocation(const char* uniformName) const;
-    void AddNewUniformInfo(std::vector<UniformInfo>& outUniformInfos, GLint location) const;
+    std::int32_t GetUniformLocation(const char* uniform_name) const;
+    void AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, GLint location) const;
 };

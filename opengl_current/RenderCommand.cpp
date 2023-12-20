@@ -1,85 +1,70 @@
 #include "RenderCommand.h"
 
-static bool CullEnabled = false;
-static bool WireframeEnabled = false;
-static bool BlendingEnabled = false;
+static bool cull_enabled_ = false;
+static bool wireframe_enabled_ = false;
+static bool blending_enabled_ = false;
 
-void RenderCommand::DrawIndexed(const VertexArray& vertexArray, std::uint32_t numIndices, RenderPrimitive renderPrimitive)
-{
-    vertexArray.Bind();
-    glDrawElements(static_cast<GLenum>(renderPrimitive), static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, nullptr);
+void RenderCommand::DrawIndexed(const VertexArray& vertex_array, std::uint32_t num_indices, RenderPrimitive render_primitive) {
+    vertex_array.Bind();
+    glDrawElements(static_cast<GLenum>(render_primitive), static_cast<GLsizei>(num_indices), GL_UNSIGNED_INT, nullptr);
 }
 
-void RenderCommand::SetClearColor(float red, float green, float blue, float alpha)
-{
+void RenderCommand::SetClearColor(float red, float green, float blue, float alpha) {
     glClearColor(red, green, blue, alpha);
 }
 
-void RenderCommand::Clear(std::uint32_t clearFlags)
-{
-    glClear(clearFlags);
+void RenderCommand::Clear(std::uint32_t clear_flags) {
+    glClear(clear_flags);
 }
 
-void RenderCommand::ToggleWireframe()
-{
-    WireframeEnabled = !WireframeEnabled;
+void RenderCommand::ToggleWireframe() {
+    wireframe_enabled_ = !wireframe_enabled_;
 
-    if (WireframeEnabled)
-    {
+    if (wireframe_enabled_) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
-    else
-    {
+    } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 }
 
-void RenderCommand::SetWireframe(bool wireframeEnabled)
-{
-    if (wireframeEnabled != IsWireframeEnabled())
-    {
+void RenderCommand::SetWireframe(bool wireframe_enabled) {
+    if (wireframe_enabled != IsWireframeEnabled()) {
         ToggleWireframe();
     }
 }
 
-bool RenderCommand::IsWireframeEnabled()
-{
-    return WireframeEnabled;
+bool RenderCommand::IsWireframeEnabled() {
+    return wireframe_enabled_;
 }
 
-void RenderCommand::SetCullFace(bool cullFace)
-{
-    if (cullFace && !DoesCullFaces())
-    {
+void RenderCommand::SetCullFace(bool cull_face) {
+    if (cull_face && !DoesCullFaces()) {
         glEnable(GL_CULL_FACE);
         glFrontFace(GL_CCW);
         glCullFace(GL_BACK);
-    }
-    else if (!cullFace)
-    {
+    } else if (!cull_face) {
         glDisable(GL_CULL_FACE);
     }
 
-    CullEnabled = cullFace;
+    cull_enabled_ = cull_face;
 }
 
-bool RenderCommand::DoesCullFaces()
-{
-    return CullEnabled;
+bool RenderCommand::DoesCullFaces() {
+    return cull_enabled_;
 }
 
-void RenderCommand::SetBlendingEnabled(bool blendingEnabled)
-{
-    if (blendingEnabled && !BlendingEnabled)
-    {
+void RenderCommand::SetBlendingEnabled(bool blending_enabled) {
+    if (blending_enabled && !blending_enabled_) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-    else
-    {
+    } else {
         glDisable(GL_BLEND);
     }
 
-    BlendingEnabled = blendingEnabled;
+    blending_enabled_ = blending_enabled;
+}
+
+void RenderCommand::SetLineWidth(float line_width) {
+    glLineWidth(line_width);
 }
 
