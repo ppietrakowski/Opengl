@@ -17,7 +17,7 @@
 SandboxGameLayer::SandboxGameLayer() :
     _cameraRotation{ glm::vec3{0, 0, 0} },
     _cameraPosition{ 0.0f, 0.0f, 0.0f },
-    mesh{"untitled.fbx"}
+    mesh{"untitled.fbx", std::make_shared<Material>(Shader::LoadShader("skeleton.vert", "textured.frag"))}
 {
     _shader = Shader::LoadShader("shaders/default.vert", "shaders/default.frag");
     _unshaded = Shader::LoadShader("shaders/default.vert", "shaders/Unshaded.frag");
@@ -58,11 +58,8 @@ SandboxGameLayer::SandboxGameLayer() :
     _cameraRotation = glm::quat{ glm::radians(glm::vec3{_pitch, _yaw, 0.0f}) };
     _position = { 2, 0, -10 };
 
+    std::vector<std::string> animations = std::move(mesh.GetAnimationNames()) ;
     RenderCommand::SetClearColor(0.2f, 0.3f, 0.6f);
-    ELOG_INFO(LOG_GLOBAL, "Loading skeleton.vert and textured.frag");
-    _materialTest = std::make_shared<Material>(Shader::LoadShader("skeleton.vert", "textured.frag"));
-    ELOG_INFO(LOG_GLOBAL, "Loading skeleton.vert and textured.frag");
-    _materialTest->SetTextureProperty("diffuse", std::make_shared<Texture2D>("photomode_30112023_222913.png"));
 }
 
 void SandboxGameLayer::OnUpdate(float deltaTime)
@@ -120,7 +117,7 @@ void SandboxGameLayer::OnRender(float deltaTime)
 
     Renderer::AddDebugBox(BboxMin, BboxMax, glm::translate(glm::identity<glm::mat4>(), glm::vec3{ 10, 2, 10 }));
     Renderer::FlushDrawDebug(*_unshaded);
-    mesh.Draw(*_materialTest, glm::scale(glm::vec3{ 0.01f, 0.01f, 0.01f }));
+    mesh.Draw(glm::scale(glm::vec3{ 0.01f, 0.01f, 0.01f }));
 
     Renderer::EndScene();
     glLineWidth(1);

@@ -114,20 +114,14 @@ struct aiScene;
 class SkeletalMesh
 {
 public:
-    SkeletalMesh(const std::filesystem::path& path);
+    SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material);
 
-    void UpdateAnimation(float elapsedTime) { CalculateTransform(elapsedTime, RootJoint); }
-    void Draw(Material& material, const glm::mat4& transform);
+    void UpdateAnimation(float elapsedTime) { CalculateTransform(elapsedTime, rootJoint_); }
+    void Draw(const glm::mat4& transform);
 
-    Joint RootJoint;
-    std::unordered_map<std::string, Animation> _animations;
-    glm::mat4 GlobalInversedTransform;
+    void SetCurrentAnimation(const std::string& animationName);
 
-    TimeSeconds InitializationTime;
-    std::uint32_t BoneCount;
-
-    glm::vec3 bboxMin_;
-    glm::vec3 bboxMax_;
+    std::vector<std::string> GetAnimationNames() const;
 
 private:
     std::vector<std::shared_ptr<Texture2D>> textures_;
@@ -135,6 +129,19 @@ private:
     std::vector<glm::mat4> boneTransforms_;
     std::vector<SkeletonMeshVertex> vertices_;
     std::vector<std::uint32_t> indices_;
+
+
+    Joint rootJoint_;
+    std::unordered_map<std::string, Animation> _animations;
+    glm::mat4 GlobalInversedTransform;
+
+    std::uint32_t BoneCount;
+
+    glm::vec3 bboxMin_;
+    glm::vec3 bboxMax_;
+    std::shared_ptr<Material> material_;
+
+    std::string currentAnimationName_;
 
 private:
     void CalculateTransform(float elapsedTime, const Joint& joint, const glm::mat4& parentTransform = glm::mat4{ 1.0f });

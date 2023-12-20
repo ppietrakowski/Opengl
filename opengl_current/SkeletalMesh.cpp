@@ -6,6 +6,8 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
+#include "Core.h"
+
 struct StbiDeleter
 {
     void operator()(std::uint8_t* bytes)
@@ -135,8 +137,9 @@ bool SkeletonMeshVertex::AddBoneData(std::uint32_t boneID, float weight)
     return false;
 }
 
-SkeletalMesh::SkeletalMesh(const std::filesystem::path& path) :
-    InitializationTime{ GetNow() }
+SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material):
+    material_{material},
+    currentAnimationName_{"TPose"}
 {
     // maps bone name to boneID
     std::unordered_map<std::string, std::uint32_t> boneNameToIndex;
@@ -236,14 +239,27 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path) :
         totalBones += mesh->mNumBones;
     }
 
+    material_->ShouldCullFaces = false;
+    material_->UsingTransparency = true;
+
+    for (std::uint32_t i = 0; i < textures_.size(); ++i)
+    {
+        std::string name = "diffuse" + std::to_string(i + 1);
+        material_->SetTextureProperty(name.c_str(), textures_[i]);
+    }
+
     for (std::uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
         LoadAnimation(scene, i);
     }
 
+    _animations[currentAnimationName_] = Animation{};
+    _animations[currentAnimationName_].TicksPerSecond = 10;
+    _animations[currentAnimationName_].Duration = 10;
+
     BoneCount = totalBones;
 
-    RootJoint.AssignHierarchy(scene->mRootNode, BoneInfos);
+    rootJoint_.AssignHierarchy(scene->mRootNode, BoneInfos);
     vertexArray_.AddBuffer<SkeletonMeshVertex>(vertices_, SkeletonMeshVertex::DataFormat);
     vertexArray_.SetIndexBuffer(IndexBuffer(indices_.data(), static_cast<std::uint32_t>(indices_.size())));
 
@@ -286,39 +302,45 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, uint32_t animationIndex)
             track.AddNewRotationTimestamp(ToGlm(channel->mRotationKeys[j].mValue), static_cast<float>(channel->mRotationKeys[j].mTime));
         }
 
-        animation.BoneNamesToTracks[channel->mNodeName.C_Str()] = track;
+        std::string name = channel->mNodeName.C_Str();
+
+        name = SplitString(name, ":").back();
+        animation.BoneNamesToTracks[name] = track;
     }
 
-    _animations[anim->mName.C_Str()] = animation;
+    std::string animationName = anim->mName.C_Str();
+    animationName = SplitString(animationName, "|").back();
+    _animations[animationName] = animation;
 }
 
-void SkeletalMesh::Draw(Material& material, const glm::mat4& transform)
+void SkeletalMesh::Draw(const glm::mat4& transform)
 {
-    static bool doneOnce = false;
+    Renderer::AddDebugBox(bboxMin_, bboxMax_, transform);
+    Renderer::SubmitSkeleton(*material_, boneTransforms_, BoneCount, vertexArray_, transform);
+}
 
-    if (!doneOnce)
+void SkeletalMesh::SetCurrentAnimation(const std::string& animationName)
+{
+    currentAnimationName_ = animationName;
+}
+
+std::vector<std::string> SkeletalMesh::GetAnimationNames() const
+{
+    std::vector<std::string> names;
+
+    names.reserve(_animations.size());
+
+    for (auto& [name, animation] : _animations)
     {
-        material.ShouldCullFaces = false;
-        material.UsingTransparency = true;
-
-
-        for (std::uint32_t i = 0; i < textures_.size(); ++i)
-        {
-            std::string name = "diffuse" + std::to_string(i + 1);
-            material.SetTextureProperty(name.c_str(), textures_[i]);
-        }
-
-        doneOnce = true;
+        names.emplace_back(name);
     }
 
-    UpdateAnimation((std::chrono::duration_cast<TimeSeconds>(GetNow()) - this->InitializationTime).count());
-    Renderer::AddDebugBox(bboxMin_, bboxMax_, transform);
-    Renderer::SubmitSkeleton(material, boneTransforms_, BoneCount, vertexArray_, transform);
+    return names;
 }
 
 void SkeletalMesh::CalculateTransform(float elapsedTime, const Joint& joint, const glm::mat4& parentTransform)
 {
-    const Animation& animation = _animations.begin()->second;
+    const Animation& animation = _animations[currentAnimationName_];
 
     float ticksPerSecond = animation.TicksPerSecond;
     float timeInTicks = elapsedTime * ticksPerSecond;
