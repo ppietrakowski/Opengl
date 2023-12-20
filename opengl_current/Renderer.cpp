@@ -164,18 +164,20 @@ void Renderer::EndScene() {
     RenderCommand::SetLineWidth(1);
 }
 
+
+
 void Renderer::Submit(const Material& material, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive) {
     Shader& shader = material.GetShader();
     shader.Use();
     material.SetupRenderState();
     material.SetShaderUniforms();
 
-    shader.SetUniformMat4("u_ProjectionView", projection_view_);
-    shader.SetUniformMat4("u_Transform", transform);
-    shader.SetUniformVec3("u_CameraLocation", camera_position_);
+    shader.SetUniformMat4("u_projection_view", projection_view_);
+    shader.SetUniformMat4("u_transform", transform);
+    shader.SetUniformVec3("u_camera_location", camera_position_);
 
     glm::mat3 normal_matrix = glm::inverseTranspose(transform);
-    shader.SetUniformMat3("u_NormalTransform", normal_matrix);
+    shader.SetUniformMat3("u_normal_transform", normal_matrix);
 
     RenderCommand::DrawIndexed(vertex_array, vertex_array.GetNumIndices(), render_primitive);
 }
@@ -186,13 +188,13 @@ void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat
     material.SetupRenderState();
     material.SetShaderUniforms();
 
-    shader.SetUniformMat4("u_ProjectionView", projection_view_);
-    shader.SetUniformMat4("u_Transform", transform);
-    shader.SetUniformVec3("u_CameraLocation", camera_position_);
+    shader.SetUniformMat4("u_projection_view", projection_view_);
+    shader.SetUniformMat4("u_transform", transform);
+    shader.SetUniformVec3("u_camera_location", camera_position_);
 
     glm::mat3 normal_matrix = glm::inverseTranspose(transform);
-    shader.SetUniformMat3("u_NormalTransform", normal_matrix);
-    shader.SetUniformMat4Array("bone_transforms", transforms, count);
+    shader.SetUniformMat3("u_normal_transform", normal_matrix);
+    shader.SetUniformMat4Array("u_bone_transforms", transforms, count);
     RenderCommand::DrawIndexed(vertex_array, vertex_array.GetNumIndices(), render_primitive);
 }
 
@@ -207,12 +209,12 @@ void Renderer::Submit(Shader& shader, std::uint32_t numIndices, const VertexArra
     ASSERT(numIndices <= vertex_array.GetNumIndices());
 
     shader.Use();
-    shader.SetUniformMat4("u_ProjectionView", projection_view_);
-    shader.SetUniformMat4("u_Transform", transform);
-    shader.SetUniformVec3("u_CameraLocation", camera_position_);
+    shader.SetUniformMat4("u_projection_view", projection_view_);
+    shader.SetUniformMat4("u_transform", transform);
+    shader.SetUniformVec3("u_camera_location", camera_position_);
 
     glm::mat3 normal_matrix = glm::inverseTranspose(transform);
-    shader.SetUniformMat3("u_NormalTransform", normal_matrix);
+    shader.SetUniformMat3("u_normal_transform", normal_matrix);
 
     RenderCommand::DrawIndexed(vertex_array, numIndices, render_primitive);
 }

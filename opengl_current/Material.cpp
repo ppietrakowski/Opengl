@@ -5,7 +5,7 @@
 #include <algorithm>
 
 namespace {
-    constexpr std::string_view MaterialTag = "u_Material.";
+    constexpr std::string_view MaterialTag = "u_material.";
 }
 
 using TextureSetter = PropertySetter<std::shared_ptr<Texture>>;

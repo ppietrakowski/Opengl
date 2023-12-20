@@ -1,25 +1,23 @@
 #version 430 core
 
-layout (location = 0) in vec3 a_Position;
-layout (location = 1) in vec3 a_Normal;
-layout (location = 2) in vec2 a_TextureCoords;
-layout (location = 3) in uint a_TextureID;
+layout (location = 0) in vec3 a_position;
+layout (location = 1) in vec3 a_normal;
+layout (location = 2) in vec2 a_texture_coords;
+layout (location = 3) in uint a_texture_id;
 
-uniform mat4 u_ProjectionView;
-uniform mat4 u_Transform;
-uniform mat3 u_NormalTransform;
+uniform mat4 u_projection_view;
+uniform mat4 u_transform;
+uniform mat3 u_normal_transform;
 
-out vec2 TextureCoords;
-out vec3 FragmentPositionWS;
-out vec3 Normal;
-out flat uint TextureID;
+out vec2 texture_coords;
+out vec3 frag_pos_ws;
+out vec3 normal;
+out flat uint texture_id;
 
-void main()
-{
-    FragmentPositionWS = vec3(u_Transform * vec4(a_Position, 1));
-
-    gl_Position = u_ProjectionView * vec4(FragmentPositionWS, 1);
-    TextureCoords = a_TextureCoords;
-    Normal = u_NormalTransform * a_Normal;
-    TextureID = a_TextureID;
+void main() {
+    frag_pos_ws = vec3(u_transform * vec4(a_position, 1));
+    gl_Position = u_projection_view * vec4(frag_pos_ws, 1);
+    texture_coords = a_texture_coords;
+    normal = u_normal_transform * a_normal;
+    texture_id = a_texture_id;
 }  

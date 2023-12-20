@@ -1,47 +1,44 @@
-#version 330 core
+#version 430 core
 
-in vec2 TextureCoords;
-in vec3 FragmentPositionWS;
-in vec3 FragmentPositionVWS;
-in vec3 Normal;
+in vec2 texture_coords;
+in vec3 frag_pos_ws;
+in vec3 normal;
 
-struct Material 
-{
+struct Material {
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
     float shininess;
 };
 
-uniform Material u_Material;
-uniform vec3 u_LightPos;
-uniform vec3 u_LightColor;
-uniform vec3 u_CameraLocation;
+uniform Material u_material;
+uniform vec3 u_light_pos;
+uniform vec3 u_light_color;
+uniform vec3 u_camera_location;
 
-out vec4 OutColor;
+out vec4 frag_color;
 
-void main()
-{
+void main() {
     // Ambient lighting
-    vec3 ambient = u_Material.ambient * u_LightColor;
+    vec3 ambient = u_material.ambient * u_light_color;
 
     // Diffuse lighting
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(u_LightPos - FragmentPositionWS);
-    float diff = max(dot(lightDir, norm), 0.0);
-    vec3 diffuse = u_Material.diffuse * u_LightColor * diff;
+    vec3 norm = normalize(normal);
+    vec3 light_dir = normalize(u_light_pos - frag_pos_ws);
+    float diff = max(dot(light_dir, norm), 0.0);
+    vec3 diffuse = u_material.diffuse * u_light_color * diff;
 
     // Specular lighting
-    vec3 viewDir = normalize(u_CameraLocation -FragmentPositionWS);
+    vec3 view_dir = normalize(u_camera_location - frag_pos_ws);
 
-    vec3 specular = vec3( 0.0, 0.0, 0.0 );
-    if( dot( lightDir, viewDir ) > 0.0 )
-    {
-	    vec3 refl = reflect( vec3( 0.0, 0.0, 0.0 ) - lightDir, norm );
-	    specular = pow( max( 0.0, dot( viewDir, refl ) ), u_Material.shininess ) * u_Material.specular;
+    vec3 specular = vec3(0.0, 0.0, 0.0);
+
+    if (dot(light_dir, view_dir) > 0.0) {
+	    vec3 refl = reflect(vec3(0.0, 0.0, 0.0) - light_dir, norm);
+	    specular = pow(max(0.0, dot(view_dir, refl)), u_material.shininess) * u_material.specular;
     }
 
     // Final color calculation
-    vec3 result = clamp( ambient + diffuse + specular, 0.0, 1.0 );
-    OutColor = vec4(result, 1.0);
+    vec3 result = clamp(ambient + diffuse + specular, 0.0, 1.0);
+    frag_color = vec4(result, 1.0);
 }

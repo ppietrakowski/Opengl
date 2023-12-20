@@ -23,23 +23,23 @@ SandboxGameLayer::SandboxGameLayer() :
 
     current_used_ = shader_;
     current_used_->Use();
-    current_used_->SetUniformVec3("u_LightColor", glm::vec3{ 1, 1, 1 });
-    current_used_->SetUniformVec3("u_LightPos", glm::vec3{ -1, 0, -5 });
-    shader_->SetUniformVec3("u_Material.diffuse", glm::vec3{ 0.34615f, 0.3143f, 0.0903f });
+    current_used_->SetUniformVec3("u_light_color", glm::vec3{ 1, 1, 1 });
+    current_used_->SetUniformVec3("u_light_pos", glm::vec3{ -1, 0, -5 });
+    shader_->SetUniformVec3("u_material.diffuse", glm::vec3{ 0.34615f, 0.3143f, 0.0903f });
 
-    current_used_->SetUniformVec3("u_Material.ambient", glm::vec3{ 0.01f, 0.01f, 0.01f });
-    current_used_->SetUniformVec3("u_Material.specular", glm::vec3{ 0.797357, 0.723991, 0.208006 });
-    current_used_->SetUniformFloat("u_Material.shininess", 87.2f);
+    current_used_->SetUniformVec3("u_material.ambient", glm::vec3{ 0.01f, 0.01f, 0.01f });
+    current_used_->SetUniformVec3("u_material.specular", glm::vec3{ 0.797357, 0.723991, 0.208006 });
+    current_used_->SetUniformFloat("u_material.shininess", 87.2f);
 
     unshaded_->Use();
-    unshaded_->SetUniformVec3("u_Material.diffuse", glm::vec3{ 1, 0, 0 });
+    unshaded_->SetUniformVec3("u_material.diffuse", glm::vec3{ 1, 0, 0 });
     current_used_->Use();
 
-    shader_->SetUniformMat4("u_ProjectionView", glm::identity<glm::mat4>());
-    shader_->SetUniformMat4("u_Transform", glm::identity<glm::mat4>());
+    shader_->SetUniformMat4("u_projection_view", glm::identity<glm::mat4>());
+    shader_->SetUniformMat4("u_transform", glm::identity<glm::mat4>());
     glm::vec3 white{ 1.0f, 1.0f, 1.0f };
 
-    shader_->SetUniformVec3("u_Material.Tint", white);
+    shader_->SetUniformVec3("u_material.Tint", white);
 
     wireframe_material_ = std::make_shared<Material>(unshaded_);
     material_ = std::make_shared<Material>(shader_);
@@ -93,11 +93,11 @@ void SandboxGameLayer::OnUpdate(float delta_time) {
 
 void SandboxGameLayer::OnRender(float delta_time) {
     Renderer::BeginScene(glm::inverse(glm::translate(glm::identity<glm::mat4>(), camera_position_) * glm::mat4_cast(camera_rotation_)), camera_position_);
-    current_used_->SetUniformVec3("u_Material.diffuse", glm::vec3{ 0.34615f, 0.3143f, 0.0903f });
+    current_used_->SetUniformVec3("u_material.diffuse", glm::vec3{ 0.34615f, 0.3143f, 0.0903f });
     static_mesh_->Render(*current_material_, glm::translate(glm::identity<glm::mat4>(), static_mesh_position_));
 
     unshaded_->Use();
-    unshaded_->SetUniformVec3("u_Material.diffuse", glm::vec3{ 1, 0, 0 });
+    unshaded_->SetUniformVec3("u_material.diffuse", glm::vec3{ 1, 0, 0 });
     Renderer::AddDebugBox(static_mesh_->GetBBoxMin(), static_mesh_->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), static_mesh_position_));
     Renderer::AddDebugBox(static_mesh_->GetBBoxMin(), static_mesh_->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), static_mesh_position_ + glm::vec3{ 10, 0, 0 }));
 
