@@ -2,13 +2,32 @@
 
 #include "Shader.h"
 #include "VertexArray.h"
-#include "MeshLoader.h"
 
 #include <filesystem>
 #include <memory>
 
 #include "Material.h"
 
+struct StaticMeshVertex
+{
+    glm::vec3 Position{ 0, 0,0 };
+    glm::vec3 Normal{ 0, 0, 0 };
+    glm::vec2 TextureCoords{ 0, 0 };
+    std::uint32_t ID{ 0 };
+
+    static inline constexpr VertexAttribute DataFormat[4] = { {3, PrimitiveVertexType::Float}, {3, PrimitiveVertexType::Float}, {2, PrimitiveVertexType::Float}, {1, PrimitiveVertexType::UnsignedInt} };
+
+    StaticMeshVertex() = default;
+    StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& textureCoords) :
+        Position{ position },
+        Normal{ normal },
+        TextureCoords{ textureCoords }
+    {
+    }
+
+    StaticMeshVertex(const StaticMeshVertex&) = default;
+    StaticMeshVertex& operator=(const StaticMeshVertex&) = default;
+};
 
 class StaticMesh
 {
@@ -31,6 +50,8 @@ public:
     std::string_view GetName() const { return _meshName; }
 
     const std::shared_ptr<Material>& GetMaterial() const { return _material; }
+
+    std::vector<std::string> TexturePaths;
 
 private:
     VertexArray _vertexArray;

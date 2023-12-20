@@ -1,16 +1,13 @@
 #include "Mesh.h"
 #include "Renderer.h"
-
-#include <assimp/mesh.h>
-#include <assimp/scene.h>
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
+#include "ErrorMacros.h"
+#include "AssimpUtils.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax)
+static void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax)
 {
     // assume mesh has infinite bounds
     outBoxMin = glm::vec3{ std::numeric_limits<float>::max() };
@@ -52,32 +49,72 @@ void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::vec3& out
 StaticMesh::StaticMesh(const std::filesystem::path& filePath, const std::shared_ptr<Material>& material) :
     _material{ material }
 {
-    StaticMeshImporter importer{ filePath };
 
-    if (importer.HasErrorOccured())
+    Assimp::Importer importer;
+    constexpr std::uint32_t ImportFlags = aiProcess_Triangulate |
+        aiProcess_GenNormals | aiProcess_JoinIdenticalVertices | aiProcess_FlipUVs;
+
+    const aiScene* scene = importer.ReadFile(filePath.string(), ImportFlags);
+
+    if (scene == nullptr)
     {
-        throw importer.GetError();
+        throw std::runtime_error{ importer.GetErrorString() };
     }
 
-    std::span<const StaticMeshVertex> loadedVertices = importer.GetVertices();
-    std::span<const std::uint32_t> loadedIndices = importer.GetIndices();
+    std::uint32_t totalVertices = 0;
+    std::uint32_t totalIndices = 0;
 
-    IndexBuffer indexBuffer(loadedIndices.data(),
-        static_cast<std::uint32_t>(loadedIndices.size()));
+    _vertices.reserve(scene->mMeshes[0]->mNumVertices);
+    _indices.reserve(scene->mMeshes[0]->mNumFaces * 3);
 
-    _vertexArray.AddBuffer(loadedVertices, StaticMeshVertex::DataFormat);
+    for (std::uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex)
+    {
+        aiString path;
+
+        if (scene->mMaterials[materialIndex]->GetTexture(aiTextureType_DIFFUSE, 0,
+            &path, nullptr, nullptr, nullptr, nullptr, nullptr) == aiReturn_SUCCESS)
+        {
+            TexturePaths.push_back(path.C_Str());
+        }
+    }
+
+    for (std::uint32_t i = 0; i < scene->mNumMeshes; ++i)
+    {
+        const aiMesh* mesh = scene->mMeshes[i];
+        
+        for (std::uint32_t j = 0; j < mesh->mNumVertices; ++j)
+        {
+            aiVector3D pos = mesh->mVertices[j];
+            aiVector3D normal = mesh->mNormals[j];
+            aiVector3D textureCoord = mesh->mTextureCoords[0][j];
+
+            _vertices.emplace_back(ToGlm(pos), ToGlm(normal), ToGlm(textureCoord));
+        }
+
+        for (std::uint32_t j = 0; j < mesh->mNumFaces; ++j)
+        {
+            const aiFace& face = mesh->mFaces[j];
+            ASSERT(face.mNumIndices == 3);
+
+            for (std::uint32_t k = 0; k < 3; ++k)
+            {
+                _indices.emplace_back(face.mIndices[k] + totalIndices);
+            }
+        }
+
+        totalVertices += mesh->mNumVertices;
+        totalIndices += mesh->mNumFaces * 3;
+    }
+
+    IndexBuffer indexBuffer(_indices.data(),
+        static_cast<std::uint32_t>(_indices.size()));
+
+    _vertexArray.AddBuffer<StaticMeshVertex>(_vertices, StaticMeshVertex::DataFormat);
     _vertexArray.SetIndexBuffer(std::move(indexBuffer));
 
-    _numTriangles = static_cast<std::uint32_t>(loadedIndices.size()) / 3;
-
-    _indices.resize(loadedIndices.size());
-    _vertices.resize(loadedVertices.size());
-
-    std::copy(loadedVertices.begin(), loadedVertices.end(), _vertices.begin());
-    std::copy(loadedIndices.begin(), loadedIndices.end(), _indices.begin());
-
-    _meshName = importer.GetModelName();
-    FindAabCollision(loadedVertices, _bboxMin, _bboxMax);
+    _numTriangles = static_cast<std::uint32_t>(_indices.size()) / 3;
+    _meshName = scene->mName.C_Str();
+    FindAabCollision(_vertices, _bboxMin, _bboxMax);
 }
 
 

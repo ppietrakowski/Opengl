@@ -17,7 +17,7 @@
 SandboxGameLayer::SandboxGameLayer() :
     _cameraRotation{ glm::vec3{0, 0, 0} },
     _cameraPosition{ 0.0f, 0.0f, 0.0f },
-    mesh{"Walking.fbx"}
+    mesh{"untitled.fbx"}
 {
     _shader = Shader::LoadShader("shaders/default.vert", "shaders/default.frag");
     _unshaded = Shader::LoadShader("shaders/default.vert", "shaders/Unshaded.frag");
@@ -120,7 +120,7 @@ void SandboxGameLayer::OnRender(float deltaTime)
 
     Renderer::AddDebugBox(BboxMin, BboxMax, glm::translate(glm::identity<glm::mat4>(), glm::vec3{ 10, 2, 10 }));
     Renderer::FlushDrawDebug(*_unshaded);
-    mesh.Draw(*_materialTest);
+    mesh.Draw(*_materialTest, glm::scale(glm::vec3{ 0.01f, 0.01f, 0.01f }));
 
     Renderer::EndScene();
     glLineWidth(1);

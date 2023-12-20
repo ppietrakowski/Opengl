@@ -117,7 +117,7 @@ public:
     SkeletalMesh(const std::filesystem::path& path);
 
     void UpdateAnimation(float elapsedTime) { CalculateTransform(elapsedTime, RootJoint); }
-    void Draw(Material& material);
+    void Draw(Material& material, const glm::mat4& transform);
 
     Joint RootJoint;
     std::unordered_map<std::string, Animation> _animations;
@@ -142,9 +142,6 @@ private:
     void LoadAnimation(const aiScene* scene, uint32_t animationIndex);
 
 };
-
-void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax);
-
 
 template<>
 inline glm::vec3 BoneAnimationTrack::Interpolate(float animationTime) const

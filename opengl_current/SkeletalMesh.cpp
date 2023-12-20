@@ -1,35 +1,10 @@
 #include "SkeletalMesh.h"
 #include "Renderer.h"
-
-#include <assimp/mesh.h>
-#include <assimp/scene.h>
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
+#include "AssimpUtils.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
-
-inline glm::mat4 ToGlm(aiMatrix4x4 matrix)
-{
-    return glm::make_mat4(matrix.Transpose()[0]);
-}
-
-inline glm::vec3 ToGlm(aiVector3D v)
-{
-    return glm::vec3{ v.x, v.y, v.z };
-}
-
-inline glm::vec2 ToGlm(aiVector2D v)
-{
-    return glm::vec2{ v.x, v.y };
-}
-
-inline glm::quat ToGlm(aiQuaternion quat)
-{
-    return glm::quat{ quat.w, quat.x, quat.y, quat.z };
-}
-
 
 struct StbiDeleter
 {
@@ -41,6 +16,7 @@ struct StbiDeleter
 
 using StbiImageData = std::unique_ptr<std::uint8_t, StbiDeleter>;
 
+static void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax);
 
 void BoneAnimationTrack::AddNewPositionTimestamp(glm::vec3 Position, float Timestamp)
 {
@@ -316,7 +292,7 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, uint32_t animationIndex)
     _animations[anim->mName.C_Str()] = animation;
 }
 
-void SkeletalMesh::Draw(Material& material)
+void SkeletalMesh::Draw(Material& material, const glm::mat4& transform)
 {
     static bool doneOnce = false;
 
@@ -336,8 +312,8 @@ void SkeletalMesh::Draw(Material& material)
     }
 
     UpdateAnimation((std::chrono::duration_cast<TimeSeconds>(GetNow()) - this->InitializationTime).count());
-    Renderer::AddDebugBox(bboxMin_, bboxMax_, glm::scale(glm::vec3{ 0.01f, 0.01f, 0.01f }));
-    Renderer::SubmitSkeleton(material, boneTransforms_, BoneCount, vertexArray_, glm::scale(glm::vec3{ 0.01f, 0.01f, 0.01f }));
+    Renderer::AddDebugBox(bboxMin_, bboxMax_, transform);
+    Renderer::SubmitSkeleton(material, boneTransforms_, BoneCount, vertexArray_, transform);
 }
 
 void SkeletalMesh::CalculateTransform(float elapsedTime, const Joint& joint, const glm::mat4& parentTransform)
