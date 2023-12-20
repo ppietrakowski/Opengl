@@ -41,8 +41,9 @@ glm::mat4 Animation::GetBoneTransformOrRelative(const std::string& boneName, flo
 
 bool Joint::AssignHierarchy(const aiNode* node, const std::unordered_map<std::string, BoneInfo>& bones_info) {
     auto it = bones_info.find(node->mName.C_Str());
+    bool is_bone = it != bones_info.end();
 
-    if (it != bones_info.end()) {
+    if (is_bone) {
         name = node->mName.C_Str();
         const BoneInfo& bone_info = it->second;
 
@@ -55,8 +56,10 @@ bool Joint::AssignHierarchy(const aiNode* node, const std::unordered_map<std::st
             child.AssignHierarchy(node->mChildren[i], bones_info);
             children.emplace_back(child);
         }
+
         return true;
     } else {
+        // traverse all children to find bone
         for (std::uint32_t i = 0; i < node->mNumChildren; i++) {
             if (AssignHierarchy(node->mChildren[i], bones_info)) {
                 return true;
@@ -64,6 +67,7 @@ bool Joint::AssignHierarchy(const aiNode* node, const std::unordered_map<std::st
         }
     }
 
+    // traversed all children and it's not a bone
     return false;
 }
 
@@ -87,19 +91,24 @@ bool SkeletonMeshVertex::AddBoneData(std::uint32_t bone_id, float weight) {
     return false;
 }
 
+static constexpr const char* kDefaultAnimationName = "TPose";
+
 SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material) :
     material_{ material },
-    current_animation_name_{ "TPose" } {
+    current_animation_name_{ kDefaultAnimationName },
+    num_bones_{ 0 } {
     // maps bone name to boneID
     std::unordered_map<std::string, std::uint32_t> bone_name_to_index;
 
-    auto GetBoneID = [&bone_name_to_index](const aiBone* bone) {
+    auto get_bone_id = [&bone_name_to_index](const aiBone* bone) {
         std::uint32_t bone_id = 0;
         std::string bone_name(bone->mName.C_Str());
 
         auto it = bone_name_to_index.find(bone_name);
 
-        if (it != bone_name_to_index.end()) {
+        bool bone_id_already_defined = it != bone_name_to_index.end();
+
+        if (bone_id_already_defined) {
             bone_id = it->second;
         } else {
             bone_id = static_cast<std::uint32_t>(bone_name_to_index.size());
@@ -111,7 +120,6 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
     std::uint32_t total_vertices = 0;
     std::uint32_t total_indices = 0;
-    std::uint32_t total_bones = 0;
 
     Assimp::Importer importer;
 
@@ -127,7 +135,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
         LoadTexturesFromMaterial(scene, i);
     }
 
-    std::unordered_map<std::string, BoneInfo> BoneInfos;
+    std::unordered_map<std::string, BoneInfo> bones_info;
 
     for (std::uint32_t i = 0; i < scene->mNumMeshes; ++i) {
         const aiMesh* mesh = scene->mMeshes[i];
@@ -151,10 +159,10 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
         for (std::uint32_t bone_index = 0; bone_index < mesh->mNumBones; ++bone_index) {
             const aiBone* bone = mesh->mBones[bone_index];
-            std::uint32_t bone_id = GetBoneID(bone);
+            std::uint32_t bone_id = get_bone_id(bone);
 
             glm::mat4 offset_matrix = ToGlm(bone->mOffsetMatrix);
-            BoneInfos[bone->mName.C_Str()] = BoneInfo{ bone_index, offset_matrix };
+            bones_info[bone->mName.C_Str()] = BoneInfo{ bone_index, offset_matrix };
             std::string s{ bone->mName.C_Str() };
 
             for (std::uint32_t j = 0; j < bone->mNumWeights; j++) {
@@ -169,12 +177,13 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
         total_vertices += mesh->mNumVertices;
         total_indices += mesh->mNumFaces * 3;
-        total_bones += mesh->mNumBones;
+        num_bones_ += mesh->mNumBones;
     }
 
     material_->should_cull_faces = false;
     material_->using_transparency = true;
 
+    // set diffuse textures
     for (std::uint32_t i = 0; i < textures_.size(); ++i) {
         std::string name = "diffuse" + std::to_string(i + 1);
         material_->SetTextureProperty(name.c_str(), textures_[i]);
@@ -184,18 +193,18 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
         LoadAnimation(scene, i);
     }
 
+    // define Tpose animation dummy values
     animations_[current_animation_name_] = Animation{};
     animations_[current_animation_name_].ticks_per_second = 10;
     animations_[current_animation_name_].duration = 10;
 
-    num_bones_ = total_bones;
-
-    root_joint_.AssignHierarchy(scene->mRootNode, BoneInfos);
+    root_joint_.AssignHierarchy(scene->mRootNode, bones_info);
     vertex_array_.AddBuffer<SkeletonMeshVertex>(vertices_, SkeletonMeshVertex::data_format);
     vertex_array_.SetIndexBuffer(IndexBuffer(indices_.data(), static_cast<std::uint32_t>(indices_.size())));
 
+    // find global transform for converting from bone space back to local space
     global_inverse_transform_ = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
-    bone_transforms_.resize(total_bones, glm::identity<glm::mat4>());
+    bone_transforms_.resize(num_bones_, glm::identity<glm::mat4>());
 
     FindAabCollision(vertices_, bbox_min_, bbox_max_);
     bbox_min_.x *= 0.2f;
@@ -241,7 +250,11 @@ void SkeletalMesh::Draw(const glm::mat4& transform) {
 }
 
 void SkeletalMesh::SetCurrentAnimation(const std::string& animation_name) {
-    current_animation_name_ = animation_name;
+    auto it = animations_.find(animation_name);
+
+    if (it != animations_.end()) {
+        current_animation_name_ = animation_name;
+    }
 }
 
 std::vector<std::string> SkeletalMesh::GetAnimationNames() const {
@@ -256,21 +269,17 @@ std::vector<std::string> SkeletalMesh::GetAnimationNames() const {
     return names;
 }
 
-void SkeletalMesh::CalculateTransform(float elapsedTime, const Joint& joint, const glm::mat4& parentTransform) {
+void SkeletalMesh::CalculateTransform(float animation_time, const Joint& joint, const glm::mat4& parent_transform) {
     const Animation& animation = animations_.at(current_animation_name_);
-
-    float ticks_per_second = animation.ticks_per_second;
-    float time_in_ticks = elapsedTime * ticks_per_second;
-    float animation_time = fmod(time_in_ticks, animation.duration);
-
     glm::mat4 transform = animation.GetBoneTransformOrRelative(joint.name, animation_time, joint.relative_transform_matrix);
 
     std::uint32_t index = joint.bone_transform_index;
-    glm::mat4 global_transform = parentTransform * transform;
+    glm::mat4 global_transform = parent_transform * transform;
     bone_transforms_[index] = global_inverse_transform_ * global_transform * joint.bone_offset;
 
+    // run chain to update other joint transforms
     for (const Joint& child : joint.children) {
-        CalculateTransform(elapsedTime, child, global_transform);
+        CalculateTransform(animation_time, child, global_transform);
     }
 }
 

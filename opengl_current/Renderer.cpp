@@ -150,8 +150,8 @@ void Renderer::Initialize() {
 }
 
 void Renderer::UpdateProjection(float width, float height, float fov, float z_near, float z_far) {
-    float aspectRatio = width / height;
-    projection_ = glm::perspective(glm::radians(fov), aspectRatio, z_near, z_far);
+    float aspect_ratio = width / height;
+    projection_ = glm::perspective(glm::radians(fov), aspect_ratio, z_near, z_far);
 }
 
 void Renderer::BeginScene(const glm::mat4& view, glm::vec3 camera_position) {

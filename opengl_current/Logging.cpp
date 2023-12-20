@@ -64,7 +64,7 @@ void Logging::Quit() {
     log_devices_.clear();
 }
 
-void Logging::log_device(const SourceLocation& location, const char* categoryName, LogLevel logLevel, const std::string& format) {
+void Logging::Log(const SourceLocation& location, const char* categoryName, LogLevel logLevel, const std::string& format) {
     if (ignored_log_levels_ & static_cast<std::uint32_t>(logLevel)) {
         return;
     }

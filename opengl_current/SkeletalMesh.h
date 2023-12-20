@@ -79,6 +79,8 @@ struct Animation
     // Duration in ticks
     float duration{ 0.0f };
     float ticks_per_second{ 0.0f };
+
+    // bone name mapped to animation track
     std::unordered_map<std::string, BoneAnimationTrack> bone_name_to_tracks;
 
     glm::mat4 GetBoneTransformOrRelative(const std::string& bone_name, float animation_time, glm::mat4 relative_transform) const;
@@ -88,7 +90,7 @@ struct BoneInfo
 {
     std::uint32_t bone_transform_index;
 
-    /* Matrix to retrieve */
+    /* Matrix that convert vertex to bone space */
     glm::mat4 offset_matrix;
 
     BoneInfo() = default;
@@ -106,8 +108,14 @@ struct aiNode;
 struct Joint
 {
     std::vector<Joint> children;
+
+    /* Index in bone_transform_ array */
     std::uint32_t bone_transform_index{ 0 };
+
+    /* Relative transformation to it's parent */
     glm::mat4 relative_transform_matrix{ glm::identity<glm::mat4>() };
+
+    /* Matrix that convert vertex to bone space */
     glm::mat4 bone_offset{ glm::identity<glm::mat4>() };
     std::string name;
 
@@ -122,15 +130,11 @@ class SkeletalMesh
 public:
     SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material);
 
-    void UpdateAnimation(float elapsed_time) 
-    { 
-        CalculateTransform(elapsed_time, root_joint_); 
-    }
+    void UpdateAnimation(float elapsed_time);
 
     void Draw(const glm::mat4& transform);
 
     void SetCurrentAnimation(const std::string& animation_name);
-
     std::vector<std::string> GetAnimationNames() const;
 
 private:
@@ -154,7 +158,7 @@ private:
     std::string current_animation_name_;
 
 private:
-    void CalculateTransform(float elapsed_time, const Joint& joint, const glm::mat4& parent_transform = glm::mat4{ 1.0f });
+    void CalculateTransform(float animation_time, const Joint& joint, const glm::mat4& parent_transform = glm::mat4{ 1.0f });
     void LoadTexturesFromMaterial(const aiScene* scene, uint32_t material_index);
     void LoadAnimation(const aiScene* scene, uint32_t animation_index);
 
@@ -223,4 +227,14 @@ inline std::uint32_t BoneAnimationTrack::GetIndex(float animation_time, const st
     }
 
     return 0;
+}
+
+inline void SkeletalMesh::UpdateAnimation(float elapsed_time) {
+    const Animation& animation = animations_.at(current_animation_name_);
+    float ticks_per_second = animation.ticks_per_second;
+    float time_in_ticks = elapsed_time * ticks_per_second;
+    float animation_time = fmod(time_in_ticks, animation.duration);
+
+    // run transform update chain starting from root joint
+    CalculateTransform(animation_time, root_joint_);
 }

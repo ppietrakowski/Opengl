@@ -14,7 +14,7 @@ DECLARE_LOG_CATEGORY(ASSET_LOADING);
 DECLARE_LOG_CATEGORY(GLOBAL);
 
 
-#define ELOG(level, category, Format, ...) ::Logging::log_device(CURRENT_SOURCE_LOCATION, category.GetName(), level, FormatString(Format ,__VA_ARGS__))
+#define ELOG(level, category, Format, ...) ::Logging::Log(CURRENT_SOURCE_LOCATION, category.GetName(), level, FormatString(Format ,__VA_ARGS__))
 #define ELOG_INFO(category, Format, ...) ELOG(LogLevel::kInfo, category, Format, __VA_ARGS__)
 #define ELOG_WARNING(category, Format, ...) ELOG(LogLevel::kWarning, category, Format, __VA_ARGS__)
 #define ELOG_ERROR(category, Format, ...) ELOG(LogLevel::kError, category, Format, __VA_ARGS__)
@@ -49,7 +49,7 @@ public:
     static void Initialize();
     static void Quit();
 
-    static void log_device(const SourceLocation& location, const char* category_name, LogLevel log_level, const std::string& format);
+    static void Log(const SourceLocation& location, const char* category_name, LogLevel log_level, const std::string& format);
     static void IgnoreLogLevel(LogLevel level);
     static void StopIgnoringLogLevel(LogLevel level);
 

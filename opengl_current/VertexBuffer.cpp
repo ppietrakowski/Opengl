@@ -12,11 +12,11 @@ VertexBuffer::VertexBuffer() :
 VertexBuffer::VertexBuffer(const void* data, std::uint32_t size_bytes, bool dynamic) :
     buffer_size_{ size_bytes }
 {
-    GLenum bufferUsage = dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+    GLenum buffer_usage = dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
     glGenBuffers(1, &renderer_id_);
     glBindBuffer(GL_ARRAY_BUFFER, renderer_id_);
-    glBufferData(GL_ARRAY_BUFFER, size_bytes, data, bufferUsage);
+    glBufferData(GL_ARRAY_BUFFER, size_bytes, data, buffer_usage);
 }
 
 VertexBuffer::VertexBuffer(std::uint32_t max_size_bytes) :
