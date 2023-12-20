@@ -146,6 +146,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
             aiVector3D texture_coord = mesh->mTextureCoords[0][j];
 
             vertices_.emplace_back(ToGlm(pos), ToGlm(normal), ToGlm(texture_coord));
+            vertices_.back().texture_id = mesh->mMaterialIndex;
         }
 
         for (std::uint32_t j = 0; j < mesh->mNumFaces; ++j) {

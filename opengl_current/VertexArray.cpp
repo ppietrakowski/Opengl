@@ -69,8 +69,12 @@ void VertexArray::AddBufferInternal(VertexBuffer&& vertex_buffer, std::span<cons
         std::uint32_t gl_type_index = GET_GL_TYPE_INDEX(attribute);
         ASSERT(gl_type_index < kMaxAttributes);
 
-        glVertexAttribPointer(attribute_start_index, attribute.num_components, kAttributeConversionTable[gl_type_index],
-            data_normalized, stride, reinterpret_cast<const void*>(offset));
+        if (attribute.vertex_type != PrimitiveVertexType::kFloat) {
+            glVertexAttribIPointer(attribute_start_index, attribute.num_components, kAttributeConversionTable[gl_type_index], stride, reinterpret_cast<const void*>(offset));
+        } else {
+            glVertexAttribPointer(attribute_start_index, attribute.num_components, kAttributeConversionTable[gl_type_index],
+                data_normalized, stride, reinterpret_cast<const void*>(offset));
+        }
 
         std::uint32_t size_index = GET_ATTRIBUTE_INDEX(attribute);
         ASSERT(size_index < kMaxAttributes);

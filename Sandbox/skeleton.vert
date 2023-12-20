@@ -4,6 +4,7 @@
 	layout (location = 2) in vec2 uv;
 	layout (location = 3) in vec4 boneIds;
 	layout (location = 4) in vec4 boneWeights;
+	layout (location = 5) in uint a_texture_id;
 
 	out vec2 TextureCoords;
 	out vec3 v_normal;
@@ -33,5 +34,5 @@
 		v_normal = mat3(transpose(inverse(u_Transform * boneTransform))) * normal;
 		v_normal = normalize(v_normal);
 
-		TextureID = 0;
+		TextureID = a_texture_id;
 	}
