@@ -10,10 +10,10 @@
 #include <Windows.h>
 #endif
 
-constexpr std::uint32_t kMaxErrorHandlers = 5;
+constexpr uint32_t kMaxErrorHandlers = 5;
 
 static std::array<ErrorHandler, kMaxErrorHandlers> error_handlers_;
-static std::uint32_t num_error_handlers_ = 0;
+static uint32_t num_error_handlers_ = 0;
 
 void AddErrorHandler(const ErrorHandler& handler) {
     ERR_FAIL_EXPECTED_TRUE_MSG(num_error_handlers_ < kMaxErrorHandlers, "Max error handlers assigned");
@@ -48,7 +48,7 @@ void PrintError(const SourceLocation* location, const char* message) {
 #endif
 
     ErrorHandlerInfo info{ *location,  message };
-    for (std::uint32_t i = 0; i < num_error_handlers_; ++i) {
+    for (uint32_t i = 0; i < num_error_handlers_; ++i) {
         const ErrorHandler& errorHandler = error_handlers_[i];
         errorHandler.error_handler_func(errorHandler.user_data, info);
     }

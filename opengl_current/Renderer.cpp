@@ -16,7 +16,7 @@ glm::vec3 Renderer::camera_position_{ 0.0f, 0.0f, 0.0f };
 std::shared_ptr<Texture2D> Renderer::default_texture_;
 
 // Predefined box indices (base for offsets for IndexBuffer)
-static const std::uint32_t kBaseBoxIndices[] =
+static const uint32_t kBaseBoxIndices[] =
 {
     0, 1, 1, 2, 2, 3, 3, 0,
     4, 5, 5, 6, 6, 7, 7, 4,
@@ -28,8 +28,8 @@ constexpr std::size_t kNumBoxVertices = 8;
 
 struct BoxBatchData {
     glm::vec3 vertices[kMaxDebugNumBox * kNumBoxVertices];
-    std::uint32_t max_num_boxes{ kMaxDebugNumBox };
-    std::uint32_t current_num_box{ 0 };
+    uint32_t max_num_boxes{ kMaxDebugNumBox };
+    uint32_t current_num_box{ 0 };
     VertexArray vertex_array;
 
     BoxBatchData() {
@@ -37,21 +37,21 @@ struct BoxBatchData {
         VertexAttribute attributes[] = { {3, PrimitiveVertexType::kFloat} };
         VertexBuffer buffer{};
 
-        vertex_array.AddDynamicBuffer(static_cast<std::uint32_t>(kNumBoxVertices * kMaxDebugNumBox * sizeof(glm::vec3)), attributes);
+        vertex_array.AddDynamicBuffer(static_cast<uint32_t>(kNumBoxVertices * kMaxDebugNumBox * sizeof(glm::vec3)), attributes);
 
         // prebatch indices
-        std::vector<std::uint32_t> indices;
-        std::uint32_t indices_start_offset = 0;
-        std::uint32_t max_num_indices = static_cast<std::uint32_t>(ARRAY_NUM_ELEMENTS(kBaseBoxIndices));
+        std::vector<uint32_t> indices;
+        uint32_t indices_start_offset = 0;
+        uint32_t max_num_indices = static_cast<uint32_t>(ARRAY_NUM_ELEMENTS(kBaseBoxIndices));
 
         indices.reserve(kMaxDebugNumBox * max_num_indices);
 
         // current starting index of mesh index
-        std::uint32_t offset_to_next_free_index = kNumBoxVertices;
+        uint32_t offset_to_next_free_index = kNumBoxVertices;
 
-        for (std::uint32_t i = 0; i < kMaxDebugNumBox; i++) {
-            for (std::uint32_t j = 0; j < max_num_indices; j++) {
-                std::uint32_t vertexIndex = kBaseBoxIndices[j] + indices_start_offset;
+        for (uint32_t i = 0; i < kMaxDebugNumBox; i++) {
+            for (uint32_t j = 0; j < max_num_indices; j++) {
+                uint32_t vertexIndex = kBaseBoxIndices[j] + indices_start_offset;
                 indices.emplace_back(vertexIndex);
             }
 
@@ -59,7 +59,7 @@ struct BoxBatchData {
         }
 
 
-        IndexBuffer indexBuffer(indices.data(), static_cast<std::uint32_t>(indices.size()));
+        IndexBuffer indexBuffer(indices.data(), static_cast<uint32_t>(indices.size()));
         vertex_array.SetIndexBuffer(std::move(indexBuffer));
     }
 
@@ -91,9 +91,9 @@ struct BoxBatchData {
             return;
         }
 
-        std::uint32_t max_num_vertices = static_cast<std::uint32_t>(vertices.size());
+        uint32_t max_num_vertices = static_cast<uint32_t>(vertices.size());
 
-        for (std::uint32_t i = 0; i < max_num_vertices; ++i) {
+        for (uint32_t i = 0; i < max_num_vertices; ++i) {
             glm::vec3& vertex = this->vertices[i + current_num_box * kNumBoxVertices];
             vertex = transform * glm::vec4{ vertices[i], 1.0f };
         }
@@ -110,15 +110,15 @@ void Renderer::Quit() {
 }
 
 struct RgbColor {
-    std::uint8_t red;
-    std::uint8_t green;
-    std::uint8_t blue;
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
 
     RgbColor() = default;
     RgbColor(const RgbColor&) = default;
     RgbColor& operator=(const RgbColor&) = default;
 
-    constexpr RgbColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) :
+    constexpr RgbColor(uint8_t red, uint8_t green, uint8_t blue) :
         red{ red },
         green{ green },
         blue{ blue } {}
@@ -182,7 +182,7 @@ void Renderer::Submit(const Material& material, const VertexArray& vertex_array,
     RenderCommand::DrawIndexed(vertex_array, vertex_array.GetNumIndices(), render_primitive);
 }
 
-void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, std::uint32_t count, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive) {
+void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, uint32_t count, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive) {
     Shader& shader = material.GetShader();
     shader.Use();
     material.SetupRenderState();
@@ -205,7 +205,7 @@ void Renderer::Submit(Shader& shader,
     Submit(shader, vertex_array.GetNumIndices(), vertex_array, transform, render_primitive);
 }
 
-void Renderer::Submit(Shader& shader, std::uint32_t numIndices, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive) {
+void Renderer::Submit(Shader& shader, uint32_t numIndices, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive) {
     ASSERT(numIndices <= vertex_array.GetNumIndices());
 
     shader.Use();

@@ -11,12 +11,12 @@
 #include "Core.h"
 
 struct StbiDeleter {
-    void operator()(std::uint8_t* bytes) {
+    void operator()(uint8_t* bytes) {
         stbi_image_free(bytes);
     }
 };
 
-using StbiImageData = std::unique_ptr<std::uint8_t, StbiDeleter>;
+using StbiImageData = std::unique_ptr<uint8_t, StbiDeleter>;
 
 static void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& out_box_min, glm::vec3& out_box_max);
 
@@ -53,7 +53,7 @@ bool Joint::AssignHierarchy(const aiNode* node, const std::unordered_map<std::st
         relative_transform_matrix = ToGlm(node->mTransformation);
         bone_offset = bone_info.offset_matrix;
 
-        for (std::uint32_t i = 0; i < node->mNumChildren; i++) {
+        for (uint32_t i = 0; i < node->mNumChildren; i++) {
             Joint child;
             child.AssignHierarchy(node->mChildren[i], bones_info);
             children.emplace_back(child);
@@ -62,7 +62,7 @@ bool Joint::AssignHierarchy(const aiNode* node, const std::unordered_map<std::st
         return true;
     } else {
         // traverse all children to find bone
-        for (std::uint32_t i = 0; i < node->mNumChildren; i++) {
+        for (uint32_t i = 0; i < node->mNumChildren; i++) {
             if (AssignHierarchy(node->mChildren[i], bones_info)) {
                 return true;
             }
@@ -78,7 +78,7 @@ SkeletonMeshVertex::SkeletonMeshVertex(const glm::vec3& position, const glm::vec
     normal{ normal },
     texture_coords{ texture_coords } {}
 
-bool SkeletonMeshVertex::AddBoneData(std::uint32_t bone_id, float weight) {
+bool SkeletonMeshVertex::AddBoneData(uint32_t bone_id, float weight) {
     // find first empty slot
     auto it = std::find(std::begin(bone_weights), std::end(bone_weights), 0.0f);
 
@@ -100,10 +100,10 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     current_animation_name_{ kDefaultAnimationName },
     num_bones_{ 0 } {
     // maps bone name to boneID
-    std::unordered_map<std::string, std::uint32_t> bone_name_to_index;
+    std::unordered_map<std::string, uint32_t> bone_name_to_index;
 
     auto get_bone_id = [&bone_name_to_index](const aiBone* bone) {
-        std::uint32_t bone_id = 0;
+        uint32_t bone_id = 0;
         std::string bone_name(bone->mName.C_Str());
 
         auto it = bone_name_to_index.find(bone_name);
@@ -113,31 +113,31 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
         if (bone_id_already_defined) {
             bone_id = it->second;
         } else {
-            bone_id = static_cast<std::uint32_t>(bone_name_to_index.size());
+            bone_id = static_cast<uint32_t>(bone_name_to_index.size());
             bone_name_to_index[bone_name] = bone_id;
         }
 
         return bone_id;
     };
 
-    std::uint32_t total_vertices = 0;
-    std::uint32_t total_indices = 0;
+    uint32_t total_vertices = 0;
+    uint32_t total_indices = 0;
 
     Assimp::Importer importer;
 
     const aiScene* scene = importer.ReadFile(path.string(), kAssimpImportFlags);
     CRASH_EXPECTED_NOT_NULL(scene);
 
-    std::uint32_t num_indices = scene->mMeshes[0]->mNumFaces * 3u;
+    uint32_t num_indices = scene->mMeshes[0]->mNumFaces * 3u;
 
     std::vector<SkeletonMeshVertex> vertices;
-    std::vector<std::uint32_t> indices;
+    std::vector<uint32_t> indices;
     vertices.reserve(scene->mMeshes[0]->mNumVertices);
     indices.reserve(num_indices);
 
     std::vector<std::shared_ptr<Texture2D>> textures;
 
-    for (std::uint32_t i = 0; i < scene->mNumMaterials; ++i) {
+    for (uint32_t i = 0; i < scene->mNumMaterials; ++i) {
         auto texture = LoadTexturesFromMaterial(scene, i);
 
         if (texture != nullptr) {
@@ -147,10 +147,10 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
     std::unordered_map<std::string, BoneInfo> bones_info;
 
-    for (std::uint32_t i = 0; i < scene->mNumMeshes; ++i) {
+    for (uint32_t i = 0; i < scene->mNumMeshes; ++i) {
         const aiMesh* mesh = scene->mMeshes[i];
 
-        for (std::uint32_t j = 0; j < mesh->mNumVertices; ++j) {
+        for (uint32_t j = 0; j < mesh->mNumVertices; ++j) {
             aiVector3D pos = mesh->mVertices[j];
             aiVector3D normal = mesh->mNormals[j];
             aiVector3D texture_coord = mesh->mTextureCoords[0][j];
@@ -159,25 +159,25 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
             vertices.back().texture_id = mesh->mMaterialIndex;
         }
 
-        for (std::uint32_t j = 0; j < mesh->mNumFaces; ++j) {
+        for (uint32_t j = 0; j < mesh->mNumFaces; ++j) {
             const aiFace& face = mesh->mFaces[j];
             ASSERT(face.mNumIndices == 3);
 
-            for (std::uint32_t k = 0; k < 3; ++k) {
+            for (uint32_t k = 0; k < 3; ++k) {
                 indices.emplace_back(face.mIndices[k] + total_indices);
             }
         }
 
-        for (std::uint32_t bone_index = 0; bone_index < mesh->mNumBones; ++bone_index) {
+        for (uint32_t bone_index = 0; bone_index < mesh->mNumBones; ++bone_index) {
             const aiBone* bone = mesh->mBones[bone_index];
-            std::uint32_t bone_id = get_bone_id(bone);
+            uint32_t bone_id = get_bone_id(bone);
 
             glm::mat4 offset_matrix = ToGlm(bone->mOffsetMatrix);
             bones_info[bone->mName.C_Str()] = BoneInfo{ bone_index, offset_matrix };
             std::string s{ bone->mName.C_Str() };
 
-            for (std::uint32_t j = 0; j < bone->mNumWeights; j++) {
-                std::uint32_t id = bone->mWeights[j].mVertexId + total_vertices;
+            for (uint32_t j = 0; j < bone->mNumWeights; j++) {
+                uint32_t id = bone->mWeights[j].mVertexId + total_vertices;
                 float weight = bone->mWeights[j].mWeight;
 
                 if (!vertices[id].AddBoneData(bone_id, weight)) {
@@ -195,12 +195,12 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     material_->using_transparency = true;
 
     // set diffuse textures
-    for (std::uint32_t i = 0; i < textures.size(); ++i) {
+    for (uint32_t i = 0; i < textures.size(); ++i) {
         std::string name = "diffuse";
         material_->SetTextureProperty(name.c_str(), textures[i], i);
     }
 
-    for (std::uint32_t i = 0; i < scene->mNumAnimations; ++i) {
+    for (uint32_t i = 0; i < scene->mNumAnimations; ++i) {
         LoadAnimation(scene, i);
     }
 
@@ -211,7 +211,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
     root_joint_.AssignHierarchy(scene->mRootNode, bones_info);
     vertex_array_.AddBuffer<SkeletonMeshVertex>(vertices, SkeletonMeshVertex::data_format);
-    vertex_array_.SetIndexBuffer(IndexBuffer(indices.data(), static_cast<std::uint32_t>(indices.size())));
+    vertex_array_.SetIndexBuffer(IndexBuffer(indices.data(), static_cast<uint32_t>(indices.size())));
 
     // find global transform for converting from bone space back to local space
     global_inverse_transform_ = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
@@ -235,14 +235,14 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, uint32_t animation_index)
 
     animation.duration = static_cast<float>(anim->mDuration);
 
-    for (std::uint32_t i = 0; i < anim->mNumChannels; i++) {
+    for (uint32_t i = 0; i < anim->mNumChannels; i++) {
         const aiNodeAnim* channel = anim->mChannels[i];
         BoneAnimationTrack track;
 
-        for (std::uint32_t j = 0; j < channel->mNumPositionKeys; j++) {
+        for (uint32_t j = 0; j < channel->mNumPositionKeys; j++) {
             track.AddNewPositionTimestamp(ToGlm(channel->mPositionKeys[j].mValue), static_cast<float>(channel->mPositionKeys[j].mTime));
         }
-        for (std::uint32_t j = 0; j < channel->mNumRotationKeys; j++) {
+        for (uint32_t j = 0; j < channel->mNumRotationKeys; j++) {
             track.AddNewRotationTimestamp(ToGlm(channel->mRotationKeys[j].mValue), static_cast<float>(channel->mRotationKeys[j].mTime));
         }
 
@@ -284,7 +284,7 @@ void SkeletalMesh::CalculateTransform(float animation_time, const Joint& joint, 
     const Animation& animation = animations_.at(current_animation_name_);
     glm::mat4 transform = animation.GetBoneTransformOrRelative(joint.name, animation_time, joint.relative_transform_matrix);
 
-    std::uint32_t index = joint.bone_transform_index;
+    uint32_t index = joint.bone_transform_index;
     glm::mat4 global_transform = parent_transform * transform;
     bone_transforms_[index] = global_inverse_transform_ * global_transform * joint.bone_offset;
 
@@ -304,16 +304,16 @@ std::shared_ptr<Texture2D> SkeletalMesh::LoadTexturesFromMaterial(const aiScene*
         if (texture != nullptr) {
             StbiImageData image_data;
 
-            std::int32_t width = 0, height = 0, num_components = 0;
+            int32_t width = 0, height = 0, num_components = 0;
 
             bool is_compressed = texture->mHeight == 0;
 
             if (is_compressed) {
-                image_data.reset(stbi_load_from_memory(reinterpret_cast<std::uint8_t*>(texture->pcData),
+                image_data.reset(stbi_load_from_memory(reinterpret_cast<uint8_t*>(texture->pcData),
                     texture->mWidth, &width, &height,
                     &num_components, STBI_rgb_alpha));
             } else {
-                image_data.reset(stbi_load_from_memory(reinterpret_cast<std::uint8_t*>(texture->pcData),
+                image_data.reset(stbi_load_from_memory(reinterpret_cast<uint8_t*>(texture->pcData),
                     texture->mWidth * texture->mHeight,
                     &width, &height, &num_components, STBI_rgb_alpha));
             }

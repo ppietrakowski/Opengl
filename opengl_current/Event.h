@@ -19,13 +19,13 @@ enum class EventType {
 
 struct Event {
     struct SizeEvent {
-        std::uint32_t width;
-        std::uint32_t height;
+        uint32_t width;
+        uint32_t height;
     };
 
     struct KeyEvent {
-        std::int32_t code;
-        std::int32_t scan_code;
+        int32_t code;
+        int32_t scan_code;
         bool alt_clicked : 1;
         bool control_clicked : 1;
         bool shift_clicked : 1;
@@ -38,7 +38,7 @@ struct Event {
     };
 
     struct MouseButtonEvent {
-        std::int32_t button;
+        int32_t button;
         glm::vec2 mouse_position;
     };
 
@@ -57,7 +57,7 @@ struct Event {
         MouseWheelEvent mouse_wheel;
     };
 
-    std::uint32_t milliseconds_since_game_start;
+    uint32_t milliseconds_since_game_start;
 
     Event();
 };

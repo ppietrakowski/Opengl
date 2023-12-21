@@ -22,7 +22,7 @@ enum class MaterialParamType : std::int8_t {
 };
 
 union ParamVal {
-    std::int32_t int_value;
+    int32_t int_value;
     float float_value;
     glm::vec2 vec2_value;
     glm::vec3 vec3_value;
@@ -36,7 +36,7 @@ public:
     MaterialParam() = default;
     MaterialParam(const MaterialParam&) = default;
     MaterialParam(const char* uniform_name);
-    MaterialParam(const char* uniform_name, std::int32_t value);
+    MaterialParam(const char* uniform_name, int32_t value);
     MaterialParam(const char* uniform_name, float value);
     MaterialParam(const char* uniform_name, glm::vec2 value);
     MaterialParam(const char* uniform_name, glm::vec3 value);
@@ -45,20 +45,20 @@ public:
     MaterialParam& operator=(const MaterialParam&) = default;
     void SetUniform(Shader& shader) const;
 
-    std::int32_t GetInt() const;
+    int32_t GetInt() const;
     float GetFloat() const;
     glm::vec2 GetVector2() const;
     glm::vec3 GetVector3() const;
     glm::vec4 GetVector4() const;
 
-    std::shared_ptr<Texture> GetTexture(std::uint32_t index) const;
+    std::shared_ptr<Texture> GetTexture(uint32_t index) const;
 
-    void SetInt(std::int32_t value);
+    void SetInt(int32_t value);
     void SetFloat(float value);
     void SetVector2(glm::vec2 value);
     void SetVector3(glm::vec3 value);
     void SetVector4(glm::vec4 value);
-    void SetTexture(const std::shared_ptr<Texture>& value, std::uint32_t index);
+    void SetTexture(const std::shared_ptr<Texture>& value, uint32_t index);
 
 private:
     ParamVal param_value_;

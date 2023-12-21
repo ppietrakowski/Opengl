@@ -12,7 +12,7 @@ struct StaticMeshVertex {
     glm::vec3 position{ 0, 0,0 };
     glm::vec3 normal{ 0, 0, 0 };
     glm::vec2 texture_coords{ 0, 0 };
-    std::uint32_t texture_id{ 0 };
+    uint32_t texture_id{ 0 };
 
     static inline constexpr VertexAttribute data_format[4] = { {3, PrimitiveVertexType::kFloat}, {3, PrimitiveVertexType::kFloat}, {2, PrimitiveVertexType::kFloat}, {1, PrimitiveVertexType::kUnsignedInt} };
 
@@ -34,8 +34,8 @@ public:
     void Render(const glm::mat4& transform) const;
     void Render(const Material& override_material, const glm::mat4& transform) const;
 
-    std::uint32_t GetNumPolygons() const;
-    std::uint32_t GetNumTriangles() const;
+    uint32_t GetNumPolygons() const;
+    uint32_t GetNumTriangles() const;
 
     const glm::vec3& GetBBoxMin() const;
     const glm::vec3& GetBBoxMax() const;
@@ -52,7 +52,7 @@ public:
 
 private:
     VertexArray vertex_array_;
-    std::uint32_t num_triangles_;
+    uint32_t num_triangles_;
 
     std::shared_ptr<Material> material_;
 
@@ -69,10 +69,10 @@ inline const glm::vec3& StaticMesh::GetBBoxMax() const {
     return bbox_max_;
 }
 
-inline std::uint32_t StaticMesh::GetNumPolygons() const {
+inline uint32_t StaticMesh::GetNumPolygons() const {
     return num_triangles_;
 }
 
-inline std::uint32_t StaticMesh::GetNumTriangles() const {
+inline uint32_t StaticMesh::GetNumTriangles() const {
     return num_triangles_;
 }

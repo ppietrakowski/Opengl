@@ -27,7 +27,7 @@ struct SkeletonMeshVertex {
     glm::vec2 texture_coords{ 0, 0 };
     float bone_ids[kNumBonesPerVertex] = { 0, 0, 0, 0 };
     float bone_weights[kNumBonesPerVertex] = { 0, 0, 0, 0 };
-    std::uint32_t texture_id{ 0 };
+    uint32_t texture_id{ 0 };
 
     static inline constexpr VertexAttribute data_format[6] = {
         { 3, PrimitiveVertexType::kFloat },
@@ -42,7 +42,7 @@ struct SkeletonMeshVertex {
     SkeletonMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& texture_coords);
     SkeletonMeshVertex(const SkeletonMeshVertex&) = default;
     SkeletonMeshVertex& operator=(const SkeletonMeshVertex&) = default;
-    bool AddBoneData(std::uint32_t bone_id, float weight);
+    bool AddBoneData(uint32_t bone_id, float weight);
 };
 
 template <typename T>
@@ -70,7 +70,7 @@ private:
     std::vector<KeyProperty<glm::quat>> rotations_;
 
     template <typename T>
-    std::uint32_t GetIndex(float animation_time, const std::vector<KeyProperty<T>>& timestamps) const;
+    uint32_t GetIndex(float animation_time, const std::vector<KeyProperty<T>>& timestamps) const;
 };
 
 struct Animation {
@@ -85,7 +85,7 @@ struct Animation {
 };
 
 struct BoneInfo {
-    std::uint32_t bone_transform_index;
+    uint32_t bone_transform_index;
 
     /* Matrix that convert vertex to bone space */
     glm::mat4 offset_matrix;
@@ -93,7 +93,7 @@ struct BoneInfo {
     BoneInfo() = default;
     BoneInfo(const BoneInfo&) = default;
     BoneInfo& operator=(const BoneInfo&) = default;
-    BoneInfo(std::uint32_t bone_transform_index, const glm::mat4& offset_matrix) :
+    BoneInfo(uint32_t bone_transform_index, const glm::mat4& offset_matrix) :
         bone_transform_index{ bone_transform_index },
         offset_matrix{ offset_matrix } {}
 };
@@ -104,7 +104,7 @@ struct Joint {
     std::vector<Joint> children;
 
     /* Index in bone_transform_ array */
-    std::uint32_t bone_transform_index{ 0 };
+    uint32_t bone_transform_index{ 0 };
 
     /* Relative transformation to it's parent */
     glm::mat4 relative_transform_matrix{ glm::identity<glm::mat4>() };
@@ -137,7 +137,7 @@ private:
     std::unordered_map<std::string, Animation> animations_;
     glm::mat4 global_inverse_transform_;
 
-    std::uint32_t num_bones_;
+    uint32_t num_bones_;
 
     glm::vec3 bbox_min_;
     glm::vec3 bbox_max_;
@@ -158,8 +158,8 @@ inline glm::vec3 BoneAnimationTrack::Interpolate(float animation_time) const {
     }
 
     else if (!positions_.empty()) {
-        std::uint32_t position_index = GetIndex(animation_time, positions_);
-        std::uint32_t next_position_index = position_index + 1;
+        uint32_t position_index = GetIndex(animation_time, positions_);
+        uint32_t next_position_index = position_index + 1;
 
         float delta_time = positions_[next_position_index].timestamp - positions_[position_index].timestamp;
         float factor = (animation_time - positions_[position_index].timestamp) / delta_time;
@@ -178,8 +178,8 @@ inline glm::quat BoneAnimationTrack::Interpolate(float animation_time) const {
     }
 
     else if (!rotations_.empty()) {
-        std::uint32_t rotation_index = GetIndex(animation_time, rotations_);
-        std::uint32_t next_rotation_index = rotation_index + 1;
+        uint32_t rotation_index = GetIndex(animation_time, rotations_);
+        uint32_t next_rotation_index = rotation_index + 1;
 
         float delta_time = rotations_[next_rotation_index].timestamp - rotations_[rotation_index].timestamp;
         float factor = (animation_time - rotations_[rotation_index].timestamp) / delta_time;
@@ -192,10 +192,10 @@ inline glm::quat BoneAnimationTrack::Interpolate(float animation_time) const {
 
 
 template <typename T>
-inline std::uint32_t BoneAnimationTrack::GetIndex(float animation_time, const std::vector<KeyProperty<T>>& keys) const {
+inline uint32_t BoneAnimationTrack::GetIndex(float animation_time, const std::vector<KeyProperty<T>>& keys) const {
     ASSERT(keys.size() > 0);
 
-    for (std::uint32_t i = 0; i < keys.size() - 1; i++) {
+    for (uint32_t i = 0; i < keys.size() - 1; i++) {
         float t = keys[i + 1].timestamp;
         if (animation_time < t) {
             return i;

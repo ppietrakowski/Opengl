@@ -16,7 +16,7 @@ void SetMouseVisible(bool mouse_visible) {
     IPlatform::GetInstance()->SetMouseVisible(mouse_visible);
 }
 
-bool IsKeyDown(std::int32_t key) {
+bool IsKeyDown(int32_t key) {
     ERR_FAIL_EXPECTED_TRUE_V(IPlatform::GetInstance() != nullptr, false);
     return IPlatform::GetInstance()->IsKeyDown(key);
 }

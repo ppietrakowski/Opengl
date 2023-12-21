@@ -35,38 +35,38 @@ void VertexArray::Unbind() const
     glBindVertexArray(0);
 }
 
-#define GET_ATTRIBUTE_INDEX(attribute) static_cast<std::uint32_t>(attribute.vertex_type)
-#define GET_GL_TYPE_INDEX(attribute) static_cast<std::uint32_t>(attribute.vertex_type)
+#define GET_ATTRIBUTE_INDEX(attribute) static_cast<uint32_t>(attribute.vertex_type)
+#define GET_GL_TYPE_INDEX(attribute) static_cast<uint32_t>(attribute.vertex_type)
 
 void VertexArray::AddBufferInternal(VertexBuffer&& vertex_buffer, std::span<const VertexAttribute> attributes)
 {
-    constexpr std::uint32_t kMaxAttributes = static_cast<std::uint32_t>(PrimitiveVertexType::kMaxPrimitiveVertexType);
+    constexpr uint32_t kMaxAttributes = static_cast<uint32_t>(PrimitiveVertexType::kMaxPrimitiveVertexType);
 
     // start index for new buffer
-    std::uint32_t attribute_start_index = static_cast<std::uint32_t>(vertex_buffers_.size());
-    std::uint32_t stride = 0;
+    uint32_t attribute_start_index = static_cast<uint32_t>(vertex_buffers_.size());
+    uint32_t stride = 0;
 
-    const std::uint32_t kAttributeSizes[kMaxAttributes] = { sizeof(std::int32_t), sizeof(std::uint32_t), sizeof(float) };
-    const std::uint32_t kAttributeConversionTable[kMaxAttributes] = { GL_INT, GL_UNSIGNED_INT, GL_FLOAT };
+    const uint32_t kAttributeSizes[kMaxAttributes] = { sizeof(int32_t), sizeof(uint32_t), sizeof(float) };
+    const uint32_t kAttributeConversionTable[kMaxAttributes] = { GL_INT, GL_UNSIGNED_INT, GL_FLOAT };
 
     Bind();
     vertex_buffer.Bind();
 
     for (const VertexAttribute& attribute : attributes)
     {
-        std::uint32_t size_index = GET_ATTRIBUTE_INDEX(attribute);
+        uint32_t size_index = GET_ATTRIBUTE_INDEX(attribute);
         ASSERT(size_index < kMaxAttributes);
         stride += attribute.num_components * kAttributeSizes[size_index];
     }
 
-    std::uintptr_t offset = 0;
+    uintptr_t offset = 0;
 
     for (const VertexAttribute& attribute : attributes)
     {
         glEnableVertexAttribArray(attribute_start_index);
         GLenum data_normalized = GL_FALSE;
 
-        std::uint32_t gl_type_index = GET_GL_TYPE_INDEX(attribute);
+        uint32_t gl_type_index = GET_GL_TYPE_INDEX(attribute);
         ASSERT(gl_type_index < kMaxAttributes);
 
         if (attribute.vertex_type != PrimitiveVertexType::kFloat) {
@@ -76,7 +76,7 @@ void VertexArray::AddBufferInternal(VertexBuffer&& vertex_buffer, std::span<cons
                 data_normalized, stride, reinterpret_cast<const void*>(offset));
         }
 
-        std::uint32_t size_index = GET_ATTRIBUTE_INDEX(attribute);
+        uint32_t size_index = GET_ATTRIBUTE_INDEX(attribute);
         ASSERT(size_index < kMaxAttributes);
 
         offset += attribute.num_components * kAttributeSizes[size_index];
@@ -100,7 +100,7 @@ void VertexArray::SetIndexBuffer(IndexBuffer&& index_buffer)
     index_buffer_ = std::move(index_buffer);
 }
 
-std::uint32_t VertexArray::GetNumIndices() const
+uint32_t VertexArray::GetNumIndices() const
 {
     ERR_FAIL_EXPECTED_TRUE_V(index_buffer_.IsValid(), 0u);
     return index_buffer_.GetNumIndices();

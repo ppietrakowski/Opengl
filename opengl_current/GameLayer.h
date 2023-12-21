@@ -19,7 +19,7 @@ public:
 
     virtual void SetMouseVisible(bool mouse_visible) = 0;
 
-    virtual bool IsKeyDown(std::int32_t key) const = 0;
+    virtual bool IsKeyDown(int32_t key) const = 0;
 
     static IPlatform* GetInstance() {
         return instance_;
@@ -42,7 +42,7 @@ glm::vec2 GetMousePosition();
 glm::vec2 GetLastMousePosition();
 
 void SetMouseVisible(bool mouse_visible);
-bool IsKeyDown(std::int32_t key);
+bool IsKeyDown(int32_t key);
 
 class Layer {
 public:

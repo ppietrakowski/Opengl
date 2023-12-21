@@ -11,8 +11,8 @@ public:
     Material& operator=(const Material&) = default;
 
 public:
-    std::int32_t GetIntProperty(const char* name) const;
-    void SetIntProperty(const char* name, std::int32_t value);
+    int32_t GetIntProperty(const char* name) const;
+    void SetIntProperty(const char* name, int32_t value);
 
     float GetFloatProperty(const char* name) const;
     void SetFloatProperty(const char* name, float value);
@@ -26,8 +26,8 @@ public:
     glm::vec4 GetVector4Property(const char* name) const;
     void SetVector4Property(const char* name, glm::vec4 value);
 
-    std::shared_ptr<Texture> GetTextureProperty(const char* name, std::uint32_t index=0) const;
-    void SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value, std::uint32_t index = 0);
+    std::shared_ptr<Texture> GetTextureProperty(const char* name, uint32_t index=0) const;
+    void SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value, uint32_t index = 0);
 
     void SetupRenderState() const;
     void SetShaderUniforms() const;

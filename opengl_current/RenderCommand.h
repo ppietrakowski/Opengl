@@ -18,10 +18,10 @@ public:
 
 public:
 
-    static void DrawIndexed(const VertexArray& vertex_array, std::uint32_t num_indices, RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
+    static void DrawIndexed(const VertexArray& vertex_array, uint32_t num_indices, RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
     
     static void SetClearColor(float red, float green, float blue, float alpha = 1.0f);
-    static void Clear(std::uint32_t clear_flags);
+    static void Clear(uint32_t clear_flags);
 
     static void ToggleWireframe();
     static void SetWireframe(bool wireframe_enabled);

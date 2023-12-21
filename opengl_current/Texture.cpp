@@ -16,11 +16,11 @@ Texture::~Texture() {
     glDeleteTextures(1, &renderer_id_);
 }
 
-void Texture::Bind(std::uint32_t texture_unit) const {
+void Texture::Bind(uint32_t texture_unit) const {
     glBindTextureUnit(texture_unit, renderer_id_);
 }
 
-void Texture::Unbind(std::uint32_t texture_unit) {
+void Texture::Unbind(uint32_t texture_unit) {
     glBindTextureUnit(texture_unit, 0);
 }
 
@@ -33,7 +33,7 @@ TextureFormat Texture::GetTextureFormat() const {
     return format_ == GL_RGB ? TextureFormat::kRgb : TextureFormat::kRgba;
 }
 
-Texture::Texture(std::uint32_t width, std::uint32_t height, GLenum format) :
+Texture::Texture(uint32_t width, uint32_t height, GLenum format) :
     width_{ width },
     height_{ height },
     format_{ format },
@@ -70,12 +70,12 @@ Texture2D::Texture2D(const std::string& file_path) :
     LoadFromFile(file_path);
 }
 
-Texture2D::Texture2D(const void* data, std::uint32_t width, std::uint32_t height, TextureFormat format) :
+Texture2D::Texture2D(const void* data, uint32_t width, uint32_t height, TextureFormat format) :
     Texture{ width, height, format == TextureFormat::kRgb ? static_cast<GLenum>(GL_RGB) : static_cast<GLenum>(GL_RGBA) } {
     GenerateTexture2D(data);
 }
 
-Texture2D::Texture2D(std::uint32_t width, std::uint32_t height, TextureFormat format) :
+Texture2D::Texture2D(uint32_t width, uint32_t height, TextureFormat format) :
     Texture2D{ nullptr, width, height, format } {}
 
 void Texture2D::SetData(const void* data, glm::uvec2 size, glm::uvec2 offset) {
@@ -88,14 +88,14 @@ void Texture2D::SetData(const void* data, glm::uvec2 size, glm::uvec2 offset) {
 void Texture2D::LoadFromFile(const std::string& file_path) {
     // Load texture using stb_image
     stbi_set_flip_vertically_on_load(GL_TRUE); // Flip the image vertically if needed
-    std::int32_t width;
-    std::int32_t height;
-    std::int32_t channels;
-    std::uint8_t* data = stbi_load(file_path.c_str(), &width, &height, &channels, 0);
+    int32_t width;
+    int32_t height;
+    int32_t channels;
+    uint8_t* data = stbi_load(file_path.c_str(), &width, &height, &channels, 0);
 
     if (data != nullptr) {
-        width_ = static_cast<std::uint32_t>(width);
-        height_ = static_cast<std::uint32_t>(height);
+        width_ = static_cast<uint32_t>(width);
+        height_ = static_cast<uint32_t>(height);
         format_ = channels == 3 ? GL_RGB : GL_RGBA;
         GenerateTexture2D(data);
     } else {

@@ -18,11 +18,11 @@ Material::Material(const std::shared_ptr<Shader>& shader) :
     }
 }
 
-std::int32_t Material::GetIntProperty(const char* name) const {
+int32_t Material::GetIntProperty(const char* name) const {
     return GetParam(name).GetInt();
 }
 
-void Material::SetIntProperty(const char* name, std::int32_t value) {
+void Material::SetIntProperty(const char* name, int32_t value) {
     GetParam(name).SetInt(value);
 }
 
@@ -58,11 +58,11 @@ void Material::SetVector4Property(const char* name, glm::vec4 value) {
     GetParam(name).SetVector4(value);
 }
 
-std::shared_ptr<Texture> Material::GetTextureProperty(const char* name, std::uint32_t index) const {
+std::shared_ptr<Texture> Material::GetTextureProperty(const char* name, uint32_t index) const {
     return GetParam(name).GetTexture(index);
 }
 
-void Material::SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value, std::uint32_t index) {
+void Material::SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value, uint32_t index) {
     GetParam(name).SetTexture(value, index);
 }
 
@@ -112,7 +112,7 @@ void Material::AddNewProperty(const UniformInfo& info) {
         MaterialParam param{ temp_uniform_name.c_str() };
         param.textures_.reserve(info.num_textures);
 
-        for (std::uint32_t i = 0; i < info.num_textures; ++i) {
+        for (uint32_t i = 0; i < info.num_textures; ++i) {
             param.textures_.emplace_back(Renderer::GetDefaultTexture());
         }
 

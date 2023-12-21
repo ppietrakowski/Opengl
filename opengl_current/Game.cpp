@@ -67,7 +67,7 @@ Game::~Game() {
     game_instance_ = nullptr;
 }
 
-constexpr std::uint32_t kClearFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+constexpr uint32_t kClearFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 
 void Game::Run() {
     TimeSeconds delta_seconds = TimeSeconds::zero();
@@ -244,7 +244,7 @@ void Game::SetMouseVisible(bool mouse_visible) {
     }
 }
 
-bool Game::IsKeyDown(std::int32_t key) const {
+bool Game::IsKeyDown(int32_t key) const {
     return glfwGetKey(window_, key);
 }
 

@@ -23,5 +23,5 @@ inline glm::quat ToGlm(aiQuaternion quat) {
     return glm::quat{ quat.w, quat.x, quat.y, quat.z };
 }
 
-constexpr inline std::uint32_t kAssimpImportFlags = aiProcess_Triangulate |
+constexpr inline uint32_t kAssimpImportFlags = aiProcess_Triangulate |
 aiProcess_GenNormals | aiProcess_JoinIdenticalVertices | aiProcess_FlipUVs;

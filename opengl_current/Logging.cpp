@@ -11,7 +11,7 @@ IMPLEMENT_LOG_CATEGORY(RENDERER);
 IMPLEMENT_LOG_CATEGORY(ASSET_LOADING);
 IMPLEMENT_LOG_CATEGORY(GLOBAL);
 
-std::uint32_t Logging::ignored_log_levels_ = 0;
+uint32_t Logging::ignored_log_levels_ = 0;
 
 struct Device {
     std::unique_ptr<LogDevice> log_device;
@@ -53,11 +53,11 @@ void Logging::Initialize() {
 }
 
 void Logging::IgnoreLogLevel(LogLevel level) {
-    ignored_log_levels_ = ignored_log_levels_ | static_cast<std::uint32_t>(level);
+    ignored_log_levels_ = ignored_log_levels_ | static_cast<uint32_t>(level);
 }
 
 void Logging::StopIgnoringLogLevel(LogLevel level) {
-    ignored_log_levels_ = ignored_log_levels_ & (~static_cast<std::uint32_t>(level));
+    ignored_log_levels_ = ignored_log_levels_ & (~static_cast<uint32_t>(level));
 }
 
 void Logging::Quit() {
@@ -65,7 +65,7 @@ void Logging::Quit() {
 }
 
 void Logging::Log(const SourceLocation& location, const char* categoryName, LogLevel logLevel, const std::string& format) {
-    if (ignored_log_levels_ & static_cast<std::uint32_t>(logLevel)) {
+    if (ignored_log_levels_ & static_cast<uint32_t>(logLevel)) {
         return;
     }
 
@@ -110,7 +110,7 @@ std::string FormatString(const char* format, ...) {
     va_list list;
 
     va_start(list, format);
-    std::int32_t sprinf_size = vsnprintf(buffer.data(), buffer.size(), format, list);
+    int32_t sprinf_size = vsnprintf(buffer.data(), buffer.size(), format, list);
     va_end(list);
 
     if (sprinf_size < 0) {

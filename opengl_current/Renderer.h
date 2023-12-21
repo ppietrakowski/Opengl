@@ -24,7 +24,7 @@ public:
         const glm::mat4& transform = glm::mat4{ 1.0f },
         RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
 
-    static void SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, std::uint32_t num_indices,
+    static void SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, uint32_t num_indices,
         const VertexArray& vertex_array,
         const glm::mat4& transform = glm::mat4{ 1.0f },
         RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
@@ -35,7 +35,7 @@ public:
         RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
 
     static void Submit(Shader& shader,
-        std::uint32_t num_indices, const VertexArray& vertexArray,
+        uint32_t num_indices, const VertexArray& vertexArray,
         const glm::mat4& transform = glm::mat4{ 1.0f }, RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();

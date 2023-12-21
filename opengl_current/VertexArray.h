@@ -5,7 +5,7 @@
 
 #include <memory>
 
-enum class PrimitiveVertexType : std::uint8_t
+enum class PrimitiveVertexType : uint8_t
 {
     kInt,
     kUnsignedInt,
@@ -15,7 +15,7 @@ enum class PrimitiveVertexType : std::uint8_t
 
 struct VertexAttribute
 {
-    std::uint8_t num_components : 5;
+    uint8_t num_components : 5;
     PrimitiveVertexType vertex_type : 3;
 };
 
@@ -33,9 +33,9 @@ public:
     
     void SetIndexBuffer(IndexBuffer&& index_buffer);
 
-    std::uint32_t GetNumIndices() const;
+    uint32_t GetNumIndices() const;
 
-    VertexBuffer& GetVertexBufferAt(std::uint32_t index) { return vertex_buffers_[index]; }
+    VertexBuffer& GetVertexBufferAt(uint32_t index) { return vertex_buffers_[index]; }
     IndexBuffer& GetIndexBuffer()
     {
         return index_buffer_;
@@ -44,7 +44,7 @@ public:
     template <typename T>
     void AddBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes)
     {
-        AddBufferInternal(VertexBuffer(data.data(), static_cast<std::uint32_t>(data.size_bytes())), attributes);
+        AddBufferInternal(VertexBuffer(data.data(), static_cast<uint32_t>(data.size_bytes())), attributes);
     }
 
     template <typename T>
@@ -53,7 +53,7 @@ public:
         AddBufferInternal(VertexBuffer(data.data(), data.size_bytes(), true), attributes);
     }
 
-    void AddDynamicBuffer(std::uint32_t max_size, std::span<const VertexAttribute> attributes)
+    void AddDynamicBuffer(uint32_t max_size, std::span<const VertexAttribute> attributes)
     {
         AddBufferInternal(VertexBuffer(max_size), attributes);
     }

@@ -4,7 +4,7 @@ static bool cull_enabled_ = false;
 static bool wireframe_enabled_ = false;
 static bool blending_enabled_ = false;
 
-void RenderCommand::DrawIndexed(const VertexArray& vertex_array, std::uint32_t num_indices, RenderPrimitive render_primitive) {
+void RenderCommand::DrawIndexed(const VertexArray& vertex_array, uint32_t num_indices, RenderPrimitive render_primitive) {
     vertex_array.Bind();
     glDrawElements(static_cast<GLenum>(render_primitive), static_cast<GLsizei>(num_indices), GL_UNSIGNED_INT, nullptr);
 }
@@ -13,7 +13,7 @@ void RenderCommand::SetClearColor(float red, float green, float blue, float alph
     glClearColor(red, green, blue, alpha);
 }
 
-void RenderCommand::Clear(std::uint32_t clear_flags) {
+void RenderCommand::Clear(uint32_t clear_flags) {
     glClear(clear_flags);
 }
 

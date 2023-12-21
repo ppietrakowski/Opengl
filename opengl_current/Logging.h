@@ -21,7 +21,7 @@ DECLARE_LOG_CATEGORY(GLOBAL);
 #define ELOG_DEBUG(category, Format, ...) ELOG(LogLevel::kDebug, category, Format, __VA_ARGS__)
 #define ELOG_VERBOSE(category, Format, ...) ELOG(LogLevel::kVerbose, category, Format, __VA_ARGS__)
 
-enum class LogLevel : std::uint32_t
+enum class LogLevel : uint32_t
 {
     kInfo = 1,
     kWarning = 1 << 1,
@@ -41,7 +41,7 @@ public:
 
 std::string FormatString(const char* format, ...);
 
-using LogDeviceID = std::int16_t;
+using LogDeviceID = int16_t;
 
 class Logging
 {
@@ -60,7 +60,7 @@ public:
     static void EnableStdLogging();
 
 private:
-    static std::uint32_t ignored_log_levels_;
+    static uint32_t ignored_log_levels_;
 
 private:
     static void SortLogDeviceIDs();

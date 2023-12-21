@@ -31,9 +31,9 @@ enum class UniformType {
 struct UniformInfo {
     UniformType vertex_type;
     std::string name;
-    std::int32_t location;
+    int32_t location;
 
-    std::uint32_t num_textures{ 0 };
+    uint32_t num_textures{ 0 };
 };
 
 struct ShaderCompilationFailedException : public std::runtime_error {
@@ -52,7 +52,7 @@ struct ShaderProgramLinkingFailedException : public std::runtime_error {
 
 class Texture;
 
-static constexpr std::uint32_t kMinTextureUnits = 16;
+static constexpr uint32_t kMinTextureUnits = 16;
 
 
 class Shader {
@@ -88,17 +88,17 @@ public:
     void Use() const;
     void StopUsing() const;
 
-    void SetUniformInt(const char* name, std::int32_t value);
+    void SetUniformInt(const char* name, int32_t value);
     void SetUniformFloat(const char* name, float value);
     void SetUniformVec2(const char* name, glm::vec2 value);
     void SetUniformVec3(const char* name, const glm::vec3& value);
     void SetUniformVec4(const char* name, const glm::vec4& value);
 
     void SetUniformMat4(const char* name, const glm::mat4& value);
-    void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, std::uint32_t count);
+    void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, uint32_t count);
     void SetUniformMat3(const char* name, const glm::mat3& value);
 
-    std::int32_t GetUniformInt(const char* name) const;
+    int32_t GetUniformInt(const char* name) const;
 
     float GetUniformFloat(const char* name) const;
     glm::vec2 GetUniformVec2(const char* name) const;
@@ -106,17 +106,17 @@ public:
     glm::vec4 GetUniformVec4(const char* name) const;
 
     std::vector<UniformInfo> GetUniformInfos() const;
-    void SetSamplerUniform(const char* uniform_name, std::span<const std::shared_ptr<Texture>> textures, std::uint32_t count, std::uint32_t start_texture_unit=0);
+    void SetSamplerUniform(const char* uniform_name, std::span<const std::shared_ptr<Texture>> textures, uint32_t count, uint32_t start_texture_unit=0);
 
 private:
     GLuint shader_program_{ 0 };
-    mutable std::unordered_map<std::string, std::int32_t> uniform_locations_cache_;
+    mutable std::unordered_map<std::string, int32_t> uniform_locations_cache_;
 
 private:
     static std::shared_ptr<Shader> LoadShader(const std::initializer_list<std::string_view>& paths);
     void GenerateShaders(std::span<std::string_view> sources);
 
 private:
-    std::int32_t GetUniformLocation(const char* uniform_name) const;
+    int32_t GetUniformLocation(const char* uniform_name) const;
     void AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, GLint location) const;
 };

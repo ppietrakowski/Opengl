@@ -9,7 +9,7 @@ VertexBuffer::VertexBuffer() :
 {
 }
 
-VertexBuffer::VertexBuffer(const void* data, std::uint32_t size_bytes, bool dynamic) :
+VertexBuffer::VertexBuffer(const void* data, uint32_t size_bytes, bool dynamic) :
     buffer_size_{ size_bytes }
 {
     GLenum buffer_usage = dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
@@ -19,7 +19,7 @@ VertexBuffer::VertexBuffer(const void* data, std::uint32_t size_bytes, bool dyna
     glBufferData(GL_ARRAY_BUFFER, size_bytes, data, buffer_usage);
 }
 
-VertexBuffer::VertexBuffer(std::uint32_t max_size_bytes) :
+VertexBuffer::VertexBuffer(uint32_t max_size_bytes) :
     VertexBuffer{ nullptr, max_size_bytes, true }
 {
 }
@@ -49,7 +49,7 @@ void VertexBuffer::Unbind() const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void VertexBuffer::UpdateVertices(const void* data, std::uint32_t offset, std::uint32_t size)
+void VertexBuffer::UpdateVertices(const void* data, uint32_t offset, uint32_t size)
 {
     ERR_FAIL_EXPECTED_TRUE(IsValid());
 

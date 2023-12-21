@@ -20,8 +20,8 @@
 #include <functional>
 
 struct WindowSettings {
-    std::uint32_t width;
-    std::uint32_t height;
+    uint32_t width;
+    uint32_t height;
     std::string title;
 };
 
@@ -49,7 +49,7 @@ public:
     glm::vec2 GetMousePosition() const override;
     glm::vec2 GetLastMousePosition() const override;
     void SetMouseVisible(bool mouse_visible) override;
-    bool IsKeyDown(std::int32_t key) const override;
+    bool IsKeyDown(int32_t key) const override;
 
     void AddLayer(std::unique_ptr<Layer>&& game_layer);
     void RemoveLayer(std::type_index index);

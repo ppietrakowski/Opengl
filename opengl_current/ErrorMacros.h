@@ -3,19 +3,19 @@
 #include <stdexcept>
 #include <cstdint>
 
-#define ARRAY_NUM_ELEMENTS(Array) static_cast<std::uint32_t>(sizeof(Array) / sizeof(Array[0]))
+#define ARRAY_NUM_ELEMENTS(Array) static_cast<uint32_t>(sizeof(Array) / sizeof(Array[0]))
 
 
 struct SourceLocation {
     const char* file_name;
-    std::uint32_t line;
+    uint32_t line;
     const char* function_name;
 };
 
 struct ErrorHandlerInfo {
     const char* function_name;
     const char* file_name;
-    std::uint32_t line;
+    uint32_t line;
     const char* error_message;
 
     ErrorHandlerInfo(const SourceLocation& source_location, const char* error_message) :
@@ -60,7 +60,7 @@ extern "C" {
 }
 #endif
 
-#define CURRENT_SOURCE_LOCATION {__FILE__, static_cast<std::uint32_t>(__LINE__), FUNCTION_SIGNATURE}
+#define CURRENT_SOURCE_LOCATION {__FILE__, static_cast<uint32_t>(__LINE__), FUNCTION_SIGNATURE}
 
 #define ERR_FAIL() SourceLocation source_location = CURRENT_SOURCE_LOCATION;  PrintError(&source_location, "Method/function failed"); return
 #define ERR_FAIL_V(RetVal) SourceLocation source_location = CURRENT_SOURCE_LOCATION;  PrintError(&source_location, "Method/function failed"); return RetVal
