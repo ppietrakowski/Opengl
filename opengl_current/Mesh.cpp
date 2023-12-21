@@ -48,12 +48,12 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
         throw std::runtime_error{ importer.GetErrorString() };
     }
 
-    std::vector<StaticMeshVertex> vertices;
+    std::vector<StaticMeshVertex> vertices_;
     std::vector<uint32_t> indices;
     std::uint32_t total_vertices = 0;
     std::uint32_t total_indices = 0;
 
-    vertices.reserve(scene->mMeshes[0]->mNumVertices);
+    vertices_.reserve(scene->mMeshes[0]->mNumVertices);
     indices.reserve(scene->mMeshes[0]->mNumFaces * 3);
 
     for (std::uint32_t i = 0; i < scene->mNumMaterials; ++i) {
@@ -73,7 +73,7 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
             aiVector3D normal = mesh->mNormals[j];
             aiVector3D texture_coords = mesh->mTextureCoords[0][j];
 
-            vertices.emplace_back(ToGlm(pos), ToGlm(normal), ToGlm(texture_coords));
+            vertices_.emplace_back(ToGlm(pos), ToGlm(normal), ToGlm(texture_coords));
         }
 
         for (std::uint32_t j = 0; j < mesh->mNumFaces; ++j) {
@@ -92,12 +92,12 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
     IndexBuffer index_buffer(indices.data(),
         static_cast<std::uint32_t>(indices.size()));
 
-    vertex_array_.AddBuffer<StaticMeshVertex>(vertices, StaticMeshVertex::data_format);
+    vertex_array_.AddBuffer<StaticMeshVertex>(vertices_, StaticMeshVertex::data_format);
     vertex_array_.SetIndexBuffer(std::move(index_buffer));
 
     num_triangles_ = static_cast<std::uint32_t>(indices.size()) / 3;
     mesh_name_ = scene->mName.C_Str();
-    FindAabCollision(vertices, bbox_min_, bbox_max_);
+    FindAabCollision(vertices_, bbox_min_, bbox_max_);
 }
 
 
