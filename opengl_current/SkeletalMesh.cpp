@@ -130,11 +130,19 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
     std::uint32_t num_indices = scene->mMeshes[0]->mNumFaces * 3u;
 
-    vertices_.reserve(scene->mMeshes[0]->mNumVertices);
-    indices_.reserve(num_indices);
+    std::vector<SkeletonMeshVertex> vertices;
+    std::vector<std::uint32_t> indices;
+    vertices.reserve(scene->mMeshes[0]->mNumVertices);
+    indices.reserve(num_indices);
+
+    std::vector<std::shared_ptr<Texture2D>> textures;
 
     for (std::uint32_t i = 0; i < scene->mNumMaterials; ++i) {
-        LoadTexturesFromMaterial(scene, i);
+        auto texture = LoadTexturesFromMaterial(scene, i);
+
+        if (texture != nullptr) {
+            textures.emplace_back(texture);
+        }
     }
 
     std::unordered_map<std::string, BoneInfo> bones_info;
@@ -147,8 +155,8 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
             aiVector3D normal = mesh->mNormals[j];
             aiVector3D texture_coord = mesh->mTextureCoords[0][j];
 
-            vertices_.emplace_back(ToGlm(pos), ToGlm(normal), ToGlm(texture_coord));
-            vertices_.back().texture_id = mesh->mMaterialIndex;
+            vertices.emplace_back(ToGlm(pos), ToGlm(normal), ToGlm(texture_coord));
+            vertices.back().texture_id = mesh->mMaterialIndex;
         }
 
         for (std::uint32_t j = 0; j < mesh->mNumFaces; ++j) {
@@ -156,7 +164,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
             ASSERT(face.mNumIndices == 3);
 
             for (std::uint32_t k = 0; k < 3; ++k) {
-                indices_.emplace_back(face.mIndices[k] + total_indices);
+                indices.emplace_back(face.mIndices[k] + total_indices);
             }
         }
 
@@ -172,7 +180,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
                 std::uint32_t id = bone->mWeights[j].mVertexId + total_vertices;
                 float weight = bone->mWeights[j].mWeight;
 
-                if (!vertices_[id].AddBoneData(bone_id, weight)) {
+                if (!vertices[id].AddBoneData(bone_id, weight)) {
                     break;
                 }
             }
@@ -187,9 +195,9 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     material_->using_transparency = true;
 
     // set diffuse textures
-    for (std::uint32_t i = 0; i < textures_.size(); ++i) {
+    for (std::uint32_t i = 0; i < textures.size(); ++i) {
         std::string name = "diffuse";
-        material_->SetTextureProperty(name.c_str(), textures_[i], i);
+        material_->SetTextureProperty(name.c_str(), textures[i], i);
     }
 
     for (std::uint32_t i = 0; i < scene->mNumAnimations; ++i) {
@@ -202,14 +210,14 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     animations_[current_animation_name_].duration = 10;
 
     root_joint_.AssignHierarchy(scene->mRootNode, bones_info);
-    vertex_array_.AddBuffer<SkeletonMeshVertex>(vertices_, SkeletonMeshVertex::data_format);
-    vertex_array_.SetIndexBuffer(IndexBuffer(indices_.data(), static_cast<std::uint32_t>(indices_.size())));
+    vertex_array_.AddBuffer<SkeletonMeshVertex>(vertices, SkeletonMeshVertex::data_format);
+    vertex_array_.SetIndexBuffer(IndexBuffer(indices.data(), static_cast<std::uint32_t>(indices.size())));
 
     // find global transform for converting from bone space back to local space
     global_inverse_transform_ = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
     bone_transforms_.resize(num_bones_, glm::identity<glm::mat4>());
 
-    FindAabCollision(vertices_, bbox_min_, bbox_max_);
+    FindAabCollision(vertices, bbox_min_, bbox_max_);
     bbox_min_.x *= 0.2f;
     bbox_max_.x *= 0.2f;
 }
@@ -286,7 +294,7 @@ void SkeletalMesh::CalculateTransform(float animation_time, const Joint& joint, 
     }
 }
 
-void SkeletalMesh::LoadTexturesFromMaterial(const aiScene* scene, uint32_t material_index) {
+std::shared_ptr<Texture2D> SkeletalMesh::LoadTexturesFromMaterial(const aiScene* scene, uint32_t material_index) {
     aiString texture_path;
 
     if (scene->mMaterials[material_index]->GetTexture(aiTextureType_DIFFUSE, 0,
@@ -310,9 +318,11 @@ void SkeletalMesh::LoadTexturesFromMaterial(const aiScene* scene, uint32_t mater
                     &width, &height, &num_components, STBI_rgb_alpha));
             }
 
-            textures_.emplace_back(std::make_shared<Texture2D>(image_data.get(), width, height, TextureFormat::kRgba));
+            return std::make_shared<Texture2D>(image_data.get(), width, height, TextureFormat::kRgba);
         }
     }
+
+    return nullptr;
 }
 
 void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& out_box_min, glm::vec3& out_box_max) {

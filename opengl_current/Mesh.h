@@ -37,9 +37,6 @@ public:
     std::uint32_t GetNumPolygons() const;
     std::uint32_t GetNumTriangles() const;
 
-    std::span<const StaticMeshVertex> GetVertices() const;
-    std::span<const std::uint32_t> GetIndices() const;
-
     const glm::vec3& GetBBoxMin() const;
     const glm::vec3& GetBBoxMax() const;
 
@@ -57,22 +54,12 @@ private:
     VertexArray vertex_array_;
     std::uint32_t num_triangles_;
 
-    std::vector<StaticMeshVertex> vertices_;
-    std::vector<std::uint32_t> indices_;
     std::shared_ptr<Material> material_;
 
     glm::vec3 bbox_min_;
     glm::vec3 bbox_max_;
     std::string mesh_name_;
 };
-
-inline std::span<const StaticMeshVertex> StaticMesh::GetVertices() const {
-    return vertices_;
-}
-
-inline std::span<const std::uint32_t> StaticMesh::GetIndices() const {
-    return indices_;
-}
 
 inline const glm::vec3& StaticMesh::GetBBoxMin() const {
     return bbox_min_;

@@ -131,13 +131,8 @@ public:
     std::vector<std::string> GetAnimationNames() const;
 
 private:
-    std::vector<std::shared_ptr<Texture2D>> textures_;
     VertexArray vertex_array_;
     std::vector<glm::mat4> bone_transforms_;
-    std::vector<SkeletonMeshVertex> vertices_;
-    std::vector<std::uint32_t> indices_;
-
-
     Joint root_joint_;
     std::unordered_map<std::string, Animation> animations_;
     glm::mat4 global_inverse_transform_;
@@ -152,7 +147,7 @@ private:
 
 private:
     void CalculateTransform(float animation_time, const Joint& joint, const glm::mat4& parent_transform = glm::mat4{ 1.0f });
-    void LoadTexturesFromMaterial(const aiScene* scene, uint32_t material_index);
+    std::shared_ptr<Texture2D> LoadTexturesFromMaterial(const aiScene* scene, uint32_t material_index);
     void LoadAnimation(const aiScene* scene, uint32_t animation_index);
 };
 
