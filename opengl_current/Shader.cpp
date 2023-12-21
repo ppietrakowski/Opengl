@@ -15,15 +15,15 @@ namespace {
     const char* ShaderTypeToString(GLenum type) {
         switch (type) {
         case GL_VERTEX_SHADER:
-        return "vertex";
+            return "vertex";
         case GL_FRAGMENT_SHADER:
-        return "fragment";
+            return "fragment";
         case GL_GEOMETRY_SHADER:
-        return "geometry";
+            return "geometry";
         case GL_TESS_EVALUATION_SHADER:
-        return "tesselation-evaluation";
+            return "tesselation-evaluation";
         case GL_TESS_CONTROL_SHADER:
-        return "tesselation-control";
+            return "tesselation-control";
         }
 
         return "???";
@@ -277,9 +277,20 @@ std::vector<UniformInfo> Shader::GetUniformInfos() const {
     return uniforms_info;
 }
 
-void Shader::SetSamplerUniform(const char* uniformName, const Texture& texture, std::uint32_t texture_unit) {
-    texture.Bind(texture_unit);
-    SetUniformInt(uniformName, static_cast<std::int32_t>(texture_unit));
+void Shader::SetSamplerUniform(const char* uniform_name, std::span<const std::shared_ptr<Texture>> textures, std::uint32_t count, std::uint32_t start_texture_unit) {
+
+    std::uint32_t last_texture_unit = count  + start_texture_unit;
+    ASSERT(last_texture_unit < kMinTextureUnits);
+
+    std::array<std::int32_t, kMinTextureUnits> texture_units_assigned{};
+
+    for (std::uint32_t i = start_texture_unit; i < last_texture_unit; ++i) {
+        std::uint32_t texture_array_index = i - start_texture_unit;
+        textures[texture_array_index]->Bind(i);
+        texture_units_assigned[texture_array_index] = i;
+    }
+
+    glUniform1iv(GetUniformLocation(uniform_name), count, texture_units_assigned.data());
 }
 
 std::shared_ptr<Shader> Shader::LoadShader(const std::initializer_list<std::string_view>& paths) {
@@ -371,6 +382,6 @@ void Shader::AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, GLin
         [&](GLTypeToUniformType& t) { return t.gl_uniform_type == type; });
 
     if (it != std::end(kGLTypesToUniformTypes)) {
-        out_uniforms_info.emplace_back(UniformInfo{ it->vertex_type, name, location });
+        out_uniforms_info.emplace_back(UniformInfo{ it->vertex_type, name, location, static_cast<std::uint32_t>(size) });
     }
 }

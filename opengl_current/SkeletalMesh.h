@@ -154,7 +154,6 @@ private:
     void CalculateTransform(float animation_time, const Joint& joint, const glm::mat4& parent_transform = glm::mat4{ 1.0f });
     void LoadTexturesFromMaterial(const aiScene* scene, uint32_t material_index);
     void LoadAnimation(const aiScene* scene, uint32_t animation_index);
-
 };
 
 template<>

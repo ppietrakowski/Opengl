@@ -32,6 +32,8 @@ struct UniformInfo {
     UniformType vertex_type;
     std::string name;
     std::int32_t location;
+
+    std::uint32_t num_textures{ 0 };
 };
 
 struct ShaderCompilationFailedException : public std::runtime_error {
@@ -49,6 +51,8 @@ struct ShaderProgramLinkingFailedException : public std::runtime_error {
 };
 
 class Texture;
+
+static constexpr std::uint32_t kMinTextureUnits = 16;
 
 
 class Shader {
@@ -102,7 +106,7 @@ public:
     glm::vec4 GetUniformVec4(const char* name) const;
 
     std::vector<UniformInfo> GetUniformInfos() const;
-    void SetSamplerUniform(const char* uniform_name, const Texture& texture, std::uint32_t texture_unit);
+    void SetSamplerUniform(const char* uniform_name, std::span<const std::shared_ptr<Texture>> textures, std::uint32_t count, std::uint32_t start_texture_unit=0);
 
 private:
     GLuint shader_program_{ 0 };

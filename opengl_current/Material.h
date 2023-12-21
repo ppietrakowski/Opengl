@@ -26,8 +26,8 @@ public:
     glm::vec4 GetVector4Property(const char* name) const;
     void SetVector4Property(const char* name, glm::vec4 value);
 
-    std::shared_ptr<Texture> GetTextureProperty(const char* name) const;
-    void SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value);
+    std::shared_ptr<Texture> GetTextureProperty(const char* name, std::uint32_t index=0) const;
+    void SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value, std::uint32_t index = 0);
 
     void SetupRenderState() const;
     void SetShaderUniforms() const;
@@ -41,23 +41,19 @@ public:
     bool using_transparency : 1{ false };
 
 private:
-    MaterialPropertyList<std::int32_t> ints_;
-    MaterialPropertyList<float> floats_;
-    MaterialPropertyList<glm::vec2> vectors2_;
-    MaterialPropertyList<glm::vec3> vectors3_;
-    MaterialPropertyList<glm::vec4> vectors4_;
-    MaterialPropertyList<std::shared_ptr<Texture>> textures_;
     std::shared_ptr<Shader> shader_;
-
+    std::unordered_map<std::string, MaterialParam> material_params_;
 
 private:
     void TryAddNewProperty(const UniformInfo& info);
     void AddNewProperty(const UniformInfo& info);
-    void AddNewTexture(const UniformInfo& info);
-    void AddNewInt(const UniformInfo& info);
 
-    void AddNewFloat(const UniformInfo& info);
-    void AddNewVec2(const UniformInfo& info);
-    void AddNewVec3(const UniformInfo& info);
-    void AddNewVec4(const UniformInfo& info);
+    MaterialParam& GetParam(const char* name) {
+        return material_params_.at(name);
+    }
+    
+    const MaterialParam& GetParam(const char* name) const {
+        return material_params_.at(name);
+    }
 };
+

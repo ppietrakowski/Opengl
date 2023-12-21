@@ -188,8 +188,8 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
     // set diffuse textures
     for (std::uint32_t i = 0; i < textures_.size(); ++i) {
-        std::string name = "diffuse" + std::to_string(i + 1);
-        material_->SetTextureProperty(name.c_str(), textures_[i]);
+        std::string name = "diffuse";
+        material_->SetTextureProperty(name.c_str(), textures_[i], i);
     }
 
     for (std::uint32_t i = 0; i < scene->mNumAnimations; ++i) {

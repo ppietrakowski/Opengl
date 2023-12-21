@@ -8,8 +8,6 @@ namespace {
     constexpr std::string_view MaterialTag = "u_material.";
 }
 
-using TextureSetter = PropertySetter<std::shared_ptr<Texture>>;
-
 Material::Material(const std::shared_ptr<Shader>& shader) :
     shader_{ shader } {
     // retrieve all uniforms information from shader
@@ -21,51 +19,51 @@ Material::Material(const std::shared_ptr<Shader>& shader) :
 }
 
 std::int32_t Material::GetIntProperty(const char* name) const {
-    return ints_.GetValue(name);
+    return GetParam(name).GetInt();
 }
 
 void Material::SetIntProperty(const char* name, std::int32_t value) {
-    ints_.SetValue(name, value);
+    GetParam(name).SetInt(value);
 }
 
 float Material::GetFloatProperty(const char* name) const {
-    return floats_.GetValue(name);
+    return GetParam(name).GetFloat();
 }
 
 void Material::SetFloatProperty(const char* name, float value) {
-    floats_.SetValue(name, value);
+    GetParam(name).SetFloat(value);
 }
 
 glm::vec2 Material::GetVector2Property(const char* name) const {
-    return vectors2_.GetValue(name);
+    return GetParam(name).GetVector2();
 }
 
 void Material::SetVector2Property(const char* name, glm::vec2 value) {
-    vectors2_.SetValue(name, value);
+    GetParam(name).SetVector2(value);
 }
 
 glm::vec3 Material::GetVector3Property(const char* name) const {
-    return vectors3_.GetValue(name);
+    return GetParam(name).GetVector3();
 }
 
 void Material::SetVector3Property(const char* name, glm::vec3 value) {
-    vectors3_.SetValue(name, value);
+    GetParam(name).SetVector3(value);
 }
 
 glm::vec4 Material::GetVector4Property(const char* name) const {
-    return vectors4_.GetValue(name);
+    return GetParam(name).GetVector4();
 }
 
 void Material::SetVector4Property(const char* name, glm::vec4 value) {
-    vectors4_.SetValue(name, value);
+    GetParam(name).SetVector4(value);
 }
 
-std::shared_ptr<Texture> Material::GetTextureProperty(const char* name) const {
-    return textures_.GetValue(name);
+std::shared_ptr<Texture> Material::GetTextureProperty(const char* name, std::uint32_t index) const {
+    return GetParam(name).GetTexture(index);
 }
 
-void Material::SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value) {
-    textures_.SetValue(name, value);
+void Material::SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value, std::uint32_t index) {
+    GetParam(name).SetTexture(value, index);
 }
 
 void Material::TryAddNewProperty(const UniformInfo& info) {
@@ -80,63 +78,48 @@ void Material::AddNewProperty(const UniformInfo& info) {
     switch (info.vertex_type) {
     case UniformType::kVec4:
     {
-        AddNewVec4(info);
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+            info.name.c_str(), glm::vec4{ 0, 0, 0, 1 });
         break;
     }
     case UniformType::kVec3:
     {
-        AddNewVec3(info);
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+            info.name.c_str(), glm::vec3{ 0, 0, 0 });
         break;
     }
     case UniformType::kVec2:
     {
-        AddNewVec2(info);
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+            info.name.c_str(), glm::vec2{ 0, 0 });
         break;
     }
     case UniformType::kFloat:
     {
-        AddNewFloat(info);
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+            info.name.c_str(), 0.0f);
         break;
     }
     case UniformType::kInt:
     {
-        AddNewInt(info);
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+            info.name.c_str(), 0);
         break;
     }
     case UniformType::kSampler2D:
     {
-        AddNewTexture(info);
+        std::string temp_uniform_name = SplitString(info.name, "[").front();
+        MaterialParam param{ temp_uniform_name.c_str() };
+        param.textures_.reserve(info.num_textures);
+
+        for (std::uint32_t i = 0; i < info.num_textures; ++i) {
+            param.textures_.emplace_back(Renderer::GetDefaultTexture());
+        }
+
+        material_params_.try_emplace(temp_uniform_name.substr(MaterialTag.length()), param);
         break;
     }
     }
-}
-
-void Material::AddNewTexture(const UniformInfo& info) {
-    textures_.Add(Renderer::GetDefaultTexture(),
-        info.name, info.name.substr(MaterialTag.length()));
-}
-
-void Material::AddNewInt(const UniformInfo& info) {
-    ints_.Add(0, info.name, info.name.substr(MaterialTag.length()));
-}
-
-void Material::AddNewFloat(const UniformInfo& info) {
-    floats_.Add(0.0f, info.name, info.name.substr(MaterialTag.length()));
-}
-
-void Material::AddNewVec2(const UniformInfo& info) {
-    vectors2_.Add(glm::vec2{ 0, 0 }, info.name,
-        info.name.substr(MaterialTag.length()));
-}
-
-void Material::AddNewVec3(const UniformInfo& info) {
-    vectors3_.Add(glm::vec3{ 0.0f, 0.0f, 0.0f }, info.name,
-        info.name.substr(MaterialTag.length()));
-}
-
-void Material::AddNewVec4(const UniformInfo& info) {
-    vectors4_.Add(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f },
-        info.name, info.name.substr(MaterialTag.length()));
 }
 
 void Material::SetupRenderState() const {
@@ -147,13 +130,7 @@ void Material::SetupRenderState() const {
 void Material::SetShaderUniforms() const {
     Shader& shader = GetShader();
 
-    floats_.RefreshVars(shader);
-    ints_.RefreshVars(shader);
-
-    vectors2_.RefreshVars(shader);
-    vectors3_.RefreshVars(shader);
-    vectors4_.RefreshVars(shader);
-
-    TextureSetter::texture_unit = 0;
-    textures_.RefreshVars(shader);
+    for (auto& [name, param] : material_params_) {
+        param.SetUniform(shader);
+    }
 }

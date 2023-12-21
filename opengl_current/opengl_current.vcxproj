@@ -163,6 +163,7 @@
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="MaterialParameters.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="RenderCommand.cpp" />
     <ClCompile Include="Renderer.cpp" />
