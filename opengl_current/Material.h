@@ -26,8 +26,8 @@ public:
     glm::vec4 GetVector4Property(const char* name) const;
     void SetVector4Property(const char* name, glm::vec4 value);
 
-    std::shared_ptr<Texture> GetTextureProperty(const char* name, uint32_t index=0) const;
-    void SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value, uint32_t index = 0);
+    std::shared_ptr<Texture> GetTextureProperty(const char* name) const;
+    void SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value);
 
     void SetupRenderState() const;
     void SetShaderUniforms() const;
@@ -43,6 +43,7 @@ public:
 private:
     std::shared_ptr<Shader> shader_;
     std::unordered_map<std::string, MaterialParam> material_params_;
+    uint32_t num_texture_units_{ 0 };
 
 private:
     void TryAddNewProperty(const UniformInfo& info);

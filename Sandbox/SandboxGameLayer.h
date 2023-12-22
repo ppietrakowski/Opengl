@@ -50,7 +50,7 @@ private:
 
     glm::vec3 bbox_min_;
     glm::vec3 bbox_max_;
-    TimeSeconds startup_time_{ std::chrono::duration_cast<TimeSeconds>(GetNow()) };
+    std::chrono::milliseconds startup_time_{ GetNow() };
     SkeletalMesh skeletal_mesh_;
 };
 

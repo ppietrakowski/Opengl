@@ -20,14 +20,6 @@ using StbiImageData = std::unique_ptr<uint8_t, StbiDeleter>;
 
 static void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& out_box_min, glm::vec3& out_box_max);
 
-void BoneAnimationTrack::AddNewPositionTimestamp(glm::vec3 position, float timestamp) {
-    positions_.emplace_back(KeyProperty<glm::vec3>{position, timestamp});
-}
-
-void BoneAnimationTrack::AddNewRotationTimestamp(glm::quat Rotation, float timestamp) {
-    rotations_.emplace_back(KeyProperty<glm::quat>{Rotation, timestamp});
-}
-
 glm::mat4 Animation::GetBoneTransformOrRelative(const std::string& boneName, float animation_time, glm::mat4 relative_transform) const {
     auto it = bone_name_to_tracks.find(boneName);
 
@@ -196,8 +188,8 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
     // set diffuse textures
     for (uint32_t i = 0; i < textures.size(); ++i) {
-        std::string name = "diffuse";
-        material_->SetTextureProperty(name.c_str(), textures[i], i);
+        std::string name = "diffuse" + std::to_string(i + 1);
+        material_->SetTextureProperty(name.c_str(), textures[i]);
     }
 
     for (uint32_t i = 0; i < scene->mNumAnimations; ++i) {
@@ -206,7 +198,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
     // define Tpose animation dummy values
     animations_[current_animation_name_] = Animation{};
-    animations_[current_animation_name_].ticks_per_second = 10;
+    animations_[current_animation_name_].ticks_per_second = 30;
     animations_[current_animation_name_].duration = 10;
 
     root_joint_.AssignHierarchy(scene->mRootNode, bones_info);

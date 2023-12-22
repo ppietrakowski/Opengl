@@ -104,7 +104,7 @@ void SandboxGameLayer::OnRender(float delta_time) {
     Renderer::AddDebugBox(bbox_min_, bbox_max_, glm::translate(glm::identity<glm::mat4>(), glm::vec3{ 10, 2, 10 }));
 
     skeletal_mesh_.UpdateAnimation(std::chrono::duration_cast<TimeSeconds>(GetNow() - startup_time_).count());
-    skeletal_mesh_.Draw(glm::translate(glm::vec3{ 10, 0, 0 }) * glm::scale(glm::vec3{ 0.01f, 0.01f, 0.01f }));
+    skeletal_mesh_.Draw(glm::translate(glm::vec3{ 0, -2, -1 }) * glm::scale(glm::vec3{ 0.01f, 0.01f, 0.01f }));
     Renderer::FlushDrawDebug(*unshaded_);
 
     Renderer::EndScene();
@@ -144,7 +144,15 @@ bool SandboxGameLayer::OnEvent(const Event& event) {
 }
 
 void SandboxGameLayer::OnImguiFrame() {
+    static int32_t last_framerate = 0;
+    static int32_t last_last_framerate = 0;
+
+    last_framerate = (last_last_framerate + last_framerate + static_cast<int>(ceil(1.0f / last_delta_seconds_))) / 3;
+
     ImGui::Begin("Transform");
     ImGui::SliderFloat3("Position", &static_mesh_position_[0], -10, 10);
+    ImGui::Text("%i", last_framerate);
     ImGui::End();
+
+    last_last_framerate = last_framerate;
 }

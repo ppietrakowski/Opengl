@@ -190,6 +190,7 @@ void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat
 
     shader.SetUniformMat4("u_projection_view", projection_view_);
     shader.SetUniformMat4("u_transform", transform);
+    shader.SetUniformMat4("u_view", view_);
     shader.SetUniformVec3("u_camera_location", camera_position_);
 
     glm::mat3 normal_matrix = glm::inverseTranspose(transform);

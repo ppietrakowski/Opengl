@@ -106,7 +106,7 @@ public:
     glm::vec4 GetUniformVec4(const char* name) const;
 
     std::vector<UniformInfo> GetUniformInfos() const;
-    void SetSamplerUniform(const char* uniform_name, std::span<const std::shared_ptr<Texture>> textures, uint32_t count, uint32_t start_texture_unit=0);
+    void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, uint32_t start_texture_unit=0);
 
 private:
     GLuint shader_program_{ 0 };

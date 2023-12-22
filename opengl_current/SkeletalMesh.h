@@ -155,9 +155,7 @@ template<>
 inline glm::vec3 BoneAnimationTrack::Interpolate(float animation_time) const {
     if (positions_.size() == 1) {
         return positions_[0].property;
-    }
-
-    else if (!positions_.empty()) {
+    } else if (!positions_.empty()) {
         uint32_t position_index = GetIndex(animation_time, positions_);
         uint32_t next_position_index = position_index + 1;
 
@@ -175,9 +173,7 @@ template<>
 inline glm::quat BoneAnimationTrack::Interpolate(float animation_time) const {
     if (rotations_.size() == 1) {
         return rotations_[0].property;
-    }
-
-    else if (!rotations_.empty()) {
+    } else if (!rotations_.empty()) {
         uint32_t rotation_index = GetIndex(animation_time, rotations_);
         uint32_t next_rotation_index = rotation_index + 1;
 
@@ -213,4 +209,13 @@ inline void SkeletalMesh::UpdateAnimation(float elapsed_time) {
 
     // run transform update chain starting from root joint
     CalculateTransform(animation_time, root_joint_);
+}
+
+
+inline void BoneAnimationTrack::AddNewPositionTimestamp(glm::vec3 position, float timestamp) {
+    positions_.emplace_back(KeyProperty<glm::vec3>{position, timestamp});
+}
+
+inline void BoneAnimationTrack::AddNewRotationTimestamp(glm::quat Rotation, float timestamp) {
+    rotations_.emplace_back(KeyProperty<glm::quat>{Rotation, timestamp});
 }

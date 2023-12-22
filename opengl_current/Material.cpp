@@ -58,12 +58,12 @@ void Material::SetVector4Property(const char* name, glm::vec4 value) {
     GetParam(name).SetVector4(value);
 }
 
-std::shared_ptr<Texture> Material::GetTextureProperty(const char* name, uint32_t index) const {
-    return GetParam(name).GetTexture(index);
+std::shared_ptr<Texture> Material::GetTextureProperty(const char* name) const {
+    return GetParam(name).GetTexture();
 }
 
-void Material::SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value, uint32_t index) {
-    GetParam(name).SetTexture(value, index);
+void Material::SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value) {
+    GetParam(name).SetTexture(value);
 }
 
 void Material::TryAddNewProperty(const UniformInfo& info) {
@@ -108,15 +108,11 @@ void Material::AddNewProperty(const UniformInfo& info) {
     }
     case UniformType::kSampler2D:
     {
-        std::string temp_uniform_name = SplitString(info.name, "[").front();
-        MaterialParam param{ temp_uniform_name.c_str() };
-        param.textures_.reserve(info.num_textures);
+        MaterialParam param{ info.name.c_str() };
+        param.texture_ = Renderer::GetDefaultTexture();
+        param.texture_unit = num_texture_units_++;
 
-        for (uint32_t i = 0; i < info.num_textures; ++i) {
-            param.textures_.emplace_back(Renderer::GetDefaultTexture());
-        }
-
-        material_params_.try_emplace(temp_uniform_name.substr(MaterialTag.length()), param);
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()), param);
         break;
     }
     }

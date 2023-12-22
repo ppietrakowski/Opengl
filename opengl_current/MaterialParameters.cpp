@@ -63,7 +63,7 @@ void MaterialParam::SetUniform(Shader& shader) const {
         shader.SetUniformVec4(uniform_name_, param_value_.vec4_value);
         break;
     case MaterialParamType::kSampler2D:
-        shader.SetSamplerUniform(uniform_name_, textures_, static_cast<uint32_t>(textures_.size()));
+        shader.SetSamplerUniform(uniform_name_, texture_, texture_unit);
         break;
     default:
         break;
@@ -90,8 +90,8 @@ glm::vec4 MaterialParam::GetVector4() const {
     return param_value_.vec4_value;
 }
 
-std::shared_ptr<Texture> MaterialParam::GetTexture(uint32_t index) const {
-    return textures_.at(index);
+std::shared_ptr<Texture> MaterialParam::GetTexture() const {
+    return texture_;
 }
 
 void MaterialParam::SetInt(int32_t value) {
@@ -114,7 +114,7 @@ void MaterialParam::SetVector4(glm::vec4 value) {
     param_value_.vec4_value = value;
 }
 
-void MaterialParam::SetTexture(const std::shared_ptr<Texture>& value, uint32_t index) {
-    textures_.at(index) = value;
+void MaterialParam::SetTexture(const std::shared_ptr<Texture>& value) {
+    texture_ = value;
 }
 

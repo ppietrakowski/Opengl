@@ -10,7 +10,7 @@
 #include <cstring>
 #include <array>
 
-enum class MaterialParamType : std::int8_t {
+enum class MaterialParamType : int8_t {
     kUnknown = 0,
     kInt,
     kFloat,
@@ -51,18 +51,20 @@ public:
     glm::vec3 GetVector3() const;
     glm::vec4 GetVector4() const;
 
-    std::shared_ptr<Texture> GetTexture(uint32_t index) const;
+    std::shared_ptr<Texture> GetTexture() const;
 
     void SetInt(int32_t value);
     void SetFloat(float value);
     void SetVector2(glm::vec2 value);
     void SetVector3(glm::vec3 value);
     void SetVector4(glm::vec4 value);
-    void SetTexture(const std::shared_ptr<Texture>& value, uint32_t index);
+    void SetTexture(const std::shared_ptr<Texture>& value);
+
+    uint32_t texture_unit{ 0 };
 
 private:
     ParamVal param_value_;
-    std::vector<std::shared_ptr<Texture>> textures_;
+    std::shared_ptr<Texture> texture_;
     MaterialParamType param_type_;
     char uniform_name_[64];
 };
