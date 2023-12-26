@@ -19,48 +19,34 @@ struct VertexAttribute {
 
 class VertexArray {
 public:
-    VertexArray();
-    VertexArray(VertexArray&& temp_vertex_array) noexcept {
-        *this = std::move(temp_vertex_array);
-    }
+    static std::shared_ptr<VertexArray> Create();
+    virtual ~VertexArray() = default;
 
-    VertexArray& operator=(VertexArray&& temp_vertex_array) noexcept;
-    ~VertexArray();
+public:
+    virtual void Bind() const = 0;
+    virtual void Unbind() const = 0;
 
-    void Bind() const;
-    void Unbind() const;
+    virtual void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& index_buffer) = 0;
 
-    void SetIndexBuffer(IndexBuffer&& index_buffer);
+    virtual uint32_t GetNumIndices() const = 0;
 
-    uint32_t GetNumIndices() const;
-
-    VertexBuffer& GetVertexBufferAt(uint32_t index) {
-        return vertex_buffers_[index];
-    }
-
-    IndexBuffer& GetIndexBuffer() {
-        return index_buffer_;
-    }
+    virtual std::shared_ptr<VertexBuffer> GetVertexBufferAt(uint32_t index) = 0;
+    virtual std::shared_ptr<IndexBuffer> GetIndexBuffer() = 0;
 
     template <typename T>
     void AddBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes) {
-        AddBufferInternal(VertexBuffer(data.data(), static_cast<uint32_t>(data.size_bytes())), attributes);
+        AddBufferInternal(VertexBuffer::Create(data.data(), static_cast<uint32_t>(data.size_bytes())), attributes);
     }
 
     template <typename T>
     void AddDynamicBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes) {
-        AddBufferInternal(VertexBuffer(data.data(), data.size_bytes(), true), attributes);
+        AddBufferInternal(VertexBuffer::Create(data.data(), data.size_bytes(), true), attributes);
     }
 
     void AddDynamicBuffer(uint32_t max_size, std::span<const VertexAttribute> attributes) {
-        AddBufferInternal(VertexBuffer(max_size), attributes);
+        AddBufferInternal(VertexBuffer::CreateEmpty(max_size), attributes);
     }
 
-private:
-    uint32_t renderer_id_;
-    std::vector<VertexBuffer> vertex_buffers_;
-    IndexBuffer index_buffer_;
-
-private:
-    void AddBufferInternal(VertexBuffer&& vertex_buffer, std::span<const VertexAttribute> attributes);
+protected:
+    virtual void AddBufferInternal(const std::shared_ptr<VertexBuffer>& vertex_buffer, std::span<const VertexAttribute> attributes) = 0;
 };

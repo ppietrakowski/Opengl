@@ -19,6 +19,7 @@ static DebugRenderBatch* box_batch_ = nullptr;
 void Renderer::Quit() {
     delete box_batch_;
     default_texture_.reset();
+    RenderCommand::Quit();
 }
 
 struct RgbColor {
@@ -52,11 +53,11 @@ void Renderer::Initialize() {
     uint32_t colors_width = 4;
     uint32_t colors_height = 4;
 
-    default_texture_ = std::make_shared<Texture2D>(colors, colors_width, colors_height, TextureFormat::kRgb);
+    default_texture_ = Texture2D::Create(colors, colors_width, colors_height, TextureFormat::kRgb);
     RenderCommand::Initialize();
 
     box_batch_ = new DebugRenderBatch();
-    RenderCommand::ClearBufferBinding();
+    RenderCommand::ClearBufferBindings_Debug();
     RenderCommand::SetCullFace(true);
 }
 

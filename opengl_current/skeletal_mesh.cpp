@@ -10,14 +10,6 @@
 
 #include "Core.h"
 
-struct StbiDeleter {
-    void operator()(uint8_t* bytes) {
-        stbi_image_free(bytes);
-    }
-};
-
-using StbiImageData = std::unique_ptr<uint8_t, StbiDeleter>;
-
 static void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& out_box_min, glm::vec3& out_box_max);
 
 glm::mat4 Animation::GetBoneTransformOrRelative(const std::string& boneName, float animation_time, glm::mat4 relative_transform) const {
@@ -90,7 +82,8 @@ static constexpr const char* kDefaultAnimationName = "TPose";
 SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material) :
     material_{ material },
     current_animation_name_{ kDefaultAnimationName },
-    num_bones_{ 0 } {
+    num_bones_{ 0 },
+    vertex_array_{ VertexArray::Create() } {
     // maps bone name to boneID
     std::unordered_map<std::string, uint32_t> bone_name_to_index;
 
@@ -202,8 +195,8 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     animations_[current_animation_name_].duration = 10;
 
     root_joint_.AssignHierarchy(scene->mRootNode, bones_info);
-    vertex_array_.AddBuffer<SkeletonMeshVertex>(vertices, SkeletonMeshVertex::data_format);
-    vertex_array_.SetIndexBuffer(IndexBuffer(indices.data(), static_cast<uint32_t>(indices.size())));
+    vertex_array_->AddBuffer<SkeletonMeshVertex>(vertices, SkeletonMeshVertex::data_format);
+    vertex_array_->SetIndexBuffer(IndexBuffer::Create(indices.data(), static_cast<uint32_t>(indices.size())));
 
     // find global transform for converting from bone space back to local space
     global_inverse_transform_ = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
@@ -249,7 +242,7 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, uint32_t animation_index)
 
 void SkeletalMesh::Draw(const glm::mat4& transform) {
     Renderer::AddDebugBox(bbox_min_, bbox_max_, transform);
-    Renderer::SubmitSkeleton(*material_, bone_transforms_, num_bones_, vertex_array_, transform);
+    Renderer::SubmitSkeleton(*material_, bone_transforms_, num_bones_, *vertex_array_, transform);
 }
 
 void SkeletalMesh::SetCurrentAnimation(const std::string& animation_name) {
@@ -294,23 +287,15 @@ std::shared_ptr<Texture2D> SkeletalMesh::LoadTexturesFromMaterial(const aiScene*
         const aiTexture* texture = scene->GetEmbeddedTexture(texture_path.C_Str());
 
         if (texture != nullptr) {
-            StbiImageData image_data;
-
-            int32_t width = 0, height = 0, num_components = 0;
-
             bool is_compressed = texture->mHeight == 0;
 
             if (is_compressed) {
-                image_data.reset(stbi_load_from_memory(reinterpret_cast<uint8_t*>(texture->pcData),
-                    texture->mWidth, &width, &height,
-                    &num_components, STBI_rgb_alpha));
+                ImageRgba image = LoadRgbaImageFromMemory(texture->pcData, texture->mWidth);
+                return Texture2D::CreateFromImage(image);
             } else {
-                image_data.reset(stbi_load_from_memory(reinterpret_cast<uint8_t*>(texture->pcData),
-                    texture->mWidth * texture->mHeight,
-                    &width, &height, &num_components, STBI_rgb_alpha));
+                ImageRgba image = LoadRgbaImageFromMemory(texture->pcData, texture->mWidth * texture->mHeight);
+                return Texture2D::CreateFromImage(image);
             }
-
-            return std::make_shared<Texture2D>(image_data.get(), width, height, TextureFormat::kRgba);
         }
     }
 

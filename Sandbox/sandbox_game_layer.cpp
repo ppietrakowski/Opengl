@@ -5,15 +5,7 @@
 #include "error_macros.h"
 #include "logging.h"
 
-#include <GLFW/glfw3.h>
-#include <assimp/mesh.h>
-#include <assimp/scene.h>
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtc/matrix_inverse.hpp>
-
 
 SandboxGameLayer::SandboxGameLayer() :
     camera_rotation_{ glm::vec3{0, 0, 0} },
@@ -21,7 +13,7 @@ SandboxGameLayer::SandboxGameLayer() :
     skeletal_mesh_{ "untitled.fbx", std::make_shared<Material>(Shader::LoadShader("skeleton.vert", "textured.frag")) } {
     shader_ = Shader::LoadShader("shaders/default.vert", "shaders/default.frag");
     unshaded_ = Shader::LoadShader("shaders/default.vert", "shaders/Unshaded.frag");
-
+    
     current_used_ = shader_;
     current_used_->Use();
     current_used_->SetUniformVec3("u_light_color", glm::vec3{ 1, 1, 1 });
@@ -51,7 +43,6 @@ SandboxGameLayer::SandboxGameLayer() :
     material_->SetFloatProperty("shininess", 87.2f);
     wireframe_material_->use_wireframe = true;
     current_material_ = material_;
-
     ELOG_INFO(LOG_GLOBAL, "Loading postac.obj");
     static_mesh_ = std::make_unique<StaticMesh>("postac.obj", material_);
 
@@ -59,34 +50,34 @@ SandboxGameLayer::SandboxGameLayer() :
     static_mesh_position_ = { 2, 0, -10 };
     std::vector<std::string> animations = std::move(skeletal_mesh_.GetAnimationNames());
     skeletal_mesh_.SetCurrentAnimation(animations[1]);
-    RenderCommand::SetClearColor(0.2f, 0.3f, 0.6f);
+    RenderCommand::SetClearColor(RgbaColor{ 50, 30, 170 });
 }
 
 void SandboxGameLayer::OnUpdate(time_milliseconds_t delta_time) {
     float dt = std::chrono::duration_cast<TimeSeconds>(delta_time).count();
 
-    if (IsKeyDown(GLFW_KEY_W)) {
+    if (Input::IsKeyPressed(Keys::kW)) {
         glm::vec3 world_forward = glm::vec3{ 0, 0, -1 };
         glm::vec3 forward = camera_rotation_ * world_forward * dt * move_speed_;
         camera_position_ += forward;
-    } else if (IsKeyDown(GLFW_KEY_S)) {
+    } else if (Input::IsKeyPressed(Keys::kS)) {
         glm::vec3 world_backward = glm::vec3{ 0, 0, 1 };
         glm::vec3 backward = camera_rotation_ * world_backward * dt * move_speed_;
         camera_position_ += backward;
     }
 
-    if (IsKeyDown(GLFW_KEY_E)) {
+    if (Input::IsKeyPressed(Keys::kE)) {
         yaw_ -= yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{ glm::radians(glm::vec3{pitch_, yaw_, 0.0f}) };
-    } else if (IsKeyDown(GLFW_KEY_Q)) {
+    } else if (Input::IsKeyPressed(Keys::kQ)) {
         yaw_ += yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{ glm::radians(glm::vec3{pitch_, yaw_, 0.0f}) };
     }
 
-    if (IsKeyDown(GLFW_KEY_Y)) {
+    if (Input::IsKeyPressed(Keys::kY)) {
         glm::vec3 world_up = glm::vec3{ 0, 1, 0 };
         camera_position_ += ascend_speed_ * world_up * dt;
-    } else if (IsKeyDown(GLFW_KEY_H)) {
+    } else if (Input::IsKeyPressed(Keys::kH)) {
         glm::vec3 world_down = glm::vec3{ 0, -1, 0 };
         camera_position_ += ascend_speed_ * world_down * dt;
     }
@@ -136,7 +127,7 @@ bool SandboxGameLayer::OnEvent(const Event& event) {
         sterring_entity_ = !sterring_entity_;
     }
 
-    if (event.type == EventType::kKeyPressed && event.key.code == GLFW_KEY_P) {
+    if (event.type == EventType::kKeyPressed && event.key.code == Keys::kP) {
         if (current_material_.get() == wireframe_material_.get()) {
             current_material_ = material_;
         } else {

@@ -1,15 +1,7 @@
 #pragma once
 
-#include "vertex_array.h"
+#include "renderer_api.h"
 #include <cstdint>
-
-/* Render primitives, which value is same as openGL equivalents*/
-enum class RenderPrimitive {
-    kPoints = 0x0000, // GL_POINTS
-    kLines = 0x0001, // GL_LINES
-    kTriangles = 0x0004, // GL_TRIANGLES
-    kTrianglesAdjancency = 0x000C // GL_TRIANGLES_ADJANCENCY
-};
 
 struct RenderStats {
     uint32_t num_drawcalls{ 0 };
@@ -25,16 +17,17 @@ public:
 public:
 
     static void Initialize();
-    static void ClearBufferBinding();
+    static void Quit();
+
+    static void ClearBufferBindings_Debug();
 
     static void DrawIndexed(const VertexArray& vertex_array, uint32_t num_indices, RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
 
     static void BeginScene();
     static void EndScene();
-    static void SetClearColor(float red, float green, float blue, float alpha = 1.0f);
-    static void Clear(uint32_t clear_flags);
+    static void SetClearColor(const RgbaColor& clear_color);
+    static void Clear();
 
-    static void ToggleWireframe();
     static void SetWireframe(bool wireframe_enabled);
     static bool IsWireframeEnabled();
 
@@ -46,5 +39,8 @@ public:
     static void SetLineWidth(float line_width);
 
     static RenderStats GetRenderStats();
+
+private:
+    static RendererAPI* renderer_api_;
 };
 

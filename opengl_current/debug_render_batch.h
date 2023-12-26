@@ -18,9 +18,9 @@ public:
     bool HasBatchedAnyPrimitive() const;
 
 private:
-    Buffer<glm::vec3> vertices;
-    Buffer<uint32_t> indices;
-    VertexArray vertex_array;
-    uint32_t last_index_number{ 0 };
+    Buffer<glm::vec3> vertices_;
+    Buffer<uint32_t> indices_;
+    std::shared_ptr<VertexArray> vertex_array_;
+    uint32_t last_index_number_{ 0 };
 };
 

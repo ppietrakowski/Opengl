@@ -1,27 +1,27 @@
 #include "render_command.h"
+#include "opengl_render_api.h"
 
-#include <gl/glew.h>
 #include <chrono>
 
-static bool cull_enabled_ = false;
-static bool wireframe_enabled_ = false;
-static bool blending_enabled_ = false;
 static RenderStats render_stats_;
 static std::chrono::nanoseconds start_timestamp_ = std::chrono::nanoseconds::zero();
+RendererAPI* RenderCommand::renderer_api_ = nullptr;
 
 void RenderCommand::Initialize() {
-    glEnable(GL_DEPTH_TEST);
+    renderer_api_ = new OpenGlRenderApi();
 }
 
-void RenderCommand::ClearBufferBinding() {
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+void RenderCommand::Quit() {
+    delete renderer_api_;
+    renderer_api_ = nullptr;
+}
+
+void RenderCommand::ClearBufferBindings_Debug() {
+    renderer_api_->ClearBufferBindings_Debug();
 }
 
 void RenderCommand::DrawIndexed(const VertexArray& vertex_array, uint32_t num_indices, RenderPrimitive render_primitive) {
-    vertex_array.Bind();
-    glDrawElements(static_cast<GLenum>(render_primitive), static_cast<GLsizei>(num_indices), GL_UNSIGNED_INT, nullptr);
+    renderer_api_->DrawIndexed(vertex_array, num_indices, render_primitive);
     render_stats_.num_drawcalls++;
     render_stats_.num_triangles += (num_indices / 3);
 }
@@ -37,63 +37,36 @@ void RenderCommand::EndScene() {
     start_timestamp_ = now;
 }
 
-void RenderCommand::SetClearColor(float red, float green, float blue, float alpha) {
-    glClearColor(red, green, blue, alpha);
+void RenderCommand::SetClearColor(const RgbaColor& clear_color) {
+    renderer_api_->SetClearColor(clear_color);
 }
 
-void RenderCommand::Clear(uint32_t clear_flags) {
-    glClear(clear_flags);
-}
-
-void RenderCommand::ToggleWireframe() {
-    wireframe_enabled_ = !wireframe_enabled_;
-
-    if (wireframe_enabled_) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    } else {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
+void RenderCommand::Clear() {
+    renderer_api_->Clear();
 }
 
 void RenderCommand::SetWireframe(bool wireframe_enabled) {
-    if (wireframe_enabled != IsWireframeEnabled()) {
-        ToggleWireframe();
-    }
+    renderer_api_->SetWireframe(wireframe_enabled);
 }
 
 bool RenderCommand::IsWireframeEnabled() {
-    return wireframe_enabled_;
+    return renderer_api_->IsWireframeEnabled();
 }
 
 void RenderCommand::SetCullFace(bool cull_face) {
-    if (cull_face && !DoesCullFaces()) {
-        glEnable(GL_CULL_FACE);
-        glFrontFace(GL_CCW);
-        glCullFace(GL_BACK);
-    } else if (!cull_face) {
-        glDisable(GL_CULL_FACE);
-    }
-
-    cull_enabled_ = cull_face;
+    renderer_api_->SetCullFace(cull_face);
 }
 
 bool RenderCommand::DoesCullFaces() {
-    return cull_enabled_;
+    return renderer_api_->DoesCullFaces();
 }
 
 void RenderCommand::SetBlendingEnabled(bool blending_enabled) {
-    if (blending_enabled && !blending_enabled_) {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    } else {
-        glDisable(GL_BLEND);
-    }
-
-    blending_enabled_ = blending_enabled;
+    renderer_api_->SetBlendingEnabled(blending_enabled);
 }
 
 void RenderCommand::SetLineWidth(float line_width) {
-    glLineWidth(line_width);
+    renderer_api_->SetLineWidth(line_width);
 }
 
 RenderStats RenderCommand::GetRenderStats() {

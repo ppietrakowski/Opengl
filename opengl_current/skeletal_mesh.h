@@ -131,7 +131,7 @@ public:
     std::vector<std::string> GetAnimationNames() const;
 
 private:
-    VertexArray vertex_array_;
+    std::shared_ptr<VertexArray> vertex_array_;
     std::vector<glm::mat4> bone_transforms_;
     Bone root_joint_;
     std::unordered_map<std::string, Animation> animations_;

@@ -21,7 +21,7 @@ public:
 			return;
 		}
 
-		uint32_t index = std::distance(data_, current_);
+		uint32_t index = static_cast<uint32_t>(std::distance(data_, current_));
 
 		T* data = new T[new_capacity];
 		std::move(data_, data_ + capacity_, data);
@@ -53,7 +53,7 @@ public:
 	}
 
 	uint32_t GetSize() const {
-		return std::distance(data_, current_);
+		return static_cast<uint32_t>(std::distance(data_, current_));
 	}
 
 	uint32_t GetSizeBytes() const {

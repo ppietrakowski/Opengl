@@ -9,6 +9,7 @@
 
 #include "logging.h"
 #include "texture.h"
+#include "input.h"
 #include "render_command.h"
 #include "renderer.h"
 
