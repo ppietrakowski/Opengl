@@ -24,7 +24,7 @@ struct Event {
     };
 
     struct KeyEvent {
-        int32_t code;
+        KeyCode code;
         int32_t scan_code;
         bool alt_clicked : 1;
         bool control_clicked : 1;
@@ -38,7 +38,7 @@ struct Event {
     };
 
     struct MouseButtonEvent {
-        int32_t button;
+        MouseCode button;
         glm::vec2 mouse_position;
     };
 

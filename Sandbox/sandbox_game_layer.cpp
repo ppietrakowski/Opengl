@@ -5,15 +5,7 @@
 #include "error_macros.h"
 #include "logging.h"
 
-#include <GLFW/glfw3.h>
-#include <assimp/mesh.h>
-#include <assimp/scene.h>
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtc/matrix_inverse.hpp>
-
 
 SandboxGameLayer::SandboxGameLayer() :
     camera_rotation_{ glm::vec3{0, 0, 0} },
@@ -21,7 +13,7 @@ SandboxGameLayer::SandboxGameLayer() :
     skeletal_mesh_{ "untitled.fbx", std::make_shared<Material>(Shader::LoadShader("skeleton.vert", "textured.frag")) } {
     shader_ = Shader::LoadShader("shaders/default.vert", "shaders/default.frag");
     unshaded_ = Shader::LoadShader("shaders/default.vert", "shaders/Unshaded.frag");
-
+    
     current_used_ = shader_;
     current_used_->Use();
     current_used_->SetUniformVec3("u_light_color", glm::vec3{ 1, 1, 1 });
@@ -51,7 +43,6 @@ SandboxGameLayer::SandboxGameLayer() :
     material_->SetFloatProperty("shininess", 87.2f);
     wireframe_material_->use_wireframe = true;
     current_material_ = material_;
-
     ELOG_INFO(LOG_GLOBAL, "Loading postac.obj");
     static_mesh_ = std::make_unique<StaticMesh>("postac.obj", material_);
 
@@ -136,7 +127,7 @@ bool SandboxGameLayer::OnEvent(const Event& event) {
         sterring_entity_ = !sterring_entity_;
     }
 
-    if (event.type == EventType::kKeyPressed && event.key.code == GLFW_KEY_P) {
+    if (event.type == EventType::kKeyPressed && event.key.code == Keys::kP) {
         if (current_material_.get() == wireframe_material_.get()) {
             current_material_ = material_;
         } else {

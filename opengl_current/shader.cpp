@@ -41,13 +41,13 @@ std::shared_ptr<Shader> Shader::CreateFromSource(std::string_view vertex_shader_
 
 std::shared_ptr<Shader> Shader::CreateFromSource(std::string_view vertex_shader_source, std::string_view fragment_shader_source,
     std::string_view geometry_shader_source, std::string_view tesselation_control_shader, std::string_view tesselation_evaluate_shader) {
-        switch (RendererAPI::GetApi()) {
-        case RendererAPI::kOpenGL:
-            return std::make_shared<OpenGlShader>(vertex_shader_source, fragment_shader_source, geometry_shader_source,
-                tesselation_control_shader, tesselation_evaluate_shader);
-        }
+    switch (RendererAPI::GetApi()) {
+    case RendererAPI::kOpenGL:
+        return std::make_shared<OpenGlShader>(vertex_shader_source, fragment_shader_source, geometry_shader_source,
+            tesselation_control_shader, tesselation_evaluate_shader);
+    }
 
-        ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
+    ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
 }
 
 std::shared_ptr<Shader> Shader::LoadShader(std::string_view vertex_shader_path, std::string_view fragment_shader_path) {
