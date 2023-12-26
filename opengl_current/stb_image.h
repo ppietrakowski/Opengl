@@ -4854,12 +4854,13 @@ static uint8_t first_row_filter[5] =
    STBI__F_paeth_first
 };
 
-static int32_t stbi__paeth(int32_t a, int32_t b, int32_t c)
+#define INLINE_ABS(x) ((x) < 0 ? (-x) : (x))
+
+static inline int32_t stbi__paeth(int32_t a, int32_t b, int32_t c)
 {
-    int32_t p = a + b - c;
-    int32_t pa = abs(p - a);
-    int32_t pb = abs(p - b);
-    int32_t pc = abs(p - c);
+    int32_t pa = abs(b - c);
+    int32_t pb = abs(a - c);
+    int32_t pc = abs(a + b - 2 * c);
     if (pa <= pb && pa <= pc) return a;
     if (pb <= pc) return b;
     return c;

@@ -18,14 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Sandbox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SandboxGameLayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="shaders\default.frag">
       <Filter>shaders</Filter>
     </None>
@@ -43,7 +35,15 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SandboxGameLayer.h">
+    <ClCompile Include="sandbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sandbox_game_layer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sandbox_game_layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

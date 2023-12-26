@@ -139,10 +139,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Sandbox.cpp" />
-    <ClCompile Include="SandboxGameLayer.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="shaders\default.frag" />
     <None Include="shaders\default.vert" />
     <None Include="shaders\Unshaded.frag" />
@@ -150,7 +146,11 @@
     <None Include="textured.frag" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SandboxGameLayer.h" />
+    <ClCompile Include="sandbox.cpp" />
+    <ClCompile Include="sandbox_game_layer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sandbox_game_layer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
