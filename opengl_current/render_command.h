@@ -13,6 +13,7 @@ enum class RenderPrimitive {
 
 struct RenderStats {
     uint32_t num_drawcalls{ 0 };
+    uint32_t num_triangles{ 0 };
     uint64_t delta_frame_nanoseconds{ 0 };
 };
 

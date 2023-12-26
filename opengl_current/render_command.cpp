@@ -23,10 +23,12 @@ void RenderCommand::DrawIndexed(const VertexArray& vertex_array, uint32_t num_in
     vertex_array.Bind();
     glDrawElements(static_cast<GLenum>(render_primitive), static_cast<GLsizei>(num_indices), GL_UNSIGNED_INT, nullptr);
     render_stats_.num_drawcalls++;
+    render_stats_.num_triangles += (num_indices / 3);
 }
 
 void RenderCommand::BeginScene() {
     render_stats_.num_drawcalls = 0;
+    render_stats_.num_triangles = 0;
 }
 
 void RenderCommand::EndScene() {
