@@ -2,7 +2,6 @@
 
 #include "Core.h"
 
-#include <GL/glew.h>
 #include <cstdint>
 #include <string>
 #include <optional>
@@ -109,7 +108,7 @@ public:
     void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, uint32_t start_texture_unit=0);
 
 private:
-    GLuint shader_program_{ 0 };
+    uint32_t shader_program_{ 0 };
     mutable std::unordered_map<std::string, int32_t> uniform_locations_cache_;
 
 private:

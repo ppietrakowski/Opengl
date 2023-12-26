@@ -2,6 +2,7 @@
 #include "buffer.h"
 #include "error_macros.h"
 #include "render_command.h"
+#include "debug_render_batch.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
@@ -12,106 +13,6 @@ glm::mat4 Renderer::projection_{ 1.0f };
 glm::mat4 Renderer::projection_view_{ 1.0f };
 glm::vec3 Renderer::camera_position_{ 0.0f, 0.0f, 0.0f };
 std::shared_ptr<Texture2D> Renderer::default_texture_;
-
-// Predefined box indices (base for offsets for box batching)
-static const uint32_t kBaseBoxIndices[] =
-{
-    0, 1, 1, 2, 2, 3, 3, 0,
-    4, 5, 5, 6, 6, 7, 7, 4,
-    0, 4, 1, 5, 2, 6, 3, 7
-};
-
-constexpr uint32_t kMaxDebugNumBox = 100;
-constexpr uint32_t kNumBoxVertices = 8;
-constexpr uint32_t kMaxIndices = kMaxDebugNumBox * ARRAY_NUM_ELEMENTS(kBaseBoxIndices);
-
-/* Just does bind and unbind within scope */
-struct DebugVertexArrayScope {
-
-    VertexArray* target;
-
-    DebugVertexArrayScope(VertexArray& target) :
-        target{ &target } {
-        target.Bind();
-    }
-
-    ~DebugVertexArrayScope() {
-        target->Unbind();
-    }
-};
-
-struct DebugRenderBatch {
-    Buffer<glm::vec3> vertices;
-    Buffer<uint32_t> indices;
-    VertexArray vertex_array;
-    uint32_t last_index_number{ 0 };
-
-    DebugRenderBatch() :
-        vertices{ kMaxDebugNumBox * kNumBoxVertices },
-        indices{ kMaxIndices } {
-        // initialize box batching
-        VertexAttribute attributes[] = { {3, PrimitiveVertexType::kFloat} };
-
-        vertex_array.AddDynamicBuffer(vertices.GetCapacityBytes(), attributes);
-        IndexBuffer index_buffer(indices.GetCapacity());
-        vertex_array.SetIndexBuffer(std::move(index_buffer));
-
-        vertex_array.Unbind();
-    }
-
-    void UploadBatchedData() {
-        DebugVertexArrayScope bind_array_scope{ vertex_array };
-
-        VertexBuffer& vertex_buffer = vertex_array.GetVertexBufferAt(0);
-        vertex_buffer.UpdateVertices(vertices.GetRawData(), vertices.GetSizeBytes());
-
-        IndexBuffer& index_buffer = vertex_array.GetIndexBuffer();
-        index_buffer.UpdateIndices(indices.GetRawData(), indices.GetSize());
-    }
-
-    void FlushDraw(Shader& shader) {
-        Renderer::Submit(shader, indices.GetSize(), vertex_array, glm::mat4{ 1.0 }, RenderPrimitive::kLines);
-        vertices.ResetPtrToStart();
-        indices.ResetPtrToStart();
-        last_index_number = 0;
-
-        vertex_array.Unbind();
-    }
-
-    void AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform) {
-        if (!CanBatchAnotherMesh(ARRAY_NUM_ELEMENTS(kBaseBoxIndices))) {
-            return;
-        }
-
-        std::array<glm::vec3, 8> box_vertices = {
-            glm::vec3{boxmin[0], boxmin[1], boxmin[2]},
-            glm::vec3{boxmax[0], boxmin[1], boxmin[2]},
-            glm::vec3{boxmax[0], boxmax[1], boxmin[2]},
-            glm::vec3{boxmin[0], boxmax[1], boxmin[2]},
-
-            glm::vec3{boxmin[0], boxmin[1], boxmax[2]},
-            glm::vec3{boxmax[0], boxmin[1], boxmax[2]},
-            glm::vec3{boxmax[0], boxmax[1], boxmax[2]},
-            glm::vec3{boxmin[0], boxmax[1], boxmax[2]}
-        };
-
-        uint32_t max_num_vertices = static_cast<uint32_t>(box_vertices.size());
-
-        for (uint32_t i = 0; i < max_num_vertices; ++i) {
-            vertices.AddInstance(transform * glm::vec4{ box_vertices[i], 1.0f });
-        }
-
-        for (uint32_t i = 0; i < ARRAY_NUM_ELEMENTS(kBaseBoxIndices); ++i) {
-            indices.AddInstance(kBaseBoxIndices[i] + last_index_number);
-        }
-
-        last_index_number += ARRAY_NUM_ELEMENTS(box_vertices);
-    }
-
-    bool CanBatchAnotherMesh(uint32_t num_indices) const {
-        return last_index_number + num_indices < kMaxIndices && vertices.GetSize() < vertices.GetCapacity();
-    }
-};
 
 static DebugRenderBatch* box_batch_ = nullptr;
 
@@ -219,7 +120,7 @@ void Renderer::Submit(Shader& shader, uint32_t numIndices, const VertexArray& ve
 }
 
 void Renderer::AddDebugBox(glm::vec3 box_min, glm::vec3 box_max, const glm::mat4& transform) {
-    if (box_batch_->vertices.GetSize() == 0) {
+    if (!box_batch_->HasBatchedAnyPrimitive()) {
         RenderCommand::SetLineWidth(2);
     }
 

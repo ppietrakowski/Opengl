@@ -5,56 +5,54 @@
 
 #include <memory>
 
-enum class PrimitiveVertexType : uint8_t
-{
+enum class PrimitiveVertexType : uint8_t {
     kInt,
     kUnsignedInt,
     kFloat,
     kMaxPrimitiveVertexType
 };
 
-struct VertexAttribute
-{
+struct VertexAttribute {
     uint8_t num_components : 5;
     PrimitiveVertexType vertex_type : 3;
 };
 
-class VertexArray
-{
+class VertexArray {
 public:
     VertexArray();
-    VertexArray(VertexArray&& temp_vertex_array) noexcept { *this = std::move(temp_vertex_array); }
+    VertexArray(VertexArray&& temp_vertex_array) noexcept {
+        *this = std::move(temp_vertex_array);
+    }
 
     VertexArray& operator=(VertexArray&& temp_vertex_array) noexcept;
     ~VertexArray();
 
     void Bind() const;
     void Unbind() const;
-    
+
     void SetIndexBuffer(IndexBuffer&& index_buffer);
 
     uint32_t GetNumIndices() const;
 
-    VertexBuffer& GetVertexBufferAt(uint32_t index) { return vertex_buffers_[index]; }
-    IndexBuffer& GetIndexBuffer()
-    {
+    VertexBuffer& GetVertexBufferAt(uint32_t index) {
+        return vertex_buffers_[index];
+    }
+
+    IndexBuffer& GetIndexBuffer() {
         return index_buffer_;
     }
 
     template <typename T>
-    void AddBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes)
-    {
+    void AddBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes) {
         AddBufferInternal(VertexBuffer(data.data(), static_cast<uint32_t>(data.size_bytes())), attributes);
     }
 
     template <typename T>
-    void AddDynamicBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes)
-    {
+    void AddDynamicBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes) {
         AddBufferInternal(VertexBuffer(data.data(), data.size_bytes(), true), attributes);
     }
 
-    void AddDynamicBuffer(uint32_t max_size, std::span<const VertexAttribute> attributes)
-    {
+    void AddDynamicBuffer(uint32_t max_size, std::span<const VertexAttribute> attributes) {
         AddBufferInternal(VertexBuffer(max_size), attributes);
     }
 

@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp" />
+    <ClCompile Include="debug_render_batch.cpp" />
     <ClCompile Include="error_macros.cpp" />
     <ClCompile Include="event.cpp" />
     <ClCompile Include="game.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="assimp_utils.h" />
     <ClInclude Include="buffer.h" />
     <ClInclude Include="core.h" />
+    <ClInclude Include="debug_render_batch.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="error_macros.h" />
     <ClInclude Include="event.h" />

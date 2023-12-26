@@ -2,6 +2,7 @@
 #include "logging.h"
 #include "texture.h"
 
+#include <GL/glew.h>
 #include <string>
 #include <fstream>
 #include <vector>
@@ -346,7 +347,7 @@ int32_t Shader::GetUniformLocation(const char* uniform_name) const {
 
 void Shader::AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, GLint location) const {
     const uint32_t kMaxNameLength = 96;
-    GLTypeToUniformType kGLTypesToUniformTypes[] =
+    const GLTypeToUniformType kGLTypesToUniformTypes[] =
     {
         {GL_FLOAT, UniformType::kFloat},
         {GL_INT, UniformType::kInt},
@@ -368,7 +369,7 @@ void Shader::AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, GLin
 
     glGetActiveUniform(shader_program_, static_cast<GLuint>(location), kMaxNameLength, &name_length, &size, &type, name);
     auto it = std::find_if(std::begin(kGLTypesToUniformTypes), std::end(kGLTypesToUniformTypes),
-        [&](GLTypeToUniformType& t) { return t.gl_uniform_type == type; });
+        [&](const GLTypeToUniformType& t) { return t.gl_uniform_type == type; });
 
     if (it != std::end(kGLTypesToUniformTypes)) {
         out_uniforms_info.emplace_back(UniformInfo{ it->vertex_type, name, location, static_cast<uint32_t>(size) });
