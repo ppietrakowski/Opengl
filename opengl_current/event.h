@@ -1,3 +1,5 @@
+#pragma once
+
 #include <chrono>
 #include <cstdint>
 #include <glm/glm.hpp>
@@ -56,6 +58,5 @@ struct Event {
     };
 
     uint32_t milliseconds_since_game_start;
-
     Event();
 };

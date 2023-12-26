@@ -59,34 +59,34 @@ SandboxGameLayer::SandboxGameLayer() :
     static_mesh_position_ = { 2, 0, -10 };
     std::vector<std::string> animations = std::move(skeletal_mesh_.GetAnimationNames());
     skeletal_mesh_.SetCurrentAnimation(animations[1]);
-    RenderCommand::SetClearColor(0.2f, 0.3f, 0.6f);
+    RenderCommand::SetClearColor(RgbaColor{ 50, 30, 170 });
 }
 
 void SandboxGameLayer::OnUpdate(time_milliseconds_t delta_time) {
     float dt = std::chrono::duration_cast<TimeSeconds>(delta_time).count();
 
-    if (IsKeyDown(GLFW_KEY_W)) {
+    if (Input::IsKeyPressed(Keys::kW)) {
         glm::vec3 world_forward = glm::vec3{ 0, 0, -1 };
         glm::vec3 forward = camera_rotation_ * world_forward * dt * move_speed_;
         camera_position_ += forward;
-    } else if (IsKeyDown(GLFW_KEY_S)) {
+    } else if (Input::IsKeyPressed(Keys::kS)) {
         glm::vec3 world_backward = glm::vec3{ 0, 0, 1 };
         glm::vec3 backward = camera_rotation_ * world_backward * dt * move_speed_;
         camera_position_ += backward;
     }
 
-    if (IsKeyDown(GLFW_KEY_E)) {
+    if (Input::IsKeyPressed(Keys::kE)) {
         yaw_ -= yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{ glm::radians(glm::vec3{pitch_, yaw_, 0.0f}) };
-    } else if (IsKeyDown(GLFW_KEY_Q)) {
+    } else if (Input::IsKeyPressed(Keys::kQ)) {
         yaw_ += yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{ glm::radians(glm::vec3{pitch_, yaw_, 0.0f}) };
     }
 
-    if (IsKeyDown(GLFW_KEY_Y)) {
+    if (Input::IsKeyPressed(Keys::kY)) {
         glm::vec3 world_up = glm::vec3{ 0, 1, 0 };
         camera_position_ += ascend_speed_ * world_up * dt;
-    } else if (IsKeyDown(GLFW_KEY_H)) {
+    } else if (Input::IsKeyPressed(Keys::kH)) {
         glm::vec3 world_down = glm::vec3{ 0, -1, 0 };
         camera_position_ += ascend_speed_ * world_down * dt;
     }
