@@ -53,7 +53,7 @@ public:
 	}
 
 	uint32_t GetSize() const {
-		return std::distance(data_, current_);
+		return static_cast<uint32_t>(std::distance(data_, current_));
 	}
 
 	uint32_t GetSizeBytes() const {

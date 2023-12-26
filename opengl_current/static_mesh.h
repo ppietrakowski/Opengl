@@ -50,7 +50,7 @@ public:
     std::vector<std::string> texture_paths;
 
 private:
-    VertexArray vertex_array_;
+    std::shared_ptr<VertexArray> vertex_array_;
     uint32_t num_triangles_;
 
     std::shared_ptr<Material> material_;

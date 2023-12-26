@@ -14,9 +14,9 @@ bool GlfwInput::IsMouseButtonPressedImpl(MouseCode button) {
 }
 
 glm::vec2 GlfwInput::GetMousePositionImpl() {
-    return mouse_position;
+    return mouse_position_;
 }
 
 void GlfwInput::Update(const WindowData& window_data) {
-    mouse_position = window_data.mouse_position;
+    mouse_position_ = window_data.mouse_position;
 }

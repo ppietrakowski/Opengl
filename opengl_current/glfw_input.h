@@ -17,6 +17,6 @@ public:
 
 private:
     GLFWwindow* window_;
-    glm::vec2 mouse_position;
+    glm::vec2 mouse_position_;
 };
 

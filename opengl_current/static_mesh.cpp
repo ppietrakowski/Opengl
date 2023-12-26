@@ -39,7 +39,8 @@ static void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::ve
 
 
 StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared_ptr<Material>& material) :
-    material_{ material } {
+    material_{ material },
+    vertex_array_{ VertexArray::Create() } {
 
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(file_path.string(), kAssimpImportFlags);
@@ -54,7 +55,9 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
     uint32_t total_indices = 0;
 
     vertices_.reserve(scene->mMeshes[0]->mNumVertices);
-    indices.reserve(scene->mMeshes[0]->mNumFaces * 3);
+    
+    uint32_t start_num_indices = scene->mMeshes[0]->mNumFaces * 3;
+    indices.reserve(start_num_indices);
 
     for (uint32_t i = 0; i < scene->mNumMaterials; ++i) {
         aiString texture_path;
@@ -89,11 +92,11 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
         total_indices += mesh->mNumFaces * 3;
     }
 
-    IndexBuffer index_buffer(indices.data(),
+    std::shared_ptr<IndexBuffer> index_buffer = IndexBuffer::Create(indices.data(),
         static_cast<uint32_t>(indices.size()));
-
-    vertex_array_.AddBuffer<StaticMeshVertex>(vertices_, StaticMeshVertex::data_format);
-    vertex_array_.SetIndexBuffer(std::move(index_buffer));
+    
+    vertex_array_->AddBuffer<StaticMeshVertex>(vertices_, StaticMeshVertex::data_format);
+    vertex_array_->SetIndexBuffer(index_buffer);
 
     num_triangles_ = static_cast<uint32_t>(indices.size()) / 3;
     mesh_name_ = scene->mName.C_Str();
@@ -102,10 +105,10 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
 
 
 void StaticMesh::Render(const glm::mat4& transform) const {
-    Renderer::Submit(*material_, vertex_array_, transform);
+    Renderer::Submit(*material_, *vertex_array_, transform);
 }
 
 void StaticMesh::Render(const Material& override_material, const glm::mat4& transform) const {
-    Renderer::Submit(override_material, vertex_array_, transform);
+    Renderer::Submit(override_material, *vertex_array_, transform);
 }
 

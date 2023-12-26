@@ -155,6 +155,7 @@
     <ClCompile Include="game_layer.cpp" />
     <ClCompile Include="glfw_input.cpp" />
     <ClCompile Include="glfw_window.cpp" />
+    <ClCompile Include="image_rgba.cpp" />
     <ClCompile Include="Imgui\imgui.cpp" />
     <ClCompile Include="Imgui\imgui_demo.cpp" />
     <ClCompile Include="Imgui\imgui_draw.cpp" />
@@ -168,8 +169,13 @@
     <ClCompile Include="material.cpp" />
     <ClCompile Include="material_parameter.cpp" />
     <ClCompile Include="object.cpp" />
+    <ClCompile Include="opengl_index_buffer.cpp" />
     <ClCompile Include="opengl_graphics_context.cpp" />
     <ClCompile Include="opengl_render_api.cpp" />
+    <ClCompile Include="opengl_shader.cpp" />
+    <ClCompile Include="opengl_texture.cpp" />
+    <ClCompile Include="opengl_vertex_array.cpp" />
+    <ClCompile Include="opengl_vertex_buffer.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="renderer_api.cpp" />
     <ClCompile Include="render_command.cpp" />
@@ -177,8 +183,8 @@
     <ClCompile Include="skeletal_mesh.cpp" />
     <ClCompile Include="static_mesh.cpp" />
     <ClCompile Include="texture.cpp" />
-    <ClCompile Include="vertex_array.cpp" />
     <ClCompile Include="vertex_buffer.cpp" />
+    <ClCompile Include="vertex_array.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -195,6 +201,7 @@
     <ClInclude Include="glfw_window.h" />
     <ClInclude Include="glfw_window_data.h" />
     <ClInclude Include="graphics_context.h" />
+    <ClInclude Include="image_rgba.h" />
     <ClInclude Include="Imgui\imconfig.h" />
     <ClInclude Include="Imgui\imgui.h" />
     <ClInclude Include="Imgui\imgui_impl_glfw.h" />
@@ -211,8 +218,13 @@
     <ClInclude Include="material.h" />
     <ClInclude Include="material_parameter.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="opengl_index_buffer.h" />
     <ClInclude Include="opengl_graphics_context.h" />
     <ClInclude Include="opengl_render_api.h" />
+    <ClInclude Include="opengl_shader.h" />
+    <ClInclude Include="opengl_texture.h" />
+    <ClInclude Include="opengl_vertex_array.h" />
+    <ClInclude Include="opengl_vertex_buffer.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="renderer_api.h" />
     <ClInclude Include="render_command.h" />

@@ -1,9 +1,5 @@
 #pragma once
 
-extern "C" {
-#include "stb_image.h"
-}
-
 #include <cstdint>
 #include <vector>
 #include <string>
@@ -12,59 +8,37 @@ extern "C" {
 #include <filesystem>
 #include <span>
 
-enum class TextureFormat
-{
+#include "image_rgba.h"
+
+enum class TextureFormat {
     kRgb,
     kRgba
 };
 
-class Texture
-{
+class Texture {
 public:
-    virtual ~Texture();
+    virtual ~Texture() = default;
 
 public:
-    uint32_t GetWidth() const { return width_; }
-    uint32_t GetHeight() const { return height_; }
+    virtual uint32_t GetWidth() const = 0;
+    virtual uint32_t GetHeight() const = 0;
 
     virtual void SetData(const void* data, glm::uvec2 size, glm::uvec2 offset = { 0, 0 }) = 0;
-    void Bind(uint32_t texture_unit) const;
-    static void Unbind(uint32_t texture_unit);
+    virtual void Bind(uint32_t texture_unit) const = 0;
+    virtual void Unbind(uint32_t texture_unit) = 0;
 
-    bool GotMinimaps() const { return got_mipmaps_; }
+    virtual bool GotMinimaps() const = 0;
+    virtual void GenerateMipmaps() = 0;
 
-    void GenerateMipmaps();
-
-    TextureFormat GetTextureFormat() const;
-
-protected:
-    uint32_t renderer_id_;
-    uint32_t width_;
-    uint32_t height_;
-    uint32_t format_;
-    bool got_mipmaps_ : 1;
-
-protected:
-    Texture(uint32_t width, uint32_t height, uint32_t format);
-
-protected:
-    uint32_t GetGlFormat() const;
-
-    void GenerateTexture2D(const void* data);
-    void SetStandardTextureOptions();
+    virtual TextureFormat GetTextureFormat() const = 0;
 };
 
-class Texture2D : public Texture
-{
+class Texture2D : public Texture {
 public:
-    Texture2D(const std::string& file_path);
-    Texture2D(const void* data, uint32_t width, uint32_t height, TextureFormat format);
-    Texture2D(uint32_t width, uint32_t height, TextureFormat format);
-
-public:
-    virtual void SetData(const void* data, glm::uvec2 size, glm::uvec2 offset = { 0, 0 }) override;
-
-private:
-    void LoadFromFile(const std::string& file_path);
+    static std::shared_ptr<Texture2D> LoadFromFile(const std::string& file_path);
+    static std::shared_ptr<Texture2D> Create(const void* data, uint32_t width, uint32_t height, TextureFormat format);
+    static std::shared_ptr<Texture2D> CreateFromImage(const ImageRgba& image);
+    static std::shared_ptr<Texture2D> CreateEmpty(uint32_t width, uint32_t height, TextureFormat format);
 };
 
+ImageRgba LoadRgbaImageFromMemory(const void* data, uint32_t length);
