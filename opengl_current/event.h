@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <glm/glm.hpp>
 
+#include "keys.h"
+
 enum class EventType {
     kInvalid = 0,
     kLostFocus,

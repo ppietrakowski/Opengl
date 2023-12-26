@@ -132,7 +132,7 @@ void GlfwWindow::BindWindowCallbacks() {
         if (game_window_data->event_callback) {
             Event event{};
             event.type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EventType::kKeyPressed : EventType::kKeyReleased;
-            event.key = { key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER) };
+            event.key = { (KeyCode)key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER) };
 
             game_window_data->event_callback(event);
         }
@@ -144,7 +144,7 @@ void GlfwWindow::BindWindowCallbacks() {
         if (game_window_data->event_callback) {
             Event event{};
             event.type = (action == GLFW_PRESS) ? EventType::kMouseButtonPressed : EventType::kMouseButtonReleased;
-            event.mouse_button = { button, game_window_data->mouse_position };
+            event.mouse_button = { (MouseCode)button, game_window_data->mouse_position };
             game_window_data->event_callback(event);
         }
     });
