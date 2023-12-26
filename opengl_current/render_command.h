@@ -23,6 +23,9 @@ public:
 
 public:
 
+    static void Initialize();
+    static void ClearBufferBinding();
+
     static void DrawIndexed(const VertexArray& vertex_array, uint32_t num_indices, RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
 
     static void BeginScene();

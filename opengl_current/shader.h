@@ -117,5 +117,5 @@ private:
 
 private:
     int32_t GetUniformLocation(const char* uniform_name) const;
-    void AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, GLint location) const;
+    void AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, int32_t location) const;
 };

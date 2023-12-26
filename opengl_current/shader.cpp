@@ -345,7 +345,7 @@ int32_t Shader::GetUniformLocation(const char* uniform_name) const {
     return it->second;
 }
 
-void Shader::AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, GLint location) const {
+void Shader::AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, int32_t location) const {
     const uint32_t kMaxNameLength = 96;
     const GLTypeToUniformType kGLTypesToUniformTypes[] =
     {

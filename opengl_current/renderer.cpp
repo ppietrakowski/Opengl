@@ -53,14 +53,10 @@ void Renderer::Initialize() {
     uint32_t colors_height = 4;
 
     default_texture_ = std::make_shared<Texture2D>(colors, colors_width, colors_height, TextureFormat::kRgb);
-
-    glEnable(GL_DEPTH_TEST);
+    RenderCommand::Initialize();
 
     box_batch_ = new DebugRenderBatch();
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
+    RenderCommand::ClearBufferBinding();
     RenderCommand::SetCullFace(true);
 }
 

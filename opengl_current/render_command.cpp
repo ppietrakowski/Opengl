@@ -9,6 +9,16 @@ static bool blending_enabled_ = false;
 static RenderStats render_stats_;
 static std::chrono::nanoseconds start_timestamp_ = std::chrono::nanoseconds::zero();
 
+void RenderCommand::Initialize() {
+    glEnable(GL_DEPTH_TEST);
+}
+
+void RenderCommand::ClearBufferBinding() {
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
 void RenderCommand::DrawIndexed(const VertexArray& vertex_array, uint32_t num_indices, RenderPrimitive render_primitive) {
     vertex_array.Bind();
     glDrawElements(static_cast<GLenum>(render_primitive), static_cast<GLsizei>(num_indices), GL_UNSIGNED_INT, nullptr);
