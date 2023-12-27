@@ -8,8 +8,8 @@ public:
     SandboxGameLayer();
 
     // Inherited via IGameLayer
-    void OnUpdate(time_milliseconds_t delta_time) override;
-    void OnRender(time_milliseconds_t delta_time) override;
+    void OnUpdate(Duration delta_time) override;
+    void OnRender(Duration delta_time) override;
     bool OnEvent(const Event& event) override;
     void OnImguiFrame() override;
 
@@ -33,10 +33,10 @@ private:
     std::shared_ptr<Material> current_material_;
     std::shared_ptr<Material> material_test_;
 
-    float yaw_ = -90.0f;
+    float yaw_ = 0.0f;
     float pitch_ = 0.0f;
 
-    time_milliseconds_t last_delta_seconds_{ time_milliseconds_t::zero()};
+    Duration last_delta_seconds_;
     bool was_pressed_last_time_ = false;
     bool sterring_entity_{ false };
 
@@ -46,8 +46,8 @@ private:
 
     glm::vec3 bbox_min_;
     glm::vec3 bbox_max_;
-    time_milliseconds_t startup_time_{ GetNow() };
-    time_milliseconds_t duration_{ GetNow() };
+    Duration startup_time_{ GetNow() };
+    Duration duration_{ GetNow() };
     SkeletalMesh skeletal_mesh_;
 };
 

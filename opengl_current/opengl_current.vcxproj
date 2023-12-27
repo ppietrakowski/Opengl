@@ -192,6 +192,7 @@
     <ClInclude Include="buffer.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="debug_render_batch.h" />
+    <ClInclude Include="duration.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="error_macros.h" />
     <ClInclude Include="event.h" />

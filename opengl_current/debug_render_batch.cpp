@@ -17,7 +17,6 @@ constexpr uint32_t kMaxIndices = kMaxDebugNumBox * STD_ARRAY_NUM_ELEMENTS(kBaseB
 
 /* Just does bind and unbind within scope */
 struct DebugVertexArrayScope {
-
     VertexArray* target;
 
     DebugVertexArrayScope(VertexArray& target) :

@@ -74,3 +74,9 @@ void OpenGlRenderApi::ClearBufferBindings_Debug() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
+
+void OpenGlRenderApi::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
+    glViewport(x, y, width, height);
+    glScissor(x, y, width, height);
+}
+ 

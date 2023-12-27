@@ -6,17 +6,16 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-#include <execution>
-
 #include "Core.h"
 
 static void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& out_box_min, glm::vec3& out_box_max);
 
-glm::mat4 Animation::GetBoneTransformOrRelative(const std::string& boneName, float animation_time, glm::mat4 relative_transform) const {
-    auto it = bone_name_to_tracks.find(boneName);
+glm::mat4 Animation::GetBoneTransformOrRelative(const Bone& bone, float animation_time) const {
+    auto it = bone_name_to_tracks.find(bone.name);
 
     if (it == bone_name_to_tracks.end()) {
-        return relative_transform;
+        // track for this bone could not be found, so take default relative_transform_matrix
+        return bone.relative_transform_matrix;
     }
 
     const BoneAnimationTrack& track = it->second;
@@ -113,12 +112,14 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     const aiScene* scene = importer.ReadFile(path.string(), kAssimpImportFlags);
     CRASH_EXPECTED_NOT_NULL(scene);
 
-    uint32_t num_indices = scene->mMeshes[0]->mNumFaces * 3u;
+    // used for reserve enough indices to decrease allocating overhead
+    uint32_t start_num_indices = scene->mMeshes[0]->mNumFaces * 3u;
 
+    // packed all vertices of all meshes in aiScene
     std::vector<SkeletonMeshVertex> vertices;
     std::vector<uint32_t> indices;
     vertices.reserve(scene->mMeshes[0]->mNumVertices);
-    indices.reserve(num_indices);
+    indices.reserve(start_num_indices);
 
     std::vector<std::shared_ptr<Texture2D>> textures;
 
@@ -146,9 +147,9 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
         for (uint32_t j = 0; j < mesh->mNumFaces; ++j) {
             const aiFace& face = mesh->mFaces[j];
-            ASSERT(face.mNumIndices == 3);
+            ASSERT(face.mNumIndices == 3 && "Face is not triangulated");
 
-            for (uint32_t k = 0; k < 3; ++k) {
+            for (uint32_t k = 0; k < face.mNumIndices; ++k) {
                 indices.emplace_back(face.mIndices[k] + total_indices);
             }
         }
@@ -162,6 +163,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
             std::string s{ bone->mName.C_Str() };
 
             for (uint32_t j = 0; j < bone->mNumWeights; j++) {
+                // find global id of vertex
                 uint32_t id = bone->mWeights[j].mVertexId + total_vertices;
                 float weight = bone->mWeights[j].mWeight;
 
@@ -209,7 +211,6 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
 void SkeletalMesh::LoadAnimation(const aiScene* scene, uint32_t animation_index) {
     const aiAnimation* anim = scene->mAnimations[animation_index];
-
     Animation animation{};
 
     if (anim->mTicksPerSecond != 0.0f) {
@@ -225,11 +226,15 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, uint32_t animation_index)
         BoneAnimationTrack track;
 
         for (uint32_t j = 0; j < channel->mNumPositionKeys; j++) {
-            track.AddNewPositionTimestamp(ToGlm(channel->mPositionKeys[j].mValue), static_cast<float>(channel->mPositionKeys[j].mTime));
+            track.AddNewPositionTimestamp(ToGlm(channel->mPositionKeys[j].mValue),
+                static_cast<float>(channel->mPositionKeys[j].mTime));
         }
         for (uint32_t j = 0; j < channel->mNumRotationKeys; j++) {
-            track.AddNewRotationTimestamp(ToGlm(channel->mRotationKeys[j].mValue), static_cast<float>(channel->mRotationKeys[j].mTime));
+            track.AddNewRotationTimestamp(ToGlm(channel->mRotationKeys[j].mValue),
+                static_cast<float>(channel->mRotationKeys[j].mTime));
         }
+
+        // skip scale tracks, as it's not common to use scaling tracks of bones
 
         std::string name = channel->mNodeName.C_Str();
         animation.bone_name_to_tracks[name] = track;
@@ -241,7 +246,10 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, uint32_t animation_index)
 }
 
 void SkeletalMesh::Draw(const glm::mat4& transform) {
-    Renderer::AddDebugBox(bbox_min_, bbox_max_, transform);
+    if (should_draw_debug_bounds) {
+        Renderer::DrawDebugBox(bbox_min_, bbox_max_, transform);
+    }
+
     Renderer::SubmitSkeleton(*material_, bone_transforms_, num_bones_, *vertex_array_, transform);
 }
 
@@ -265,9 +273,9 @@ std::vector<std::string> SkeletalMesh::GetAnimationNames() const {
     return names;
 }
 
-void SkeletalMesh::CalculateTransform(float animation_time, const Bone& joint, const glm::mat4& parent_transform) {
-    const Animation& animation = animations_.at(current_animation_name_);
-    glm::mat4 transform = animation.GetBoneTransformOrRelative(joint.name, animation_time, joint.relative_transform_matrix);
+void SkeletalMesh::CalculateTransform(const BoneAnimationUpdateSpecs& update_specs, const glm::mat4& parent_transform) {
+    const Bone& joint = *update_specs.joint;
+    glm::mat4 transform = update_specs->GetBoneTransformOrRelative(joint, update_specs.animation_time);
 
     uint32_t index = joint.bone_transform_index;
     glm::mat4 global_transform = parent_transform * transform;
@@ -275,7 +283,9 @@ void SkeletalMesh::CalculateTransform(float animation_time, const Bone& joint, c
 
     // run chain to update other joint transforms
     for (const Bone& child : joint.children) {
-        CalculateTransform(animation_time, child, global_transform);
+        BoneAnimationUpdateSpecs new_update_specs = update_specs;
+        new_update_specs.joint = &child;
+        CalculateTransform(new_update_specs, global_transform);
     }
 }
 
@@ -290,11 +300,10 @@ std::shared_ptr<Texture2D> SkeletalMesh::LoadTexturesFromMaterial(const aiScene*
             bool is_compressed = texture->mHeight == 0;
 
             if (is_compressed) {
-                ImageRgba image = LoadRgbaImageFromMemory(texture->pcData, texture->mWidth);
-                return Texture2D::CreateFromImage(image);
+                return Texture2D::CreateFromImage(LoadRgbaImageFromMemory(texture->pcData, texture->mWidth));
             } else {
-                ImageRgba image = LoadRgbaImageFromMemory(texture->pcData, texture->mWidth * texture->mHeight);
-                return Texture2D::CreateFromImage(image);
+                return Texture2D::CreateFromImage(LoadRgbaImageFromMemory(texture->pcData,
+                    texture->mWidth * texture->mHeight));
             }
         }
     }

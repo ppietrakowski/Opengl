@@ -83,7 +83,7 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
             const aiFace& face = mesh->mFaces[j];
             ASSERT(face.mNumIndices == 3);
 
-            for (uint32_t k = 0; k < 3; ++k) {
+            for (uint32_t k = 0; k < face.mNumIndices; ++k) {
                 indices.emplace_back(face.mIndices[k] + total_indices);
             }
         }

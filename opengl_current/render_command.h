@@ -6,7 +6,7 @@
 struct RenderStats {
     uint32_t num_drawcalls{ 0 };
     uint32_t num_triangles{ 0 };
-    uint64_t delta_frame_nanoseconds{ 0 };
+    int64_t delta_frame_nanoseconds{ 0 };
 };
 
 class RenderCommand {
@@ -37,6 +37,7 @@ public:
     static void SetBlendingEnabled(bool blending_enabled);
 
     static void SetLineWidth(float line_width);
+    static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
     static RenderStats GetRenderStats();
 

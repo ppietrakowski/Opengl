@@ -73,16 +73,6 @@ private:
     uint32_t GetIndex(float animation_time, const std::vector<KeyProperty<T>>& timestamps) const;
 };
 
-struct Animation {
-    // Duration in ticks
-    float duration{ 0.0f };
-    float ticks_per_second{ 0.0f };
-
-    // bone name mapped to animation track
-    std::unordered_map<std::string, BoneAnimationTrack> bone_name_to_tracks;
-
-    glm::mat4 GetBoneTransformOrRelative(const std::string& bone_name, float animation_time, glm::mat4 relative_transform) const;
-};
 
 struct BoneInfo {
     uint32_t bone_transform_index;
@@ -116,8 +106,29 @@ struct Bone {
     bool AssignHierarchy(const aiNode* node, const std::unordered_map<std::string, BoneInfo>& bones_info);
 };
 
+struct Animation {
+    // Duration in ticks
+    float duration{ 0.0f };
+    float ticks_per_second{ 0.0f };
+
+    // bone name mapped to animation track
+    std::unordered_map<std::string, BoneAnimationTrack> bone_name_to_tracks;
+
+    glm::mat4 GetBoneTransformOrRelative(const Bone& bone, float animation_time) const;
+};
 
 struct aiScene;
+
+struct BoneAnimationUpdateSpecs {
+    const Animation* animation;
+    float animation_time;
+    const Bone* joint;
+    
+    const Animation* operator->() const {
+        ASSERT(animation != nullptr);
+        return animation;
+    }
+};
 
 class SkeletalMesh {
 public:
@@ -129,6 +140,8 @@ public:
 
     void SetCurrentAnimation(const std::string& animation_name);
     std::vector<std::string> GetAnimationNames() const;
+
+    bool should_draw_debug_bounds{ false };
 
 private:
     std::shared_ptr<VertexArray> vertex_array_;
@@ -146,7 +159,7 @@ private:
     std::string current_animation_name_;
 
 private:
-    void CalculateTransform(float animation_time, const Bone& joint, const glm::mat4& parent_transform = glm::mat4{ 1.0f });
+    void CalculateTransform(const BoneAnimationUpdateSpecs& update_specs, const glm::mat4& parent_transform = glm::identity<glm::mat4>());
     std::shared_ptr<Texture2D> LoadTexturesFromMaterial(const aiScene* scene, uint32_t material_index);
     void LoadAnimation(const aiScene* scene, uint32_t animation_index);
 };
@@ -172,8 +185,10 @@ inline glm::vec3 BoneAnimationTrack::Interpolate(float animation_time) const {
 template<>
 inline glm::quat BoneAnimationTrack::Interpolate(float animation_time) const {
     if (rotations_.size() == 1) {
+        // not enough keys, use first key as base
         return rotations_[0].property;
     } else if (!rotations_.empty()) {
+        // find time range based on animation_time
         uint32_t rotation_index = GetIndex(animation_time, rotations_);
         uint32_t next_rotation_index = rotation_index + 1;
 
@@ -189,26 +204,39 @@ inline glm::quat BoneAnimationTrack::Interpolate(float animation_time) const {
 
 template <typename T>
 inline uint32_t BoneAnimationTrack::GetIndex(float animation_time, const std::vector<KeyProperty<T>>& keys) const {
-    ASSERT(keys.size() > 0);
+    ASSERT(keys.size() > 0 && "Called BoneAnimationTrack::GetIndex with track without keys");
 
-    for (uint32_t i = 0; i < keys.size() - 1; i++) {
-        float t = keys[i + 1].timestamp;
-        if (animation_time < t) {
-            return i;
-        }
+    // run binary search to find first timestamp that is greater than animation_time (max in time range)
+    auto it = std::lower_bound(keys.begin(), keys.end(), animation_time, [](const KeyProperty<T>& k, float time) {
+        return time > k.timestamp;
+    });
+
+    bool is_timestamp_over_animation_time = it == keys.end();
+    if (is_timestamp_over_animation_time) {
+        return keys.size() > 2 ? static_cast<uint32_t>(keys.size()- 2) : 0;
     }
 
-    return 0;
+    uint32_t left_side_range = static_cast<uint32_t>(std::distance(keys.begin(), it));
+
+    if (left_side_range != 0) {
+        // if it's not a first frame of animation, adjust that i now defines left side of range
+        // otherwise it's just range {0, 1}
+        --left_side_range;
+    }
+
+    return left_side_range;
 }
 
 inline void SkeletalMesh::UpdateAnimation(float elapsed_time) {
     const Animation& animation = animations_.at(current_animation_name_);
+
+    // precalculate animation time to
     float ticks_per_second = animation.ticks_per_second;
     float time_in_ticks = elapsed_time * ticks_per_second;
     float animation_time = fmod(time_in_ticks, animation.duration);
-
+    
     // run transform update chain starting from root joint
-    CalculateTransform(animation_time, root_joint_);
+    CalculateTransform(BoneAnimationUpdateSpecs{ &animation, animation_time, &root_joint_ });
 }
 
 

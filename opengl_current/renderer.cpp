@@ -116,7 +116,7 @@ void Renderer::Submit(Shader& shader, uint32_t numIndices, const VertexArray& ve
     RenderCommand::DrawIndexed(vertex_array, numIndices, render_primitive);
 }
 
-void Renderer::AddDebugBox(glm::vec3 box_min, glm::vec3 box_max, const glm::mat4& transform) {
+void Renderer::DrawDebugBox(glm::vec3 box_min, glm::vec3 box_max, const glm::mat4& transform) {
     if (!box_batch_->HasBatchedAnyPrimitive()) {
         RenderCommand::SetLineWidth(2);
     }

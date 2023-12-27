@@ -37,9 +37,8 @@ Game::~Game() {
 }
 
 void Game::Run() {
-    time_milliseconds_t delta_seconds = time_milliseconds_t::zero();
+    std::chrono::nanoseconds delta_seconds{ std::chrono::nanoseconds::zero() };
     auto last_frame_time = GetNow();
-    bool first_frame = true;
 
     while (window_->IsOpen()) {
         for (const std::unique_ptr<Layer>& layer : layers_) {
@@ -51,9 +50,8 @@ void Game::Run() {
         // calculate delta time using chrono library
         auto now = GetNow();
 
-        if (first_frame) {
+        if (delta_seconds == std::chrono::nanoseconds::zero()) {
             delta_seconds = (now - last_frame_time);
-            first_frame = false;
         } else {
             // average delta seconds to keep more meaningfull frame time
             delta_seconds = ((now - last_frame_time) + delta_seconds) / 2;

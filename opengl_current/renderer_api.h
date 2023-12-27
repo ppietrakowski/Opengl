@@ -60,6 +60,7 @@ public:
     virtual void SetLineWidth(float line_width) = 0;
 
     virtual void ClearBufferBindings_Debug() = 0;
+    virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
     inline static ApiType GetApi() {
         return render_api_type_;

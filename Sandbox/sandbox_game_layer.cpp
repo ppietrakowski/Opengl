@@ -13,7 +13,7 @@ SandboxGameLayer::SandboxGameLayer() :
     skeletal_mesh_{ "untitled.fbx", std::make_shared<Material>(Shader::LoadShader("skeleton.vert", "textured.frag")) } {
     shader_ = Shader::LoadShader("shaders/default.vert", "shaders/default.frag");
     unshaded_ = Shader::LoadShader("shaders/default.vert", "shaders/Unshaded.frag");
-    
+
     current_used_ = shader_;
     current_used_->Use();
     current_used_->SetUniformVec3("u_light_color", glm::vec3{ 1, 1, 1 });
@@ -51,10 +51,12 @@ SandboxGameLayer::SandboxGameLayer() :
     std::vector<std::string> animations = std::move(skeletal_mesh_.GetAnimationNames());
     skeletal_mesh_.SetCurrentAnimation(animations[1]);
     RenderCommand::SetClearColor(RgbaColor{ 50, 30, 170 });
+
+    skeletal_mesh_.should_draw_debug_bounds = true;
 }
 
-void SandboxGameLayer::OnUpdate(time_milliseconds_t delta_time) {
-    float dt = std::chrono::duration_cast<TimeSeconds>(delta_time).count();
+void SandboxGameLayer::OnUpdate(Duration delta_time) {
+    float dt = delta_time.GetAsSeconds();
 
     if (Input::IsKeyPressed(Keys::kW)) {
         glm::vec3 world_forward = glm::vec3{ 0, 0, -1 };
@@ -83,31 +85,32 @@ void SandboxGameLayer::OnUpdate(time_milliseconds_t delta_time) {
     }
     duration_ += delta_time;
     last_delta_seconds_ = delta_time;
+
+    skeletal_mesh_.UpdateAnimation((duration_ - startup_time_).GetAsSeconds());
 }
 
-void SandboxGameLayer::OnRender(time_milliseconds_t delta_time) {
-    Renderer::BeginScene(glm::inverse(glm::translate(glm::identity<glm::mat4>(), camera_position_) * glm::mat4_cast(camera_rotation_)), camera_position_);
+void SandboxGameLayer::OnRender(Duration delta_time) {
+
+    Renderer::BeginScene(glm::inverse(glm::translate(camera_position_) * glm::mat4_cast(camera_rotation_)), camera_position_);
     current_used_->SetUniformVec3("u_material.diffuse", glm::vec3{ 0.34615f, 0.3143f, 0.0903f });
     static_mesh_->Render(*current_material_, glm::translate(glm::identity<glm::mat4>(), static_mesh_position_));
 
     unshaded_->Use();
     unshaded_->SetUniformVec3("u_material.diffuse", glm::vec3{ 1, 0, 0 });
-    Renderer::AddDebugBox(static_mesh_->GetBBoxMin(), static_mesh_->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), static_mesh_position_));
-    Renderer::AddDebugBox(static_mesh_->GetBBoxMin(), static_mesh_->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), static_mesh_position_ + glm::vec3{ 10, 0, 0 }));
+    Renderer::DrawDebugBox(static_mesh_->GetBBoxMin(), static_mesh_->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), static_mesh_position_));
+    Renderer::DrawDebugBox(static_mesh_->GetBBoxMin(), static_mesh_->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), static_mesh_position_ + glm::vec3{ 10, 0, 0 }));
 
-    Renderer::AddDebugBox(bbox_min_, bbox_max_, glm::translate(glm::identity<glm::mat4>(), glm::vec3{ 10, 2, 10 }));
+    Renderer::DrawDebugBox(bbox_min_, bbox_max_, glm::translate(glm::identity<glm::mat4>(), glm::vec3{ 10, 2, 10 }));
 
-    skeletal_mesh_.UpdateAnimation(std::chrono::duration_cast<TimeSeconds>(duration_ - startup_time_).count());
     skeletal_mesh_.Draw(glm::translate(glm::vec3{ 0, -2, -1 }) * glm::scale(glm::vec3{ 0.01f, 0.01f, 0.01f }));
     Renderer::FlushDrawDebug(*unshaded_);
-
     Renderer::EndScene();
 }
 
 bool SandboxGameLayer::OnEvent(const Event& event) {
     if (event.type == EventType::kMouseMoved) {
         glm::vec2 delta = event.mouse_move.mouse_position - event.mouse_move.last_mouse_position;
-        float dt = std::chrono::duration_cast<TimeSeconds>(last_delta_seconds_).count();
+        float dt = last_delta_seconds_.GetAsSeconds();
 
         yaw_ -= 10 * delta.x * dt;
         pitch_ -= 10 * delta.y * dt;
@@ -138,22 +141,18 @@ bool SandboxGameLayer::OnEvent(const Event& event) {
     return false;
 }
 
-using time_milliseconds = std::chrono::duration<float, std::milli>;
-
 void SandboxGameLayer::OnImguiFrame() {
     static int32_t last_framerate = 0;
     static int32_t frame_num{ 0 };
 
     if (frame_num == 2) {
-        last_framerate = (last_framerate + static_cast<int32_t>(1000 / last_delta_seconds_.count())) / 2;
-    }
-    else {
+        last_framerate = (last_framerate + static_cast<int32_t>(1000 / last_delta_seconds_.GetAsMilliseconds())) / 2;
+    } else {
         frame_num++;
     }
 
     ImGui::Begin("Transform");
     ImGui::SliderFloat3("Position", &static_mesh_position_[0], -10, 10);
-    time_milliseconds dt = std::chrono::duration_cast<time_milliseconds>(last_delta_seconds_);
 
     RenderStats stats = RenderCommand::GetRenderStats();
 

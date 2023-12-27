@@ -69,6 +69,10 @@ void RenderCommand::SetLineWidth(float line_width) {
     renderer_api_->SetLineWidth(line_width);
 }
 
+void RenderCommand::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
+    renderer_api_->SetViewport(x, y, width, height);
+}
+
 RenderStats RenderCommand::GetRenderStats() {
     return render_stats_;
 }

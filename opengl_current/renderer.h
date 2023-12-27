@@ -41,7 +41,7 @@ public:
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();
 
-    static void AddDebugBox(glm::vec3 box_min, glm::vec3 box_max, const glm::mat4& transform);
+    static void DrawDebugBox(glm::vec3 box_min, glm::vec3 box_max, const glm::mat4& transform);
     static void FlushDrawDebug(Shader& shader);
 
 private:

@@ -79,7 +79,7 @@ std::shared_ptr<Shader> Shader::LoadShader(const std::initializer_list<std::stri
 
     std::array<std::string_view, ShaderIndex::kCount> sources_to_string_view;
     std::transform(sources.begin(), it, sources_to_string_view.begin(),
-        [](const std::string& s) { return (std::string_view)s; });
+        [](const std::string& s) { return static_cast<std::string_view>(s); });
 
     std::shared_ptr<Shader> shader = std::make_shared<OpenGlShader>();
     shader->GenerateShaders(std::span<std::string_view>{ sources_to_string_view.begin(), index });

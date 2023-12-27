@@ -86,7 +86,7 @@ namespace {
 
         msg = ShaderTypeToString(type);
 
-        msg += " compilation failure: ";
+        msg += " shader compilation failure: ";
         msg += log.data();
 
         ELOG_ERROR(LOG_RENDERER, "%s", msg.c_str());

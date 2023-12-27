@@ -21,6 +21,7 @@ private:
     void SetLineWidth(float line_width) override;
 
     void ClearBufferBindings_Debug() override;
+    void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) override;
 
 private:
     bool cull_enabled_ = false;

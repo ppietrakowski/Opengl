@@ -302,5 +302,8 @@
     <ClInclude Include="buffer.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
+    <ClInclude Include="duration.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

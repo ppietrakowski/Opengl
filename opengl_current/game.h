@@ -44,3 +44,7 @@ private:
     void BindWindowEvents();
 };
 
+inline std::chrono::nanoseconds GetNow() {
+    using std::chrono::system_clock;
+    return system_clock::now().time_since_epoch();
+}
