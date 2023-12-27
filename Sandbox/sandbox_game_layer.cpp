@@ -157,7 +157,7 @@ void SandboxGameLayer::OnImguiFrame() {
     RenderStats stats = RenderCommand::GetRenderStats();
 
     ImGui::Text("Fps: %i", last_framerate);
-    ImGui::Text("Frame time: %.2f ms", stats.delta_frame_nanoseconds / 1000000.0f);
+    ImGui::Text("Frame time: %.2f ms", last_delta_seconds_.GetAsMilliseconds());
     ImGui::Text("Drawcalls: %u", stats.num_drawcalls);
     ImGui::Text("Rendered triangles: %u", stats.num_triangles);
     ImGui::End();
