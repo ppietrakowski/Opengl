@@ -50,17 +50,11 @@ struct ErrorHandler
     void* UserData{nullptr};
 };
 
-#ifdef __cplusplus
-extern "C" {
-#endif
     void AddErrorHandler(const ErrorHandler& handler);
     void RemoveErrorHandler(const ErrorHandler& handler);
     void Crash(const SourceLocation* location, const char* description);
 
     void PrintError(const SourceLocation* location, const char* message);
-#ifdef __cplusplus
-}
-#endif
 
 #define CURRENT_SOURCE_LOCATION                                       \
     {                                                                 \
