@@ -27,7 +27,7 @@ public:
     void SetUniformVec4(const char* name, const glm::vec4& value) override;
 
     void SetUniformMat4(const char* name, const glm::mat4& value) override;
-    void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, uint32_t count) override;
+    void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, int32_t count) override;
     void SetUniformMat3(const char* name, const glm::mat3& value) override;
 
     int32_t GetUniformInt(const char* name) const override;

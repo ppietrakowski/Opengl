@@ -61,12 +61,12 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
 
     std::vector<StaticMeshVertex> vertices;
     std::vector<uint32_t> indices;
-    uint32_t totalVertices = 0;
-    uint32_t totalIndices = 0;
+    int32_t totalVertices = 0;
+    int32_t totalIndices = 0;
 
     vertices.reserve(scene->mMeshes[0]->mNumVertices);
 
-    uint32_t startNumIndices = scene->mMeshes[0]->mNumFaces * 3;
+    int32_t startNumIndices = scene->mMeshes[0]->mNumFaces * 3;
     indices.reserve(startNumIndices);
 
     for (uint32_t i = 0; i < scene->mNumMaterials; ++i)
@@ -109,12 +109,12 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
     }
 
     std::shared_ptr<IIndexBuffer> indexBuffer = IIndexBuffer::Create(indices.data(),
-        static_cast<uint32_t>(indices.size()));
+        static_cast<int32_t>(indices.size()));
 
     m_VertexArray->AddBuffer<StaticMeshVertex>(vertices, StaticMeshVertex::kDataFormat);
     m_VertexArray->SetIndexBuffer(indexBuffer);
 
-    m_NumTriangles = static_cast<uint32_t>(indices.size()) / 3;
+    m_NumTriangles = static_cast<int32_t>(indices.size()) / 3;
     m_MeshName = scene->mName.C_Str();
     FindAabCollision(vertices, m_BboxMin, m_BboxMax);
 }

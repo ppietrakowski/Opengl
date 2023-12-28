@@ -56,7 +56,7 @@ public:
 
     virtual void Clear() = 0;
     virtual void SetClearColor(const RgbaColor& clearColor) = 0;
-    virtual void DrawIndexed(const IVertexArray& vertexArray, uint32_t numIndices, RenderPrimitive renderPrimitive) = 0;
+    virtual void DrawIndexed(const IVertexArray& vertexArray, int32_t numIndices, RenderPrimitive renderPrimitive) = 0;
 
     virtual void SetWireframe(bool bWireframeEnabled) = 0;
     virtual bool IsWireframeEnabled() = 0;
@@ -68,7 +68,7 @@ public:
     virtual void SetLineWidth(float lineWidth) = 0;
 
     virtual void ClearBufferBindings_Debug() = 0;
-    virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
+    virtual void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
 
     inline static ApiType GetApi()
     {

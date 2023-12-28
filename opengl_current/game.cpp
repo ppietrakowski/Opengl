@@ -17,7 +17,7 @@ Game::Game(const WindowSettings& settings) :
 
     // initialize subsystems
     Renderer::Initialize();
-    Renderer::UpdateProjection(static_cast<float>(settings.Width), static_cast<float>(settings.Height), 45.0f, 0.01f);
+    Renderer::UpdateProjection(CameraProjection{settings.Width, settings.Height, 45.0f});
 
     BindWindowEvents();
     InitializeImGui();

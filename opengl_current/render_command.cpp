@@ -23,7 +23,7 @@ void RenderCommand::ClearBufferBindings_Debug()
     s_RendererApi->ClearBufferBindings_Debug();
 }
 
-void RenderCommand::DrawIndexed(const IVertexArray& vertexArray, uint32_t numIndices, RenderPrimitive renderPrimitive)
+void RenderCommand::DrawIndexed(const IVertexArray& vertexArray, int32_t numIndices, RenderPrimitive renderPrimitive)
 {
     s_RendererApi->DrawIndexed(vertexArray, numIndices, renderPrimitive);
     s_RenderStats.NumDrawCalls++;
@@ -83,7 +83,7 @@ void RenderCommand::SetLineWidth(float lineWidth)
     s_RendererApi->SetLineWidth(lineWidth);
 }
 
-void RenderCommand::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+void RenderCommand::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     s_RendererApi->SetViewport(x, y, width, height);
 }

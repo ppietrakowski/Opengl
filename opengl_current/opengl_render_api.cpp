@@ -21,7 +21,7 @@ void OpenGlRenderApi::SetClearColor(const RgbaColor& clearColor)
     }
 }
 
-void OpenGlRenderApi::DrawIndexed(const IVertexArray& vertexArray, uint32_t numIndices, RenderPrimitive renderPrimitive)
+void OpenGlRenderApi::DrawIndexed(const IVertexArray& vertexArray, int32_t numIndices, RenderPrimitive renderPrimitive)
 {
     vertexArray.Bind();
     glDrawElements(static_cast<GLenum>(renderPrimitive), static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, nullptr);
@@ -97,7 +97,7 @@ void OpenGlRenderApi::ClearBufferBindings_Debug()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void OpenGlRenderApi::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+void OpenGlRenderApi::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     glViewport(x, y, width, height);
     glScissor(x, y, width, height);

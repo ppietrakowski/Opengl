@@ -125,8 +125,8 @@ bool SandboxGameLayer::OnEvent(const Event& event)
         glm::vec2 delta = event.MouseMove.MousePosition - event.MouseMove.LastMousePosition;
         float dt = m_LastDeltaSeconds.GetAsSeconds();
 
-        m_Yaw -= 10 * delta.x * dt;
-        m_Pitch -= 10 * delta.y * dt;
+        m_Yaw -= m_YawRotationRate * delta.x * dt;
+        m_Pitch -= m_PitchRotationRate * delta.y * dt;
 
         if (m_Pitch < -89)
         {

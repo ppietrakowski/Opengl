@@ -5,8 +5,8 @@
 #include <string_view>  
 #include <vector>
 
-#define ARRAY_NUM_ELEMENTS(Array) static_cast<uint32_t>(sizeof(Array) / sizeof(Array[0]))
-#define STD_ARRAY_NUM_ELEMENTS(Array) static_cast<uint32_t>(Array.size())
+#define ARRAY_NUM_ELEMENTS(Array) static_cast<int32_t>(sizeof(Array) / sizeof(Array[0]))
+#define STD_ARRAY_NUM_ELEMENTS(Array) static_cast<int32_t>(Array.size())
 
 template <typename CharType>
 inline bool ContainsString(const std::basic_string<CharType>& str, const CharType* s)

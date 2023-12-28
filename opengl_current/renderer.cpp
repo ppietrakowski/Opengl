@@ -55,10 +55,10 @@ void Renderer::Initialize()
         {kMagenta, kMagenta, kBlack, kBlack}
     };
 
-    uint32_t colorsWidth = 4;
-    uint32_t colorsHeight = 4;
+    int32_t colorsWidth = 4;
+    int32_t colorsHeight = 4;
 
-    s_DefaultTexture = ITexture2D::Create(colors, colorsWidth, colorsHeight, TextureFormat::kRgb);
+    s_DefaultTexture = ITexture2D::Create(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::kRgb});
     RenderCommand::Initialize();
 
     s_DebugBatch = new DebugRenderBatch();
@@ -66,10 +66,9 @@ void Renderer::Initialize()
     RenderCommand::SetCullFace(true);
 }
 
-void Renderer::UpdateProjection(float width, float height, float fov, float zNear, float zFar)
+void Renderer::UpdateProjection(const CameraProjection& projection)
 {
-    float aspectRatio = width / height;
-    s_Projection = glm::perspective(glm::radians(fov), aspectRatio, zNear, zFar);
+    s_Projection = glm::perspective(glm::radians(projection.Fov), projection.AspectRatio, projection.ZNear, projection.ZFar);
 }
 
 void Renderer::BeginScene(const glm::mat4& view, glm::vec3 cameraPosition)
@@ -97,7 +96,7 @@ void Renderer::Submit(const Material& material, const IVertexArray& vertexArray,
     RenderCommand::DrawIndexed(vertexArray, vertexArray.GetNumIndices(), renderPrimitive);
 }
 
-void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, uint32_t count, const IVertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
+void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, int32_t count, const IVertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
 {
     IShader& shader = material.GetShader();
 
@@ -119,7 +118,7 @@ void Renderer::Submit(IShader& shader,
     Submit(shader, vertexArray.GetNumIndices(), vertexArray, transform, renderPrimitive);
 }
 
-void Renderer::Submit(IShader& shader, uint32_t numIndices, const IVertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
+void Renderer::Submit(IShader& shader, int32_t numIndices, const IVertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
 {
     ASSERT(numIndices <= vertexArray.GetNumIndices());
 

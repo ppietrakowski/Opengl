@@ -15,8 +15,8 @@ public:
 public:
 
     void Update() override;
-    uint32_t GetWidth() const override;
-    uint32_t GetHeight() const override;
+    int32_t GetWidth() const override;
+    int32_t GetHeight() const override;
 
     glm::ivec2 GetWindowPosition() const override;
     glm::vec2 GetMousePosition() const override;

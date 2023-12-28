@@ -8,13 +8,37 @@
 
 #include <cstdint>
 
+struct CameraProjection
+{
+    float Fov{45.0f};
+    float AspectRatio{0.0f};
+    float Width;
+    float Height;
+    float ZNear{0.1f};
+    float ZFar{1000.0f};
+
+    CameraProjection(int32_t width, int32_t height, float fov=45.0f, float zNear=0.1f, float zFar=1000.0f):
+        Width((float)width),
+        Height((float)height),
+        Fov(fov),
+        ZNear(zNear),
+        ZFar(zFar)
+    {
+        AspectRatio = Width / Height;
+    }
+
+    CameraProjection() = default;
+    CameraProjection(const CameraProjection&) = default;
+    CameraProjection& operator=(const CameraProjection&) = default;
+};
+
 class Renderer
 {
 public:
     static void Initialize();
     static void Quit();
 
-    static void UpdateProjection(float width, float height, float fov, float zNear = 0.1f, float zFar = 1000.0f);
+    static void UpdateProjection(const CameraProjection& projection);
 
 public:
     static void BeginScene(const glm::mat4& view, glm::vec3 cameraPosition);
@@ -25,7 +49,7 @@ public:
         const glm::mat4& transform = glm::mat4{1.0f},
         RenderPrimitive renderPrimitive = RenderPrimitive::kTriangles);
 
-    static void SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, uint32_t numIndices,
+    static void SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, int32_t numIndices,
         const IVertexArray& vertexArray,
         const glm::mat4& transform = glm::mat4{1.0f},
         RenderPrimitive renderPrimitive = RenderPrimitive::kTriangles);
@@ -37,7 +61,7 @@ public:
         RenderPrimitive renderPrimitive = RenderPrimitive::kTriangles);
 
     static void Submit(IShader& shader,
-        uint32_t numIndices, const IVertexArray& vertexArray,
+        int32_t numIndices, const IVertexArray& vertexArray,
         const glm::mat4& transform = glm::mat4{1.0f}, RenderPrimitive renderPrimitive = RenderPrimitive::kTriangles);
 
     static std::shared_ptr<ITexture2D> GetDefaultTexture();

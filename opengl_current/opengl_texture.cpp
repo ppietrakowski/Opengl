@@ -3,23 +3,38 @@
 
 #include <GL/glew.h>
 
-OpenGlTexture2D::OpenGlTexture2D(const void* data, uint32_t width, uint32_t height, TextureFormat format) :
-    m_Width{width},
-    m_Height{height},
-    m_GlFormat(format == TextureFormat::kRgb ? GL_RGB : GL_RGBA)
+inline static GLenum ConvertTextureFormatToGL(const TextureFormat format)
+{
+    switch (format)
+    {
+    case TextureFormat::kRgb:
+        return GL_RGB;
+    case TextureFormat::kRgba:
+        return GL_RGBA;
+    default:
+        break;
+    }
+
+    return 0x7fffff;
+}
+
+OpenGlTexture2D::OpenGlTexture2D(const void* data, const TextureSpecification& specification) :
+    m_Width{specification.Width},
+    m_Height{specification.Height},
+    m_GlFormat(specification.Format == TextureFormat::kRgb ? GL_RGB : GL_RGBA)
 {
     GenerateTexture2D(data);
 }
 
 OpenGlTexture2D::OpenGlTexture2D(const ImageRgba& image) :
-    OpenGlTexture2D{image.GetRawImageData(), image.GetWidth(), image.GetHeight(), TextureFormat::kRgba}
+    OpenGlTexture2D{image.GetRawImageData(), TextureSpecification{image.GetWidth(), image.GetHeight(), TextureFormat::kRgba}}
 {
 }
 
-OpenGlTexture2D::OpenGlTexture2D(uint32_t width, uint32_t height, TextureFormat format) :
-    m_Width{width},
-    m_Height{height},
-    m_GlFormat(format == TextureFormat::kRgb ? GL_RGB : GL_RGBA)
+OpenGlTexture2D::OpenGlTexture2D(const TextureSpecification& specification) :
+    m_Width{specification.Width},
+    m_Height{specification.Height},
+    m_GlFormat(specification.Format == TextureFormat::kRgb ? GL_RGB : GL_RGBA)
 {
     GenerateTexture2D(nullptr);
 }
@@ -29,22 +44,22 @@ OpenGlTexture2D::~OpenGlTexture2D()
     glDeleteTextures(1, &m_RendererId);
 }
 
-uint32_t OpenGlTexture2D::GetWidth() const
+int32_t OpenGlTexture2D::GetWidth() const
 {
     return m_Width;
 }
 
-uint32_t OpenGlTexture2D::GetHeight() const
+int32_t OpenGlTexture2D::GetHeight() const
 {
     return m_Height;
 }
 
-void OpenGlTexture2D::Bind(uint32_t textureUnit) const
+void OpenGlTexture2D::Bind(int32_t textureUnit) const
 {
     glBindTextureUnit(textureUnit, m_RendererId);
 }
 
-void OpenGlTexture2D::Unbind(uint32_t textureUnit)
+void OpenGlTexture2D::Unbind(int32_t textureUnit)
 {
     glBindTextureUnit(textureUnit, 0);
 }
@@ -65,12 +80,13 @@ TextureFormat OpenGlTexture2D::GetTextureFormat() const
     return m_GlFormat == GL_RGB ? TextureFormat::kRgb : TextureFormat::kRgba;
 }
 
-void OpenGlTexture2D::SetData(const void* data, glm::uvec2 size, glm::uvec2 offset)
+void OpenGlTexture2D::SetData(const void* data, const TextureSpecification& specification, glm::ivec2 offset)
 {
-    ERR_FAIL_EXPECTED_TRUE(size.x < GetWidth() && size.y < GetHeight());
-    ERR_FAIL_EXPECTED_TRUE(offset.x < GetWidth() && offset.y < GetHeight());
+    ERR_FAIL_EXPECTED_TRUE(specification.Width < GetWidth() && specification.Height < GetHeight());
+    ERR_FAIL_EXPECTED_TRUE(specification.Width < GetWidth() && specification.Height < GetHeight());
 
-    glTextureSubImage2D(m_RendererId, 0, offset.x, offset.y, size.x, size.y, GetGlFormat(), GL_UNSIGNED_BYTE, data);
+    glTextureSubImage2D(m_RendererId, 0, offset.x, offset.y,
+        specification.Width, specification.Height, ConvertTextureFormatToGL(specification.Format), GL_UNSIGNED_BYTE, data);
 }
 
 uint32_t OpenGlTexture2D::GetGlFormat() const

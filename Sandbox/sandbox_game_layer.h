@@ -43,7 +43,8 @@ private:
     bool m_bSterringEntity{false};
 
     float m_MoveSpeed = 20.0f;
-    float m_YawRotationRate = 80.0f;
+    float m_YawRotationRate = 10.0f;
+    float m_PitchRotationRate = 10.0f;
     float m_AscendSpeed = 20.0f;
 
     glm::vec3 m_BboxMin;

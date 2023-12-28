@@ -3,7 +3,7 @@
 
 #include <GL/glew.h>
 
-OpenGlVertexBuffer::OpenGlVertexBuffer(const void* data, uint32_t sizeBytes, bool bDynamic) :
+OpenGlVertexBuffer::OpenGlVertexBuffer(const void* data, int32_t sizeBytes, bool bDynamic) :
     m_BufferSize{sizeBytes}
 {
     GLenum bufferUsage = bDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
@@ -13,7 +13,7 @@ OpenGlVertexBuffer::OpenGlVertexBuffer(const void* data, uint32_t sizeBytes, boo
     glBufferData(GL_ARRAY_BUFFER, sizeBytes, data, bufferUsage);
 }
 
-OpenGlVertexBuffer::OpenGlVertexBuffer(uint32_t maxSizeBytes) :
+OpenGlVertexBuffer::OpenGlVertexBuffer(int32_t maxSizeBytes) :
     OpenGlVertexBuffer{nullptr, maxSizeBytes, true}
 {
 }
@@ -25,7 +25,7 @@ OpenGlVertexBuffer::~OpenGlVertexBuffer()
     m_BufferSize = 0;
 }
 
-uint32_t OpenGlVertexBuffer::GetVerticesSizeBytes() const
+int32_t OpenGlVertexBuffer::GetVerticesSizeBytes() const
 {
     return m_BufferSize;
 }
@@ -45,10 +45,10 @@ void OpenGlVertexBuffer::Unbind() const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void OpenGlVertexBuffer::UpdateVertices(const void* data, uint32_t offset, uint32_t size)
+void OpenGlVertexBuffer::UpdateVertices(const void* buffer, const BufferSize& bufferSize)
 {
     ERR_FAIL_EXPECTED_TRUE(IsValid());
 
     glBindBuffer(GL_ARRAY_BUFFER, m_RendererId);
-    glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(offset), static_cast<GLintptr>(size), data);
+    glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(bufferSize.Offset), static_cast<GLintptr>(bufferSize.Size), buffer);
 }

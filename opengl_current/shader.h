@@ -32,8 +32,8 @@ struct UniformInfo
 {
     UniformType Type;
     std::string Name;
-    int32_t Location;
-    uint32_t NumTextures{0};
+    int Location;
+    int32_t NumTextures{0};
 };
 
 struct ShaderCompilationFailedException : public std::runtime_error
@@ -54,8 +54,7 @@ struct ShaderProgramLinkingFailedException : public std::runtime_error
 
 class ITexture;
 
-static constexpr uint32_t kMinTextureUnits = 16;
-
+static constexpr int32_t kMinTextureUnits = 16;
 
 class IShader
 {
@@ -91,17 +90,17 @@ public:
     virtual void Use() const = 0;
     virtual void StopUsing() const = 0;
 
-    virtual void SetUniformInt(const char* name, int32_t value) = 0;
+    virtual void SetUniformInt(const char* name, int value) = 0;
     virtual void SetUniformFloat(const char* name, float value) = 0;
     virtual void SetUniformVec2(const char* name, glm::vec2 value) = 0;
     virtual void SetUniformVec3(const char* name, const glm::vec3& value) = 0;
     virtual void SetUniformVec4(const char* name, const glm::vec4& value) = 0;
 
     virtual void SetUniformMat4(const char* name, const glm::mat4& value) = 0;
-    virtual void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, uint32_t count) = 0;
+    virtual void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, int32_t count) = 0;
     virtual void SetUniformMat3(const char* name, const glm::mat3& value) = 0;
 
-    virtual int32_t GetUniformInt(const char* name) const = 0;
+    virtual int GetUniformInt(const char* name) const = 0;
 
     virtual float GetUniformFloat(const char* name) const = 0;
     virtual glm::vec2 GetUniformVec2(const char* name) const = 0;

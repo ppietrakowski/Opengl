@@ -7,7 +7,7 @@ OpenGlIndexBuffer::OpenGlIndexBuffer() :
 {
 }
 
-OpenGlIndexBuffer::OpenGlIndexBuffer(const uint32_t* data, uint32_t numIndices, bool bDynamic) :
+OpenGlIndexBuffer::OpenGlIndexBuffer(const uint32_t* data, int32_t numIndices, bool bDynamic) :
     m_NumIndices{numIndices}
 {
     GLenum bufferUsage = bDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
@@ -19,7 +19,7 @@ OpenGlIndexBuffer::OpenGlIndexBuffer(const uint32_t* data, uint32_t numIndices, 
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(uint32_t), data, bufferUsage);
 }
 
-OpenGlIndexBuffer::OpenGlIndexBuffer(uint32_t totalNumIndices) :
+OpenGlIndexBuffer::OpenGlIndexBuffer(int32_t totalNumIndices) :
     OpenGlIndexBuffer{nullptr, totalNumIndices, true}
 {
 }
@@ -31,7 +31,7 @@ OpenGlIndexBuffer::~OpenGlIndexBuffer()
     m_NumIndices = 0;
 }
 
-uint32_t OpenGlIndexBuffer::GetNumIndices() const
+int32_t OpenGlIndexBuffer::GetNumIndices() const
 {
     return m_NumIndices;
 }
@@ -46,14 +46,14 @@ void OpenGlIndexBuffer::Unbind() const
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void OpenGlIndexBuffer::UpdateIndices(const uint32_t* data, uint32_t offset, uint32_t numIndices)
+void OpenGlIndexBuffer::UpdateIndices(const uint32_t* data, const BufferSize& bufferSize)
 {
     ERR_FAIL_EXPECTED_TRUE(IsValid());
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
-    uint32_t sizeBytes = numIndices * sizeof(uint32_t);
+    int32_t sizeBytes = bufferSize.Size * sizeof(uint32_t);
 
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, sizeBytes, data);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, bufferSize.Offset, sizeBytes, data);
 }
 
 bool OpenGlIndexBuffer::IsValid() const

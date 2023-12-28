@@ -2,7 +2,7 @@
 layout (location = 0) in vec3 a_position; 
 layout (location = 1) in vec3 a_normal;
 layout (location = 2) in vec2 a_texture_coords;
-layout (location = 3) in vec4 a_bone_ids;
+layout (location = 3) in ivec4 a_bone_ids;
 layout (location = 4) in vec4 a_bone_weights;
 layout (location = 5) in uint a_texture_id;
 

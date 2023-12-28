@@ -4,7 +4,7 @@
 #include "renderer_api.h"
 #include "opengl_index_buffer.h"
 
-std::shared_ptr<IIndexBuffer> IIndexBuffer::Create(const uint32_t* data, uint32_t numIndices, bool bDynamic) {
+std::shared_ptr<IIndexBuffer> IIndexBuffer::Create(const uint32_t* data, int32_t numIndices, bool bDynamic) {
     switch (IRendererAPI::GetApi()) {
     case IRendererAPI::kOpenGL:
         return std::make_shared<OpenGlIndexBuffer>(data, numIndices, bDynamic);
@@ -13,7 +13,7 @@ std::shared_ptr<IIndexBuffer> IIndexBuffer::Create(const uint32_t* data, uint32_
     ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
 }
 
-std::shared_ptr<IIndexBuffer> IIndexBuffer::CreateEmpty(uint32_t totalNumIndices) {
+std::shared_ptr<IIndexBuffer> IIndexBuffer::CreateEmpty(int32_t totalNumIndices) {
     switch (IRendererAPI::GetApi()) {
     case IRendererAPI::kOpenGL:
         return std::make_shared<OpenGlIndexBuffer>(totalNumIndices);

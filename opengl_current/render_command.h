@@ -5,8 +5,8 @@
 
 struct RenderStats
 {
-    uint32_t NumDrawCalls{0};
-    uint32_t NumTriangles{0};
+    int32_t NumDrawCalls{0};
+    int32_t NumTriangles{0};
     int64_t DeltaFrameNanoseconds{0};
 };
 
@@ -23,7 +23,7 @@ public:
 
     static void ClearBufferBindings_Debug();
 
-    static void DrawIndexed(const IVertexArray& vertexArray, uint32_t numIndices, RenderPrimitive renderPrimitive = RenderPrimitive::kTriangles);
+    static void DrawIndexed(const IVertexArray& vertexArray, int32_t numIndices, RenderPrimitive renderPrimitive = RenderPrimitive::kTriangles);
 
     static void BeginScene();
     static void EndScene();
@@ -39,7 +39,7 @@ public:
     static void SetBlendingEnabled(bool bBlendingEnabled);
 
     static void SetLineWidth(float lineWidth);
-    static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+    static void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height);
 
     static RenderStats GetRenderStats();
 

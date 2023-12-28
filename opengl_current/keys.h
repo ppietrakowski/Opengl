@@ -3,12 +3,13 @@
 #include <cstdint>
 
 // KeyCode based on glfw key codes
-using KeyCode = uint16_t;
+using KeyCode = int16_t;
 
 struct Keys
 {
     enum : KeyCode
     {
+        kInvalid = -1,
         // From glfw3.h
         kSpace = 32,
         kApostrophe = 39, /* ' */
@@ -144,12 +145,13 @@ struct Keys
 };
 
 // MouseCode based on glfw mouse codes
-using MouseButton = uint16_t;
+using MouseButton = int16_t;
 
 struct Mouse
 {
     enum : MouseButton
     {
+        kInvalid = -1,
         kButton0 = 0,
         kButton1 = 1,
         kButton2 = 2,

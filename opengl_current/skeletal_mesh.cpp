@@ -72,7 +72,7 @@ SkeletonMeshVertex::SkeletonMeshVertex(const glm::vec3& position, const glm::vec
 {
 }
 
-bool SkeletonMeshVertex::AddBoneData(uint32_t boneId, float weight)
+bool SkeletonMeshVertex::AddBoneData(int32_t boneId, float weight)
 {
     // find first empty slot
     auto it = std::find(std::begin(BoneWeights), std::end(BoneWeights), 0.0f);
@@ -80,7 +80,7 @@ bool SkeletonMeshVertex::AddBoneData(uint32_t boneId, float weight)
     if (it != std::end(BoneWeights))
     {
         std::ptrdiff_t index = std::distance(std::begin(BoneWeights), it);
-        BoneIds[index] = (float)boneId;
+        BoneIds[index] = boneId;
         BoneWeights[index] = weight;
 
         return true;
@@ -98,10 +98,10 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     m_VertexArray{IVertexArray::Create()}
 {
     // maps bone name to boneID
-    std::unordered_map<std::string, uint32_t> boneNameToIndex;
+    std::unordered_map<std::string, int32_t> boneNameToIndex;
 
     auto getBoneId = [&boneNameToIndex](const aiBone* bone) {
-        uint32_t boneId = 0;
+        int32_t boneId = 0;
         std::string boneName(bone->mName.C_Str());
 
         auto it = boneNameToIndex.find(boneName);
@@ -114,15 +114,15 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
         }
         else
         {
-            boneId = static_cast<uint32_t>(boneNameToIndex.size());
+            boneId = static_cast<int32_t>(boneNameToIndex.size());
             boneNameToIndex[boneName] = boneId;
         }
 
         return boneId;
     };
 
-    uint32_t totalVertices = 0;
-    uint32_t totalIndices = 0;
+    int32_t totalVertices = 0;
+    int32_t totalIndices = 0;
 
     Assimp::Importer importer;
 
@@ -130,7 +130,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     CRASH_EXPECTED_NOT_NULL(scene);
 
     // used for reserve enough indices to decrease allocating overhead
-    uint32_t startNumIndices = scene->mMeshes[0]->mNumFaces * 3u;
+    int32_t startNumIndices = scene->mMeshes[0]->mNumFaces * 3;
 
     // packed all vertices of all meshes in aiScene
     std::vector<SkeletonMeshVertex> vertices;
@@ -180,10 +180,10 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
         for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
         {
             const aiBone* bone = mesh->mBones[boneIndex];
-            uint32_t boneId = getBoneId(bone);
+            int32_t boneId = getBoneId(bone);
 
             glm::mat4 offsetMatrix = ToGlm(bone->mOffsetMatrix);
-            bonesInfo[bone->mName.C_Str()] = BoneInfo{boneIndex, offsetMatrix};
+            bonesInfo[bone->mName.C_Str()] = BoneInfo{static_cast<int32_t>(boneIndex), offsetMatrix};
             std::string s{bone->mName.C_Str()};
 
             for (uint32_t j = 0; j < bone->mNumWeights; j++)
@@ -237,7 +237,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     m_BboxMax.x *= 0.2f;
 }
 
-void SkeletalMesh::LoadAnimation(const aiScene* scene, uint32_t animationIndex)
+void SkeletalMesh::LoadAnimation(const aiScene* scene, int32_t animationIndex)
 {
     const aiAnimation* anim = scene->mAnimations[animationIndex];
     Animation animation{};
@@ -319,7 +319,7 @@ void SkeletalMesh::CalculateTransform(const BoneAnimationUpdateSpecs& updateSpec
     const Bone& joint = *updateSpecs.Joint;
     glm::mat4 transform = updateSpecs->GetBoneTransformOrRelative(joint, updateSpecs.AnimationTime);
 
-    uint32_t index = joint.BoneTransformIndex;
+    int32_t index = joint.BoneTransformIndex;
     glm::mat4 globalTransform = parentTransform * transform;
     m_BoneTransforms[index] = m_GlobalInverseTransform * globalTransform * joint.BoneOffset;
 
@@ -332,7 +332,7 @@ void SkeletalMesh::CalculateTransform(const BoneAnimationUpdateSpecs& updateSpec
     }
 }
 
-std::shared_ptr<ITexture2D> SkeletalMesh::LoadTexturesFromMaterial(const aiScene* scene, uint32_t materialIndex)
+std::shared_ptr<ITexture2D> SkeletalMesh::LoadTexturesFromMaterial(const aiScene* scene, int32_t materialIndex)
 {
     aiString texturePath;
 

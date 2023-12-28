@@ -287,9 +287,6 @@
     <ClInclude Include="static_mesh.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="stb_image.h">
-      <Filter>Header Files\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="texture.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
@@ -304,6 +301,9 @@
     </ClInclude>
     <ClInclude Include="duration.h">
       <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Header Files\renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

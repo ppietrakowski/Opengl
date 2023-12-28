@@ -12,7 +12,7 @@ IMPLEMENT_LOG_CATEGORY(RENDERER);
 IMPLEMENT_LOG_CATEGORY(ASSET_LOADING);
 IMPLEMENT_LOG_CATEGORY(GLOBAL);
 
-uint32_t Logging::s_IgnoredLogLevels = 0;
+int32_t Logging::s_IgnoredLogLevels = 0;
 
 struct Device
 {
@@ -80,7 +80,7 @@ void Logging::Quit()
 
 void Logging::Log(const LogInfo& info)
 {
-    if (s_IgnoredLogLevels & static_cast<uint32_t>(info.Level))
+    if (s_IgnoredLogLevels & static_cast<int32_t>(info.Level))
     {
         return;
     }

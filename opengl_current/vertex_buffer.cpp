@@ -4,7 +4,7 @@
 #include "opengl_vertex_buffer.h"
 #include "error_macros.h"
 
-std::shared_ptr<IVertexBuffer> IVertexBuffer::Create(const void* data, uint32_t sizeBytes, bool bDynamic)
+std::shared_ptr<IVertexBuffer> IVertexBuffer::Create(const void* data, int32_t sizeBytes, bool bDynamic)
 {
     switch (IRendererAPI::GetApi())
     {
@@ -15,7 +15,7 @@ std::shared_ptr<IVertexBuffer> IVertexBuffer::Create(const void* data, uint32_t 
     ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
 }
 
-std::shared_ptr<IVertexBuffer> IVertexBuffer::CreateEmpty(uint32_t maxSizeBytes)
+std::shared_ptr<IVertexBuffer> IVertexBuffer::CreateEmpty(int32_t maxSizeBytes)
 {
     switch (IRendererAPI::GetApi())
     {

@@ -20,7 +20,7 @@ DECLARE_LOG_CATEGORY(GLOBAL);
 #define ELOG_DEBUG(category, Format, ...) ELOG(LogLevel::kDebug, category, Format, __VA_ARGS__)
 #define ELOG_VERBOSE(category, Format, ...) ELOG(LogLevel::kVerbose, category, Format, __VA_ARGS__)
 
-enum class LogLevel : uint32_t
+enum class LogLevel
 {
     kInfo = 1,
     kWarning = 1 << 1,
@@ -67,7 +67,7 @@ public:
     static void EnableStdLogging();
 
 private:
-    static uint32_t s_IgnoredLogLevels;
+    static int32_t s_IgnoredLogLevels;
 
 private:
     static void SortLogDeviceIDs();

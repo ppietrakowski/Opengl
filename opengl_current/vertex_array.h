@@ -5,7 +5,7 @@
 
 #include <memory>
 
-enum class PrimitiveVertexType : uint8_t
+enum class PrimitiveVertexType : int8_t
 {
     kInt,
     kUnsignedInt,
@@ -15,7 +15,7 @@ enum class PrimitiveVertexType : uint8_t
 
 struct VertexAttribute
 {
-    uint8_t NumComponents : 5;
+    int8_t NumComponents : 5;
     PrimitiveVertexType VertexType : 3;
 };
 
@@ -31,24 +31,24 @@ public:
 
     virtual void SetIndexBuffer(const std::shared_ptr<IIndexBuffer>& indexBuffer) = 0;
 
-    virtual uint32_t GetNumIndices() const = 0;
+    virtual int32_t GetNumIndices() const = 0;
 
-    virtual std::shared_ptr<IVertexBuffer> GetVertexBufferAt(uint32_t index) = 0;
+    virtual std::shared_ptr<IVertexBuffer> GetVertexBufferAt(int32_t index) = 0;
     virtual std::shared_ptr<IIndexBuffer> GetIndexBuffer() = 0;
 
     template <typename T>
     void AddBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes)
     {
-        AddBufferInternal(IVertexBuffer::Create(data.data(), static_cast<uint32_t>(data.size_bytes())), attributes);
+        AddBufferInternal(IVertexBuffer::Create(data.data(), static_cast<int32_t>(data.size_bytes())), attributes);
     }
 
     template <typename T>
     void AddDynamicBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes)
     {
-        AddBufferInternal(IVertexBuffer::Create(data.data(), data.size_bytes(), true), attributes);
+        AddBufferInternal(IVertexBuffer::Create(data.data(), static_cast<int32_t>(data.size_bytes()), true), attributes);
     }
 
-    void AddDynamicBuffer(uint32_t maxSize, std::span<const VertexAttribute> attributes)
+    void AddDynamicBuffer(int32_t maxSize, std::span<const VertexAttribute> attributes)
     {
         AddBufferInternal(IVertexBuffer::CreateEmpty(maxSize), attributes);
     }

@@ -31,25 +31,22 @@ std::shared_ptr<ITexture2D> ITexture2D::LoadFromFile(const std::string& filePath
         stbi_set_flip_vertically_on_load(0);
     }
 
-    int32_t width;
-    int32_t height;
-    int32_t channels;
-    uint8_t* data = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+    stbi_image_data_t imageData = stbi_load_from_filepath(filePath.c_str(), STBI_rgb_alpha);
 
-    if (data == nullptr)
+    if (imageData.data == nullptr)
     {
         throw std::runtime_error{"Failed to load texture " + filePath};
     }
 
-    return CreateFromImage(ImageRgba(data, (uint32_t)width, (uint32_t)height, &StbiDeleter));
+    return CreateFromImage(ImageRgba(imageData.data, imageData.width, imageData.height, &StbiDeleter));
 }
 
-std::shared_ptr<ITexture2D> ITexture2D::Create(const void* data, uint32_t width, uint32_t height, TextureFormat format)
+std::shared_ptr<ITexture2D> ITexture2D::Create(const void* data, const TextureSpecification& specification)
 {
     switch (IRendererAPI::GetApi())
     {
     case IRendererAPI::kOpenGL:
-        return std::make_shared<OpenGlTexture2D>(data, width, height, format);
+        return std::make_shared<OpenGlTexture2D>(data, specification);
     }
 
     ERR_FAIL_MSG_V("Invalid API type", nullptr);
@@ -66,20 +63,19 @@ std::shared_ptr<ITexture2D> ITexture2D::CreateFromImage(const ImageRgba& image)
     ERR_FAIL_MSG_V("Invalid API type", nullptr);
 }
 
-std::shared_ptr<ITexture2D> ITexture2D::CreateEmpty(uint32_t width, uint32_t height, TextureFormat format)
+std::shared_ptr<ITexture2D> ITexture2D::CreateEmpty(const TextureSpecification& specification)
 {
     switch (IRendererAPI::GetApi())
     {
     case IRendererAPI::kOpenGL:
-        return std::make_shared<OpenGlTexture2D>(width, height, format);
+        return std::make_shared<OpenGlTexture2D>(specification);
     }
 
     ERR_FAIL_MSG_V("Invalid API type", nullptr);
 }
 
-ImageRgba LoadRgbaImageFromMemory(const void* data, uint32_t length)
+ImageRgba LoadRgbaImageFromMemory(const void* data, int length)
 {
-    int32_t w, h, comps;
-    uint8_t* image = stbi_load_from_memory((uint8_t*)data, length, &w, &h, &comps, STBI_rgb_alpha);
-    return ImageRgba{image, (uint32_t)w, (uint32_t)h, &StbiDeleter};
+    stbi_image_data_t imageData = stbi_load_from_memory_rgba(reinterpret_cast<const uint8_t*>(data), length);
+    return ImageRgba{imageData.data, imageData.width, imageData.height, &StbiDeleter};
 }

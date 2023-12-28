@@ -15,9 +15,9 @@ public:
 
     void SetIndexBuffer(const std::shared_ptr<IIndexBuffer>& indexBuffer) override;
 
-    uint32_t GetNumIndices() const override;
+    int32_t GetNumIndices() const override;
 
-    std::shared_ptr<IVertexBuffer> GetVertexBufferAt(uint32_t index) override;
+    std::shared_ptr<IVertexBuffer> GetVertexBufferAt(int32_t index) override;
     std::shared_ptr<IIndexBuffer> GetIndexBuffer() override;
     void AddBufferInternal(const std::shared_ptr<IVertexBuffer>& vertexBuffer, std::span<const VertexAttribute> attributes) override;
 

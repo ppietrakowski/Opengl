@@ -7,7 +7,7 @@
 struct SourceLocation
 {
     const char* FileName;
-    uint32_t Line;
+    int32_t Line;
     const char* FunctionName;
 };
 
@@ -15,7 +15,7 @@ struct ErrorHandlerInfo
 {
     const char* FunctionName;
     const char* FileName;
-    uint32_t Line;
+    int32_t Line;
     const char* ErrorMessage;
 
     ErrorHandlerInfo(const SourceLocation& sourceLocation, const char* errorMessage) :
@@ -48,17 +48,19 @@ struct ErrorHandler
 {
     ErrorHandlerFn ErrorHandlerFunc{nullptr};
     void* UserData{nullptr};
+
+    void Invoke(const ErrorHandlerInfo& info) const;
 };
 
-    void AddErrorHandler(const ErrorHandler& handler);
-    void RemoveErrorHandler(const ErrorHandler& handler);
-    void Crash(const SourceLocation* location, const char* description);
+void AddErrorHandler(const ErrorHandler& handler);
+void RemoveErrorHandler(const ErrorHandler& handler);
+void Crash(const SourceLocation* location, const char* description);
 
-    void PrintError(const SourceLocation* location, const char* message);
+void PrintError(const SourceLocation* location, const char* message);
 
 #define CURRENT_SOURCE_LOCATION                                       \
     {                                                                 \
-        __FILE__, static_cast<uint32_t>(__LINE__), FUNCTION_SIGNATURE \
+        __FILE__, static_cast<int32_t>(__LINE__), FUNCTION_SIGNATURE \
     }
 
 #define ERR_FAIL()                                            \

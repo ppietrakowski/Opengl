@@ -11,8 +11,8 @@
 
 struct WindowSettings
 {
-    uint32_t Width;
-    uint32_t Height;
+    int32_t Width;
+    int32_t Height;
     std::string Title;
 };
 
@@ -25,8 +25,8 @@ public:
 
     virtual void Update() = 0;
 
-    virtual uint32_t GetWidth() const = 0;
-    virtual uint32_t GetHeight() const = 0;
+    virtual int32_t GetWidth() const = 0;
+    virtual int32_t GetHeight() const = 0;
 
     virtual glm::ivec2 GetWindowPosition() const = 0;
 

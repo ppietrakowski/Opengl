@@ -225,7 +225,7 @@ void OpenGlShader::SetUniformMat4(const char* name, const glm::mat4& value)
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void OpenGlShader::SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, uint32_t count)
+void OpenGlShader::SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, int32_t count)
 {
     glUniformMatrix4fv(GetUniformLocation(name), count, GL_FALSE, glm::value_ptr(values[0]));
 }
@@ -342,9 +342,9 @@ int32_t OpenGlShader::GetUniformLocation(const char* uniformName) const
     return it->second;
 }
 
-void OpenGlShader::AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, int32_t location) const
+void OpenGlShader::AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, int32_t location) const
 {
-    const uint32_t kMaxNameLength = 96;
+    const int32_t kMaxNameLength = 96;
     const GLTypeToUniformType kGLTypesToUniformTypes[] =
     {
         {GL_FLOAT, UniformType::kFloat},
@@ -371,6 +371,6 @@ void OpenGlShader::AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info
 
     if (it != std::end(kGLTypesToUniformTypes))
     {
-        out_uniforms_info.emplace_back(UniformInfo{it->Type, name, location, static_cast<uint32_t>(size)});
+        outUniformsInfo.emplace_back(UniformInfo{it->Type, name, location, static_cast<int32_t>(size)});
     }
 }

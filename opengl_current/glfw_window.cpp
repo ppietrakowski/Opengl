@@ -6,7 +6,7 @@
 
 GlfwWindow::GlfwWindow(const WindowSettings& settings)
 {
-    glfwSetErrorCallback([](int code, const char* description) {
+    glfwSetErrorCallback([](int32_t code, const char* description) {
         ELOG_ERROR(LOG_CORE, "Glfw error %i : %s", code, description);
     });
 
@@ -48,12 +48,12 @@ void GlfwWindow::Update()
     m_Input->Update(m_WindowData);
 }
 
-uint32_t GlfwWindow::GetWidth() const
+int32_t GlfwWindow::GetWidth() const
 {
     return m_WindowData.WindowSize.x;
 }
 
-uint32_t GlfwWindow::GetHeight() const
+int32_t GlfwWindow::GetHeight() const
 {
     return m_WindowData.WindowSize.y;
 }
@@ -147,7 +147,7 @@ void GlfwWindow::BindWindowCallbacks()
         }
     });
 
-    glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+    glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
         GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
         if (windowData->Callback)
@@ -160,7 +160,7 @@ void GlfwWindow::BindWindowCallbacks()
         }
     });
 
-    glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods) {
+    glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int32_t button, int32_t action, int32_t mods) {
         GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
         if (windowData->Callback)
@@ -172,7 +172,7 @@ void GlfwWindow::BindWindowCallbacks()
         }
     });
 
-    glfwSetWindowFocusCallback(m_Window, [](GLFWwindow* window, int focused) {
+    glfwSetWindowFocusCallback(m_Window, [](GLFWwindow* window, int32_t focused) {
         GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
         if (windowData->Callback)

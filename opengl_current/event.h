@@ -24,8 +24,8 @@ struct Event
 {
     struct SizeEvent
     {
-        uint32_t Width;
-        uint32_t Height;
+        int32_t Width;
+        int32_t Height;
     };
 
     struct KeyEvent
@@ -67,6 +67,6 @@ struct Event
         MouseWheelEvent MouseWheel;
     };
 
-    uint32_t MillisecondsSinceGameStart;
+    int32_t MillisecondsSinceGameStart;
     Event();
 };
