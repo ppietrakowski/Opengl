@@ -3,51 +3,53 @@
 #include <engine.h>
 #include <glm/gtc/quaternion.hpp>
 
-class SandboxGameLayer : public Layer {
+class SandboxGameLayer : public ILayer
+{
 public:
     SandboxGameLayer();
 
     // Inherited via IGameLayer
-    void OnUpdate(Duration delta_time) override;
-    void OnRender(Duration delta_time) override;
+    void OnUpdate(Duration deltaTime) override;
+    void OnRender(Duration deltaTime) override;
     bool OnEvent(const Event& event) override;
     void OnImguiFrame() override;
 
-    virtual std::type_index GetTypeIndex() const override {
+    virtual std::type_index GetTypeIndex() const override
+    {
         return typeid(SandboxGameLayer);
     }
 
 private:
-    std::shared_ptr<Shader> shader_;
-    std::shared_ptr<Shader> unshaded_;
-    std::shared_ptr<Shader> current_used_;
+    std::shared_ptr<IShader> m_Shader;
+    std::shared_ptr<IShader> m_Unshaded;
+    std::shared_ptr<IShader> m_CurrentUsed;
 
-    std::unique_ptr<StaticMesh> static_mesh_;
-    glm::vec3 static_mesh_position_;
+    std::unique_ptr<StaticMesh> m_StaticMesh;
+    glm::vec3 m_StaticMeshPosition;
 
-    glm::vec3 camera_position_;
-    glm::quat camera_rotation_;
+    glm::vec3 m_CameraPosition;
+    glm::quat m_CameraRotation;
 
-    std::shared_ptr<Material> material_;
-    std::shared_ptr<Material> wireframe_material_;
-    std::shared_ptr<Material> current_material_;
-    std::shared_ptr<Material> material_test_;
+    std::shared_ptr<Material> m_Material;
+    std::shared_ptr<Material> m_WireframeMaterial;
+    std::shared_ptr<Material> m_CurrentMaterial;
+    std::shared_ptr<Material> m_MaterialTest;
 
-    float yaw_ = 0.0f;
-    float pitch_ = 0.0f;
+    float m_Yaw = 0.0f;
+    float m_Pitch = 0.0f;
 
-    Duration last_delta_seconds_;
-    bool was_pressed_last_time_ = false;
-    bool sterring_entity_{ false };
+    Duration m_LastDeltaSeconds;
+    bool m_bWasPressedLastTime = false;
+    bool m_bSterringEntity{false};
 
-    float move_speed_ = 20.0f;
-    float yaw_rotation_rate_ = 80.0f;
-    float ascend_speed_ = 20.0f;
+    float m_MoveSpeed = 20.0f;
+    float m_YawRotationRate = 80.0f;
+    float m_AscendSpeed = 20.0f;
 
-    glm::vec3 bbox_min_;
-    glm::vec3 bbox_max_;
-    Duration startup_time_{ GetNow() };
-    Duration duration_{ GetNow() };
-    SkeletalMesh skeletal_mesh_;
+    glm::vec3 m_BboxMin;
+    glm::vec3 m_BboxMax;
+    Duration m_StartupTime{GetNow()};
+    Duration m_Duration{GetNow()};
+    SkeletalMesh m_SkeletalMesh;
 };
 

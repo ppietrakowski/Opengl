@@ -7,9 +7,10 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-class OpenGlGraphicsContext : public GraphicsContext {
+class OpenGlGraphicsContext : public IGraphicsContext
+{
 public:
-    OpenGlGraphicsContext(GLFWwindow *context_window);
+    OpenGlGraphicsContext(GLFWwindow* contextWindow);
 
 public:
     void InitializeForImGui() override;
@@ -18,9 +19,9 @@ public:
     void ImGuiDrawFrame() override;
     void UpdateImGuiViewport() override;
     void SwapBuffers() override;
-    void SetVsync(bool vsync_enabled) override;
+    void SetVsync(bool bVsyncEnabled) override;
 
 private:
-    GLFWwindow* context_window_;
+    GLFWwindow* m_Window;
 };
 

@@ -3,14 +3,15 @@
 #include <GL/glew.h>
 #include "shader.h"
 
-class OpenGlShader : public Shader {
+class OpenGlShader : public IShader
+{
 public:
     OpenGlShader();
 
-    OpenGlShader(std::string_view vertex_shader_source, std::string_view fragment_shader_source);
-    OpenGlShader(std::string_view vertex_shader_source, std::string_view fragment_shader_source, std::string_view geometry_shader_source);
-    OpenGlShader(std::string_view vertex_shader_source, std::string_view fragment_shader_source, std::string_view geometry_shader_source,
-        std::string_view tesselation_control_shader, std::string_view tesselation_evaluate_shader);
+    OpenGlShader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource);
+    OpenGlShader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource, std::string_view geometryShaderSource);
+    OpenGlShader(std::string_view vertexShaderSource, std::string_view fragmentShaderSource, std::string_view geometryShaderSource,
+        std::string_view tesselationControlShader, std::string_view tesselationEvaluateShader);
 
     ~OpenGlShader();
 
@@ -37,17 +38,17 @@ public:
     virtual glm::vec4 GetUniformVec4(const char* name) const override;
 
     virtual std::vector<UniformInfo> GetUniformInfos() const override;
-    virtual void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, uint32_t start_texture_unit) override;
+    virtual void SetSamplerUniform(const char* uniformName, const std::shared_ptr<ITexture>& textures, uint32_t startTextureUnit) override;
 
     void GenerateShaders(std::span<std::string_view> sources) override;
 
 private:
-    GLuint shader_program_{ 0 };
-    mutable std::unordered_map<std::string, GLint> uniform_locations_cache_;
+    GLuint m_ShaderProgram{0};
+    mutable std::unordered_map<std::string, GLint> m_UniformNameToLocation;
 
 private:
-    
-    int32_t GetUniformLocation(const char* uniform_name) const;
-    void AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, int32_t location) const;
+
+    int32_t GetUniformLocation(const char* uniformName) const;
+    void AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, int32_t location) const;
 };
 

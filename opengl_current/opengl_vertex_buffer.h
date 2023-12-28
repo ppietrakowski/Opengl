@@ -3,10 +3,11 @@
 #include <GL/glew.h>
 #include "vertex_buffer.h"
 
-class OpenGlVertexBuffer : public VertexBuffer {
+class OpenGlVertexBuffer : public IVertexBuffer
+{
 public:
-    OpenGlVertexBuffer(const void* data, uint32_t size_bytes, bool dynamic = false);
-    OpenGlVertexBuffer(uint32_t max_size_bytes);
+    OpenGlVertexBuffer(const void* data, uint32_t sizeBytes, bool bDynamic = false);
+    OpenGlVertexBuffer(uint32_t maxSizeBytes);
     ~OpenGlVertexBuffer();
 
 public:
@@ -18,7 +19,7 @@ public:
     bool IsValid() const override;
 
 private:
-    GLuint renderer_id_;
-    uint32_t buffer_size_;
+    GLuint m_RendererId;
+    uint32_t m_BufferSize;
 };
 

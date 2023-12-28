@@ -4,11 +4,12 @@
 
 #include <GL/glew.h>
 
-class OpenGlIndexBuffer : public IndexBuffer {
+class OpenGlIndexBuffer : public IIndexBuffer
+{
 public:
     OpenGlIndexBuffer();
-    OpenGlIndexBuffer(const uint32_t* data, uint32_t num_indices, bool dynamic = false);
-    OpenGlIndexBuffer(uint32_t total_num_indices);
+    OpenGlIndexBuffer(const uint32_t* data, uint32_t numIndices, bool bDynamic = false);
+    OpenGlIndexBuffer(uint32_t totalNumIndices);
     ~OpenGlIndexBuffer();
 
 public:
@@ -16,12 +17,12 @@ public:
     void Bind() const override;
     void Unbind() const override;
     uint32_t GetNumIndices() const override;
-    void UpdateIndices(const uint32_t* data, uint32_t offset, uint32_t num_elements) override;
+    void UpdateIndices(const uint32_t* data, uint32_t offset, uint32_t numElements) override;
     bool IsValid() const override;
 
 private:
-    uint32_t renderer_id_;
-    uint32_t num_indices_;
+    uint32_t m_RendererId;
+    uint32_t m_NumIndices;
 
 };
 

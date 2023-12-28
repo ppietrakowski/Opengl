@@ -6,43 +6,48 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-static Game* game_instance_ = nullptr;
+static Game* s_GameInstance = nullptr;
 
 Game::Game(const WindowSettings& settings) :
-    imgui_context_{ nullptr } {
+    m_ImGuiContext{nullptr}
+{
     Logging::Initialize();
-    window_ = Window::Create(settings);
-    graphics_context_ = window_->GetContext();
-    
+    m_Window = IWindow::Create(settings);
+    m_GraphicsContext = m_Window->GetContext();
+
     // initialize subsystems
     Renderer::Initialize();
-    Renderer::UpdateProjection(static_cast<float>(settings.width), static_cast<float>(settings.height), 45.0f, 0.01f);
+    Renderer::UpdateProjection(static_cast<float>(settings.Width), static_cast<float>(settings.Height), 45.0f, 0.01f);
 
     BindWindowEvents();
     InitializeImGui();
-    game_instance_ = this;
+    s_GameInstance = this;
 }
 
-Game::~Game() {
-    layers_.clear();
+Game::~Game()
+{
+    m_Layers.clear();
 
     // deinitialize all libraries
     Renderer::Quit();
 
-    graphics_context_->DeinitializeImGui();
+    m_GraphicsContext->DeinitializeImGui();
     ImGui::DestroyContext();
 
     Logging::Quit();
-    game_instance_ = nullptr;
+    s_GameInstance = nullptr;
 }
 
-void Game::Run() {
-    std::chrono::nanoseconds delta_seconds{ std::chrono::nanoseconds::zero() };
-    auto last_frame_time = GetNow();
+void Game::Run()
+{
+    std::chrono::nanoseconds deltaSeconds{std::chrono::nanoseconds::zero()};
+    auto lastFrameTime = GetNow();
 
-    while (window_->IsOpen()) {
-        for (const std::unique_ptr<Layer>& layer : layers_) {
-            layer->OnUpdate(delta_seconds);
+    while (m_Window->IsOpen())
+    {
+        for (const std::unique_ptr<ILayer>& layer : m_Layers)
+        {
+            layer->OnUpdate(deltaSeconds);
         }
 
         RenderCommand::Clear();
@@ -50,36 +55,43 @@ void Game::Run() {
         // calculate delta time using chrono library
         auto now = GetNow();
 
-        if (delta_seconds == std::chrono::nanoseconds::zero()) {
-            delta_seconds = (now - last_frame_time);
-        } else {
+        if (deltaSeconds == std::chrono::nanoseconds::zero())
+        {
+            deltaSeconds = (now - lastFrameTime);
+        }
+        else
+        {
             // average delta seconds to keep more meaningfull frame time
-            delta_seconds = ((now - last_frame_time) + delta_seconds) / 2;
+            deltaSeconds = ((now - lastFrameTime) + deltaSeconds) / 2;
         }
 
-        last_frame_time = now;
+        lastFrameTime = now;
 
         // broadcast render command
-        for (const std::unique_ptr<Layer>& layer : layers_) {
-            layer->OnRender(delta_seconds);
+        for (const std::unique_ptr<ILayer>& layer : m_Layers)
+        {
+            layer->OnRender(deltaSeconds);
         }
 
         RunImguiFrame();
-        window_->Update();
+        m_Window->Update();
     }
 }
 
-bool Game::IsRunning() const {
-    return window_->IsOpen();
+bool Game::IsRunning() const
+{
+    return m_Window->IsOpen();
 }
 
-void Game::Quit() {
-    window_->Close();
+void Game::Quit()
+{
+    m_Window->Close();
 }
 
-bool Game::InitializeImGui() {
-    imgui_context_ = ImGui::CreateContext();
-    ImGui::SetCurrentContext(imgui_context_);
+bool Game::InitializeImGui()
+{
+    m_ImGuiContext = ImGui::CreateContext();
+    ImGui::SetCurrentContext(m_ImGuiContext);
 
     ImGui::StyleColorsDark();
     ImGuiIO& io = ImGui::GetIO();
@@ -87,52 +99,61 @@ bool Game::InitializeImGui() {
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-    graphics_context_->InitializeForImGui();
+    m_GraphicsContext->InitializeForImGui();
     return true;
 }
 
-void Game::RunImguiFrame() {
-    graphics_context_->ImGuiBeginFrame();
+void Game::RunImguiFrame()
+{
+    m_GraphicsContext->ImGuiBeginFrame();
     ImGui::NewFrame();
 
     // broadcast imgui frame draw
-    for (const std::unique_ptr<Layer>& layer : layers_) {
+    for (const std::unique_ptr<ILayer>& layer : m_Layers)
+    {
         layer->OnImguiFrame();
     }
 
     ImGui::Render();
-    graphics_context_->ImGuiDrawFrame();
+    m_GraphicsContext->ImGuiDrawFrame();
     ImGui::EndFrame();
-    graphics_context_->UpdateImGuiViewport();
+    m_GraphicsContext->UpdateImGuiViewport();
 }
 
-void Game::BindWindowEvents() {
-    window_->SetEventCallback([this](const Event& evt) {
+void Game::BindWindowEvents()
+{
+    m_Window->SetEventCallback([this](const Event& evt) {
         // events in layer are processed from last to first
-        for (auto it = layers_.rbegin(); it != layers_.rend(); ++it) {
-            std::unique_ptr<Layer>& layer = *it;
+        for (auto it = m_Layers.rbegin(); it != m_Layers.rend(); ++it)
+        {
+            std::unique_ptr<ILayer>& layer = *it;
 
-            if (layer->OnEvent(evt)) {
+            if (layer->OnEvent(evt))
+            {
                 return;
             }
         }
     });
 }
 
-void Game::SetMouseVisible(bool mouse_visible) {
-    window_->SetMouseVisible(mouse_visible);
+void Game::SetMouseVisible(bool bMouseVisible)
+{
+    m_Window->SetMouseVisible(bMouseVisible);
 }
 
-void Game::AddLayer(std::unique_ptr<Layer>&& game_layer) {
-    layers_.emplace_back(std::move(game_layer));
+void Game::AddLayer(std::unique_ptr<ILayer>&& gameLayer)
+{
+    m_Layers.emplace_back(std::move(gameLayer));
 }
 
-void Game::RemoveLayer(std::type_index index) {
-    auto it = std::remove_if(layers_.begin(),
-        layers_.end(),
-        [index](const std::unique_ptr<Layer>& layer) { return layer->GetTypeIndex() == index; });
+void Game::RemoveLayer(std::type_index index)
+{
+    auto it = std::remove_if(m_Layers.begin(),
+        m_Layers.end(),
+        [index](const std::unique_ptr<ILayer>& layer) { return layer->GetTypeIndex() == index; });
 
-    if (it != layers_.end()) {
-        layers_.erase(it);
+    if (it != m_Layers.end())
+    {
+        m_Layers.erase(it);
     }
 }

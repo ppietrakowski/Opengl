@@ -6,7 +6,8 @@
 
 #include "keys.h"
 
-enum class EventType {
+enum class EventType
+{
     kInvalid = 0,
     kLostFocus,
     kGainedFocus,
@@ -19,46 +20,53 @@ enum class EventType {
     kCount
 };
 
-struct Event {
-    struct SizeEvent {
-        uint32_t width;
-        uint32_t height;
+struct Event
+{
+    struct SizeEvent
+    {
+        uint32_t Width;
+        uint32_t Height;
     };
 
-    struct KeyEvent {
-        KeyCode code;
-        int32_t scan_code;
-        bool alt_clicked : 1;
-        bool control_clicked : 1;
-        bool shift_clicked : 1;
-        bool system_clicked : 1;
+    struct KeyEvent
+    {
+        KeyCode Code;
+        int32_t ScanCode;
+        bool bAltClicked : 1;
+        bool bControlClicked : 1;
+        bool bShiftClicked : 1;
+        bool bSystemClicked : 1;
     };
 
-    struct MouseMoveEvent {
-        glm::vec2 mouse_position;
-        glm::vec2 last_mouse_position;
+    struct MouseMoveEvent
+    {
+        glm::vec2 MousePosition;
+        glm::vec2 LastMousePosition;
     };
 
-    struct MouseButtonEvent {
-        MouseCode button;
-        glm::vec2 mouse_position;
+    struct MouseButtonEvent
+    {
+        MouseButton Button;
+        glm::vec2 MousePosition;
     };
 
-    struct MouseWheelEvent {
-        glm::vec2 delta;
+    struct MouseWheelEvent
+    {
+        glm::vec2 Delta;
     };
 
     // Member data
-    EventType type;
+    EventType Type;
 
-    union {
-        SizeEvent size;
-        KeyEvent key;
-        MouseMoveEvent mouse_move;
-        MouseButtonEvent mouse_button;
-        MouseWheelEvent mouse_wheel;
+    union
+    {
+        SizeEvent Size;
+        KeyEvent Key;
+        MouseMoveEvent MouseMove;
+        MouseButtonEvent MouseButtonState;
+        MouseWheelEvent MouseWheel;
     };
 
-    uint32_t milliseconds_since_game_start;
+    uint32_t MillisecondsSinceGameStart;
     Event();
 };

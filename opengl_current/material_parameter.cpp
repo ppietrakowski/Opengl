@@ -4,117 +4,137 @@
 
 #include <cstring>
 
-MaterialParam::MaterialParam(const char* uniform_name) :
-    param_type_{ MaterialParamType::kUnknown } {
-    strncpy(this->uniform_name_, uniform_name, sizeof(this->uniform_name_));
+MaterialParam::MaterialParam(const char* uniformName) :
+    m_ParamType{MaterialParamType::kUnknown}
+{
+    strncpy(this->m_UniformName, uniformName, sizeof(this->m_UniformName));
 }
 
-MaterialParam::MaterialParam(const char* uniform_name, int32_t value) :
-    param_type_{ MaterialParamType::kInt } {
-    param_value_.int_value = value;
+MaterialParam::MaterialParam(const char* uniformName, int32_t value) :
+    m_ParamType{MaterialParamType::kInt}
+{
+    m_ParamValue.IntValue = value;
 
-    strncpy(this->uniform_name_, uniform_name, sizeof(this->uniform_name_));
+    strncpy(this->m_UniformName, uniformName, sizeof(this->m_UniformName));
 }
 
-MaterialParam::MaterialParam(const char* uniform_name, float value) :
-    param_type_{ MaterialParamType::kFloat } {
-    param_value_.float_value = value;
+MaterialParam::MaterialParam(const char* uniformName, float value) :
+    m_ParamType{MaterialParamType::kFloat}
+{
+    m_ParamValue.FloatValue = value;
 
-    strncpy(this->uniform_name_, uniform_name, sizeof(this->uniform_name_));
+    strncpy(this->m_UniformName, uniformName, sizeof(this->m_UniformName));
 }
 
-MaterialParam::MaterialParam(const char* uniform_name, glm::vec2 value) :
-    param_type_{ MaterialParamType::kVec2 } {
-    param_value_.vec2_value = value;
+MaterialParam::MaterialParam(const char* uniformName, glm::vec2 value) :
+    m_ParamType{MaterialParamType::kVec2}
+{
+    m_ParamValue.Vec2Value = value;
 
-    strncpy(this->uniform_name_, uniform_name, sizeof(this->uniform_name_));
+    strncpy(this->m_UniformName, uniformName, sizeof(this->m_UniformName));
 }
 
-MaterialParam::MaterialParam(const char* uniform_name, glm::vec3 value) :
-    param_type_{ MaterialParamType::kVec3 } {
-    param_value_.vec3_value = value;
+MaterialParam::MaterialParam(const char* uniformName, glm::vec3 value) :
+    m_ParamType{MaterialParamType::kVec3}
+{
+    m_ParamValue.Vec3Value = value;
 
-    strncpy(this->uniform_name_, uniform_name, sizeof(this->uniform_name_));
+    strncpy(this->m_UniformName, uniformName, sizeof(this->m_UniformName));
 }
 
-MaterialParam::MaterialParam(const char* uniform_name, glm::vec4 value) :
-    param_type_{ MaterialParamType::kVec2 } {
-    param_value_.vec4_value = value;
+MaterialParam::MaterialParam(const char* uniformName, glm::vec4 value) :
+    m_ParamType{MaterialParamType::kVec2}
+{
+    m_ParamValue.Vec4Value = value;
 
-    strncpy(this->uniform_name_, uniform_name, sizeof(this->uniform_name_));
+    strncpy(this->m_UniformName, uniformName, sizeof(this->m_UniformName));
 }
 
-void MaterialParam::SetUniform(Shader& shader) const {
+void MaterialParam::SetUniform(IShader& shader) const
+{
 
-    switch (param_type_) {
+    switch (m_ParamType)
+    {
     case MaterialParamType::kInt:
-        shader.SetUniformInt(uniform_name_, param_value_.int_value);
+        shader.SetUniformInt(m_UniformName, m_ParamValue.IntValue);
         break;
     case MaterialParamType::kFloat:
-        shader.SetUniformFloat(uniform_name_, param_value_.float_value);
+        shader.SetUniformFloat(m_UniformName, m_ParamValue.FloatValue);
         break;
     case MaterialParamType::kVec2:
-        shader.SetUniformVec2(uniform_name_, param_value_.vec2_value);
+        shader.SetUniformVec2(m_UniformName, m_ParamValue.Vec2Value);
         break;
     case MaterialParamType::kVec3:
-        shader.SetUniformVec3(uniform_name_, param_value_.vec3_value);
+        shader.SetUniformVec3(m_UniformName, m_ParamValue.Vec3Value);
         break;
     case MaterialParamType::kVec4:
-        shader.SetUniformVec4(uniform_name_, param_value_.vec4_value);
+        shader.SetUniformVec4(m_UniformName, m_ParamValue.Vec4Value);
         break;
     case MaterialParamType::kSampler2D:
-        shader.SetSamplerUniform(uniform_name_, texture_, texture_unit);
+        shader.SetSamplerUniform(m_UniformName, m_Texture, TextureUnit);
         break;
     default:
         break;
     }
 }
 
-int32_t MaterialParam::GetInt() const {
-    return param_value_.int_value;
+int32_t MaterialParam::GetInt() const
+{
+    return m_ParamValue.IntValue;
 }
 
-float MaterialParam::GetFloat() const {
-    return param_value_.float_value;
+float MaterialParam::GetFloat() const
+{
+    return m_ParamValue.FloatValue;
 }
 
-glm::vec2 MaterialParam::GetVector2() const {
-    return param_value_.vec2_value;
+glm::vec2 MaterialParam::GetVector2() const
+{
+    return m_ParamValue.Vec2Value;
 }
 
-glm::vec3 MaterialParam::GetVector3() const {
-    return param_value_.vec3_value;
+glm::vec3 MaterialParam::GetVector3() const
+{
+    return m_ParamValue.Vec3Value;
 }
 
-glm::vec4 MaterialParam::GetVector4() const {
-    return param_value_.vec4_value;
+glm::vec4 MaterialParam::GetVector4() const
+{
+    return m_ParamValue.Vec4Value;
 }
 
-std::shared_ptr<Texture> MaterialParam::GetTexture() const {
-    return texture_;
+std::shared_ptr<ITexture> MaterialParam::GetTexture() const
+{
+    return m_Texture;
 }
 
-void MaterialParam::SetInt(int32_t value) {
-    param_value_.int_value = value;
+void MaterialParam::SetInt(int32_t value)
+{
+    m_ParamValue.IntValue = value;
 }
 
-void MaterialParam::SetFloat(float value) {
-    param_value_.float_value = value;
+void MaterialParam::SetFloat(float value)
+{
+    m_ParamValue.FloatValue = value;
 }
 
-void MaterialParam::SetVector2(glm::vec2 value) {
-    param_value_.vec2_value = value;
+void MaterialParam::SetVector2(glm::vec2 value)
+{
+    m_ParamValue.Vec2Value = value;
 }
 
-void MaterialParam::SetVector3(glm::vec3 value) {
-    param_value_.vec3_value = value;
+void MaterialParam::SetVector3(glm::vec3 value)
+{
+    m_ParamValue.Vec3Value = value;
 }
 
-void MaterialParam::SetVector4(glm::vec4 value) {
-    param_value_.vec4_value = value;
+void MaterialParam::SetVector4(glm::vec4 value)
+{
+    m_ParamValue.Vec4Value = value;
 }
 
-void MaterialParam::SetTexture(const std::shared_ptr<Texture>& value) {
-    texture_ = value;
+void MaterialParam::SetTexture(const std::shared_ptr<ITexture>& value)
+{
+    m_Texture = value;
 }
 

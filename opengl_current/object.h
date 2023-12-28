@@ -2,7 +2,8 @@
 
 #include <string>
 
-class Object {
+class Object
+{
 public:
     Object() = default;
     virtual ~Object() = default;
@@ -15,14 +16,15 @@ public:
 
     virtual void SetName(const std::string& name);
 
-    const std::string& GetName() const {
-        return name_;
+    const std::string& GetName() const
+    {
+        return m_Name;
     }
 
     virtual std::string ToString() const;
 
 private:
-    std::string name_;
+    std::string m_Name;
 };
 
 #define CLASS_TYPE_TO_NAME(ClassType) #ClassType

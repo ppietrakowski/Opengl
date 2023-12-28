@@ -12,29 +12,34 @@
 
 constexpr uint32_t kMaxErrorHandlers = 5;
 
-static std::array<ErrorHandler, kMaxErrorHandlers> error_handlers_;
-static uint32_t num_error_handlers_ = 0;
+static std::array<ErrorHandler, kMaxErrorHandlers> s_ErrorHandlers;
+static uint32_t s_NumErrorHandlers = 0;
 
-void AddErrorHandler(const ErrorHandler& handler) {
-    ERR_FAIL_EXPECTED_TRUE_MSG(num_error_handlers_ < kMaxErrorHandlers, "Max error handlers assigned");
-    error_handlers_[num_error_handlers_++] = handler;
+void AddErrorHandler(const ErrorHandler& handler)
+{
+    ERR_FAIL_EXPECTED_TRUE_MSG(s_NumErrorHandlers < kMaxErrorHandlers, "Max error handlers assigned");
+    s_ErrorHandlers[s_NumErrorHandlers++] = handler;
 }
 
-void RemoveErrorHandler(const ErrorHandler& handler) {
+void RemoveErrorHandler(const ErrorHandler& handler)
+{
     // find first item that's equal to handler
-    for (auto it = error_handlers_.begin(); it != error_handlers_.end(); ++it) {
-        bool handler_equal = handler.user_data == it->user_data && handler.error_handler_func == it->error_handler_func;
+    for (auto it = s_ErrorHandlers.begin(); it != s_ErrorHandlers.end(); ++it)
+    {
+        bool bHandlerEqual = handler.UserData == it->UserData && handler.ErrorHandlerFunc == it->ErrorHandlerFunc;
 
-        if (handler_equal) {
+        if (bHandlerEqual)
+        {
             // if found, move element to front of array
-            std::move(it + 1, error_handlers_.end(), it);
-            num_error_handlers_--;
+            std::move(it + 1, s_ErrorHandlers.end(), it);
+            s_NumErrorHandlers--;
             break;
         }
     }
 }
 
-void Crash(const SourceLocation* location, const char* description) {
+void Crash(const SourceLocation* location, const char* description)
+{
     PrintError(location, description);
 #if defined(_WIN32) || defined(WIN32)     /* _Win32 is usually defined by compilers targeting 32 or   64 bit Windows systems */
     MessageBoxA(nullptr, description, "Crash report", MB_OK);
@@ -42,14 +47,16 @@ void Crash(const SourceLocation* location, const char* description) {
     std::exit(EXIT_FAILURE);
 }
 
-void PrintError(const SourceLocation* location, const char* message) {
+void PrintError(const SourceLocation* location, const char* message)
+{
 #if defined(DEBUG) || defined(_DEBUG)
-    printf("Error in %s: %u in %s msg: %s\n", location->file_name, location->line, location->function_name, message);
+    printf("Error in %s: %u in %s msg: %s\n", location->FileName, location->Line, location->FunctionName, message);
 #endif
 
-    ErrorHandlerInfo info{ *location,  message };
-    for (uint32_t i = 0; i < num_error_handlers_; ++i) {
-        const ErrorHandler& errorHandler = error_handlers_[i];
-        errorHandler.error_handler_func(errorHandler.user_data, info);
+    ErrorHandlerInfo info{*location,  message};
+    for (uint32_t i = 0; i < s_NumErrorHandlers; ++i)
+    {
+        const ErrorHandler& errorHandler = s_ErrorHandlers[i];
+        errorHandler.ErrorHandlerFunc(errorHandler.UserData, info);
     }
 }

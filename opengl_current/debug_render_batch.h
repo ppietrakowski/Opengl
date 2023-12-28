@@ -5,22 +5,23 @@
 #include "shader.h"
 #include <glm/glm.hpp>
 
-class DebugRenderBatch {
+class DebugRenderBatch
+{
 public:
     DebugRenderBatch();
 
     void UploadBatchedData();
-    void FlushDraw(Shader& shader);
+    void FlushDraw(IShader& shader);
 
     void AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform);
 
-    bool CanBatchAnotherMesh(uint32_t num_indices) const;
+    bool CanBatchAnotherMesh(uint32_t numIndices) const;
     bool HasBatchedAnyPrimitive() const;
 
 private:
-    Buffer<glm::vec3> vertices_;
-    Buffer<uint32_t> indices_;
-    std::shared_ptr<VertexArray> vertex_array_;
-    uint32_t last_index_number_{ 0 };
+    Buffer<glm::vec3> m_Vertices;
+    Buffer<uint32_t> m_Indices;
+    std::shared_ptr<IVertexArray> m_VertexArray;
+    uint32_t m_LastIndexNumber{0};
 };
 

@@ -5,8 +5,10 @@
 // KeyCode based on glfw key codes
 using KeyCode = uint16_t;
 
-struct Keys {
-    enum : KeyCode {
+struct Keys
+{
+    enum : KeyCode
+    {
         // From glfw3.h
         kSpace = 32,
         kApostrophe = 39, /* ' */
@@ -142,10 +144,12 @@ struct Keys {
 };
 
 // MouseCode based on glfw mouse codes
-using MouseCode = uint16_t;
+using MouseButton = uint16_t;
 
-struct Mouse {
-    enum : MouseCode {
+struct Mouse
+{
+    enum : MouseButton
+    {
         kButton0 = 0,
         kButton1 = 1,
         kButton2 = 2,

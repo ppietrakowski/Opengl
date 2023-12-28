@@ -5,7 +5,7 @@
 class Material
 {
 public:
-    Material(const std::shared_ptr<Shader>& shader);
+    Material(const std::shared_ptr<IShader>& shader);
 
     Material(const Material&) = default;
     Material& operator=(const Material&) = default;
@@ -26,35 +26,40 @@ public:
     glm::vec4 GetVector4Property(const char* name) const;
     void SetVector4Property(const char* name, glm::vec4 value);
 
-    std::shared_ptr<Texture> GetTextureProperty(const char* name) const;
-    void SetTextureProperty(const char* name, const std::shared_ptr<Texture>& value);
+    std::shared_ptr<ITexture> GetTextureProperty(const char* name) const;
+    void SetTextureProperty(const char* name, const std::shared_ptr<ITexture>& value);
 
     void SetupRenderState() const;
     void SetShaderUniforms() const;
 
-    Shader& GetShader() const { return *shader_; }
+    IShader& GetShader() const
+    {
+        return *m_Shader;
+    }
 
 public:
 
-    bool use_wireframe : 1{ false };
-    bool should_cull_faces : 1{ true };
-    bool using_transparency : 1{ false };
+    bool bUseWireframe : 1{ false };
+    bool bCullFaces : 1{ true };
+    bool bTransparent : 1{ false };
 
 private:
-    std::shared_ptr<Shader> shader_;
-    std::unordered_map<std::string, MaterialParam> material_params_;
-    uint32_t num_texture_units_{ 0 };
+    std::shared_ptr<IShader> m_Shader;
+    std::unordered_map<std::string, MaterialParam> m_MaterialParams;
+    uint32_t m_NumTextureUnits{0};
 
 private:
     void TryAddNewProperty(const UniformInfo& info);
     void AddNewProperty(const UniformInfo& info);
 
-    MaterialParam& GetParam(const char* name) {
-        return material_params_.at(name);
+    MaterialParam& GetParam(const char* name)
+    {
+        return m_MaterialParams.at(name);
     }
-    
-    const MaterialParam& GetParam(const char* name) const {
-        return material_params_.at(name);
+
+    const MaterialParam& GetParam(const char* name) const
+    {
+        return m_MaterialParams.at(name);
     }
 };
 

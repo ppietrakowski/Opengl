@@ -6,7 +6,8 @@
 
 #include <GLFW/glfw3.h>
 
-class GlfwWindow : public Window {
+class GlfwWindow : public IWindow
+{
 public:
     GlfwWindow(const WindowSettings& settings);
     ~GlfwWindow();
@@ -28,16 +29,16 @@ public:
     void DisableVSync() override;
     bool IsVSyncEnabled() const override;
     void* GetWindowNativeHandle() const override;
-    GraphicsContext* GetContext() const override;
+    IGraphicsContext* GetContext() const override;
 
     void Close() override;
-    void SetMouseVisible(bool mouse_visible) override;
+    void SetMouseVisible(bool bMouseVisible) override;
 
 private:
-    GLFWwindow* window_;
-    GlfwInput* input_;
-    GraphicsContext* context_;
-    WindowData window_data_;
+    GLFWwindow* m_Window;
+    GlfwInput* m_Input;
+    IGraphicsContext* m_GraphicsContext;
+    GlfwWindowData m_WindowData;
 
 private:
     void BindWindowCallbacks();

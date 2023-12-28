@@ -1,82 +1,104 @@
 #include "opengl_render_api.h"
 
 OpenGlRenderApi::OpenGlRenderApi() :
-    clear_color_{ 0, 0, 0 } {
+    m_ClearColor{0, 0, 0}
+{
     glEnable(GL_DEPTH_TEST);
 }
 
-void OpenGlRenderApi::Clear() {
+void OpenGlRenderApi::Clear()
+{
     constexpr GLenum kClearFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
     glClear(kClearFlags);
 }
 
-void OpenGlRenderApi::SetClearColor(const RgbaColor& clear_color) {
-    if (clear_color_ != clear_color) {
-        glClearColor(clear_color.red / 255.0f, clear_color.green / 255.0f, clear_color.blue / 255.0f, clear_color.alpha / 255.0f);
-        clear_color_ = clear_color;
+void OpenGlRenderApi::SetClearColor(const RgbaColor& clearColor)
+{
+    if (m_ClearColor != clearColor)
+    {
+        glClearColor(clearColor.Red / 255.0f, clearColor.Green / 255.0f, clearColor.Blue / 255.0f, clearColor.Alpha / 255.0f);
+        m_ClearColor = clearColor;
     }
 }
 
-void OpenGlRenderApi::DrawIndexed(const VertexArray& vertex_array, uint32_t num_indices, RenderPrimitive render_primitive) {
-    vertex_array.Bind();
-    glDrawElements(static_cast<GLenum>(render_primitive), static_cast<GLsizei>(num_indices), GL_UNSIGNED_INT, nullptr);
+void OpenGlRenderApi::DrawIndexed(const IVertexArray& vertexArray, uint32_t numIndices, RenderPrimitive renderPrimitive)
+{
+    vertexArray.Bind();
+    glDrawElements(static_cast<GLenum>(renderPrimitive), static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, nullptr);
 }
 
-void OpenGlRenderApi::SetWireframe(bool wireframe_enabled) {
-    if (wireframe_enabled != wireframe_enabled_) {
-        if (wireframe_enabled) {
+void OpenGlRenderApi::SetWireframe(bool bWireframeEnabled)
+{
+    if (bWireframeEnabled != m_bWireframeEnabled)
+    {
+        if (bWireframeEnabled)
+        {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        } else {
+        }
+        else
+        {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
-        wireframe_enabled_ = wireframe_enabled;
+        m_bWireframeEnabled = bWireframeEnabled;
     }
 }
 
-bool OpenGlRenderApi::IsWireframeEnabled() {
-    return wireframe_enabled_;
+bool OpenGlRenderApi::IsWireframeEnabled()
+{
+    return m_bWireframeEnabled;
 }
 
-void OpenGlRenderApi::SetCullFace(bool cull_face) {
-    if (cull_face && !DoesCullFaces()) {
+void OpenGlRenderApi::SetCullFace(bool bCullFace)
+{
+    if (bCullFace && !DoesCullFaces())
+    {
         glEnable(GL_CULL_FACE);
         glFrontFace(GL_CCW);
         glCullFace(GL_BACK);
-    } else if (!cull_face) {
+    }
+    else if (!bCullFace)
+    {
         glDisable(GL_CULL_FACE);
     }
 
-    cull_enabled_ = cull_face;
+    m_bCullEnabled = bCullFace;
 }
 
-bool OpenGlRenderApi::DoesCullFaces() {
-    return cull_enabled_;
+bool OpenGlRenderApi::DoesCullFaces()
+{
+    return m_bCullEnabled;
 }
 
-void OpenGlRenderApi::SetBlendingEnabled(bool blending_enabled) {
-    if (blending_enabled && !blending_enabled_) {
+void OpenGlRenderApi::SetBlendingEnabled(bool bBlendingEnabled)
+{
+    if (bBlendingEnabled && !m_bBlendingEnabled)
+    {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    } else {
+    }
+    else
+    {
         glDisable(GL_BLEND);
     }
 
-    blending_enabled_ = blending_enabled;
+    m_bBlendingEnabled = bBlendingEnabled;
 }
 
-void OpenGlRenderApi::SetLineWidth(float line_width) {
-    glLineWidth(line_width);
+void OpenGlRenderApi::SetLineWidth(float lineWidth)
+{
+    glLineWidth(lineWidth);
 }
 
-void OpenGlRenderApi::ClearBufferBindings_Debug() {
+void OpenGlRenderApi::ClearBufferBindings_Debug()
+{
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void OpenGlRenderApi::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
+void OpenGlRenderApi::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+{
     glViewport(x, y, width, height);
     glScissor(x, y, width, height);
 }
- 

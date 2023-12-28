@@ -4,7 +4,8 @@
 #include "logging.h"
 
 
-GlfwWindow::GlfwWindow(const WindowSettings& settings) {
+GlfwWindow::GlfwWindow(const WindowSettings& settings)
+{
     glfwSetErrorCallback([](int code, const char* description) {
         ELOG_ERROR(LOG_CORE, "Glfw error %i : %s", code, description);
     });
@@ -16,162 +17,186 @@ GlfwWindow::GlfwWindow(const WindowSettings& settings) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window_ = glfwCreateWindow(settings.width, settings.height, settings.title.c_str(), nullptr, nullptr);
-    CRASH_EXPECTED_NOT_NULL(window_);
-    
-    // fill window data
-    glm::dvec2 mouse_position;
-    glfwGetCursorPos(window_, &mouse_position.x, &mouse_position.y);
-    WindowData& game_window_data = window_data_;
-    game_window_data.mouse_position = mouse_position;
-    game_window_data.last_mouse_position = game_window_data.mouse_position;
+    m_Window = glfwCreateWindow(settings.Width, settings.Height, settings.Title.c_str(), nullptr, nullptr);
+    CRASH_EXPECTED_NOT_NULL(m_Window);
 
-    glfwGetWindowPos(window_, &game_window_data.window_position.x, &game_window_data.window_position.y);
-    glfwGetWindowSize(window_, &game_window_data.window_size.x, &game_window_data.window_size.y);
+    // fill window data
+    glm::dvec2 mousePosition;
+    glfwGetCursorPos(m_Window, &mousePosition.x, &mousePosition.y);
+    m_WindowData.MousePosition = mousePosition;
+    m_WindowData.LastMousePosition = m_WindowData.MousePosition;
+
+    glfwGetWindowPos(m_Window, &m_WindowData.WindowPosition.x, &m_WindowData.WindowPosition.y);
+    glfwGetWindowSize(m_Window, &m_WindowData.WindowSize.x, &m_WindowData.WindowSize.y);
 
     BindWindowCallbacks();
-    context_ = new OpenGlGraphicsContext(window_);
-    input_ = new GlfwInput(window_);
+    m_GraphicsContext = new OpenGlGraphicsContext(m_Window);
+    m_Input = new GlfwInput(m_Window);
 }
 
-GlfwWindow::~GlfwWindow() {
-    delete input_;
-    delete context_;
-    glfwDestroyWindow(window_);
+GlfwWindow::~GlfwWindow()
+{
+    delete m_Input;
+    delete m_GraphicsContext;
+    glfwDestroyWindow(m_Window);
 }
 
-void GlfwWindow::Update() {
+void GlfwWindow::Update()
+{
     glfwPollEvents();
-    context_->SwapBuffers();
-    input_->Update(window_data_);
+    m_GraphicsContext->SwapBuffers();
+    m_Input->Update(m_WindowData);
 }
 
-uint32_t GlfwWindow::GetWidth() const {
-    return window_data_.window_size.x;
+uint32_t GlfwWindow::GetWidth() const
+{
+    return m_WindowData.WindowSize.x;
 }
 
-uint32_t GlfwWindow::GetHeight() const {
-    return window_data_.window_size.y;
+uint32_t GlfwWindow::GetHeight() const
+{
+    return m_WindowData.WindowSize.y;
 }
 
-glm::ivec2 GlfwWindow::GetWindowPosition() const {
-    return window_data_.window_position;
+glm::ivec2 GlfwWindow::GetWindowPosition() const
+{
+    return m_WindowData.WindowPosition;
 }
 
-glm::vec2 GlfwWindow::GetMousePosition() const {
-    return window_data_.mouse_position;
+glm::vec2 GlfwWindow::GetMousePosition() const
+{
+    return m_WindowData.MousePosition;
 }
 
-glm::vec2 GlfwWindow::GetLastMousePosition() const {
-    return window_data_.last_mouse_position;
+glm::vec2 GlfwWindow::GetLastMousePosition() const
+{
+    return m_WindowData.LastMousePosition;
 }
 
-bool GlfwWindow::IsOpen() const {
-    return window_data_.game_running;
+bool GlfwWindow::IsOpen() const
+{
+    return m_WindowData.bGameRunning;
 }
 
-void GlfwWindow::SetEventCallback(const EventCallback& callback) {
-    window_data_.event_callback = callback;
+void GlfwWindow::SetEventCallback(const EventCallback& callback)
+{
+    m_WindowData.Callback = callback;
 }
 
-void GlfwWindow::EnableVSync() {
-    window_data_.vsync_enabled = true;
-    context_->SetVsync(true);
+void GlfwWindow::EnableVSync()
+{
+    m_WindowData.bVsyncEnabled = true;
+    m_GraphicsContext->SetVsync(true);
 }
 
-void GlfwWindow::DisableVSync() {
-    window_data_.vsync_enabled = false;
-    context_->SetVsync(false);
+void GlfwWindow::DisableVSync()
+{
+    m_WindowData.bVsyncEnabled = false;
+    m_GraphicsContext->SetVsync(false);
 }
 
-bool GlfwWindow::IsVSyncEnabled() const {
-    return window_data_.vsync_enabled;
+bool GlfwWindow::IsVSyncEnabled() const
+{
+    return m_WindowData.bVsyncEnabled;
 }
 
-void* GlfwWindow::GetWindowNativeHandle() const {
-    return window_;
+void* GlfwWindow::GetWindowNativeHandle() const
+{
+    return m_Window;
 }
 
-GraphicsContext* GlfwWindow::GetContext() const {
-    return context_;
+IGraphicsContext* GlfwWindow::GetContext() const
+{
+    return m_GraphicsContext;
 }
 
-void GlfwWindow::Close() {
-    glfwSetWindowShouldClose(window_, GL_TRUE);
-    window_data_.game_running = false;
+void GlfwWindow::Close()
+{
+    glfwSetWindowShouldClose(m_Window, GL_TRUE);
+    m_WindowData.bGameRunning = false;
 }
 
-void GlfwWindow::SetMouseVisible(bool mouse_visible) {
-    if (mouse_visible) {
-        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    } else {
-        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+void GlfwWindow::SetMouseVisible(bool bMouseVisible)
+{
+    if (bMouseVisible)
+    {
+        glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+    else
+    {
+        glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
 
-void GlfwWindow::BindWindowCallbacks() {
-    glfwSetWindowUserPointer(window_, &window_data_);
+void GlfwWindow::BindWindowCallbacks()
+{
+    glfwSetWindowUserPointer(m_Window, &m_WindowData);
 
-    glfwSetCursorPosCallback(window_, [](GLFWwindow* window, double xpos, double ypos) {
-        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
-        game_window_data->last_mouse_position = game_window_data->mouse_position;
-        game_window_data->mouse_position = glm::vec2{ xpos, ypos };
+    glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos) {
+        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        windowData->LastMousePosition = windowData->MousePosition;
+        windowData->MousePosition = glm::vec2{xpos, ypos};
 
-        if (game_window_data->event_callback) {
+        if (windowData->Callback)
+        {
             Event evt{};
-            evt.type = EventType::kMouseMoved;
-            evt.mouse_move.mouse_position = game_window_data->mouse_position;
-            evt.mouse_move.last_mouse_position = game_window_data->last_mouse_position;
-            game_window_data->event_callback(evt);
+            evt.Type = EventType::kMouseMoved;
+            evt.MouseMove.MousePosition = windowData->MousePosition;
+            evt.MouseMove.LastMousePosition = windowData->LastMousePosition;
+            windowData->Callback(evt);
         }
     });
 
-    glfwSetKeyCallback(window_, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (game_window_data->event_callback) {
+        if (windowData->Callback)
+        {
             Event event{};
-            event.type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EventType::kKeyPressed : EventType::kKeyReleased;
-            event.key = { (KeyCode)key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER) };
+            event.Type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EventType::kKeyPressed : EventType::kKeyReleased;
+            event.Key = {(KeyCode)key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER)};
 
-            game_window_data->event_callback(event);
+            windowData->Callback(event);
         }
     });
 
-    glfwSetMouseButtonCallback(window_, [](GLFWwindow* window, int button, int action, int mods) {
-        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods) {
+        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (game_window_data->event_callback) {
+        if (windowData->Callback)
+        {
             Event event{};
-            event.type = (action == GLFW_PRESS) ? EventType::kMouseButtonPressed : EventType::kMouseButtonReleased;
-            event.mouse_button = { (MouseCode)button, game_window_data->mouse_position };
-            game_window_data->event_callback(event);
+            event.Type = (action == GLFW_PRESS) ? EventType::kMouseButtonPressed : EventType::kMouseButtonReleased;
+            event.MouseButtonState = {(MouseButton)button, windowData->MousePosition};
+            windowData->Callback(event);
         }
     });
 
-    glfwSetWindowFocusCallback(window_, [](GLFWwindow* window, int focused) {
-        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetWindowFocusCallback(m_Window, [](GLFWwindow* window, int focused) {
+        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (game_window_data->event_callback) {
+        if (windowData->Callback)
+        {
             Event event{};
-            event.type = (focused == GL_TRUE) ? EventType::kGainedFocus : EventType::kLostFocus;
-            game_window_data->event_callback(event);
+            event.Type = (focused == GL_TRUE) ? EventType::kGainedFocus : EventType::kLostFocus;
+            windowData->Callback(event);
         }
     });
 
-    glfwSetScrollCallback(window_, [](GLFWwindow* window, double xoffset, double yoffset) {
-        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset) {
+        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (game_window_data->event_callback) {
+        if (windowData->Callback)
+        {
             Event event{};
-            event.type = EventType::kMouseWheelScrolled;
-            event.mouse_wheel.delta = { xoffset, yoffset };
-            game_window_data->event_callback(event);
+            event.Type = EventType::kMouseWheelScrolled;
+            event.MouseWheel.Delta = {xoffset, yoffset};
+            windowData->Callback(event);
         }
     });
 
-    glfwSetWindowCloseCallback(window_, [](GLFWwindow* window) {
-        WindowData* game_window_data = reinterpret_cast<WindowData*>(glfwGetWindowUserPointer(window));
-        game_window_data->game_running = false;
+    glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {
+        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        windowData->bGameRunning = false;
     });
 }

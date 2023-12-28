@@ -2,13 +2,15 @@
 
 #include <cstdint>
 
-inline void DefaultImageDataDeleter(uint8_t* data) {
+inline void DefaultImageDataDeleter(uint8_t* data)
+{
     delete[] data;
 }
 
-class ImageRgba {
+class ImageRgba
+{
 public:
-    ImageRgba(uint8_t* image, uint32_t width, uint32_t height, void (*deleter_)(uint8_t*) = &DefaultImageDataDeleter);
+    ImageRgba(uint8_t* image, uint32_t width, uint32_t height, void (*deleter)(uint8_t*) = &DefaultImageDataDeleter);
 
     ImageRgba(ImageRgba&& image) noexcept;
     ImageRgba& operator=(ImageRgba&& image) noexcept;
@@ -20,8 +22,8 @@ public:
     uint32_t GetHeight() const;
 
 private:
-    uint8_t* image_data_;
-    uint32_t width_;
-    uint32_t height_;
-    void (*deleter_)(uint8_t*);
+    uint8_t* m_ImageData;
+    uint32_t m_Width;
+    uint32_t m_Height;
+    void (*m_Deleter)(uint8_t*);
 };

@@ -3,13 +3,15 @@
 #include "renderer_api.h"
 #include <cstdint>
 
-struct RenderStats {
-    uint32_t num_drawcalls{ 0 };
-    uint32_t num_triangles{ 0 };
-    int64_t delta_frame_nanoseconds{ 0 };
+struct RenderStats
+{
+    uint32_t NumDrawCalls{0};
+    uint32_t NumTriangles{0};
+    int64_t DeltaFrameNanoseconds{0};
 };
 
-class RenderCommand {
+class RenderCommand
+{
 public:
     RenderCommand() = delete;
     RenderCommand(const RenderCommand&) = delete;
@@ -21,27 +23,27 @@ public:
 
     static void ClearBufferBindings_Debug();
 
-    static void DrawIndexed(const VertexArray& vertex_array, uint32_t num_indices, RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
+    static void DrawIndexed(const IVertexArray& vertexArray, uint32_t numIndices, RenderPrimitive renderPrimitive = RenderPrimitive::kTriangles);
 
     static void BeginScene();
     static void EndScene();
-    static void SetClearColor(const RgbaColor& clear_color);
+    static void SetClearColor(const RgbaColor& clearColor);
     static void Clear();
 
-    static void SetWireframe(bool wireframe_enabled);
+    static void SetWireframe(bool bWireframeEnabled);
     static bool IsWireframeEnabled();
 
-    static void SetCullFace(bool cullFace);
+    static void SetCullFace(bool bCullFace);
     static bool DoesCullFaces();
 
-    static void SetBlendingEnabled(bool blending_enabled);
+    static void SetBlendingEnabled(bool bBlendingEnabled);
 
-    static void SetLineWidth(float line_width);
+    static void SetLineWidth(float lineWidth);
     static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
     static RenderStats GetRenderStats();
 
 private:
-    static RendererAPI* renderer_api_;
+    static IRendererAPI* s_RendererApi;
 };
 

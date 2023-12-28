@@ -1,17 +1,19 @@
 #include "core.h"
 
-std::vector<std::string> SplitString(const std::string& string, std::string_view delimiter) {
+std::vector<std::string> SplitString(const std::string& string, std::string_view delimiter)
+{
     std::vector<std::string> tokens;
-    std::size_t start_offset = 0;
-    std::size_t delimiter_pos = string.find(delimiter, start_offset);
+    std::size_t startOffset = 0;
+    std::size_t delimiterPos = string.find(delimiter, startOffset);
 
-    while (delimiter_pos != std::string::npos) {
-        tokens.emplace_back(string.substr(start_offset, delimiter_pos - start_offset));
+    while (delimiterPos != std::string::npos)
+    {
+        tokens.emplace_back(string.substr(startOffset, delimiterPos - startOffset));
 
-        start_offset = delimiter_pos + delimiter.length();
-        delimiter_pos = string.find(delimiter, start_offset);
+        startOffset = delimiterPos + delimiter.length();
+        delimiterPos = string.find(delimiter, startOffset);
     }
 
-    tokens.emplace_back(string.substr(start_offset));
+    tokens.emplace_back(string.substr(startOffset));
     return tokens;
 }

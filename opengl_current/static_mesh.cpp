@@ -7,108 +7,126 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-static void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::vec3& out_box_min, glm::vec3& out_box_max) {
+static void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax)
+{
     // assume mesh has infinite bounds
-    out_box_min = glm::vec3{ std::numeric_limits<float>::max() };
-    out_box_max = glm::vec3{ std::numeric_limits<float>::min() };
+    outBoxMin = glm::vec3{std::numeric_limits<float>::max()};
+    outBoxMax = glm::vec3{std::numeric_limits<float>::min()};
 
-    for (std::size_t i = 0; i < vertices.size(); ++i) {
-        const glm::vec3* vertex = &vertices[i].position;
+    for (std::size_t i = 0; i < vertices.size(); ++i)
+    {
+        const glm::vec3* vertex = &vertices[i].Position;
 
-        if (vertex->x < out_box_min.x) {
-            out_box_min.x = vertex->x;
+        if (vertex->x < outBoxMin.x)
+        {
+            outBoxMin.x = vertex->x;
         }
-        if (vertex->y < out_box_min.y) {
-            out_box_min.y = vertex->y;
+        if (vertex->y < outBoxMin.y)
+        {
+            outBoxMin.y = vertex->y;
         }
-        if (vertex->z < out_box_min.z) {
-            out_box_min.z = vertex->z;
+        if (vertex->z < outBoxMin.z)
+        {
+            outBoxMin.z = vertex->z;
         }
 
-        if (vertex->x > out_box_max.x) {
-            out_box_max.x = vertex->x;
+        if (vertex->x > outBoxMax.x)
+        {
+            outBoxMax.x = vertex->x;
         }
-        if (vertex->y > out_box_max.y) {
-            out_box_max.y = vertex->y;
+        if (vertex->y > outBoxMax.y)
+        {
+            outBoxMax.y = vertex->y;
         }
-        if (vertex->z > out_box_max.z) {
-            out_box_max.z = vertex->z;
+        if (vertex->z > outBoxMax.z)
+        {
+            outBoxMax.z = vertex->z;
         }
     }
 }
 
 
 StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared_ptr<Material>& material) :
-    material_{ material },
-    vertex_array_{ VertexArray::Create() } {
+    m_Material{material},
+    m_VertexArray{IVertexArray::Create()}
+{
 
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(file_path.string(), kAssimpImportFlags);
 
-    if (scene == nullptr) {
-        throw std::runtime_error{ importer.GetErrorString() };
+    if (scene == nullptr)
+    {
+        throw std::runtime_error{importer.GetErrorString()};
     }
 
-    std::vector<StaticMeshVertex> vertices_;
+    std::vector<StaticMeshVertex> vertices;
     std::vector<uint32_t> indices;
-    uint32_t total_vertices = 0;
-    uint32_t total_indices = 0;
+    uint32_t totalVertices = 0;
+    uint32_t totalIndices = 0;
 
-    vertices_.reserve(scene->mMeshes[0]->mNumVertices);
-    
-    uint32_t start_num_indices = scene->mMeshes[0]->mNumFaces * 3;
-    indices.reserve(start_num_indices);
+    vertices.reserve(scene->mMeshes[0]->mNumVertices);
 
-    for (uint32_t i = 0; i < scene->mNumMaterials; ++i) {
-        aiString texture_path;
+    uint32_t startNumIndices = scene->mMeshes[0]->mNumFaces * 3;
+    indices.reserve(startNumIndices);
+
+    for (uint32_t i = 0; i < scene->mNumMaterials; ++i)
+    {
+        aiString texturePath;
 
         if (scene->mMaterials[i]->GetTexture(aiTextureType_DIFFUSE, 0,
-            &texture_path, nullptr, nullptr, nullptr, nullptr, nullptr) == aiReturn_SUCCESS) {
-            texture_paths.emplace_back(texture_path.C_Str());
+            &texturePath, nullptr, nullptr, nullptr, nullptr, nullptr) == aiReturn_SUCCESS)
+        {
+            TexturePaths.emplace_back(texturePath.C_Str());
         }
     }
 
-    for (uint32_t i = 0; i < scene->mNumMeshes; ++i) {
+    for (uint32_t i = 0; i < scene->mNumMeshes; ++i)
+    {
         const aiMesh* mesh = scene->mMeshes[i];
 
-        for (uint32_t j = 0; j < mesh->mNumVertices; ++j) {
+        for (uint32_t j = 0; j < mesh->mNumVertices; ++j)
+        {
             aiVector3D pos = mesh->mVertices[j];
             aiVector3D normal = mesh->mNormals[j];
-            aiVector3D texture_coords = mesh->mTextureCoords[0][j];
+            aiVector3D textureCoords = mesh->mTextureCoords[0][j];
 
-            vertices_.emplace_back(ToGlm(pos), ToGlm(normal), ToGlm(texture_coords));
+            vertices.emplace_back(ToGlm(pos), ToGlm(normal), ToGlm(textureCoords));
         }
 
-        for (uint32_t j = 0; j < mesh->mNumFaces; ++j) {
+        for (uint32_t j = 0; j < mesh->mNumFaces; ++j)
+        {
             const aiFace& face = mesh->mFaces[j];
             ASSERT(face.mNumIndices == 3);
 
-            for (uint32_t k = 0; k < face.mNumIndices; ++k) {
-                indices.emplace_back(face.mIndices[k] + total_indices);
+            for (uint32_t k = 0; k < face.mNumIndices; ++k)
+            {
+                indices.emplace_back(face.mIndices[k] + totalIndices);
             }
         }
 
-        total_vertices += mesh->mNumVertices;
-        total_indices += mesh->mNumFaces * 3;
+        totalVertices += mesh->mNumVertices;
+        totalIndices += mesh->mNumFaces * 3;
     }
 
-    std::shared_ptr<IndexBuffer> index_buffer = IndexBuffer::Create(indices.data(),
+    std::shared_ptr<IIndexBuffer> indexBuffer = IIndexBuffer::Create(indices.data(),
         static_cast<uint32_t>(indices.size()));
-    
-    vertex_array_->AddBuffer<StaticMeshVertex>(vertices_, StaticMeshVertex::data_format);
-    vertex_array_->SetIndexBuffer(index_buffer);
 
-    num_triangles_ = static_cast<uint32_t>(indices.size()) / 3;
-    mesh_name_ = scene->mName.C_Str();
-    FindAabCollision(vertices_, bbox_min_, bbox_max_);
+    m_VertexArray->AddBuffer<StaticMeshVertex>(vertices, StaticMeshVertex::kDataFormat);
+    m_VertexArray->SetIndexBuffer(indexBuffer);
+
+    m_NumTriangles = static_cast<uint32_t>(indices.size()) / 3;
+    m_MeshName = scene->mName.C_Str();
+    FindAabCollision(vertices, m_BboxMin, m_BboxMax);
 }
 
 
-void StaticMesh::Render(const glm::mat4& transform) const {
-    Renderer::Submit(*material_, *vertex_array_, transform);
+void StaticMesh::Render(const glm::mat4& transform) const
+{
+    Renderer::Submit(*m_Material, *m_VertexArray, transform);
 }
 
-void StaticMesh::Render(const Material& override_material, const glm::mat4& transform) const {
-    Renderer::Submit(override_material, *vertex_array_, transform);
+void StaticMesh::Render(const Material& overrideMaterial, const glm::mat4& transform) const
+{
+    Renderer::Submit(overrideMaterial, *m_VertexArray, transform);
 }
 

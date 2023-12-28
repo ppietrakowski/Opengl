@@ -9,17 +9,19 @@
 #include "event.h"
 #include "graphics_context.h"
 
-struct WindowSettings {
-    uint32_t width;
-    uint32_t height;
-    std::string title;
+struct WindowSettings
+{
+    uint32_t Width;
+    uint32_t Height;
+    std::string Title;
 };
 
 using EventCallback = std::function<void(const Event&)>;
 
-class Window {
+class IWindow
+{
 public:
-    virtual ~Window() = default;
+    virtual ~IWindow() = default;
 
     virtual void Update() = 0;
 
@@ -40,11 +42,11 @@ public:
     virtual bool IsVSyncEnabled() const = 0;
 
     virtual void* GetWindowNativeHandle() const = 0;
-    virtual GraphicsContext* GetContext() const = 0;
+    virtual IGraphicsContext* GetContext() const = 0;
 
     virtual void Close() = 0;
-    virtual void SetMouseVisible(bool mouse_visible) = 0;
+    virtual void SetMouseVisible(bool bMouseVisible) = 0;
 
-    static std::unique_ptr<Window> Create(const WindowSettings& window_settings);
+    static std::unique_ptr<IWindow> Create(const WindowSettings& window_settings);
 };
 
