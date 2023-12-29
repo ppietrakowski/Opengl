@@ -164,13 +164,16 @@ public:
 
     const std::shared_ptr<Material>& GetMaterial() const
     {
-        return m_Material;
+        return MainMaterial;
     }
 
     int32_t GetNumBones() const
     {
         return m_NumBones;
     }
+
+    std::shared_ptr<Material> MainMaterial;
+    std::vector<std::string> Textures;
 
 private:
     std::shared_ptr<IVertexArray> m_VertexArray;
@@ -182,7 +185,6 @@ private:
 
     glm::vec3 m_BboxMin;
     glm::vec3 m_BboxMax;
-    std::shared_ptr<Material> m_Material;
 
     std::string m_CurrentAnimationName;
 

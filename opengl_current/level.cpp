@@ -2,6 +2,18 @@
 #include "static_mesh_component.h"
 #include "skeletal_mesh_component.h"
 
+#include <future>
+
+Level::Level():
+    m_ResourceManager{ResourceManager::CreateResourceManager()}
+{
+}
+
+Level::~Level()
+{
+    ResourceManager::Quit();
+}
+
 Actor Level::CreateActor(const std::string& name)
 {
     Actor actor;
@@ -34,13 +46,13 @@ Actor Level::FindActor(const std::string& name) const
 std::vector<Actor> Level::FindActorsWithTag(const std::string& tag) const
 {
     std::vector<Actor> actorsWithTag;
-    
+
     actorsWithTag.reserve(m_Actors.size());
 
     for (auto& [name, actor] : m_Actors)
     {
         const ActorTagComponent& t = actor.GetComponent<ActorTagComponent>();
-    
+
         if (t.Tag == tag)
         {
             actorsWithTag.emplace_back(actor);
@@ -55,6 +67,9 @@ void Level::RemoveActor(const std::string& name)
     auto& actor = m_Actors.at(name);
     auto& tag = actor.GetComponent<ActorTagComponent>();
     tag.IsAlive = false;
+
+    m_Registry.destroy(actor.m_EntityHandle.entity());
+    m_Actors.erase(name);
 }
 
 void Level::StartupLevel()
@@ -63,12 +78,12 @@ void Level::StartupLevel()
 
 void Level::BroadcastUpdate(Duration duration)
 {
-    auto skeletalMeshView = m_Registry.view<SkeletalMeshComponent>();
+    // start all update tasks that are independent from themselfs
+    auto skeletalUpdateTask = std::async(std::launch::async, [this](Duration duration) {
+        UpdateSkeletalMeshesAnimation(duration);
+    }, duration);
 
-    for (auto&& [entity, skeletalMesh] : skeletalMeshView.each())
-    {
-        skeletalMesh.UpdateAnimation(duration.GetAsSeconds());
-    }
+    skeletalUpdateTask.wait();
 }
 
 void Level::BroadcastRender(Duration duration)
@@ -84,5 +99,15 @@ void Level::BroadcastRender(Duration duration)
     for (auto&& [entity, transform, skeletalMesh] : skeletalMeshView.each())
     {
         skeletalMesh.Draw(transform.GetWorldTransformMatrix());
+    }
+}
+
+void Level::UpdateSkeletalMeshesAnimation(Duration duration)
+{
+    auto skeletalMeshView = m_Registry.view<SkeletalMeshComponent>();
+
+    for (auto&& [entity, skeletalMesh] : skeletalMeshView.each())
+    {
+        skeletalMesh.UpdateAnimation(duration.GetAsSeconds());
     }
 }

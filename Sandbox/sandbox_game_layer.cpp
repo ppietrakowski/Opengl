@@ -9,12 +9,16 @@
 
 SandboxGameLayer::SandboxGameLayer() :
     m_CameraRotation{glm::vec3{0, 0, 0}},
-    m_CameraPosition{0.0f, 0.0f, 0.0f},
-    m_SkeletalMesh{std::make_shared<SkeletalMesh>("untitled.fbx", std::make_shared<Material>(IShader::LoadShader("skeleton.vert", "textured.frag")))}
+    m_CameraPosition{0.0f, 0.0f, 0.0f}
 {
-    m_Shader = IShader::LoadShader("shaders/default.vert", "shaders/default.frag");
-    m_Unshaded = IShader::LoadShader("shaders/default.vert", "shaders/Unshaded.frag");
+    m_Shader = ResourceManager::GetShader("shaders/default.shd");
+    m_Unshaded = ResourceManager::GetShader("shaders/unshaded.shd");
+    auto skeletalShader = ResourceManager::GetShader("shaders/skeletal_default.shd");
 
+    ResourceManager::CreateMaterial("shaders/default.shd", "default");
+
+    m_SkeletalMesh = ResourceManager::GetSkeletalMesh("untitled.fbx");
+    m_SkeletalMesh->MainMaterial = ResourceManager::CreateMaterial("shaders/skeletal_default.shd", "skeletal1");
     m_CurrentUsed = m_Shader;
     m_CurrentUsed->Use();
     m_CurrentUsed->SetUniformVec3("u_light_color", glm::vec3{1, 1, 1});
@@ -35,8 +39,8 @@ SandboxGameLayer::SandboxGameLayer() :
 
     m_Shader->SetUniformVec3("u_material.Tint", white);
 
-    m_WireframeMaterial = std::make_shared<Material>(m_Unshaded);
-    m_Material = std::make_shared<Material>(m_Shader);
+    m_WireframeMaterial = ResourceManager::CreateMaterial("shaders/unshaded.shd", "wireframe");
+    m_Material = ResourceManager::CreateMaterial("shaders/default.shd", "postac_material");
 
     m_Material->SetVector3Property("diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
     m_Material->SetVector3Property("ambient", glm::vec3{0.01f, 0.01f, 0.01f});
@@ -45,7 +49,18 @@ SandboxGameLayer::SandboxGameLayer() :
     m_WireframeMaterial->bUseWireframe = true;
     m_CurrentMaterial = m_Material;
     ELOG_INFO(LOG_GLOBAL, "Loading postac.obj");
-    m_StaticMesh = std::make_shared<StaticMesh>("postac.obj", m_Material);
+    m_StaticMesh = ResourceManager::GetStaticMesh("postac.obj");
+    m_StaticMesh->MainMaterial = m_Material;
+
+    uint32_t i = 0;
+
+    for (const auto& path : m_SkeletalMesh->Textures)
+    {
+        std::string name = "diffuse" + std::to_string(i + 1);
+        auto material = m_SkeletalMesh->MainMaterial;
+        material->SetTextureProperty(name.c_str(), ResourceManager::GetTexture2D(path));
+        ++i;
+    }
 
     m_CameraRotation = glm::quat{glm::radians(glm::vec3{m_Pitch, m_Yaw, 0.0f})};
     m_StaticMeshPosition = {2, 0, -10};

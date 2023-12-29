@@ -1,4 +1,6 @@
 #include "core.h"
+#include <fstream>
+#include <sstream>
 
 std::vector<std::string> SplitString(const std::string& string, std::string_view delimiter)
 {
@@ -16,4 +18,13 @@ std::vector<std::string> SplitString(const std::string& string, std::string_view
 
     tokens.emplace_back(string.substr(startOffset));
     return tokens;
+}
+
+std::string LoadFileContent(const std::string& filePath)
+{
+    std::ifstream file(filePath.c_str());
+    file.exceptions(std::ios::failbit | std::ios::badbit);
+    std::ostringstream content;
+    content << file.rdbuf();
+    return content.str();
 }

@@ -174,6 +174,9 @@
     <ClCompile Include="static_mesh_component.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
+    <ClCompile Include="resouce_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Imgui\imconfig.h">
@@ -334,6 +337,9 @@
     </ClInclude>
     <ClInclude Include="actor.h">
       <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="resouce_manager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -181,6 +181,7 @@
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="renderer_api.cpp" />
     <ClCompile Include="render_command.cpp" />
+    <ClCompile Include="resouce_manager.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="skeletal_mesh.cpp" />
     <ClCompile Include="skeletal_mesh_component.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="renderer.h" />
     <ClInclude Include="renderer_api.h" />
     <ClInclude Include="render_command.h" />
+    <ClInclude Include="resouce_manager.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="skeletal_mesh.h" />
     <ClInclude Include="skeletal_mesh_component.h" />

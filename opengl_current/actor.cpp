@@ -3,16 +3,16 @@
 
 glm::mat4 TransformComponent::GetWorldTransformMatrix() const
 {
-    const entt::handle* parentTraverseIt = &Parent;
+    entt::handle parentTraverseIt = Parent;
 
     glm::mat4 worldTransform = CalculateRelativeTransform();
 
-    while (parentTraverseIt->valid())
+    while (parentTraverseIt.valid())
     {
         // accumulate all parent transforms
-        const TransformComponent& t = parentTraverseIt->get<TransformComponent>();
-        worldTransform = t.CalculateRelativeTransform() * worldTransform;
-        parentTraverseIt = &t.Parent;
+        const TransformComponent& parentTransform = parentTraverseIt.get<TransformComponent>();
+        worldTransform = parentTransform.CalculateRelativeTransform() * worldTransform;
+        parentTraverseIt = parentTransform.Parent;
     }
 
     return worldTransform;
@@ -35,13 +35,11 @@ void SceneHierarchyComponent::AddChild(const entt::handle& self, entt::handle ha
     handle.get<TransformComponent>().Parent = self;
 }
 
-
 void SceneHierarchyComponent::InvalidateState()
 {
     auto predicate = [](const std::pair<const std::string, entt::handle>& a) { return !a.second.valid(); };
 
     auto it = std::find_if(Children.begin(), Children.end(), predicate);
-        
 
     while (it != Children.end())
     {
@@ -76,7 +74,18 @@ void Actor::RemoveChild(const Actor& actor)
 
 void Actor::DestroyActor()
 {
+    auto& sceneHierarchy = GetComponent<SceneHierarchyComponent>();
     m_HomeLevel->RemoveActor(GetName());
+
+    for (auto& [name, actor] : sceneHierarchy.Children)
+    {
+        m_HomeLevel->RemoveActor(name);
+    }
+}
+
+bool Actor::IsAlive() const
+{
+    return m_EntityHandle.valid();
 }
 
 Actor::Actor()

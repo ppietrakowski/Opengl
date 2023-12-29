@@ -17,3 +17,4 @@ inline bool ContainsString(const std::basic_string<CharType>& str, const CharTyp
 
 std::vector<std::string> SplitString(const std::string& string, std::string_view delimiter);
 
+std::string LoadFileContent(const std::string& filePath);

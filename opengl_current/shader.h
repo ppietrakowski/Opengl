@@ -58,6 +58,7 @@ static constexpr int32_t kMinTextureUnits = 16;
 
 class IShader
 {
+    friend class IShader;
 public:
     enum ShaderIndex
     {
@@ -76,6 +77,8 @@ public:
 
     static std::shared_ptr<IShader> CreateFromSource(std::string_view vertexShaderSource, std::string_view fragmentShaderSource,
         std::string_view geometryShaderSource, std::string_view tesselationControlShader, std::string_view tesselationEvaluateShader);
+
+    static std::shared_ptr<IShader> CreateFromSource(std::span<const std::string> sources);
 
     static std::shared_ptr<IShader> LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath);
     static std::shared_ptr<IShader> LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath,

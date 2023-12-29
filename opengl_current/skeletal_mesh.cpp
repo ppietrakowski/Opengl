@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_inverse.hpp>
 
 #include "Core.h"
+#include "resouce_manager.h"
 
 static void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax);
 
@@ -92,7 +93,7 @@ bool SkeletonMeshVertex::AddBoneData(int32_t boneId, float weight)
 static constexpr const char* kDefaultAnimationName = "TPose";
 
 SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material) :
-    m_Material{material},
+    MainMaterial{material},
     m_CurrentAnimationName{kDefaultAnimationName},
     m_NumBones{0},
     m_VertexArray{IVertexArray::Create()}
@@ -138,16 +139,9 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     vertices.reserve(scene->mMeshes[0]->mNumVertices);
     indices.reserve(startNumIndices);
 
-    std::vector<std::shared_ptr<ITexture2D>> textures;
-
     for (uint32_t i = 0; i < scene->mNumMaterials; ++i)
     {
-        auto texture = LoadTexturesFromMaterial(scene, i);
-
-        if (texture != nullptr)
-        {
-            textures.emplace_back(texture);
-        }
+        LoadTexturesFromMaterial(scene, i);
     }
 
     std::unordered_map<std::string, BoneInfo> bonesInfo;
@@ -204,15 +198,8 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
         m_NumBones += mesh->mNumBones;
     }
 
-    m_Material->bCullFaces = false;
-    m_Material->bTransparent = true;
-
-    // set diffuse textures
-    for (uint32_t i = 0; i < textures.size(); ++i)
-    {
-        std::string name = "diffuse" + std::to_string(i + 1);
-        m_Material->SetTextureProperty(name.c_str(), textures[i]);
-    }
+    MainMaterial->bCullFaces = false;
+    MainMaterial->bTransparent = true;
 
     for (uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
@@ -230,7 +217,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
     // find global transform for converting from bone space back to local space
     m_GlobalInverseTransform = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
-    
+
     FindAabCollision(vertices, m_BboxMin, m_BboxMax);
     m_BboxMin.x *= 0.2f;
     m_BboxMax.x *= 0.2f;
@@ -281,7 +268,7 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, int32_t animationIndex)
 
 void SkeletalMesh::Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& worldTransform)
 {
-    Renderer::SubmitSkeleton(*m_Material, transforms, m_NumBones, *m_VertexArray, worldTransform);
+    Renderer::SubmitSkeleton(*MainMaterial, transforms, m_NumBones, *m_VertexArray, worldTransform);
 }
 
 void SkeletalMesh::SetCurrentAnimation(const std::string& animationName)
@@ -347,13 +334,17 @@ std::shared_ptr<ITexture2D> SkeletalMesh::LoadTexturesFromMaterial(const aiScene
 
             if (bIsCompressed)
             {
-                return ITexture2D::CreateFromImage(LoadRgbaImageFromMemory(texture->pcData, texture->mWidth));
+                ResourceManager::AddTexture2D(texturePath.C_Str(), 
+                    ITexture2D::CreateFromImage(LoadRgbaImageFromMemory(texture->pcData, texture->mWidth)));
             }
             else
             {
-                return ITexture2D::CreateFromImage(LoadRgbaImageFromMemory(texture->pcData,
-                    texture->mWidth * texture->mHeight));
+                ResourceManager::AddTexture2D(texturePath.C_Str(), ITexture2D::CreateFromImage(
+                    LoadRgbaImageFromMemory(texture->pcData, texture->mWidth * texture->mHeight)));
             }
+
+            Textures.emplace_back(texturePath.C_Str());
+            return ResourceManager::GetTexture2D(texturePath.C_Str());
         }
     }
 

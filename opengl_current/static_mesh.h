@@ -49,18 +49,13 @@ public:
         return m_MeshName;
     }
 
-    const std::shared_ptr<Material>& GetMaterial() const
-    {
-        return m_Material;
-    }
-
     std::vector<std::string> TexturePaths;
+    std::shared_ptr<Material> MainMaterial;
 
 private:
     std::shared_ptr<IVertexArray> m_VertexArray;
     int32_t m_NumTriangles;
 
-    std::shared_ptr<Material> m_Material;
 
     glm::vec3 m_BboxMin;
     glm::vec3 m_BboxMax;

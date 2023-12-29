@@ -9,18 +9,6 @@
 #include <fstream>
 #include <algorithm>
 
-static std::string LoadFileContent(const std::string& file_path)
-{
-    std::ifstream file(file_path.c_str());
-    file.exceptions(std::ios::failbit | std::ios::badbit);
-
-    std::ostringstream content;
-
-    content << file.rdbuf();
-
-    return content.str();
-}
-
 std::shared_ptr<IShader> IShader::CreateFromSource(std::string_view vertex_shader_source, std::string_view fragment_shader_source)
 {
     switch (IRendererAPI::GetApi())
@@ -55,6 +43,20 @@ std::shared_ptr<IShader> IShader::CreateFromSource(std::string_view vertex_shade
     }
 
     ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
+}
+
+std::shared_ptr<IShader> IShader::CreateFromSource(std::span<const std::string> sources)
+{
+    std::shared_ptr<IShader> shader = std::make_shared<OpenGlShader>();
+    std::vector<std::string_view> sources_to_string_view;
+
+    sources_to_string_view.resize(sources.size());
+
+    std::transform(sources.begin(), sources.end(), sources_to_string_view.begin(),
+        [](const std::string& s) { return static_cast<std::string_view>(s); });
+
+    shader->GenerateShaders(sources_to_string_view);
+    return shader;
 }
 
 std::shared_ptr<IShader> IShader::LoadShader(std::string_view vertex_shader_path, std::string_view fragment_shader_path)

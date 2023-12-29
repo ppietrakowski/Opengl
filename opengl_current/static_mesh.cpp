@@ -47,10 +47,9 @@ static void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::ve
 
 
 StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared_ptr<Material>& material) :
-    m_Material{material},
+    MainMaterial{material},
     m_VertexArray{IVertexArray::Create()}
 {
-
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(file_path.string(), kAssimpImportFlags);
 
@@ -122,7 +121,7 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
 
 void StaticMesh::Render(const glm::mat4& transform) const
 {
-    Renderer::Submit(*m_Material, *m_VertexArray, transform);
+    Renderer::Submit(*MainMaterial, *m_VertexArray, transform);
 }
 
 void StaticMesh::Render(const Material& overrideMaterial, const glm::mat4& transform) const

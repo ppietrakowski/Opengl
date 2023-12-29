@@ -10,7 +10,7 @@
 struct ActorTagComponent
 {
     std::string Name;
-    std::string Tag;
+    std::string Tag{"Default"};
     bool IsAlive{true};
 };
 
@@ -55,7 +55,7 @@ class Level;
 class Actor
 {
     friend class Level;
-public:    
+public:
     Actor();
     Actor(const Actor&) = default;
     Actor& operator=(const Actor&) = default;
@@ -101,9 +101,7 @@ public:
     }
 
     void DestroyActor();
-
-private:
-
+    bool IsAlive() const;
 
 private:
     entt::handle m_EntityHandle;
