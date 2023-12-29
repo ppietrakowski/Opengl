@@ -10,7 +10,7 @@
 SandboxGameLayer::SandboxGameLayer() :
     m_CameraRotation{glm::vec3{0, 0, 0}},
     m_CameraPosition{0.0f, 0.0f, 0.0f},
-    m_SkeletalMesh{"untitled.fbx", std::make_shared<Material>(IShader::LoadShader("skeleton.vert", "textured.frag"))}
+    m_SkeletalMesh{std::make_shared<SkeletalMesh>("untitled.fbx", std::make_shared<Material>(IShader::LoadShader("skeleton.vert", "textured.frag")))}
 {
     m_Shader = IShader::LoadShader("shaders/default.vert", "shaders/default.frag");
     m_Unshaded = IShader::LoadShader("shaders/default.vert", "shaders/Unshaded.frag");
@@ -45,15 +45,22 @@ SandboxGameLayer::SandboxGameLayer() :
     m_WireframeMaterial->bUseWireframe = true;
     m_CurrentMaterial = m_Material;
     ELOG_INFO(LOG_GLOBAL, "Loading postac.obj");
-    m_StaticMesh = std::make_unique<StaticMesh>("postac.obj", m_Material);
+    m_StaticMesh = std::make_shared<StaticMesh>("postac.obj", m_Material);
 
     m_CameraRotation = glm::quat{glm::radians(glm::vec3{m_Pitch, m_Yaw, 0.0f})};
     m_StaticMeshPosition = {2, 0, -10};
-    std::vector<std::string> animations = std::move(m_SkeletalMesh.GetAnimationNames());
-    m_SkeletalMesh.SetCurrentAnimation(animations[1]);
+    std::vector<std::string> animations = std::move(m_SkeletalMesh->GetAnimationNames());
+    m_SkeletalMesh->SetCurrentAnimation(animations[1]);
     RenderCommand::SetClearColor(RgbaColor{50, 30, 170});
 
-    m_SkeletalMesh.bShouldDrawDebugBounds = true;
+    m_SkeletalMeshActor = m_Level.CreateActor("SkeletalMesh");
+    m_SkeletalMeshActor.AddComponent<SkeletalMeshComponent>(m_SkeletalMesh);
+    m_SkeletalMeshActor.GetComponent<TransformComponent>().Scale = glm::vec3{0.01f, 0.01f, 0.01f};
+    m_SkeletalMeshActor.GetComponent<TransformComponent>().Position = glm::vec3{0, -2, -1};
+
+    Actor staticMeshActor = m_Level.CreateActor("StaticMeshActor");
+    staticMeshActor.AddComponent<StaticMeshComponent>(m_StaticMesh);
+    staticMeshActor.GetComponent<TransformComponent>().SetLocalEulerAngles(glm::vec3{0, 90, 0}); 
 }
 
 void SandboxGameLayer::OnUpdate(Duration deltaTime)
@@ -97,7 +104,7 @@ void SandboxGameLayer::OnUpdate(Duration deltaTime)
     m_Duration += deltaTime;
     m_LastDeltaSeconds = deltaTime;
 
-    m_SkeletalMesh.UpdateAnimation((m_Duration - m_StartupTime).GetAsSeconds());
+    m_Level.BroadcastUpdate(deltaTime);
 }
 
 void SandboxGameLayer::OnRender(Duration deltaTime)
@@ -112,8 +119,7 @@ void SandboxGameLayer::OnRender(Duration deltaTime)
     Renderer::DrawDebugBox(m_StaticMesh->GetBBoxMin(), m_StaticMesh->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), m_StaticMeshPosition + glm::vec3{10, 0, 0}));
 
     Renderer::DrawDebugBox(m_BboxMin, m_BboxMax, glm::translate(glm::identity<glm::mat4>(), glm::vec3{10, 2, 10}));
-
-    m_SkeletalMesh.Draw(glm::translate(glm::vec3{0, -2, -1}) * glm::scale(glm::vec3{0.01f, 0.01f, 0.01f}));
+    m_Level.BroadcastRender(deltaTime);
     Renderer::FlushDrawDebug(*m_Unshaded);
     Renderer::EndScene();
 }

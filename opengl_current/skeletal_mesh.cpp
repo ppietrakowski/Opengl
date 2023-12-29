@@ -230,8 +230,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
     // find global transform for converting from bone space back to local space
     m_GlobalInverseTransform = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
-    m_BoneTransforms.resize(m_NumBones, glm::identity<glm::mat4>());
-
+    
     FindAabCollision(vertices, m_BboxMin, m_BboxMax);
     m_BboxMin.x *= 0.2f;
     m_BboxMax.x *= 0.2f;
@@ -280,14 +279,9 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, int32_t animationIndex)
     m_Animations[animationName] = animation;
 }
 
-void SkeletalMesh::Draw(const glm::mat4& transform)
+void SkeletalMesh::Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& worldTransform)
 {
-    if (bShouldDrawDebugBounds)
-    {
-        Renderer::DrawDebugBox(m_BboxMin, m_BboxMax, transform);
-    }
-
-    Renderer::SubmitSkeleton(*m_Material, m_BoneTransforms, m_NumBones, *m_VertexArray, transform);
+    Renderer::SubmitSkeleton(*m_Material, transforms, m_NumBones, *m_VertexArray, worldTransform);
 }
 
 void SkeletalMesh::SetCurrentAnimation(const std::string& animationName)
@@ -314,21 +308,27 @@ std::vector<std::string> SkeletalMesh::GetAnimationNames() const
     return names;
 }
 
-void SkeletalMesh::CalculateTransform(const BoneAnimationUpdateSpecs& updateSpecs, const glm::mat4& parentTransform)
+void SkeletalMesh::GetAnimationFrames(float elapsedTime, const std::string& name, std::vector<glm::mat4>& transforms) const
+{
+    transforms.resize(m_NumBones);
+    UpdateAnimation(name, elapsedTime, transforms);
+}
+
+void SkeletalMesh::CalculateTransform(const BoneAnimationUpdateSpecs& updateSpecs, std::vector<glm::mat4>& transforms, const glm::mat4& parentTransform) const
 {
     const Bone& joint = *updateSpecs.Joint;
     glm::mat4 transform = updateSpecs->GetBoneTransformOrRelative(joint, updateSpecs.AnimationTime);
 
     int32_t index = joint.BoneTransformIndex;
     glm::mat4 globalTransform = parentTransform * transform;
-    m_BoneTransforms[index] = m_GlobalInverseTransform * globalTransform * joint.BoneOffset;
+    transforms[index] = m_GlobalInverseTransform * globalTransform * joint.BoneOffset;
 
     // run chain to update other joint transforms
     for (const Bone& child : joint.Children)
     {
         BoneAnimationUpdateSpecs newUpdateSpecs = updateSpecs;
         newUpdateSpecs.Joint = &child;
-        CalculateTransform(newUpdateSpecs, globalTransform);
+        CalculateTransform(newUpdateSpecs, transforms, globalTransform);
     }
 }
 

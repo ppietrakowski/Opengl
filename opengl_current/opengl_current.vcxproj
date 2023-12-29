@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="actor.cpp" />
     <ClCompile Include="core.cpp" />
     <ClCompile Include="debug_render_batch.cpp" />
     <ClCompile Include="error_macros.cpp" />
@@ -165,6 +166,7 @@
     <ClCompile Include="Imgui\imgui_widgets.cpp" />
     <ClCompile Include="index_buffer.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="level.cpp" />
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="material.cpp" />
     <ClCompile Include="material_parameter.cpp" />
@@ -181,13 +183,16 @@
     <ClCompile Include="render_command.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="skeletal_mesh.cpp" />
+    <ClCompile Include="skeletal_mesh_component.cpp" />
     <ClCompile Include="static_mesh.cpp" />
+    <ClCompile Include="static_mesh_component.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="vertex_buffer.cpp" />
     <ClCompile Include="vertex_array.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="actor.h" />
     <ClInclude Include="assimp_utils.h" />
     <ClInclude Include="buffer.h" />
     <ClInclude Include="core.h" />
@@ -215,6 +220,7 @@
     <ClInclude Include="index_buffer.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="keys.h" />
+    <ClInclude Include="level.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="material_parameter.h" />
@@ -231,7 +237,9 @@
     <ClInclude Include="render_command.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="skeletal_mesh.h" />
+    <ClInclude Include="skeletal_mesh_component.h" />
     <ClInclude Include="static_mesh.h" />
+    <ClInclude Include="static_mesh_component.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="vertex_array.h" />

@@ -142,21 +142,38 @@ struct BoneAnimationUpdateSpecs
 
 class SkeletalMesh
 {
+    friend struct SkeletalMeshComponent;
+
 public:
     SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material);
-
-    void UpdateAnimation(float elapsedTime);
-
-    void Draw(const glm::mat4& transform);
 
     void SetCurrentAnimation(const std::string& animationName);
     std::vector<std::string> GetAnimationNames() const;
 
-    bool bShouldDrawDebugBounds{false};
+    void GetAnimationFrames(float elapsedTime, const std::string& name, std::vector<glm::mat4>& transforms) const;
+
+    const glm::vec3& GetBboxMin() const
+    {
+        return m_BboxMin;
+    }
+
+    const glm::vec3& GetBboxMax() const
+    {
+        return m_BboxMax;
+    }
+
+    const std::shared_ptr<Material>& GetMaterial() const
+    {
+        return m_Material;
+    }
+
+    int32_t GetNumBones() const
+    {
+        return m_NumBones;
+    }
 
 private:
     std::shared_ptr<IVertexArray> m_VertexArray;
-    std::vector<glm::mat4> m_BoneTransforms;
     Bone m_RootBone;
     std::unordered_map<std::string, Animation> m_Animations;
     glm::mat4 m_GlobalInverseTransform;
@@ -170,9 +187,12 @@ private:
     std::string m_CurrentAnimationName;
 
 private:
-    void CalculateTransform(const BoneAnimationUpdateSpecs& updateSpecs, const glm::mat4& parentTransform = glm::identity<glm::mat4>());
+    void UpdateAnimation(const std::string& animationName, float elapsedTime, std::vector<glm::mat4>& transforms) const;
+    void CalculateTransform(const BoneAnimationUpdateSpecs& updateSpecs, std::vector<glm::mat4>& transforms, const glm::mat4& parentTransform = glm::identity<glm::mat4>()) const;
     std::shared_ptr<ITexture2D> LoadTexturesFromMaterial(const aiScene* scene, int32_t materialIndex);
     void LoadAnimation(const aiScene* scene, int32_t animationIndex);
+    
+    void Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& worldTransform);
 };
 
 template<>
@@ -252,9 +272,9 @@ inline int32_t BoneAnimationTrack::GetIndex(float animationTime, const std::vect
     return leftSideRange;
 }
 
-inline void SkeletalMesh::UpdateAnimation(float elapsedTime)
+inline void SkeletalMesh::UpdateAnimation(const std::string& animationName, float elapsedTime, std::vector<glm::mat4>& transforms) const
 {
-    const Animation& animation = m_Animations.at(m_CurrentAnimationName);
+    const Animation& animation = m_Animations.at(animationName);
 
     // precalculate animation time to
     float ticksPerSecond = animation.TicksPerSecond;
@@ -262,7 +282,7 @@ inline void SkeletalMesh::UpdateAnimation(float elapsedTime)
     float animationTime = fmod(timeInTicks, animation.Duration);
 
     // run transform update chain starting from root joint
-    CalculateTransform(BoneAnimationUpdateSpecs{&animation, animationTime, &m_RootBone});
+    CalculateTransform(BoneAnimationUpdateSpecs{&animation, animationTime, &m_RootBone}, transforms);
 }
 
 

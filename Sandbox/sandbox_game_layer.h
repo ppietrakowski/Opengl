@@ -3,6 +3,8 @@
 #include <engine.h>
 #include <glm/gtc/quaternion.hpp>
 
+#include "level.h"
+
 class SandboxGameLayer : public ILayer
 {
 public:
@@ -24,7 +26,7 @@ private:
     std::shared_ptr<IShader> m_Unshaded;
     std::shared_ptr<IShader> m_CurrentUsed;
 
-    std::unique_ptr<StaticMesh> m_StaticMesh;
+    std::shared_ptr<StaticMesh> m_StaticMesh;
     glm::vec3 m_StaticMeshPosition;
 
     glm::vec3 m_CameraPosition;
@@ -51,6 +53,9 @@ private:
     glm::vec3 m_BboxMax;
     Duration m_StartupTime{GetNow()};
     Duration m_Duration{GetNow()};
-    SkeletalMesh m_SkeletalMesh;
+    std::shared_ptr<SkeletalMesh> m_SkeletalMesh;
+
+    Level m_Level;
+    Actor m_SkeletalMeshActor;
 };
 
