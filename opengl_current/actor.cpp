@@ -75,12 +75,12 @@ void Actor::RemoveChild(const Actor& actor)
 void Actor::DestroyActor()
 {
     auto& sceneHierarchy = GetComponent<SceneHierarchyComponent>();
-    m_HomeLevel->RemoveActor(GetName());
-
     for (auto& [name, actor] : sceneHierarchy.Children)
     {
         m_HomeLevel->RemoveActor(name);
     }
+
+    m_HomeLevel->RemoveActor(GetName());
 }
 
 bool Actor::IsAlive() const

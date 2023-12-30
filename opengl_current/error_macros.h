@@ -166,13 +166,13 @@ void PrintError(const SourceLocation* location, const char* message);
 
 #define CRASH_EXPECTED_FALSE(Condition) CRASH_EXPECTED_FALSE_MSG(Condition, "Fatal condition \"" #Condition "\" is true ")
 
-#define DO_ONCE(Expression)            \
+#define DO_ONCE(Lambda)            \
     {                                  \
         static bool bDoneOnce = false; \
                                        \
         if (!bDoneOnce) {              \
             do {                       \
-                Expression             \
+                Lambda();              \
             } while (0);               \
             bDoneOnce = true;          \
         }                              \

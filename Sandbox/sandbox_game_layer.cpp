@@ -164,6 +164,12 @@ bool SandboxGameLayer::OnEvent(const Event& event)
 
     if (event.Type == EventType::kMouseButtonPressed)
     {
+        DO_ONCE([this]() {
+            Actor actor = m_Level.FindActor("StaticMeshActor");
+            actor.DestroyActor();
+        }
+        );
+
         m_bSterringEntity = !m_bSterringEntity;
     }
 
