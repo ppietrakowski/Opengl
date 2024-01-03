@@ -22,6 +22,6 @@ public:
     void SetVsync(bool bVsyncEnabled) override;
 
 private:
-    GLFWwindow* m_Window;
+    GLFWwindow* Window;
 };
 

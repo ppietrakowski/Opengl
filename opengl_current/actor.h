@@ -63,25 +63,25 @@ public:
     template <typename T>
     T& GetComponent()
     {
-        return m_EntityHandle.get<T>();
+        return EntityHandle.get<T>();
     }
 
     template <typename T>
     const T& GetComponent() const
     {
-        return m_EntityHandle.get<T>();
+        return EntityHandle.get<T>();
     }
 
     template <typename T, typename ...Args>
     void AddComponent(Args&& ...args)
     {
-        m_EntityHandle.emplace<T>(std::forward<Args>(args)...);
+        EntityHandle.emplace<T>(std::forward<Args>(args)...);
     }
 
     template <typename T>
     void RemoveComponent()
     {
-        m_EntityHandle.erase<T>();
+        EntityHandle.erase<T>();
     }
 
     const std::string& GetName() const;
@@ -92,19 +92,19 @@ public:
 
     const Level* GetHomeLevel() const
     {
-        return m_HomeLevel;
+        return HomeLevel;
     }
 
     Level* GetHomeLevel()
     {
-        return m_HomeLevel;
+        return HomeLevel;
     }
 
     void DestroyActor();
     bool IsAlive() const;
 
 private:
-    entt::handle m_EntityHandle;
-    Level* m_HomeLevel{nullptr};
+    entt::handle EntityHandle;
+    Level* HomeLevel{nullptr};
 };
 

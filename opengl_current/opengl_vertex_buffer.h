@@ -13,13 +13,13 @@ public:
 public:
     void Bind() const override;
     void Unbind() const override;
-    void UpdateVertices(const void* buffer, const BufferSize& bufferSize) override;
+    void UpdateVertices(const void* buffer, BufferSize bufferSize) override;
 
     int32_t GetVerticesSizeBytes() const override;
     bool IsValid() const override;
 
 private:
-    GLuint m_RendererId;
-    int32_t m_BufferSize;
+    GLuint RendererId;
+    int32_t VboBufferSize;
 };
 

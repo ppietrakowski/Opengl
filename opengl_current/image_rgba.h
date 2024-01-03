@@ -22,8 +22,8 @@ public:
     int32_t GetHeight() const;
 
 private:
-    uint8_t* m_ImageData;
-    int32_t m_Width;
-    int32_t m_Height;
-    void (*m_Deleter)(uint8_t*);
+    uint8_t* ImageData;
+    int32_t Width;
+    int32_t Height;
+    void (*Deleter)(uint8_t*);
 };

@@ -12,21 +12,11 @@ struct SkeletalMeshComponent
     glm::vec3 DebugBboxMin;
     glm::vec3 DebugBboxMax;
 
+    SkeletalMeshComponent() = default;
+    SkeletalMeshComponent(const std::shared_ptr<SkeletalMesh>& mesh);
+
     void UpdateAnimation(float deltaSeconds);
     void Draw(const glm::mat4& worldTransform);
-
-    SkeletalMeshComponent() = default;
-
-    SkeletalMeshComponent(const std::shared_ptr<SkeletalMesh>& mesh) :
-        Mesh{mesh}
-    {
-        std::vector<std::string> animations = mesh->GetAnimationNames();
-        AnimationName = animations.back();
-        BoneTransforms.resize(mesh->GetNumBones(), glm::identity<glm::mat4>());
-
-        DebugBboxMin = Mesh->GetBboxMin();
-        DebugBboxMax = Mesh->GetBboxMax();
-    }
 };
 
 inline void SkeletalMeshComponent::UpdateAnimation(float deltaSeconds)

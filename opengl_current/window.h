@@ -47,6 +47,6 @@ public:
     virtual void Close() = 0;
     virtual void SetMouseVisible(bool bMouseVisible) = 0;
 
-    static std::unique_ptr<IWindow> Create(const WindowSettings& window_settings);
+    static std::unique_ptr<IWindow> Create(const WindowSettings& windowSettings);
 };
 

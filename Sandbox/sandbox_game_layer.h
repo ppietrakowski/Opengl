@@ -11,8 +11,8 @@ public:
     SandboxGameLayer();
 
     // Inherited via IGameLayer
-    void OnUpdate(Duration deltaTime) override;
-    void OnRender(Duration deltaTime) override;
+    void Update(Duration deltaTime) override;
+    void Render(Duration deltaTime) override;
     bool OnEvent(const Event& event) override;
     void OnImguiFrame() override;
 

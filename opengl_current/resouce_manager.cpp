@@ -2,7 +2,7 @@
 #include <fstream>
 #include <filesystem>
 
-std::shared_ptr<ResourceManagerImpl> ResourceManager::s_ResourceManager;
+std::shared_ptr<ResourceManagerImpl> ResourceManager::ResourceManagerInstance;
 
 class ResourceManagerImpl
 {
@@ -24,71 +24,71 @@ public:
     std::shared_ptr<Material> CreateMaterial(const std::string& shaderFilePath, const std::string& materialName);
 
 private:
-    std::unordered_map<std::string, std::shared_ptr<IShader>> m_Shaders;
-    std::unordered_map<std::string, std::shared_ptr<Material>> m_Materials;
-    std::unordered_map<std::string, std::shared_ptr<ITexture2D>> m_Textures2D;
-    std::unordered_map<std::string, std::shared_ptr<SkeletalMesh>> m_SkeletalMeshes;
-    std::unordered_map<std::string, std::shared_ptr<StaticMesh>> m_StaticMeshes;
+    std::unordered_map<std::string, std::shared_ptr<IShader>> Shaders;
+    std::unordered_map<std::string, std::shared_ptr<Material>> Materials;
+    std::unordered_map<std::string, std::shared_ptr<ITexture2D>> Textures2D;
+    std::unordered_map<std::string, std::shared_ptr<SkeletalMesh>> SkeletalMeshes;
+    std::unordered_map<std::string, std::shared_ptr<StaticMesh>> StaticMeshes;
 };
 
 std::shared_ptr<IShader> ResourceManager::GetShader(const std::string& filePath)
 {
-    ASSERT(s_ResourceManager);
-    return s_ResourceManager->GetShader(filePath);
+    ASSERT(ResourceManagerInstance);
+    return ResourceManagerInstance->GetShader(filePath);
 }
 
 std::shared_ptr<ITexture2D> ResourceManager::GetTexture2D(const std::string& filePath)
 {
-    ASSERT(s_ResourceManager);
-    return s_ResourceManager->GetTexture2D(filePath);
+    ASSERT(ResourceManagerInstance);
+    return ResourceManagerInstance->GetTexture2D(filePath);
 }
 
 void ResourceManager::AddTexture2D(const std::string& path, const std::shared_ptr<ITexture2D>& texture)
 {
-    ASSERT(s_ResourceManager);
-    return s_ResourceManager->AddTexture2D(path, texture);
+    ASSERT(ResourceManagerInstance);
+    return ResourceManagerInstance->AddTexture2D(path, texture);
 }
 
 std::shared_ptr<SkeletalMesh> ResourceManager::GetSkeletalMesh(const std::string& filePath)
 {
-    ASSERT(s_ResourceManager);
-    return s_ResourceManager->GetSkeletalMesh(filePath);
+    ASSERT(ResourceManagerInstance);
+    return ResourceManagerInstance->GetSkeletalMesh(filePath);
 }
 
 std::shared_ptr<StaticMesh> ResourceManager::GetStaticMesh(const std::string& filePath)
 {
-    ASSERT(s_ResourceManager);
-    return s_ResourceManager->GetStaticMesh(filePath);
+    ASSERT(ResourceManagerInstance);
+    return ResourceManagerInstance->GetStaticMesh(filePath);
 }
 
 std::shared_ptr<Material> ResourceManager::GetMaterial(const std::string& materialName)
 {
-    ASSERT(s_ResourceManager);
-    return s_ResourceManager->GetMaterial(materialName);
+    ASSERT(ResourceManagerInstance);
+    return ResourceManagerInstance->GetMaterial(materialName);
 }
 
 std::shared_ptr<Material> ResourceManager::CreateMaterial(const std::string& shaderFilePath, const std::string& materialName)
 {
-    ASSERT(s_ResourceManager);
-    return s_ResourceManager->CreateMaterial(shaderFilePath, materialName);
+    ASSERT(ResourceManagerInstance);
+    return ResourceManagerInstance->CreateMaterial(shaderFilePath, materialName);
 }
 
 void ResourceManager::Quit()
 {
-    s_ResourceManager = nullptr;
+    ResourceManagerInstance = nullptr;
 }
 
 std::shared_ptr<ResourceManagerImpl> ResourceManager::CreateResourceManager()
 {
-    s_ResourceManager = std::make_shared<ResourceManagerImpl>();
-    return s_ResourceManager;
+    ResourceManagerInstance = std::make_shared<ResourceManagerImpl>();
+    return ResourceManagerInstance;
 }
 
 std::shared_ptr<IShader> ResourceManagerImpl::GetShader(const std::string& filePath)
 {
-    auto it = m_Shaders.find(filePath);
+    auto it = Shaders.find(filePath);
 
-    if (it == m_Shaders.end())
+    if (it == Shaders.end())
     {
         return LoadShader(filePath);
     }
@@ -153,15 +153,15 @@ std::shared_ptr<IShader> ResourceManagerImpl::LoadShader(const std::string& file
     ASSERT(shaderSources.size() < IShader::kCount);
 
     std::shared_ptr<IShader> shader = IShader::CreateFromSource(shaderSources);
-    m_Shaders[filePath] = shader;
+    Shaders[filePath] = shader;
     return shader;
 }
 
 std::shared_ptr<ITexture2D> ResourceManagerImpl::GetTexture2D(const std::string& filePath)
 {
-    auto it = m_Textures2D.find(filePath);
+    auto it = Textures2D.find(filePath);
 
-    if (it == m_Textures2D.end())
+    if (it == Textures2D.end())
     {
         return LoadTexture2D(filePath);
     }
@@ -172,21 +172,21 @@ std::shared_ptr<ITexture2D> ResourceManagerImpl::GetTexture2D(const std::string&
 std::shared_ptr<ITexture2D> ResourceManagerImpl::LoadTexture2D(const std::string& filePath)
 {
     std::shared_ptr<ITexture2D> texture = ITexture2D::LoadFromFile(filePath);
-    m_Textures2D[filePath] = texture;
+    Textures2D[filePath] = texture;
 
     return texture;
 }
 
 void ResourceManagerImpl::AddTexture2D(const std::string& path, const std::shared_ptr<ITexture2D>& texture)
 {
-    m_Textures2D[path] = texture;
+    Textures2D[path] = texture;
 }
 
 std::shared_ptr<SkeletalMesh> ResourceManagerImpl::GetSkeletalMesh(const std::string& filePath)
 {
-    auto it = m_SkeletalMeshes.find(filePath);
+    auto it = SkeletalMeshes.find(filePath);
 
-    if (it == m_SkeletalMeshes.end())
+    if (it == SkeletalMeshes.end())
     {
         return LoadSkeletalMesh(filePath);
     }
@@ -197,15 +197,15 @@ std::shared_ptr<SkeletalMesh> ResourceManagerImpl::GetSkeletalMesh(const std::st
 std::shared_ptr<SkeletalMesh> ResourceManagerImpl::LoadSkeletalMesh(const std::string& filePath)
 {
     std::shared_ptr<SkeletalMesh> skeletalMesh = std::make_shared<SkeletalMesh>(filePath, GetMaterial("default"));
-    m_SkeletalMeshes[filePath] = skeletalMesh;
+    SkeletalMeshes[filePath] = skeletalMesh;
     return skeletalMesh;
 }
 
 std::shared_ptr<StaticMesh> ResourceManagerImpl::GetStaticMesh(const std::string& filePath)
 {
-    auto it = m_StaticMeshes.find(filePath);
+    auto it = StaticMeshes.find(filePath);
 
-    if (it == m_StaticMeshes.end())
+    if (it == StaticMeshes.end())
     {
         return LoadStaticMesh(filePath);
     }
@@ -216,15 +216,15 @@ std::shared_ptr<StaticMesh> ResourceManagerImpl::GetStaticMesh(const std::string
 std::shared_ptr<StaticMesh> ResourceManagerImpl::LoadStaticMesh(const std::string& filePath)
 {
     std::shared_ptr<StaticMesh> staticMesh = std::make_shared<StaticMesh>(filePath, GetMaterial("default"));
-    m_StaticMeshes[filePath] = staticMesh;
+    StaticMeshes[filePath] = staticMesh;
     return staticMesh;
 }
 
 std::shared_ptr<Material> ResourceManagerImpl::GetMaterial(const std::string& materialName)
 {
-    auto it = m_Materials.find(materialName);
+    auto it = Materials.find(materialName);
 
-    if (it == m_Materials.end())
+    if (it == Materials.end())
     {
         THROW_ERROR("Couldn't find material with such name");
     }
@@ -235,6 +235,6 @@ std::shared_ptr<Material> ResourceManagerImpl::GetMaterial(const std::string& ma
 std::shared_ptr<Material> ResourceManagerImpl::CreateMaterial(const std::string& shaderFilePath, const std::string& materialName)
 {
     auto shader = GetShader(shaderFilePath);
-    m_Materials[materialName] = std::make_shared<Material>(shader);
-    return m_Materials[materialName];
+    Materials[materialName] = std::make_shared<Material>(shader);
+    return Materials[materialName];
 }

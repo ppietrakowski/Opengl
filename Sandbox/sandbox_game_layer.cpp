@@ -65,7 +65,6 @@ SandboxGameLayer::SandboxGameLayer() :
     m_CameraRotation = glm::quat{glm::radians(glm::vec3{m_Pitch, m_Yaw, 0.0f})};
     m_StaticMeshPosition = {2, 0, -10};
     std::vector<std::string> animations = std::move(m_SkeletalMesh->GetAnimationNames());
-    m_SkeletalMesh->SetCurrentAnimation(animations[1]);
     RenderCommand::SetClearColor(RgbaColor{50, 30, 170});
 
     m_SkeletalMeshActor = m_Level.CreateActor("SkeletalMesh");
@@ -78,7 +77,7 @@ SandboxGameLayer::SandboxGameLayer() :
     staticMeshActor.GetComponent<TransformComponent>().SetLocalEulerAngles(glm::vec3{0, 90, 0}); 
 }
 
-void SandboxGameLayer::OnUpdate(Duration deltaTime)
+void SandboxGameLayer::Update(Duration deltaTime)
 {
     float dt = deltaTime.GetAsSeconds();
 
@@ -122,7 +121,7 @@ void SandboxGameLayer::OnUpdate(Duration deltaTime)
     m_Level.BroadcastUpdate(deltaTime);
 }
 
-void SandboxGameLayer::OnRender(Duration deltaTime)
+void SandboxGameLayer::Render(Duration deltaTime)
 {
     Renderer::BeginScene(glm::inverse(glm::translate(m_CameraPosition) * glm::mat4_cast(m_CameraRotation)), m_CameraPosition);
     m_CurrentUsed->SetUniformVec3("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});

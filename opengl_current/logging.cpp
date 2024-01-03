@@ -12,7 +12,7 @@ IMPLEMENT_LOG_CATEGORY(RENDERER);
 IMPLEMENT_LOG_CATEGORY(ASSET_LOADING);
 IMPLEMENT_LOG_CATEGORY(GLOBAL);
 
-int32_t Logging::s_IgnoredLogLevels = 0;
+int32_t Logging::IgnoredLogLevels = 0;
 
 struct Device
 {
@@ -25,8 +25,8 @@ struct Device
     }
 };
 
-static std::vector<Device> s_LogDevices;
-static LogDeviceID s_LastLogDeviceId = 1;
+static std::vector<Device> LogDevices;
+static LogDeviceID LastLogDeviceId = 1;
 
 namespace
 {
@@ -60,32 +60,32 @@ class StdLogDevice : public LogDevice
 
 void Logging::Initialize()
 {
-    s_LogDevices.emplace_back(Device{std::make_unique<StdLogDevice>(), kStdLoggerId});
+    LogDevices.emplace_back(Device{std::make_unique<StdLogDevice>(), kStdLoggerId});
 }
 
 void Logging::IgnoreLogLevel(LogLevel level)
 {
-    s_IgnoredLogLevels = s_IgnoredLogLevels | static_cast<uint32_t>(level);
+    IgnoredLogLevels = IgnoredLogLevels | static_cast<uint32_t>(level);
 }
 
 void Logging::StopIgnoringLogLevel(LogLevel level)
 {
-    s_IgnoredLogLevels = s_IgnoredLogLevels & (~static_cast<uint32_t>(level));
+    IgnoredLogLevels = IgnoredLogLevels & (~static_cast<uint32_t>(level));
 }
 
 void Logging::Quit()
 {
-    s_LogDevices.clear();
+    LogDevices.clear();
 }
 
 void Logging::Log(const LogInfo& info)
 {
-    if (s_IgnoredLogLevels & static_cast<int32_t>(info.Level))
+    if (IgnoredLogLevels & static_cast<int32_t>(info.Level))
     {
         return;
     }
 
-    for (const Device& device : s_LogDevices)
+    for (const Device& device : LogDevices)
     {
         device->Print(info);
     }
@@ -93,21 +93,21 @@ void Logging::Log(const LogInfo& info)
 
 LogDeviceID Logging::AddLogDevice(std::unique_ptr<LogDevice>&& device)
 {
-    LogDeviceID deviceId = s_LastLogDeviceId++;
-    s_LogDevices.emplace_back(Device{std::move(device), deviceId});
+    LogDeviceID deviceId = LastLogDeviceId++;
+    LogDevices.emplace_back(Device{std::move(device), deviceId});
     SortLogDeviceIDs();
     return deviceId;
 }
 
 void Logging::RemoveLogDevice(LogDeviceID id)
 {
-    auto it = std::find_if(s_LogDevices.begin(), s_LogDevices.end(), [id](const Device& device) {
+    auto it = std::find_if(LogDevices.begin(), LogDevices.end(), [id](const Device& device) {
         return device.DeviceId == id;
     });
 
-    if (it != s_LogDevices.end())
+    if (it != LogDevices.end())
     {
-        s_LogDevices.erase(it);
+        LogDevices.erase(it);
     }
 }
 
@@ -118,13 +118,13 @@ void Logging::DisableStdLogging()
 
 void Logging::EnableStdLogging()
 {
-    s_LogDevices.emplace_back(Device{std::make_unique<StdLogDevice>(), kStdLoggerId});
+    LogDevices.emplace_back(Device{std::make_unique<StdLogDevice>(), kStdLoggerId});
     SortLogDeviceIDs();
 }
 
 void Logging::SortLogDeviceIDs()
 {
-    std::sort(s_LogDevices.begin(), s_LogDevices.end(), [](const Device& a, const Device& b) { return a.DeviceId < b.DeviceId; });
+    std::sort(LogDevices.begin(), LogDevices.end(), [](const Device& a, const Device& b) { return a.DeviceId < b.DeviceId; });
 }
 
 std::string FormatString(const char* format, ...)

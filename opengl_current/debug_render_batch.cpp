@@ -33,36 +33,36 @@ struct DebugVertexArrayScope
 };
 
 DebugRenderBatch::DebugRenderBatch() :
-    m_Vertices{kMaxDebugNumBox * kNumBoxVertices},
-    m_Indices{kMaxIndices},
-    m_VertexArray{IVertexArray::Create()}
+    Vertices{kMaxDebugNumBox * kNumBoxVertices},
+    Indices{kMaxIndices},
+    VertexArray{IVertexArray::Create()}
 {
     // initialize box batching
     VertexAttribute attributes[] = {{3, PrimitiveVertexType::kFloat}};
 
-    m_VertexArray->AddDynamicBuffer(m_Vertices.GetCapacityBytes(), attributes);
-    m_VertexArray->SetIndexBuffer(IIndexBuffer::CreateEmpty(m_Indices.GetCapacity()));
+    VertexArray->AddDynamicBuffer(Vertices.GetCapacityBytes(), attributes);
+    VertexArray->SetIndexBuffer(IIndexBuffer::CreateEmpty(Indices.GetCapacity()));
 
-    m_VertexArray->Unbind();
+    VertexArray->Unbind();
 }
 
 void DebugRenderBatch::UploadBatchedData()
 {
-    DebugVertexArrayScope bindArrayScope{*m_VertexArray};
+    DebugVertexArrayScope bindArrayScope{*VertexArray};
 
-    std::shared_ptr<IVertexBuffer> vertexBuffer = m_VertexArray->GetVertexBufferAt(0);
-    vertexBuffer->UpdateVertices(m_Vertices.GetRawData(), BufferSize{m_Vertices.GetSizeBytes()});
+    std::shared_ptr<IVertexBuffer> vertexBuffer = VertexArray->GetVertexBufferAt(0);
+    vertexBuffer->UpdateVertices(Vertices.GetRawData(), BufferSize{Vertices.GetSizeBytes()});
 
-    std::shared_ptr<IIndexBuffer> indexBuffer = m_VertexArray->GetIndexBuffer();
-    indexBuffer->UpdateIndices(m_Indices.GetRawData(), m_Indices.GetSize());
+    std::shared_ptr<IIndexBuffer> indexBuffer = VertexArray->GetIndexBuffer();
+    indexBuffer->UpdateIndices(Indices.GetRawData(), Indices.GetSize());
 }
 
 void DebugRenderBatch::FlushDraw(IShader& shader)
 {
-    Renderer::Submit(shader, m_Indices.GetSize(), *m_VertexArray, glm::mat4{1.0}, RenderPrimitive::kLines);
-    m_Vertices.ResetPtrToStart();
-    m_Indices.ResetPtrToStart();
-    m_LastIndexNumber = 0;
+    Renderer::Submit(shader, Indices.GetSize(), *VertexArray, glm::mat4{1.0}, RenderPrimitive::kLines);
+    Vertices.ResetPtrToStart();
+    Indices.ResetPtrToStart();
+    LastIndexNumber = 0;
 }
 
 void DebugRenderBatch::AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform)
@@ -87,24 +87,24 @@ void DebugRenderBatch::AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const 
 
     for (const glm::vec3& vertex : boxVertices)
     {
-        m_Vertices.AddInstance(transform * glm::vec4{vertex, 1.0f});
+        Vertices.AddInstance(transform * glm::vec4{vertex, 1.0f});
     }
 
     for (uint32_t index : kBaseBoxIndices)
     {
-        m_Indices.AddInstance(index + m_LastIndexNumber);
+        Indices.AddInstance(index + LastIndexNumber);
     }
 
     int32_t maxNumVertices = STD_ARRAY_NUM_ELEMENTS(boxVertices);
-    m_LastIndexNumber += maxNumVertices;
+    LastIndexNumber += maxNumVertices;
 }
 
 bool DebugRenderBatch::CanBatchAnotherMesh(int32_t numIndices) const
 {
-    return m_LastIndexNumber + numIndices < kMaxIndices && m_Vertices.GetSize() < m_Vertices.GetCapacity();
+    return LastIndexNumber + numIndices < kMaxIndices && Vertices.GetSize() < Vertices.GetCapacity();
 }
 
 bool DebugRenderBatch::HasBatchedAnyPrimitive() const
 {
-    return m_Vertices.GetSize() > 0;
+    return Vertices.GetSize() > 0;
 }

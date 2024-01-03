@@ -11,7 +11,7 @@ public:
 private:
     void Clear() override;
     void SetClearColor(const RgbaColor& clearColor) override;
-    void DrawIndexed(const IVertexArray& vertexArray, int32_t numIndices, RenderPrimitive renderPrimitive) override;
+    void DrawIndexed(const IndexedDrawData& drawData) override;
 
     void SetWireframe(bool bWireframeEnabled) override;
     bool IsWireframeEnabled() override;
@@ -25,9 +25,9 @@ private:
     void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height) override;
 
 private:
-    bool m_bCullEnabled = false;
-    bool m_bWireframeEnabled = false;
-    bool m_bBlendingEnabled = false;
-    RgbaColor m_ClearColor;
+    bool bCullEnabled = false;
+    bool bWireframeEnabled = false;
+    bool bBlendingEnabled = false;
+    RgbaColor ClearColor;
 };
 

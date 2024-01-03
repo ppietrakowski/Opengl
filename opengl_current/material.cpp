@@ -9,7 +9,7 @@ namespace
 }
 
 Material::Material(const std::shared_ptr<IShader>& shader) :
-    m_Shader{shader}
+    Shader{shader}
 {
     // retrieve all uniforms information from shader
     std::vector<UniformInfo> uniformsInfo = std::move(shader->GetUniformInfos());
@@ -96,41 +96,41 @@ void Material::AddNewProperty(const UniformInfo& info)
     {
     case UniformType::kVec4:
     {
-        m_MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()),
+        MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()),
             info.Name.c_str(), glm::vec4{0, 0, 0, 1});
         break;
     }
     case UniformType::kVec3:
     {
-        m_MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()),
+        MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()),
             info.Name.c_str(), glm::vec3{0, 0, 0});
         break;
     }
     case UniformType::kVec2:
     {
-        m_MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()),
+        MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()),
             info.Name.c_str(), glm::vec2{0, 0});
         break;
     }
     case UniformType::kFloat:
     {
-        m_MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()),
+        MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()),
             info.Name.c_str(), 0.0f);
         break;
     }
     case UniformType::kInt:
     {
-        m_MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()),
+        MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()),
             info.Name.c_str(), 0);
         break;
     }
     case UniformType::kSampler2D:
     {
         MaterialParam param{info.Name.c_str()};
-        param.m_Texture = Renderer::GetDefaultTexture();
-        param.TextureUnit = m_NumTextureUnits++;
+        param.Texture = Renderer::GetDefaultTexture();
+        param.TextureUnit = NumTextureUnits++;
 
-        m_MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()), param);
+        MaterialParams.try_emplace(info.Name.substr(kMaterialTag.length()), param);
         break;
     }
     }
@@ -146,7 +146,7 @@ void Material::SetShaderUniforms() const
 {
     IShader& shader = GetShader();
 
-    for (auto& [name, param] : m_MaterialParams)
+    for (auto& [name, param] : MaterialParams)
     {
         param.SetUniform(shader);
     }

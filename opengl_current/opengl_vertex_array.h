@@ -22,8 +22,8 @@ public:
     void AddBufferInternal(const std::shared_ptr<IVertexBuffer>& vertexBuffer, std::span<const VertexAttribute> attributes) override;
 
 private:
-    GLuint m_RendererId;
-    std::vector<std::shared_ptr<IVertexBuffer>> m_VertexBuffers;
-    std::shared_ptr<IIndexBuffer> m_IndexBuffer;
+    GLuint RendererId;
+    std::vector<std::shared_ptr<IVertexBuffer>> VertexBuffers;
+    std::shared_ptr<IIndexBuffer> IndexBuffer;
 };
 

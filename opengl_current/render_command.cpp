@@ -5,29 +5,29 @@
 
 static RenderStats s_RenderStats;
 static std::chrono::nanoseconds s_StartTimestamp = std::chrono::nanoseconds::zero();
-IRendererAPI* RenderCommand::s_RendererApi = nullptr;
+IRendererAPI* RenderCommand::RendererApi = nullptr;
 
 void RenderCommand::Initialize()
 {
-    s_RendererApi = new OpenGlRenderApi();
+    RendererApi = new OpenGlRenderApi();
 }
 
 void RenderCommand::Quit()
 {
-    delete s_RendererApi;
-    s_RendererApi = nullptr;
+    delete RendererApi;
+    RendererApi = nullptr;
 }
 
 void RenderCommand::ClearBufferBindings_Debug()
 {
-    s_RendererApi->ClearBufferBindings_Debug();
+    RendererApi->ClearBufferBindings_Debug();
 }
 
-void RenderCommand::DrawIndexed(const IVertexArray& vertexArray, int32_t numIndices, RenderPrimitive renderPrimitive)
+void RenderCommand::DrawIndexed(const IndexedDrawData& drawData)
 {
-    s_RendererApi->DrawIndexed(vertexArray, numIndices, renderPrimitive);
+    RendererApi->DrawIndexed(drawData);
     s_RenderStats.NumDrawCalls++;
-    s_RenderStats.NumTriangles += (numIndices / 3);
+    s_RenderStats.NumTriangles += (drawData.NumIndices / 3);
 }
 
 void RenderCommand::BeginScene()
@@ -45,47 +45,47 @@ void RenderCommand::EndScene()
 
 void RenderCommand::SetClearColor(const RgbaColor& clearColor)
 {
-    s_RendererApi->SetClearColor(clearColor);
+    RendererApi->SetClearColor(clearColor);
 }
 
 void RenderCommand::Clear()
 {
-    s_RendererApi->Clear();
+    RendererApi->Clear();
 }
 
 void RenderCommand::SetWireframe(bool bWireframeEnabled)
 {
-    s_RendererApi->SetWireframe(bWireframeEnabled);
+    RendererApi->SetWireframe(bWireframeEnabled);
 }
 
 bool RenderCommand::IsWireframeEnabled()
 {
-    return s_RendererApi->IsWireframeEnabled();
+    return RendererApi->IsWireframeEnabled();
 }
 
 void RenderCommand::SetCullFace(bool bCullFace)
 {
-    s_RendererApi->SetCullFace(bCullFace);
+    RendererApi->SetCullFace(bCullFace);
 }
 
 bool RenderCommand::DoesCullFaces()
 {
-    return s_RendererApi->DoesCullFaces();
+    return RendererApi->DoesCullFaces();
 }
 
 void RenderCommand::SetBlendingEnabled(bool bBlendingEnabled)
 {
-    s_RendererApi->SetBlendingEnabled(bBlendingEnabled);
+    RendererApi->SetBlendingEnabled(bBlendingEnabled);
 }
 
 void RenderCommand::SetLineWidth(float lineWidth)
 {
-    s_RendererApi->SetLineWidth(lineWidth);
+    RendererApi->SetLineWidth(lineWidth);
 }
 
 void RenderCommand::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
 {
-    s_RendererApi->SetViewport(x, y, width, height);
+    RendererApi->SetViewport(x, y, width, height);
 }
 
 RenderStats RenderCommand::GetRenderStats()

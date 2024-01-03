@@ -23,11 +23,11 @@ public:
     TextureFormat GetTextureFormat() const override;
 
 private:
-    uint32_t m_RendererId;
-    int32_t m_Width;
-    int32_t m_Height;
-    uint32_t m_GlFormat;
-    bool m_bGotMipmaps : 1;
+    uint32_t RendererId;
+    int32_t Width;
+    int32_t Height;
+    uint32_t GlFormat;
+    bool bGotMipmaps : 1;
 
 private:
     void GenerateTexture2D(const void* data);

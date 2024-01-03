@@ -21,7 +21,7 @@ public:
     bool IsValid() const override;
 
 private:
-    uint32_t m_RendererId;
-    int32_t m_NumIndices;
+    uint32_t RendererId;
+    int32_t NumIndices;
 };
 

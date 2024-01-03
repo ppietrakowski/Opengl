@@ -170,7 +170,6 @@
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="material.cpp" />
     <ClCompile Include="material_parameter.cpp" />
-    <ClCompile Include="object.cpp" />
     <ClCompile Include="opengl_index_buffer.cpp" />
     <ClCompile Include="opengl_graphics_context.cpp" />
     <ClCompile Include="opengl_render_api.cpp" />
@@ -225,7 +224,6 @@
     <ClInclude Include="logging.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="material_parameter.h" />
-    <ClInclude Include="object.h" />
     <ClInclude Include="opengl_index_buffer.h" />
     <ClInclude Include="opengl_graphics_context.h" />
     <ClInclude Include="opengl_render_api.h" />

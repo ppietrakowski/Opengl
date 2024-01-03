@@ -4,20 +4,20 @@
 #include "error_macros.h"
 
 OpenGlVertexArray::OpenGlVertexArray() :
-    m_RendererId{0}
+    RendererId{0}
 {
     glBindVertexArray(0);
-    glGenVertexArrays(1, &m_RendererId);
+    glGenVertexArrays(1, &RendererId);
 }
 
 OpenGlVertexArray::~OpenGlVertexArray()
 {
-    glDeleteVertexArrays(1, &m_RendererId);
+    glDeleteVertexArrays(1, &RendererId);
 }
 
 void OpenGlVertexArray::Bind() const
 {
-    glBindVertexArray(m_RendererId);
+    glBindVertexArray(RendererId);
 }
 
 void OpenGlVertexArray::Unbind() const
@@ -33,7 +33,7 @@ void OpenGlVertexArray::AddBufferInternal(const std::shared_ptr<IVertexBuffer>& 
     constexpr int32_t kMaxAttributes = static_cast<int32_t>(PrimitiveVertexType::kMaxPrimitiveVertexType);
 
     // start index for new buffer
-    int32_t attributeStartIndex = static_cast<int32_t>(m_VertexBuffers.size());
+    int32_t attributeStartIndex = static_cast<int32_t>(VertexBuffers.size());
     int32_t stride = 0;
 
     const uintptr_t kAttributeSizes[kMaxAttributes] = {sizeof(int32_t), sizeof(uint32_t), sizeof(float)};
@@ -76,34 +76,34 @@ void OpenGlVertexArray::AddBufferInternal(const std::shared_ptr<IVertexBuffer>& 
         attributeStartIndex++;
     }
 
-    m_VertexBuffers.emplace_back(vertexBuffer);
+    VertexBuffers.emplace_back(vertexBuffer);
 }
 
 void OpenGlVertexArray::SetIndexBuffer(const std::shared_ptr<IIndexBuffer>& indexBuffer)
 {
     Bind();
 
-    if (m_IndexBuffer != nullptr && m_IndexBuffer->IsValid())
+    if (IndexBuffer != nullptr && IndexBuffer->IsValid())
     {
-        m_IndexBuffer->Unbind();
+        IndexBuffer->Unbind();
     }
 
     indexBuffer->Bind();
-    m_IndexBuffer = indexBuffer;
+    IndexBuffer = indexBuffer;
 }
 
 int32_t OpenGlVertexArray::GetNumIndices() const
 {
-    ERR_FAIL_EXPECTED_TRUE_V(m_IndexBuffer->IsValid(), 0);
-    return m_IndexBuffer->GetNumIndices();
+    ERR_FAIL_EXPECTED_TRUE_V(IndexBuffer->IsValid(), 0);
+    return IndexBuffer->GetNumIndices();
 }
 
 std::shared_ptr<IVertexBuffer> OpenGlVertexArray::GetVertexBufferAt(int32_t index)
 {
-    return m_VertexBuffers.at(index);
+    return VertexBuffers.at(index);
 }
 
 std::shared_ptr<IIndexBuffer> OpenGlVertexArray::GetIndexBuffer()
 {
-    return m_IndexBuffer;
+    return IndexBuffer;
 }

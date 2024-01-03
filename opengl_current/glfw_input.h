@@ -17,7 +17,7 @@ public:
     void Update(const GlfwWindowData& windowData);
 
 private:
-    GLFWwindow* m_Window;
-    glm::vec2 m_MousePosition;
+    GLFWwindow* Window;
+    glm::vec2 MousePosition;
 };
 

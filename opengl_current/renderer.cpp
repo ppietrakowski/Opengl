@@ -8,18 +8,18 @@
 #include <glm/gtc/matrix_inverse.hpp>
 #include <array>
 
-glm::mat4 Renderer::s_View{1.0f};
-glm::mat4 Renderer::s_Projection{1.0f};
-glm::mat4 Renderer::s_ProjectionView{1.0f};
-glm::vec3 Renderer::s_CameraPosition{0.0f, 0.0f, 0.0f};
-std::shared_ptr<ITexture2D> Renderer::s_DefaultTexture;
+glm::mat4 Renderer::View{1.0f};
+glm::mat4 Renderer::Projection{1.0f};
+glm::mat4 Renderer::ProjectionView{1.0f};
+glm::vec3 Renderer::CameraPosition{0.0f, 0.0f, 0.0f};
+std::shared_ptr<ITexture2D> Renderer::DefaultTexture;
 
 static DebugRenderBatch* s_DebugBatch = nullptr;
 
 void Renderer::Quit()
 {
     delete s_DebugBatch;
-    s_DefaultTexture.reset();
+    DefaultTexture.reset();
     RenderCommand::Quit();
 }
 
@@ -58,7 +58,7 @@ void Renderer::Initialize()
     int32_t colorsWidth = 4;
     int32_t colorsHeight = 4;
 
-    s_DefaultTexture = ITexture2D::Create(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::kRgb});
+    DefaultTexture = ITexture2D::Create(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::kRgb});
     RenderCommand::Initialize();
 
     s_DebugBatch = new DebugRenderBatch();
@@ -68,15 +68,15 @@ void Renderer::Initialize()
 
 void Renderer::UpdateProjection(const CameraProjection& projection)
 {
-    s_Projection = glm::perspective(glm::radians(projection.Fov), projection.AspectRatio, projection.ZNear, projection.ZFar);
+    Projection = glm::perspective(glm::radians(projection.Fov), projection.AspectRatio, projection.ZNear, projection.ZFar);
 }
 
 void Renderer::BeginScene(const glm::mat4& view, glm::vec3 cameraPosition)
 {
     RenderCommand::BeginScene();
-    s_View = view;
-    s_ProjectionView = s_Projection * view;
-    s_CameraPosition = cameraPosition;
+    View = view;
+    ProjectionView = Projection * view;
+    CameraPosition = cameraPosition;
 }
 
 void Renderer::EndScene()
@@ -93,7 +93,7 @@ void Renderer::Submit(const Material& material, const IVertexArray& vertexArray,
     material.SetShaderUniforms();
 
     UploadUniforms(shader, transform);
-    RenderCommand::DrawIndexed(vertexArray, vertexArray.GetNumIndices(), renderPrimitive);
+    RenderCommand::DrawIndexed(IndexedDrawData{&vertexArray, vertexArray.GetNumIndices(), renderPrimitive});
 }
 
 void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, int32_t count, const IVertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
@@ -106,7 +106,7 @@ void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat
 
     UploadUniforms(shader, transform);
     shader.SetUniformMat4Array("u_bone_transforms", transforms, count);
-    RenderCommand::DrawIndexed(vertexArray, vertexArray.GetNumIndices(), renderPrimitive);
+    RenderCommand::DrawIndexed(IndexedDrawData{&vertexArray, vertexArray.GetNumIndices(), renderPrimitive});
 }
 
 
@@ -124,7 +124,7 @@ void Renderer::Submit(IShader& shader, int32_t numIndices, const IVertexArray& v
 
     shader.Use();
     UploadUniforms(shader, transform);
-    RenderCommand::DrawIndexed(vertexArray, numIndices, renderPrimitive);
+    RenderCommand::DrawIndexed(IndexedDrawData{&vertexArray, vertexArray.GetNumIndices(), renderPrimitive});
 }
 
 void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform)
@@ -145,10 +145,10 @@ void Renderer::FlushDrawDebug(IShader& shader)
 
 void Renderer::UploadUniforms(IShader& shader, const glm::mat4& transform)
 {
-    shader.SetUniformMat4("u_projection_view", s_ProjectionView);
+    shader.SetUniformMat4("u_projection_view", ProjectionView);
     shader.SetUniformMat4("u_transform", transform);
-    shader.SetUniformMat4("u_view", s_View);
-    shader.SetUniformVec3("u_camera_location", s_CameraPosition);
+    shader.SetUniformMat4("u_view", View);
+    shader.SetUniformVec3("u_camera_location", CameraPosition);
 
     glm::mat3 normalMatrix = glm::inverseTranspose(transform);
     shader.SetUniformMat3("u_normal_transform", normalMatrix);

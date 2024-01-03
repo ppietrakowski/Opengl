@@ -1,7 +1,7 @@
 #include "opengl_render_api.h"
 
 OpenGlRenderApi::OpenGlRenderApi() :
-    m_ClearColor{0, 0, 0}
+    ClearColor{0, 0, 0}
 {
     glEnable(GL_DEPTH_TEST);
 }
@@ -14,22 +14,23 @@ void OpenGlRenderApi::Clear()
 
 void OpenGlRenderApi::SetClearColor(const RgbaColor& clearColor)
 {
-    if (m_ClearColor != clearColor)
+    if (ClearColor != clearColor)
     {
         glClearColor(clearColor.Red / 255.0f, clearColor.Green / 255.0f, clearColor.Blue / 255.0f, clearColor.Alpha / 255.0f);
-        m_ClearColor = clearColor;
+        ClearColor = clearColor;
     }
 }
 
-void OpenGlRenderApi::DrawIndexed(const IVertexArray& vertexArray, int32_t numIndices, RenderPrimitive renderPrimitive)
+void OpenGlRenderApi::DrawIndexed(const IndexedDrawData& drawData)
 {
-    vertexArray.Bind();
-    glDrawElements(static_cast<GLenum>(renderPrimitive), static_cast<GLsizei>(numIndices), GL_UNSIGNED_INT, nullptr);
+    drawData.Bind();
+    glDrawElements(static_cast<GLenum>(drawData.DrawPrimitive),
+        static_cast<GLsizei>(drawData.NumIndices), GL_UNSIGNED_INT, nullptr);
 }
 
 void OpenGlRenderApi::SetWireframe(bool bWireframeEnabled)
 {
-    if (bWireframeEnabled != m_bWireframeEnabled)
+    if (bWireframeEnabled != bWireframeEnabled)
     {
         if (bWireframeEnabled)
         {
@@ -40,13 +41,13 @@ void OpenGlRenderApi::SetWireframe(bool bWireframeEnabled)
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
-        m_bWireframeEnabled = bWireframeEnabled;
+        bWireframeEnabled = bWireframeEnabled;
     }
 }
 
 bool OpenGlRenderApi::IsWireframeEnabled()
 {
-    return m_bWireframeEnabled;
+    return bWireframeEnabled;
 }
 
 void OpenGlRenderApi::SetCullFace(bool bCullFace)
@@ -62,17 +63,17 @@ void OpenGlRenderApi::SetCullFace(bool bCullFace)
         glDisable(GL_CULL_FACE);
     }
 
-    m_bCullEnabled = bCullFace;
+    bCullEnabled = bCullFace;
 }
 
 bool OpenGlRenderApi::DoesCullFaces()
 {
-    return m_bCullEnabled;
+    return bCullEnabled;
 }
 
 void OpenGlRenderApi::SetBlendingEnabled(bool bBlendingEnabled)
 {
-    if (bBlendingEnabled && !m_bBlendingEnabled)
+    if (bBlendingEnabled && !bBlendingEnabled)
     {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -82,7 +83,7 @@ void OpenGlRenderApi::SetBlendingEnabled(bool bBlendingEnabled)
         glDisable(GL_BLEND);
     }
 
-    m_bBlendingEnabled = bBlendingEnabled;
+    bBlendingEnabled = bBlendingEnabled;
 }
 
 void OpenGlRenderApi::SetLineWidth(float lineWidth)

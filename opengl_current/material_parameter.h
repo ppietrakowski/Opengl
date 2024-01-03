@@ -66,8 +66,8 @@ public:
     uint32_t TextureUnit{0};
 
 private:
-    ParamVal m_ParamValue;
-    std::shared_ptr<ITexture> m_Texture;
-    MaterialParamType m_ParamType;
-    char m_UniformName[64];
+    ParamVal ParamValue;
+    std::shared_ptr<ITexture> Texture;
+    MaterialParamType ParamType;
+    char UniformName[64];
 };

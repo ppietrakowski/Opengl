@@ -70,16 +70,16 @@ public:
     static void FlushDrawDebug(IShader& shader);
 
 private:
-    static glm::mat4 s_View;
-    static glm::mat4 s_Projection;
-    static glm::mat4 s_ProjectionView;
-    static glm::vec3 s_CameraPosition;
-    static std::shared_ptr<ITexture2D> s_DefaultTexture;
+    static glm::mat4 View;
+    static glm::mat4 Projection;
+    static glm::mat4 ProjectionView;
+    static glm::vec3 CameraPosition;
+    static std::shared_ptr<ITexture2D> DefaultTexture;
 
     static void UploadUniforms(IShader& shader, const glm::mat4& transform);
 };
 
 inline std::shared_ptr<ITexture2D> Renderer::GetDefaultTexture()
 {
-    return s_DefaultTexture;
+    return DefaultTexture;
 }

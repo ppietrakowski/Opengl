@@ -153,7 +153,7 @@ namespace
 }
 
 OpenGlShader::OpenGlShader() :
-    m_ShaderProgram{0}
+    ShaderProgram{0}
 {
 }
 
@@ -182,12 +182,12 @@ OpenGlShader::OpenGlShader(std::string_view vertexShaderSource, std::string_view
 
 OpenGlShader::~OpenGlShader()
 {
-    glDeleteProgram(m_ShaderProgram);
+    glDeleteProgram(ShaderProgram);
 }
 
 void OpenGlShader::Use() const
 {
-    glUseProgram(m_ShaderProgram);
+    glUseProgram(ShaderProgram);
 }
 
 void OpenGlShader::StopUsing() const
@@ -238,35 +238,35 @@ void OpenGlShader::SetUniformMat3(const char* name, const glm::mat3& value)
 int32_t  OpenGlShader::GetUniformInt(const char* name) const
 {
     int32_t value = 0;
-    glGetUniformiv(m_ShaderProgram, GetUniformLocation(name), &value);
+    glGetUniformiv(ShaderProgram, GetUniformLocation(name), &value);
     return value;
 }
 
 float OpenGlShader::GetUniformFloat(const char* name) const
 {
     glm::vec4 value;
-    glGetUniformfv(m_ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
+    glGetUniformfv(ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
     return value[0];
 }
 
 glm::vec2 OpenGlShader::GetUniformVec2(const char* name) const
 {
     glm::vec4 value;
-    glGetUniformfv(m_ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
+    glGetUniformfv(ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
     return value;
 }
 
 glm::vec3 OpenGlShader::GetUniformVec3(const char* name) const
 {
     glm::vec4 value;
-    glGetUniformfv(m_ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
+    glGetUniformfv(ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
     return value;
 }
 
 glm::vec4 OpenGlShader::GetUniformVec4(const char* name) const
 {
     glm::vec4 value;
-    glGetUniformfv(m_ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
+    glGetUniformfv(ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
     return value;
 }
 
@@ -274,7 +274,7 @@ std::vector<UniformInfo> OpenGlShader::GetUniformInfos() const
 {
     GLint numUniforms;
 
-    glGetProgramiv(m_ShaderProgram, GL_ACTIVE_UNIFORMS, &numUniforms);
+    glGetProgramiv(ShaderProgram, GL_ACTIVE_UNIFORMS, &numUniforms);
     std::vector<UniformInfo> uniformsInfo;
     uniformsInfo.reserve(numUniforms);
 
@@ -308,33 +308,33 @@ void OpenGlShader::GenerateShaders(std::span<std::string_view> sources)
         shaderIndex++;
     }
 
-    m_ShaderProgram = glCreateProgram();
+    ShaderProgram = glCreateProgram();
 
     for (std::size_t i = 0; i < shaderIndex; ++i)
     {
-        shaders[i].AttachShaderToProgram(m_ShaderProgram);
+        shaders[i].AttachShaderToProgram(ShaderProgram);
     }
 
-    glLinkProgram(m_ShaderProgram);
+    glLinkProgram(ShaderProgram);
 
     int32_t linkedSuccesfully;
 
-    glGetProgramiv(m_ShaderProgram, GL_LINK_STATUS, &linkedSuccesfully);
+    glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &linkedSuccesfully);
 
     if (linkedSuccesfully == GL_FALSE)
     {
-        ThrowLinkingError(m_ShaderProgram);
+        ThrowLinkingError(ShaderProgram);
     }
 }
 
 int32_t OpenGlShader::GetUniformLocation(const char* uniformName) const
 {
-    auto it = m_UniformNameToLocation.find(uniformName);
+    auto it = UniformNameToLocation.find(uniformName);
 
-    if (it == m_UniformNameToLocation.end())
+    if (it == UniformNameToLocation.end())
     {
-        int32_t location = glGetUniformLocation(m_ShaderProgram, uniformName);
-        m_UniformNameToLocation[uniformName] = location;
+        int32_t location = glGetUniformLocation(ShaderProgram, uniformName);
+        UniformNameToLocation[uniformName] = location;
 
         return location;
     }
@@ -365,7 +365,7 @@ void OpenGlShader::AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, 
     GLint size; // size of the variable
     GLenum type; // type of the variable (float, vec3 or mat4, etc)
 
-    glGetActiveUniform(m_ShaderProgram, static_cast<GLuint>(location), kMaxNameLength, &nameLength, &size, &type, name);
+    glGetActiveUniform(ShaderProgram, static_cast<GLuint>(location), kMaxNameLength, &nameLength, &size, &type, name);
     auto it = std::find_if(std::begin(kGLTypesToUniformTypes), std::end(kGLTypesToUniformTypes),
         [&](const GLTypeToUniformType& t) { return t.GlUniformType == type; });
 

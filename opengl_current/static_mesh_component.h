@@ -7,17 +7,8 @@ struct StaticMeshComponent
     std::shared_ptr<StaticMesh> Mesh;
 
     StaticMeshComponent() = default;
-    StaticMeshComponent(const std::shared_ptr<StaticMesh>& mesh) :
-        Mesh{mesh}
-    {
-    }
+    StaticMeshComponent(const std::shared_ptr<StaticMesh>& mesh);
 
-    void Draw(const glm::mat4& worldTransform) const
-    {
-        if (Mesh)
-        {
-            Mesh->Render(worldTransform);
-        }
-    }
+    void Draw(const glm::mat4& worldTransform) const;
 };
 

@@ -17,122 +17,122 @@ GlfwWindow::GlfwWindow(const WindowSettings& settings)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    m_Window = glfwCreateWindow(settings.Width, settings.Height, settings.Title.c_str(), nullptr, nullptr);
-    CRASH_EXPECTED_NOT_NULL(m_Window);
+    Window = glfwCreateWindow(settings.Width, settings.Height, settings.Title.c_str(), nullptr, nullptr);
+    CRASH_EXPECTED_NOT_NULL(Window);
 
     // fill window data
     glm::dvec2 mousePosition;
-    glfwGetCursorPos(m_Window, &mousePosition.x, &mousePosition.y);
-    m_WindowData.MousePosition = mousePosition;
-    m_WindowData.LastMousePosition = m_WindowData.MousePosition;
+    glfwGetCursorPos(Window, &mousePosition.x, &mousePosition.y);
+    WindowData.MousePosition = mousePosition;
+    WindowData.LastMousePosition = WindowData.MousePosition;
 
-    glfwGetWindowPos(m_Window, &m_WindowData.WindowPosition.x, &m_WindowData.WindowPosition.y);
-    glfwGetWindowSize(m_Window, &m_WindowData.WindowSize.x, &m_WindowData.WindowSize.y);
+    glfwGetWindowPos(Window, &WindowData.WindowPosition.x, &WindowData.WindowPosition.y);
+    glfwGetWindowSize(Window, &WindowData.WindowSize.x, &WindowData.WindowSize.y);
 
     BindWindowCallbacks();
-    m_GraphicsContext = new OpenGlGraphicsContext(m_Window);
-    m_Input = new GlfwInput(m_Window);
+    GraphicsContext = new OpenGlGraphicsContext(Window);
+    Input = new GlfwInput(Window);
 }
 
 GlfwWindow::~GlfwWindow()
 {
-    delete m_Input;
-    delete m_GraphicsContext;
-    glfwDestroyWindow(m_Window);
+    delete Input;
+    delete GraphicsContext;
+    glfwDestroyWindow(Window);
 }
 
 void GlfwWindow::Update()
 {
     glfwPollEvents();
-    m_GraphicsContext->SwapBuffers();
-    m_Input->Update(m_WindowData);
+    GraphicsContext->SwapBuffers();
+    Input->Update(WindowData);
 }
 
 int32_t GlfwWindow::GetWidth() const
 {
-    return m_WindowData.WindowSize.x;
+    return WindowData.WindowSize.x;
 }
 
 int32_t GlfwWindow::GetHeight() const
 {
-    return m_WindowData.WindowSize.y;
+    return WindowData.WindowSize.y;
 }
 
 glm::ivec2 GlfwWindow::GetWindowPosition() const
 {
-    return m_WindowData.WindowPosition;
+    return WindowData.WindowPosition;
 }
 
 glm::vec2 GlfwWindow::GetMousePosition() const
 {
-    return m_WindowData.MousePosition;
+    return WindowData.MousePosition;
 }
 
 glm::vec2 GlfwWindow::GetLastMousePosition() const
 {
-    return m_WindowData.LastMousePosition;
+    return WindowData.LastMousePosition;
 }
 
 bool GlfwWindow::IsOpen() const
 {
-    return m_WindowData.bGameRunning;
+    return WindowData.bGameRunning;
 }
 
 void GlfwWindow::SetEventCallback(const EventCallback& callback)
 {
-    m_WindowData.Callback = callback;
+    WindowData.Callback = callback;
 }
 
 void GlfwWindow::EnableVSync()
 {
-    m_WindowData.bVsyncEnabled = true;
-    m_GraphicsContext->SetVsync(true);
+    WindowData.bVsyncEnabled = true;
+    GraphicsContext->SetVsync(true);
 }
 
 void GlfwWindow::DisableVSync()
 {
-    m_WindowData.bVsyncEnabled = false;
-    m_GraphicsContext->SetVsync(false);
+    WindowData.bVsyncEnabled = false;
+    GraphicsContext->SetVsync(false);
 }
 
 bool GlfwWindow::IsVSyncEnabled() const
 {
-    return m_WindowData.bVsyncEnabled;
+    return WindowData.bVsyncEnabled;
 }
 
 void* GlfwWindow::GetWindowNativeHandle() const
 {
-    return m_Window;
+    return Window;
 }
 
 IGraphicsContext* GlfwWindow::GetContext() const
 {
-    return m_GraphicsContext;
+    return GraphicsContext;
 }
 
 void GlfwWindow::Close()
 {
-    glfwSetWindowShouldClose(m_Window, GL_TRUE);
-    m_WindowData.bGameRunning = false;
+    glfwSetWindowShouldClose(Window, GL_TRUE);
+    WindowData.bGameRunning = false;
 }
 
 void GlfwWindow::SetMouseVisible(bool bMouseVisible)
 {
     if (bMouseVisible)
     {
-        glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
     else
     {
-        glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
 
 void GlfwWindow::BindWindowCallbacks()
 {
-    glfwSetWindowUserPointer(m_Window, &m_WindowData);
+    glfwSetWindowUserPointer(Window, &WindowData);
 
-    glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos) {
+    glfwSetCursorPosCallback(Window, [](GLFWwindow* window, double xpos, double ypos) {
         GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
         windowData->LastMousePosition = windowData->MousePosition;
         windowData->MousePosition = glm::vec2{xpos, ypos};
@@ -147,7 +147,7 @@ void GlfwWindow::BindWindowCallbacks()
         }
     });
 
-    glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
+    glfwSetKeyCallback(Window, [](GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
         GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
         if (windowData->Callback)
@@ -160,7 +160,7 @@ void GlfwWindow::BindWindowCallbacks()
         }
     });
 
-    glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int32_t button, int32_t action, int32_t mods) {
+    glfwSetMouseButtonCallback(Window, [](GLFWwindow* window, int32_t button, int32_t action, int32_t mods) {
         GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
         if (windowData->Callback)
@@ -172,7 +172,7 @@ void GlfwWindow::BindWindowCallbacks()
         }
     });
 
-    glfwSetWindowFocusCallback(m_Window, [](GLFWwindow* window, int32_t focused) {
+    glfwSetWindowFocusCallback(Window, [](GLFWwindow* window, int32_t focused) {
         GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
         if (windowData->Callback)
@@ -183,7 +183,7 @@ void GlfwWindow::BindWindowCallbacks()
         }
     });
 
-    glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset) {
+    glfwSetScrollCallback(Window, [](GLFWwindow* window, double xoffset, double yoffset) {
         GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
         if (windowData->Callback)
@@ -195,7 +195,7 @@ void GlfwWindow::BindWindowCallbacks()
         }
     });
 
-    glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {
+    glfwSetWindowCloseCallback(Window, [](GLFWwindow* window) {
         GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
         windowData->bGameRunning = false;
     });

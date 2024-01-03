@@ -17,12 +17,12 @@ public:
     using milliseconds_duration_t = std::chrono::duration<float, std::milli>;
 
     Duration() :
-        m_DurationTime{duration_t::zero()}
+        DurationTime{duration_t::zero()}
     {
     }
 
     Duration(duration_t duration) :
-        m_DurationTime{duration}
+        DurationTime{duration}
     {
     }
 
@@ -31,51 +31,51 @@ public:
 
     float GetAsSeconds() const
     {
-        return std::chrono::duration_cast<seconds_duration_t>(m_DurationTime).count();
+        return std::chrono::duration_cast<seconds_duration_t>(DurationTime).count();
     }
 
     float GetAsMilliseconds() const
     {
-        return std::chrono::duration_cast<milliseconds_duration_t>(m_DurationTime).count();
+        return std::chrono::duration_cast<milliseconds_duration_t>(DurationTime).count();
     }
 
     int64_t GetNanoSeconds() const
     {
-        return m_DurationTime.count();
+        return DurationTime.count();
     }
 
     bool IsNonZero() const
     {
-        return m_DurationTime != duration_t::zero();
+        return DurationTime != duration_t::zero();
     }
 
     bool IsZero() const
     {
-        return m_DurationTime == duration_t::zero();
+        return DurationTime == duration_t::zero();
     }
 
 private:
-    duration_t m_DurationTime;
+    duration_t DurationTime;
 };
 
 inline Duration operator+(const Duration& a, const Duration& b)
 {
-    return a.m_DurationTime + b.m_DurationTime;
+    return a.DurationTime + b.DurationTime;
 }
 
 inline Duration operator-(const Duration& a, const Duration& b)
 {
-    return a.m_DurationTime - b.m_DurationTime;
+    return a.DurationTime - b.DurationTime;
 }
 
 inline Duration operator*(const Duration& a, const Duration& b)
 {
-    return a.m_DurationTime * b.m_DurationTime;
+    return a.DurationTime * b.DurationTime;
 }
 
 inline Duration operator/(const Duration& a, const Duration& b)
 {
-    return Duration::duration_t{a.m_DurationTime / b.m_DurationTime};
+    return Duration::duration_t{a.DurationTime / b.DurationTime};
 }
 
 inline Duration& operator+=(Duration& a, const Duration& b)
@@ -92,5 +92,5 @@ inline Duration& operator-=(Duration& a, const Duration& b)
 
 inline Duration operator/(const Duration& a, uint64_t scalar)
 {
-    return Duration::duration_t{a.m_DurationTime / scalar};
+    return Duration::duration_t{a.DurationTime / scalar};
 }

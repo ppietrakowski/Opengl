@@ -35,10 +35,10 @@ public:
     void SetMouseVisible(bool bMouseVisible) override;
 
 private:
-    GLFWwindow* m_Window;
-    GlfwInput* m_Input;
-    IGraphicsContext* m_GraphicsContext;
-    GlfwWindowData m_WindowData;
+    GLFWwindow* Window;
+    GlfwInput* Input;
+    IGraphicsContext* GraphicsContext;
+    GlfwWindowData WindowData;
 
 private:
     void BindWindowCallbacks();

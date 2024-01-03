@@ -11,7 +11,7 @@
 
 static void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax);
 
-glm::mat4 Animation::GetBoneTransformOrRelative(const Bone& bone, float animationTime) const
+glm::mat4 SkeletalAnimation::GetBoneTransformOrRelative(const Bone& bone, float animationTime) const
 {
     auto it = BoneNameToTracks.find(bone.Name);
 
@@ -94,9 +94,8 @@ static constexpr const char* kDefaultAnimationName = "TPose";
 
 SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material) :
     MainMaterial{material},
-    m_CurrentAnimationName{kDefaultAnimationName},
-    m_NumBones{0},
-    m_VertexArray{IVertexArray::Create()}
+    NumBones{0},
+    VertexArray{IVertexArray::Create()}
 {
     // maps bone name to boneID
     std::unordered_map<std::string, int32_t> boneNameToIndex;
@@ -195,7 +194,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
         totalVertices += mesh->mNumVertices;
         totalIndices += mesh->mNumFaces * 3;
-        m_NumBones += mesh->mNumBones;
+        NumBones += mesh->mNumBones;
     }
 
     MainMaterial->bCullFaces = false;
@@ -207,26 +206,26 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     }
 
     // define Tpose animation dummy values
-    m_Animations[m_CurrentAnimationName] = Animation{};
-    m_Animations[m_CurrentAnimationName].TicksPerSecond = 30;
-    m_Animations[m_CurrentAnimationName].Duration = 10;
+    Animations[kDefaultAnimationName] = SkeletalAnimation{};
+    Animations[kDefaultAnimationName].TicksPerSecond = 30;
+    Animations[kDefaultAnimationName].Duration = 10;
 
-    m_RootBone.AssignHierarchy(scene->mRootNode, bonesInfo);
-    m_VertexArray->AddBuffer<SkeletonMeshVertex>(vertices, SkeletonMeshVertex::kDataFormat);
-    m_VertexArray->SetIndexBuffer(IIndexBuffer::Create(indices.data(), static_cast<uint32_t>(indices.size())));
+    RootBone.AssignHierarchy(scene->mRootNode, bonesInfo);
+    VertexArray->AddBuffer<SkeletonMeshVertex>(vertices, SkeletonMeshVertex::kDataFormat);
+    VertexArray->SetIndexBuffer(IIndexBuffer::Create(indices.data(), static_cast<uint32_t>(indices.size())));
 
     // find global transform for converting from bone space back to local space
-    m_GlobalInverseTransform = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
+    GlobalInverseTransform = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
 
-    FindAabCollision(vertices, m_BboxMin, m_BboxMax);
-    m_BboxMin.x *= 0.2f;
-    m_BboxMax.x *= 0.2f;
+    FindAabCollision(vertices, BboxMin, BboxMax);
+    BboxMin.x *= 0.2f;
+    BboxMax.x *= 0.2f;
 }
 
 void SkeletalMesh::LoadAnimation(const aiScene* scene, int32_t animationIndex)
 {
     const aiAnimation* anim = scene->mAnimations[animationIndex];
-    Animation animation{};
+    SkeletalAnimation animation{};
 
     if (anim->mTicksPerSecond != 0.0f)
     {
@@ -263,31 +262,21 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, int32_t animationIndex)
 
     std::string animationName = anim->mName.C_Str();
     animationName = SplitString(animationName, "|").back();
-    m_Animations[animationName] = animation;
+    Animations[animationName] = animation;
 }
 
 void SkeletalMesh::Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& worldTransform)
 {
-    Renderer::SubmitSkeleton(*MainMaterial, transforms, m_NumBones, *m_VertexArray, worldTransform);
-}
-
-void SkeletalMesh::SetCurrentAnimation(const std::string& animationName)
-{
-    auto it = m_Animations.find(animationName);
-
-    if (it != m_Animations.end())
-    {
-        m_CurrentAnimationName = animationName;
-    }
+    Renderer::SubmitSkeleton(*MainMaterial, transforms, NumBones, *VertexArray, worldTransform);
 }
 
 std::vector<std::string> SkeletalMesh::GetAnimationNames() const
 {
     std::vector<std::string> names;
 
-    names.reserve(m_Animations.size());
+    names.reserve(Animations.size());
 
-    for (auto& [name, animation] : m_Animations)
+    for (auto& [name, animation] : Animations)
     {
         names.emplace_back(name);
     }
@@ -297,7 +286,7 @@ std::vector<std::string> SkeletalMesh::GetAnimationNames() const
 
 void SkeletalMesh::GetAnimationFrames(float elapsedTime, const std::string& name, std::vector<glm::mat4>& transforms) const
 {
-    transforms.resize(m_NumBones);
+    transforms.resize(NumBones);
     UpdateAnimation(name, elapsedTime, transforms);
 }
 
@@ -308,7 +297,7 @@ void SkeletalMesh::CalculateTransform(const BoneAnimationUpdateSpecs& updateSpec
 
     int32_t index = joint.BoneTransformIndex;
     glm::mat4 globalTransform = parentTransform * transform;
-    transforms[index] = m_GlobalInverseTransform * globalTransform * joint.BoneOffset;
+    transforms[index] = GlobalInverseTransform * globalTransform * joint.BoneOffset;
 
     // run chain to update other joint transforms
     for (const Bone& child : joint.Children)

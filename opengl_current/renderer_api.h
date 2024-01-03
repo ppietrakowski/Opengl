@@ -42,6 +42,18 @@ inline bool operator!=(const RgbaColor& a, const RgbaColor& b)
     return a.Red != b.Red || a.Green != b.Green || a.Blue != b.Blue || a.Alpha != b.Alpha;
 }
 
+struct IndexedDrawData
+{
+    const IVertexArray* VertexArray;
+    int32_t NumIndices{0};
+    RenderPrimitive DrawPrimitive{RenderPrimitive::kTriangles};
+
+    void Bind() const
+    {
+        VertexArray->Bind();
+    }
+};
+
 class IRendererAPI
 {
 public:
@@ -56,7 +68,7 @@ public:
 
     virtual void Clear() = 0;
     virtual void SetClearColor(const RgbaColor& clearColor) = 0;
-    virtual void DrawIndexed(const IVertexArray& vertexArray, int32_t numIndices, RenderPrimitive renderPrimitive) = 0;
+    virtual void DrawIndexed(const IndexedDrawData& drawData) = 0;
 
     virtual void SetWireframe(bool bWireframeEnabled) = 0;
     virtual bool IsWireframeEnabled() = 0;
@@ -72,10 +84,10 @@ public:
 
     inline static ApiType GetApi()
     {
-        return s_RenderApiType;
+        return RenderApiType;
     }
 
 private:
-    static ApiType s_RenderApiType;
+    static ApiType RenderApiType;
 };
 

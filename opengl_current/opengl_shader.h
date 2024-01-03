@@ -43,8 +43,8 @@ public:
     void GenerateShaders(std::span<std::string_view> sources) override;
 
 private:
-    GLuint m_ShaderProgram{0};
-    mutable std::unordered_map<std::string, GLint> m_UniformNameToLocation;
+    GLuint ShaderProgram{0};
+    mutable std::unordered_map<std::string, GLint> UniformNameToLocation;
 
 private:
 

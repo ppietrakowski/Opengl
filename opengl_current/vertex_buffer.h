@@ -40,7 +40,7 @@ public:
     virtual void Bind() const = 0;
     virtual void Unbind() const = 0;
     
-    virtual void UpdateVertices(const void* buffer, const BufferSize& bufferSize) = 0;
+    virtual void UpdateVertices(const void* buffer, BufferSize bufferSize) = 0;
 
     virtual int32_t GetVerticesSizeBytes() const = 0;
     virtual bool IsValid() const = 0;

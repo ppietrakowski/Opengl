@@ -12,27 +12,27 @@
 
 constexpr int32_t kMaxErrorHandlers = 5;
 
-static std::array<ErrorHandler, kMaxErrorHandlers> s_ErrorHandlers;
-static int32_t s_NumErrorHandlers = 0;
+static std::array<ErrorHandler, kMaxErrorHandlers> ErrorHandlers;
+static int32_t NumErrorHandlers = 0;
 
 void AddErrorHandler(const ErrorHandler& handler)
 {
-    ERR_FAIL_EXPECTED_TRUE_MSG(s_NumErrorHandlers < kMaxErrorHandlers, "Max error handlers assigned");
-    s_ErrorHandlers[s_NumErrorHandlers++] = handler;
+    ERR_FAIL_EXPECTED_TRUE_MSG(NumErrorHandlers < kMaxErrorHandlers, "Max error handlers assigned");
+    ErrorHandlers[NumErrorHandlers++] = handler;
 }
 
 void RemoveErrorHandler(const ErrorHandler& handler)
 {
     // find first item that's equal to handler
-    for (auto it = s_ErrorHandlers.begin(); it != s_ErrorHandlers.end(); ++it)
+    for (auto it = ErrorHandlers.begin(); it != ErrorHandlers.end(); ++it)
     {
         bool bHandlerEqual = handler.UserData == it->UserData && handler.ErrorHandlerFunc == it->ErrorHandlerFunc;
 
         if (bHandlerEqual)
         {
             // if found, move element to front of array
-            std::move(it + 1, s_ErrorHandlers.end(), it);
-            s_NumErrorHandlers--;
+            std::move(it + 1, ErrorHandlers.end(), it);
+            NumErrorHandlers--;
             break;
         }
     }
@@ -54,9 +54,9 @@ void PrintError(const SourceLocation* location, const char* message)
 #endif
 
     ErrorHandlerInfo info{*location,  message};
-    for (int32_t i = 0; i < s_NumErrorHandlers; ++i)
+    for (int32_t i = 0; i < NumErrorHandlers; ++i)
     {
-        const ErrorHandler& errorHandler = s_ErrorHandlers[i];
+        const ErrorHandler& errorHandler = ErrorHandlers[i];
         errorHandler.Invoke(info);
     }
 }

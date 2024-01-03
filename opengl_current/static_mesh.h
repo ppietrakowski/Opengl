@@ -46,38 +46,38 @@ public:
 
     std::string_view GetName() const
     {
-        return m_MeshName;
+        return MeshName;
     }
 
     std::vector<std::string> TexturePaths;
     std::shared_ptr<Material> MainMaterial;
 
 private:
-    std::shared_ptr<IVertexArray> m_VertexArray;
-    int32_t m_NumTriangles;
+    std::shared_ptr<IVertexArray> VertexArray;
+    int32_t NumTriangles;
 
 
-    glm::vec3 m_BboxMin;
-    glm::vec3 m_BboxMax;
-    std::string m_MeshName;
+    glm::vec3 BboxMin;
+    glm::vec3 BboxMax;
+    std::string MeshName;
 };
 
 inline const glm::vec3& StaticMesh::GetBBoxMin() const
 {
-    return m_BboxMin;
+    return BboxMin;
 }
 
 inline const glm::vec3& StaticMesh::GetBBoxMax() const
 {
-    return m_BboxMax;
+    return BboxMax;
 }
 
 inline int32_t StaticMesh::GetNumPolygons() const
 {
-    return m_NumTriangles;
+    return NumTriangles;
 }
 
 inline int32_t StaticMesh::GetNumTriangles() const
 {
-    return m_NumTriangles;
+    return NumTriangles;
 }

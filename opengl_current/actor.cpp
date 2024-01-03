@@ -63,13 +63,13 @@ void Actor::SetName(const std::string& name)
 void Actor::AddChild(const Actor& actor)
 {
     auto& hierarchy = GetComponent<SceneHierarchyComponent>();
-    hierarchy.AddChild(m_EntityHandle, actor.m_EntityHandle);
+    hierarchy.AddChild(EntityHandle, actor.EntityHandle);
 }
 
 void Actor::RemoveChild(const Actor& actor)
 {
     auto& hierarchy = GetComponent<SceneHierarchyComponent>();
-    hierarchy.RemoveChild(actor.m_EntityHandle);
+    hierarchy.RemoveChild(actor.EntityHandle);
 }
 
 void Actor::DestroyActor()
@@ -77,15 +77,15 @@ void Actor::DestroyActor()
     auto& sceneHierarchy = GetComponent<SceneHierarchyComponent>();
     for (auto& [name, actor] : sceneHierarchy.Children)
     {
-        m_HomeLevel->RemoveActor(name);
+        HomeLevel->RemoveActor(name);
     }
 
-    m_HomeLevel->RemoveActor(GetName());
+    HomeLevel->RemoveActor(GetName());
 }
 
 bool Actor::IsAlive() const
 {
-    return m_EntityHandle.valid();
+    return EntityHandle.valid();
 }
 
 Actor::Actor()

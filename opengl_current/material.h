@@ -34,7 +34,7 @@ public:
 
     IShader& GetShader() const
     {
-        return *m_Shader;
+        return *Shader;
     }
 
 public:
@@ -44,9 +44,9 @@ public:
     bool bTransparent : 1{ false };
 
 private:
-    std::shared_ptr<IShader> m_Shader;
-    std::unordered_map<std::string, MaterialParam> m_MaterialParams;
-    uint32_t m_NumTextureUnits{0};
+    std::shared_ptr<IShader> Shader;
+    std::unordered_map<std::string, MaterialParam> MaterialParams;
+    uint32_t NumTextureUnits{0};
 
 private:
     void TryAddNewProperty(const UniformInfo& info);
@@ -54,12 +54,12 @@ private:
 
     MaterialParam& GetParam(const char* name)
     {
-        return m_MaterialParams.at(name);
+        return MaterialParams.at(name);
     }
 
     const MaterialParam& GetParam(const char* name) const
     {
-        return m_MaterialParams.at(name);
+        return MaterialParams.at(name);
     }
 };
 

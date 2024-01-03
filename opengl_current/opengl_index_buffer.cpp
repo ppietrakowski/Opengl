@@ -2,20 +2,20 @@
 #include "error_macros.h"
 
 OpenGlIndexBuffer::OpenGlIndexBuffer() :
-    m_RendererId{0},
-    m_NumIndices{0}
+    RendererId{0},
+    NumIndices{0}
 {
 }
 
 OpenGlIndexBuffer::OpenGlIndexBuffer(const uint32_t* data, int32_t numIndices, bool bDynamic) :
-    m_NumIndices{numIndices}
+    NumIndices{numIndices}
 {
     GLenum bufferUsage = bDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
     glBindVertexArray(0);
 
-    glGenBuffers(1, &m_RendererId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
+    glGenBuffers(1, &RendererId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RendererId);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(uint32_t), data, bufferUsage);
 }
 
@@ -26,19 +26,19 @@ OpenGlIndexBuffer::OpenGlIndexBuffer(int32_t totalNumIndices) :
 
 OpenGlIndexBuffer::~OpenGlIndexBuffer()
 {
-    glDeleteBuffers(1, &m_RendererId);
-    m_RendererId = 0;
-    m_NumIndices = 0;
+    glDeleteBuffers(1, &RendererId);
+    RendererId = 0;
+    NumIndices = 0;
 }
 
 int32_t OpenGlIndexBuffer::GetNumIndices() const
 {
-    return m_NumIndices;
+    return NumIndices;
 }
 
 void OpenGlIndexBuffer::Bind() const
 {
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RendererId);
 }
 
 void OpenGlIndexBuffer::Unbind() const
@@ -50,7 +50,7 @@ void OpenGlIndexBuffer::UpdateIndices(const uint32_t* data, const BufferSize& bu
 {
     ERR_FAIL_EXPECTED_TRUE(IsValid());
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, RendererId);
     int32_t sizeBytes = bufferSize.Size * sizeof(uint32_t);
 
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, bufferSize.Offset, sizeBytes, data);
@@ -58,5 +58,5 @@ void OpenGlIndexBuffer::UpdateIndices(const uint32_t* data, const BufferSize& bu
 
 bool OpenGlIndexBuffer::IsValid() const
 {
-    return m_RendererId != 0;
+    return RendererId != 0;
 }

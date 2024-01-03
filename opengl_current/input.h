@@ -19,7 +19,7 @@ public:
     static float GetMouseY();
 
 private:
-    static Input* s_Instance;
+    static Input* Instance;
 
     virtual bool IsKeyPressedImpl(KeyCode key) = 0;
     virtual bool IsMouseButtonPressedImpl(MouseButton button) = 0;

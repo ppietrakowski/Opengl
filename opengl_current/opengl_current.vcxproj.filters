@@ -111,9 +111,6 @@
     <ClCompile Include="logging.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="object.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
     <ClCompile Include="window.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
@@ -175,7 +172,7 @@
       <Filter>Source Files\scene</Filter>
     </ClCompile>
     <ClCompile Include="resouce_manager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -266,9 +263,6 @@
     <ClInclude Include="window.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="object.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
     <ClInclude Include="assimp_utils.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
@@ -339,7 +333,7 @@
       <Filter>Header Files\scene</Filter>
     </ClInclude>
     <ClInclude Include="resouce_manager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

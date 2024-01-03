@@ -33,10 +33,10 @@ public:
     void RemoveLayer(std::type_index index);
 
 private:
-    std::unique_ptr<IWindow> m_Window;
-    IGraphicsContext* m_GraphicsContext;
-    ImGuiContext* m_ImGuiContext;
-    std::vector<std::unique_ptr<ILayer>> m_Layers;
+    std::unique_ptr<IWindow> Window;
+    IGraphicsContext* GraphicsContext;
+    ImGuiContext* ImguiContext;
+    std::vector<std::unique_ptr<ILayer>> Layers;
 
 private:
     bool InitializeImGui();

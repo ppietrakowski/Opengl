@@ -48,7 +48,7 @@ static void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::ve
 
 StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared_ptr<Material>& material) :
     MainMaterial{material},
-    m_VertexArray{IVertexArray::Create()}
+    VertexArray{IVertexArray::Create()}
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(file_path.string(), kAssimpImportFlags);
@@ -110,22 +110,22 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
     std::shared_ptr<IIndexBuffer> indexBuffer = IIndexBuffer::Create(indices.data(),
         static_cast<int32_t>(indices.size()));
 
-    m_VertexArray->AddBuffer<StaticMeshVertex>(vertices, StaticMeshVertex::kDataFormat);
-    m_VertexArray->SetIndexBuffer(indexBuffer);
+    VertexArray->AddBuffer<StaticMeshVertex>(vertices, StaticMeshVertex::kDataFormat);
+    VertexArray->SetIndexBuffer(indexBuffer);
 
-    m_NumTriangles = static_cast<int32_t>(indices.size()) / 3;
-    m_MeshName = scene->mName.C_Str();
-    FindAabCollision(vertices, m_BboxMin, m_BboxMax);
+    NumTriangles = static_cast<int32_t>(indices.size()) / 3;
+    MeshName = scene->mName.C_Str();
+    FindAabCollision(vertices, BboxMin, BboxMax);
 }
 
 
 void StaticMesh::Render(const glm::mat4& transform) const
 {
-    Renderer::Submit(*MainMaterial, *m_VertexArray, transform);
+    Renderer::Submit(*MainMaterial, *VertexArray, transform);
 }
 
 void StaticMesh::Render(const Material& overrideMaterial, const glm::mat4& transform) const
 {
-    Renderer::Submit(overrideMaterial, *m_VertexArray, transform);
+    Renderer::Submit(overrideMaterial, *VertexArray, transform);
 }
 

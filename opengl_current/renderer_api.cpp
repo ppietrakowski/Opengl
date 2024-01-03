@@ -1,4 +1,4 @@
 #include "renderer_api.h"
 
-IRendererAPI::ApiType IRendererAPI::s_RenderApiType = IRendererAPI::kOpenGL;
+IRendererAPI::ApiType IRendererAPI::RenderApiType = IRendererAPI::kOpenGL;
 

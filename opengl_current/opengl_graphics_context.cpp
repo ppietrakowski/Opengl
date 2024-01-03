@@ -3,9 +3,9 @@
 #include "error_macros.h"
 
 OpenGlGraphicsContext::OpenGlGraphicsContext(GLFWwindow* contextWindow) :
-    m_Window{contextWindow}
+    Window{contextWindow}
 {
-    glfwMakeContextCurrent(m_Window);
+    glfwMakeContextCurrent(Window);
     glfwSwapInterval(1);
     GLenum errorCode = glewInit();
     CRASH_EXPECTED_TRUE_MSG(errorCode == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(errorCode)));
@@ -13,7 +13,7 @@ OpenGlGraphicsContext::OpenGlGraphicsContext(GLFWwindow* contextWindow) :
 
 void OpenGlGraphicsContext::InitializeForImGui()
 {
-    ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+    ImGui_ImplGlfw_InitForOpenGL(Window, true);
     const char* glslVersion = "#version 430 core";
     ImGui_ImplOpenGL3_Init(glslVersion);
 }
@@ -51,7 +51,7 @@ void OpenGlGraphicsContext::UpdateImGuiViewport()
 
 void OpenGlGraphicsContext::SwapBuffers()
 {
-    glfwSwapBuffers(m_Window);
+    glfwSwapBuffers(Window);
 }
 
 void OpenGlGraphicsContext::SetVsync(bool vsync_enabled)

@@ -26,7 +26,7 @@ public:
 
     static void Quit();
 private:
-    static std::shared_ptr<ResourceManagerImpl> s_ResourceManager;
+    static std::shared_ptr<ResourceManagerImpl> ResourceManagerInstance;
 
 private:
     static std::shared_ptr<ResourceManagerImpl> CreateResourceManager();

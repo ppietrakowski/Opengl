@@ -23,7 +23,7 @@ public:
 
     static void ClearBufferBindings_Debug();
 
-    static void DrawIndexed(const IVertexArray& vertexArray, int32_t numIndices, RenderPrimitive renderPrimitive = RenderPrimitive::kTriangles);
+    static void DrawIndexed(const IndexedDrawData& drawData);
 
     static void BeginScene();
     static void EndScene();
@@ -44,6 +44,6 @@ public:
     static RenderStats GetRenderStats();
 
 private:
-    static IRendererAPI* s_RendererApi;
+    static IRendererAPI* RendererApi;
 };
 

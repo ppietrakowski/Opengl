@@ -9,11 +9,11 @@
 static Game* s_GameInstance = nullptr;
 
 Game::Game(const WindowSettings& settings) :
-    m_ImGuiContext{nullptr}
+    ImguiContext{nullptr}
 {
     Logging::Initialize();
-    m_Window = IWindow::Create(settings);
-    m_GraphicsContext = m_Window->GetContext();
+    Window = IWindow::Create(settings);
+    GraphicsContext = Window->GetContext();
 
     // initialize subsystems
     Renderer::Initialize();
@@ -26,12 +26,12 @@ Game::Game(const WindowSettings& settings) :
 
 Game::~Game()
 {
-    m_Layers.clear();
+    Layers.clear();
 
     // deinitialize all libraries
     Renderer::Quit();
 
-    m_GraphicsContext->DeinitializeImGui();
+    GraphicsContext->DeinitializeImGui();
     ImGui::DestroyContext();
 
     Logging::Quit();
@@ -43,11 +43,11 @@ void Game::Run()
     std::chrono::nanoseconds deltaSeconds{std::chrono::nanoseconds::zero()};
     auto lastFrameTime = GetNow();
 
-    while (m_Window->IsOpen())
+    while (Window->IsOpen())
     {
-        for (const std::unique_ptr<ILayer>& layer : m_Layers)
+        for (const std::unique_ptr<ILayer>& layer : Layers)
         {
-            layer->OnUpdate(deltaSeconds);
+            layer->Update(deltaSeconds);
         }
 
         RenderCommand::Clear();
@@ -68,30 +68,30 @@ void Game::Run()
         lastFrameTime = now;
 
         // broadcast render command
-        for (const std::unique_ptr<ILayer>& layer : m_Layers)
+        for (const std::unique_ptr<ILayer>& layer : Layers)
         {
-            layer->OnRender(deltaSeconds);
+            layer->Render(deltaSeconds);
         }
 
         RunImguiFrame();
-        m_Window->Update();
+        Window->Update();
     }
 }
 
 bool Game::IsRunning() const
 {
-    return m_Window->IsOpen();
+    return Window->IsOpen();
 }
 
 void Game::Quit()
 {
-    m_Window->Close();
+    Window->Close();
 }
 
 bool Game::InitializeImGui()
 {
-    m_ImGuiContext = ImGui::CreateContext();
-    ImGui::SetCurrentContext(m_ImGuiContext);
+    ImguiContext = ImGui::CreateContext();
+    ImGui::SetCurrentContext(ImguiContext);
 
     ImGui::StyleColorsDark();
     ImGuiIO& io = ImGui::GetIO();
@@ -99,32 +99,32 @@ bool Game::InitializeImGui()
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-    m_GraphicsContext->InitializeForImGui();
+    GraphicsContext->InitializeForImGui();
     return true;
 }
 
 void Game::RunImguiFrame()
 {
-    m_GraphicsContext->ImGuiBeginFrame();
+    GraphicsContext->ImGuiBeginFrame();
     ImGui::NewFrame();
 
     // broadcast imgui frame draw
-    for (const std::unique_ptr<ILayer>& layer : m_Layers)
+    for (const std::unique_ptr<ILayer>& layer : Layers)
     {
         layer->OnImguiFrame();
     }
 
     ImGui::Render();
-    m_GraphicsContext->ImGuiDrawFrame();
+    GraphicsContext->ImGuiDrawFrame();
     ImGui::EndFrame();
-    m_GraphicsContext->UpdateImGuiViewport();
+    GraphicsContext->UpdateImGuiViewport();
 }
 
 void Game::BindWindowEvents()
 {
-    m_Window->SetEventCallback([this](const Event& evt) {
+    Window->SetEventCallback([this](const Event& evt) {
         // events in layer are processed from last to first
-        for (auto it = m_Layers.rbegin(); it != m_Layers.rend(); ++it)
+        for (auto it = Layers.rbegin(); it != Layers.rend(); ++it)
         {
             std::unique_ptr<ILayer>& layer = *it;
 
@@ -138,22 +138,22 @@ void Game::BindWindowEvents()
 
 void Game::SetMouseVisible(bool bMouseVisible)
 {
-    m_Window->SetMouseVisible(bMouseVisible);
+    Window->SetMouseVisible(bMouseVisible);
 }
 
 void Game::AddLayer(std::unique_ptr<ILayer>&& gameLayer)
 {
-    m_Layers.emplace_back(std::move(gameLayer));
+    Layers.emplace_back(std::move(gameLayer));
 }
 
 void Game::RemoveLayer(std::type_index index)
 {
-    auto it = std::remove_if(m_Layers.begin(),
-        m_Layers.end(),
+    auto it = std::remove_if(Layers.begin(),
+        Layers.end(),
         [index](const std::unique_ptr<ILayer>& layer) { return layer->GetTypeIndex() == index; });
 
-    if (it != m_Layers.end())
+    if (it != Layers.end())
     {
-        m_Layers.erase(it);
+        Layers.erase(it);
     }
 }

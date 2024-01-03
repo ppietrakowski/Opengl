@@ -67,7 +67,7 @@ public:
     static void EnableStdLogging();
 
 private:
-    static int32_t s_IgnoredLogLevels;
+    static int32_t IgnoredLogLevels;
 
 private:
     static void SortLogDeviceIDs();
