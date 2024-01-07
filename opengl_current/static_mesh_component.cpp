@@ -1,14 +1,14 @@
 #include "static_mesh_component.h"
 
 StaticMeshComponent::StaticMeshComponent(const std::shared_ptr<StaticMesh>& mesh) :
-    Mesh{mesh}
+    static_mesh{mesh}
 {
 }
 
-void StaticMeshComponent::Draw(const glm::mat4& worldTransform) const
+void StaticMeshComponent::Draw(const glm::mat4& world_transform) const
 {
-    if (Mesh)
+    if (static_mesh)
     {
-        Mesh->Render(worldTransform);
+        static_mesh->Render(world_transform);
     }
 }

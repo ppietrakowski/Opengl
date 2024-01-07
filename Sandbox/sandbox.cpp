@@ -1,6 +1,6 @@
 #include "sandbox_game_layer.h"
 
-int32_t main()
+int main()
 {
     Game game(WindowSettings{1280, 720, "Game"});
 

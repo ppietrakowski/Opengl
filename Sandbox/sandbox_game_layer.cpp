@@ -18,7 +18,7 @@ SandboxGameLayer::SandboxGameLayer() :
     ResourceManager::CreateMaterial("shaders/default.shd", "default");
 
     m_SkeletalMesh = ResourceManager::GetSkeletalMesh("untitled.fbx");
-    m_SkeletalMesh->MainMaterial = ResourceManager::CreateMaterial("shaders/skeletal_default.shd", "skeletal1");
+    m_SkeletalMesh->main_material = ResourceManager::CreateMaterial("shaders/skeletal_default.shd", "skeletal1");
     m_CurrentUsed = m_Shader;
     m_CurrentUsed->Use();
     m_CurrentUsed->SetUniformVec3("u_light_color", glm::vec3{1, 1, 1});
@@ -46,18 +46,18 @@ SandboxGameLayer::SandboxGameLayer() :
     m_Material->SetVector3Property("ambient", glm::vec3{0.01f, 0.01f, 0.01f});
     m_Material->SetVector3Property("specular", glm::vec3{0.797357, 0.723991, 0.208006});
     m_Material->SetFloatProperty("shininess", 87.2f);
-    m_WireframeMaterial->bUseWireframe = true;
+    m_WireframeMaterial->use_wireframe = true;
     m_CurrentMaterial = m_Material;
     ELOG_INFO(LOG_GLOBAL, "Loading postac.obj");
     m_StaticMesh = ResourceManager::GetStaticMesh("postac.obj");
-    m_StaticMesh->MainMaterial = m_Material;
+    m_StaticMesh->main_material = m_Material;
 
     uint32_t i = 0;
 
-    for (const auto& path : m_SkeletalMesh->Textures)
+    for (const auto& path : m_SkeletalMesh->textures)
     {
         std::string name = "diffuse" + std::to_string(i + 1);
-        auto material = m_SkeletalMesh->MainMaterial;
+        auto material = m_SkeletalMesh->main_material;
         material->SetTextureProperty(name.c_str(), ResourceManager::GetTexture2D(path));
         ++i;
     }
@@ -67,10 +67,13 @@ SandboxGameLayer::SandboxGameLayer() :
     std::vector<std::string> animations = std::move(m_SkeletalMesh->GetAnimationNames());
     RenderCommand::SetClearColor(RgbaColor{50, 30, 170});
 
-    m_SkeletalMeshActor = m_Level.CreateActor("SkeletalMesh");
-    m_SkeletalMeshActor.AddComponent<SkeletalMeshComponent>(m_SkeletalMesh);
-    m_SkeletalMeshActor.GetComponent<TransformComponent>().Scale = glm::vec3{0.01f, 0.01f, 0.01f};
-    m_SkeletalMeshActor.GetComponent<TransformComponent>().Position = glm::vec3{0, -2, -1};
+    for (int i = 0; i < 10; ++i)
+    {
+        m_SkeletalMeshActor = m_Level.CreateActor("SkeletalMesh");
+        m_SkeletalMeshActor.AddComponent<SkeletalMeshComponent>(m_SkeletalMesh);
+        m_SkeletalMeshActor.GetComponent<TransformComponent>().scale = glm::vec3{0.01f, 0.01f, 0.01f};
+        m_SkeletalMeshActor.GetComponent<TransformComponent>().position = glm::vec3{0, -2 * i - 2, -i - 1};
+    }
 
     Actor staticMeshActor = m_Level.CreateActor("StaticMeshActor");
     staticMeshActor.AddComponent<StaticMeshComponent>(m_StaticMesh);
@@ -140,9 +143,9 @@ void SandboxGameLayer::Render(Duration deltaTime)
 
 bool SandboxGameLayer::OnEvent(const Event& event)
 {
-    if (event.Type == EventType::kMouseMoved)
+    if (event.type == EventType::kMouseMoved)
     {
-        glm::vec2 delta = event.MouseMove.MousePosition - event.MouseMove.LastMousePosition;
+        glm::vec2 delta = event.mouse_move.mouse_position - event.mouse_move.last_mouse_position;
         float dt = m_LastDeltaSeconds.GetAsSeconds();
 
         m_Yaw -= m_YawRotationRate * delta.x * dt;
@@ -161,7 +164,7 @@ bool SandboxGameLayer::OnEvent(const Event& event)
         return true;
     }
 
-    if (event.Type == EventType::kMouseButtonPressed)
+    if (event.type == EventType::kMouseButtonPressed)
     {
         DO_ONCE([this]() {
             Actor actor = m_Level.FindActor("StaticMeshActor");
@@ -172,7 +175,7 @@ bool SandboxGameLayer::OnEvent(const Event& event)
         m_bSterringEntity = !m_bSterringEntity;
     }
 
-    if (event.Type == EventType::kKeyPressed && event.Key.Code == Keys::kP)
+    if (event.type == EventType::kKeyPressed && event.key_event.code == Keys::kP)
     {
         if (m_CurrentMaterial.get() == m_WireframeMaterial.get())
         {
@@ -189,12 +192,12 @@ bool SandboxGameLayer::OnEvent(const Event& event)
 
 void SandboxGameLayer::OnImguiFrame()
 {
-    static int32_t lastFramerate = 0;
-    static int32_t frameNum{0};
+    static std::int32_t lastFramerate = 0;
+    static std::int32_t frameNum{0};
 
     if (frameNum == 2)
     {
-        lastFramerate = (lastFramerate + static_cast<int32_t>(1000 / m_LastDeltaSeconds.GetAsMilliseconds())) / 2;
+        lastFramerate = (lastFramerate + static_cast<std::int32_t>(1000 / m_LastDeltaSeconds.GetAsMilliseconds())) / 2;
     }
     else
     {
@@ -208,7 +211,7 @@ void SandboxGameLayer::OnImguiFrame()
 
     ImGui::Text("Fps: %i", lastFramerate);
     ImGui::Text("Frame time: %.2f ms", m_LastDeltaSeconds.GetAsMilliseconds());
-    ImGui::Text("Drawcalls: %u", stats.NumDrawCalls);
-    ImGui::Text("Rendered triangles: %u", stats.NumTriangles);
+    ImGui::Text("Drawcalls: %u", stats.num_drawcalls);
+    ImGui::Text("Rendered triangles: %u", stats.num_drawn_triangles);
     ImGui::End();
 }

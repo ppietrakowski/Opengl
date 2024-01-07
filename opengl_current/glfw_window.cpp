@@ -6,7 +6,7 @@
 
 GlfwWindow::GlfwWindow(const WindowSettings& settings)
 {
-    glfwSetErrorCallback([](int32_t code, const char* description) {
+    glfwSetErrorCallback([](std::int32_t code, const char* description) {
         ELOG_ERROR(LOG_CORE, "Glfw error %i : %s", code, description);
     });
 
@@ -17,186 +17,186 @@ GlfwWindow::GlfwWindow(const WindowSettings& settings)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    Window = glfwCreateWindow(settings.Width, settings.Height, settings.Title.c_str(), nullptr, nullptr);
-    CRASH_EXPECTED_NOT_NULL(Window);
+    window_ = glfwCreateWindow(settings.width, settings.height, settings.title.c_str(), nullptr, nullptr);
+    CRASH_EXPECTED_NOT_NULL(window_);
 
     // fill window data
-    glm::dvec2 mousePosition;
-    glfwGetCursorPos(Window, &mousePosition.x, &mousePosition.y);
-    WindowData.MousePosition = mousePosition;
-    WindowData.LastMousePosition = WindowData.MousePosition;
+    glm::dvec2 mouse_pos;
+    glfwGetCursorPos(window_, &mouse_pos.x, &mouse_pos.y);
+    window_data_.mouse_position = mouse_pos;
+    window_data_.last_mouse_position = window_data_.mouse_position;
 
-    glfwGetWindowPos(Window, &WindowData.WindowPosition.x, &WindowData.WindowPosition.y);
-    glfwGetWindowSize(Window, &WindowData.WindowSize.x, &WindowData.WindowSize.y);
+    glfwGetWindowPos(window_, &window_data_.window_position.x, &window_data_.window_position.y);
+    glfwGetWindowSize(window_, &window_data_.window_size.x, &window_data_.window_size.y);
 
     BindWindowCallbacks();
-    GraphicsContext = new OpenGlGraphicsContext(Window);
-    Input = new GlfwInput(Window);
+    graphics_context_ = new OpenGlGraphicsContext(window_);
+    input_ = new GlfwInput(window_);
 }
 
 GlfwWindow::~GlfwWindow()
 {
-    delete Input;
-    delete GraphicsContext;
-    glfwDestroyWindow(Window);
+    delete input_;
+    delete graphics_context_;
+    glfwDestroyWindow(window_);
 }
 
 void GlfwWindow::Update()
 {
     glfwPollEvents();
-    GraphicsContext->SwapBuffers();
-    Input->Update(WindowData);
+    graphics_context_->SwapBuffers();
+    input_->Update(window_data_);
 }
 
-int32_t GlfwWindow::GetWidth() const
+std::int32_t GlfwWindow::GetWidth() const
 {
-    return WindowData.WindowSize.x;
+    return window_data_.window_size.x;
 }
 
-int32_t GlfwWindow::GetHeight() const
+std::int32_t GlfwWindow::GetHeight() const
 {
-    return WindowData.WindowSize.y;
+    return window_data_.window_size.y;
 }
 
 glm::ivec2 GlfwWindow::GetWindowPosition() const
 {
-    return WindowData.WindowPosition;
+    return window_data_.window_position;
 }
 
 glm::vec2 GlfwWindow::GetMousePosition() const
 {
-    return WindowData.MousePosition;
+    return window_data_.mouse_position;
 }
 
 glm::vec2 GlfwWindow::GetLastMousePosition() const
 {
-    return WindowData.LastMousePosition;
+    return window_data_.last_mouse_position;
 }
 
 bool GlfwWindow::IsOpen() const
 {
-    return WindowData.bGameRunning;
+    return window_data_.game_running;
 }
 
 void GlfwWindow::SetEventCallback(const EventCallback& callback)
 {
-    WindowData.Callback = callback;
+    window_data_.event_callback = callback;
 }
 
 void GlfwWindow::EnableVSync()
 {
-    WindowData.bVsyncEnabled = true;
-    GraphicsContext->SetVsync(true);
+    window_data_.vsync_enabled = true;
+    graphics_context_->SetVsync(true);
 }
 
 void GlfwWindow::DisableVSync()
 {
-    WindowData.bVsyncEnabled = false;
-    GraphicsContext->SetVsync(false);
+    window_data_.vsync_enabled = false;
+    graphics_context_->SetVsync(false);
 }
 
 bool GlfwWindow::IsVSyncEnabled() const
 {
-    return WindowData.bVsyncEnabled;
+    return window_data_.vsync_enabled;
 }
 
 void* GlfwWindow::GetWindowNativeHandle() const
 {
-    return Window;
+    return window_;
 }
 
-IGraphicsContext* GlfwWindow::GetContext() const
+GraphicsContext* GlfwWindow::GetContext() const
 {
-    return GraphicsContext;
+    return graphics_context_;
 }
 
 void GlfwWindow::Close()
 {
-    glfwSetWindowShouldClose(Window, GL_TRUE);
-    WindowData.bGameRunning = false;
+    glfwSetWindowShouldClose(window_, GL_TRUE);
+    window_data_.game_running = false;
 }
 
 void GlfwWindow::SetMouseVisible(bool bMouseVisible)
 {
     if (bMouseVisible)
     {
-        glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
     else
     {
-        glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
 
 void GlfwWindow::BindWindowCallbacks()
 {
-    glfwSetWindowUserPointer(Window, &WindowData);
+    glfwSetWindowUserPointer(window_, &window_data_);
 
-    glfwSetCursorPosCallback(Window, [](GLFWwindow* window, double xpos, double ypos) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
-        windowData->LastMousePosition = windowData->MousePosition;
-        windowData->MousePosition = glm::vec2{xpos, ypos};
+    glfwSetCursorPosCallback(window_, [](GLFWwindow* window, double xpos, double ypos) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        window_data->last_mouse_position = window_data->mouse_position;
+        window_data->mouse_position = glm::vec2{xpos, ypos};
 
-        if (windowData->Callback)
+        if (window_data->event_callback)
         {
             Event evt{};
-            evt.Type = EventType::kMouseMoved;
-            evt.MouseMove.MousePosition = windowData->MousePosition;
-            evt.MouseMove.LastMousePosition = windowData->LastMousePosition;
-            windowData->Callback(evt);
+            evt.type = EventType::kMouseMoved;
+            evt.mouse_move.mouse_position = window_data->mouse_position;
+            evt.mouse_move.last_mouse_position = window_data->last_mouse_position;
+            window_data->event_callback(evt);
         }
     });
 
-    glfwSetKeyCallback(Window, [](GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetKeyCallback(window_, [](GLFWwindow* window, std::int32_t key, std::int32_t scancode, std::int32_t action, std::int32_t mods) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (windowData->Callback)
+        if (window_data->event_callback)
         {
             Event event{};
-            event.Type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EventType::kKeyPressed : EventType::kKeyReleased;
-            event.Key = {(KeyCode)key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER)};
+            event.type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EventType::kKeyPressed : EventType::kKeyReleased;
+            event.key_event = {(KeyCode)key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER)};
 
-            windowData->Callback(event);
+            window_data->event_callback(event);
         }
     });
 
-    glfwSetMouseButtonCallback(Window, [](GLFWwindow* window, int32_t button, int32_t action, int32_t mods) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetMouseButtonCallback(window_, [](GLFWwindow* window, std::int32_t button, std::int32_t action, std::int32_t mods) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (windowData->Callback)
+        if (window_data->event_callback)
         {
             Event event{};
-            event.Type = (action == GLFW_PRESS) ? EventType::kMouseButtonPressed : EventType::kMouseButtonReleased;
-            event.MouseButtonState = {(MouseButton)button, windowData->MousePosition};
-            windowData->Callback(event);
+            event.type = (action == GLFW_PRESS) ? EventType::kMouseButtonPressed : EventType::kMouseButtonReleased;
+            event.mouse_button_state = {(MouseButton)button, window_data->mouse_position};
+            window_data->event_callback(event);
         }
     });
 
-    glfwSetWindowFocusCallback(Window, [](GLFWwindow* window, int32_t focused) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetWindowFocusCallback(window_, [](GLFWwindow* window, std::int32_t focused) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (windowData->Callback)
+        if (window_data->event_callback)
         {
             Event event{};
-            event.Type = (focused == GL_TRUE) ? EventType::kGainedFocus : EventType::kLostFocus;
-            windowData->Callback(event);
+            event.type = (focused == GL_TRUE) ? EventType::kGainedFocus : EventType::kLostFocus;
+            window_data->event_callback(event);
         }
     });
 
-    glfwSetScrollCallback(Window, [](GLFWwindow* window, double xoffset, double yoffset) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetScrollCallback(window_, [](GLFWwindow* window, double xoffset, double yoffset) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (windowData->Callback)
+        if (window_data->event_callback)
         {
             Event event{};
-            event.Type = EventType::kMouseWheelScrolled;
-            event.MouseWheel.Delta = {xoffset, yoffset};
-            windowData->Callback(event);
+            event.type = EventType::kMouseWheelScrolled;
+            event.mouse_wheel.delta = {xoffset, yoffset};
+            window_data->event_callback(event);
         }
     });
 
-    glfwSetWindowCloseCallback(Window, [](GLFWwindow* window) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
-        windowData->bGameRunning = false;
+    glfwSetWindowCloseCallback(window_, [](GLFWwindow* window) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        window_data->game_running = false;
     });
 }

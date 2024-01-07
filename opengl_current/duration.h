@@ -12,7 +12,7 @@ class Duration
     friend Duration operator/(const Duration& a, uint64_t scalar);
 
 public:
-    using duration_t = std::chrono::nanoseconds;
+    using duration_t = std::chrono::duration<std::uint64_t, std::nano>;
     using seconds_duration_t = std::chrono::duration<float>;
     using milliseconds_duration_t = std::chrono::duration<float, std::milli>;
 
@@ -39,7 +39,7 @@ public:
         return std::chrono::duration_cast<milliseconds_duration_t>(DurationTime).count();
     }
 
-    int64_t GetNanoSeconds() const
+    std::uint64_t GetNanoSeconds() const
     {
         return DurationTime.count();
     }
@@ -90,7 +90,7 @@ inline Duration& operator-=(Duration& a, const Duration& b)
     return a;
 }
 
-inline Duration operator/(const Duration& a, uint64_t scalar)
+inline Duration operator/(const Duration& a, std::uint64_t scalar)
 {
     return Duration::duration_t{a.DurationTime / scalar};
 }

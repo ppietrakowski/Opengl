@@ -8,38 +8,20 @@
 #include <glm/gtc/matrix_inverse.hpp>
 #include <array>
 
-glm::mat4 Renderer::View{1.0f};
-glm::mat4 Renderer::Projection{1.0f};
-glm::mat4 Renderer::ProjectionView{1.0f};
-glm::vec3 Renderer::CameraPosition{0.0f, 0.0f, 0.0f};
-std::shared_ptr<ITexture2D> Renderer::DefaultTexture;
+glm::mat4 Renderer::view_{1.0f};
+glm::mat4 Renderer::projection_{1.0f};
+glm::mat4 Renderer::projection_view_{1.0f};
+glm::vec3 Renderer::camera_position_{0.0f, 0.0f, 0.0f};
+std::shared_ptr<Texture2D> Renderer::default_texture_;
 
-static DebugRenderBatch* s_DebugBatch = nullptr;
+static DebugRenderBatch* debug_batch_ = nullptr;
 
 void Renderer::Quit()
 {
-    delete s_DebugBatch;
-    DefaultTexture.reset();
+    delete debug_batch_;
+    default_texture_.reset();
     RenderCommand::Quit();
 }
-
-struct RgbColor
-{
-    uint8_t Red;
-    uint8_t Green;
-    uint8_t Blue;
-
-    RgbColor() = default;
-    RgbColor(const RgbColor&) = default;
-    RgbColor& operator=(const RgbColor&) = default;
-
-    constexpr RgbColor(uint8_t red, uint8_t green, uint8_t blue) :
-        Red{red},
-        Green{green},
-        Blue{blue}
-    {
-    }
-};
 
 static constexpr RgbColor kBlack{0, 0, 0};
 static constexpr RgbColor kMagenta{255, 0, 255};
@@ -55,28 +37,28 @@ void Renderer::Initialize()
         {kMagenta, kMagenta, kBlack, kBlack}
     };
 
-    int32_t colorsWidth = 4;
-    int32_t colorsHeight = 4;
+    std::int32_t colors_width = 4;
+    std::int32_t colors_height = 4;
 
-    DefaultTexture = ITexture2D::Create(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::kRgb});
+    default_texture_ = Texture2D::Create(colors, TextureSpecification{colors_width, colors_height, TextureFormat::kRgb});
     RenderCommand::Initialize();
 
-    s_DebugBatch = new DebugRenderBatch();
+    debug_batch_ = new DebugRenderBatch();
     RenderCommand::ClearBufferBindings_Debug();
     RenderCommand::SetCullFace(true);
 }
 
 void Renderer::UpdateProjection(const CameraProjection& projection)
 {
-    Projection = glm::perspective(glm::radians(projection.Fov), projection.AspectRatio, projection.ZNear, projection.ZFar);
+    projection_ = glm::perspective(glm::radians(projection.fov), projection.aspect_ratio, projection.z_near, projection.z_far);
 }
 
-void Renderer::BeginScene(const glm::mat4& view, glm::vec3 cameraPosition)
+void Renderer::BeginScene(const glm::mat4& view, glm::vec3 camera_pos)
 {
     RenderCommand::BeginScene();
-    View = view;
-    ProjectionView = Projection * view;
-    CameraPosition = cameraPosition;
+    view_ = view;
+    projection_view_ = projection_ * view;
+    camera_position_ = camera_pos;
 }
 
 void Renderer::EndScene()
@@ -85,20 +67,21 @@ void Renderer::EndScene()
     RenderCommand::EndScene();
 }
 
-void Renderer::Submit(const Material& material, const IVertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
+void Renderer::Submit(const Material& material, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive)
 {
-    IShader& shader = material.GetShader();
+    Shader& shader = material.GetShader();
     shader.Use();
     material.SetupRenderState();
     material.SetShaderUniforms();
 
     UploadUniforms(shader, transform);
-    RenderCommand::DrawIndexed(IndexedDrawData{&vertexArray, vertexArray.GetNumIndices(), renderPrimitive});
+    RenderCommand::DrawIndexed(IndexedDrawData{&vertex_array, vertex_array.GetNumIndices(), render_primitive});
 }
 
-void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, int32_t count, const IVertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
+void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms,
+    std::int32_t count, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive)
 {
-    IShader& shader = material.GetShader();
+    Shader& shader = material.GetShader();
 
     shader.Use();
     material.SetupRenderState();
@@ -106,50 +89,51 @@ void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat
 
     UploadUniforms(shader, transform);
     shader.SetUniformMat4Array("u_bone_transforms", transforms, count);
-    RenderCommand::DrawIndexed(IndexedDrawData{&vertexArray, vertexArray.GetNumIndices(), renderPrimitive});
+    RenderCommand::DrawIndexed(IndexedDrawData{&vertex_array, vertex_array.GetNumIndices(), render_primitive});
 }
 
 
-void Renderer::Submit(IShader& shader,
-    const IVertexArray& vertexArray,
+void Renderer::Submit(Shader& shader,
+    const VertexArray& vertex_array,
     const glm::mat4& transform,
-    RenderPrimitive renderPrimitive)
+    RenderPrimitive render_primitive)
 {
-    Submit(shader, vertexArray.GetNumIndices(), vertexArray, transform, renderPrimitive);
+    Submit(shader, vertex_array.GetNumIndices(), vertex_array, transform, render_primitive);
 }
 
-void Renderer::Submit(IShader& shader, int32_t numIndices, const IVertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
+void Renderer::Submit(Shader& shader, std::int32_t num_indices, const VertexArray& vertex_array,
+    const glm::mat4& transform, RenderPrimitive render_primitive)
 {
-    ASSERT(numIndices <= vertexArray.GetNumIndices());
+    ASSERT(num_indices <= vertex_array.GetNumIndices());
 
     shader.Use();
     UploadUniforms(shader, transform);
-    RenderCommand::DrawIndexed(IndexedDrawData{&vertexArray, vertexArray.GetNumIndices(), renderPrimitive});
+    RenderCommand::DrawIndexed(IndexedDrawData{&vertex_array, vertex_array.GetNumIndices(), render_primitive});
 }
 
 void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform)
 {
-    if (!s_DebugBatch->HasBatchedAnyPrimitive())
+    if (!debug_batch_->HasBatchedAnyPrimitive())
     {
         RenderCommand::SetLineWidth(2);
     }
 
-    s_DebugBatch->AddBoxInstance(boxmin, boxmax, transform);
+    debug_batch_->AddBoxInstance(boxmin, boxmax, transform);
 }
 
-void Renderer::FlushDrawDebug(IShader& shader)
+void Renderer::FlushDrawDebug(Shader& shader)
 {
-    s_DebugBatch->UploadBatchedData();
-    s_DebugBatch->FlushDraw(shader);
+    debug_batch_->UploadBatchedData();
+    debug_batch_->FlushDraw(shader);
 }
 
-void Renderer::UploadUniforms(IShader& shader, const glm::mat4& transform)
+void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform)
 {
-    shader.SetUniformMat4("u_projection_view", ProjectionView);
+    shader.SetUniformMat4("u_projection_view", projection_view_);
     shader.SetUniformMat4("u_transform", transform);
-    shader.SetUniformMat4("u_view", View);
-    shader.SetUniformVec3("u_camera_location", CameraPosition);
+    shader.SetUniformMat4("u_view", view_);
+    shader.SetUniformVec3("u_camera_location", camera_position_);
 
-    glm::mat3 normalMatrix = glm::inverseTranspose(transform);
-    shader.SetUniformMat3("u_normal_transform", normalMatrix);
+    glm::mat3 normal_matrix = glm::inverseTranspose(transform);
+    shader.SetUniformMat3("u_normal_transform", normal_matrix);
 }

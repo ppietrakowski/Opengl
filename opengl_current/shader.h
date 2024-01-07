@@ -12,6 +12,8 @@
 #include <memory>
 #include <span>
 
+#include <array>
+
 enum class UniformType
 {
     kUndefined,
@@ -30,64 +32,78 @@ enum class UniformType
 
 struct UniformInfo
 {
-    UniformType Type;
-    std::string Name;
-    int Location;
-    int32_t NumTextures{0};
+    UniformType uniform_type;
+    std::string name;
+    std::int32_t location;
+    int32_t num_textures{0};
 };
 
 struct ShaderCompilationFailedException : public std::runtime_error
 {
-    ShaderCompilationFailedException(const char* errorMessage) :
-        std::runtime_error{errorMessage}
+    ShaderCompilationFailedException(const char* error_message) :
+        std::runtime_error{error_message}
     {
     }
 };
 
 struct ShaderProgramLinkingFailedException : public std::runtime_error
 {
-    ShaderProgramLinkingFailedException(const char* errorMessage) :
-        std::runtime_error{errorMessage}
+    ShaderProgramLinkingFailedException(const char* error_message) :
+        std::runtime_error{error_message}
     {
     }
 };
 
-class ITexture;
-
-static constexpr int32_t kMinTextureUnits = 16;
-
-class IShader
+struct ShaderIndex
 {
-    friend class IShader;
-public:
-    enum ShaderIndex
+    enum IndexType
     {
-        kVertex,
+        kVertex = 0,
         kFragment,
         kGeometry,
         kTesselationControlShader,
         kTesselationEvaluateShader,
         kCount
     };
+};
 
+class Shader;
+
+class ShaderSourceBuilder
+{
 public:
-    static std::shared_ptr<IShader> CreateFromSource(std::string_view vertexShaderSource, std::string_view fragmentShaderSource);
-    static std::shared_ptr<IShader> CreateFromSource(std::string_view vertexShaderSource, std::string_view fragmentShaderSource,
-        std::string_view geometryShaderSource);
+    std::shared_ptr<Shader> Build();
 
-    static std::shared_ptr<IShader> CreateFromSource(std::string_view vertexShaderSource, std::string_view fragmentShaderSource,
-        std::string_view geometryShaderSource, std::string_view tesselationControlShader, std::string_view tesselationEvaluateShader);
+    ShaderSourceBuilder& SetVertexShaderSource(const std::string& source);
+    ShaderSourceBuilder& LoadVertexShaderSource(const std::filesystem::path& file_path);
 
-    static std::shared_ptr<IShader> CreateFromSource(std::span<const std::string> sources);
+    ShaderSourceBuilder& SetFragmentShaderSource(const std::string& source);
+    ShaderSourceBuilder& LoadFragmentShaderSource(const std::filesystem::path& file_path);
 
-    static std::shared_ptr<IShader> LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath);
-    static std::shared_ptr<IShader> LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath,
-        std::string_view geometryShaderPath);
+    ShaderSourceBuilder& SetGeometryShaderSource(const std::string& source);
+    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& file_path);
 
-    static std::shared_ptr<IShader> LoadShader(std::string_view vertexShaderPath, std::string_view fragmentShaderPath,
-        std::string_view geometryShaderPath, std::string_view tesselationControlShaderPath, std::string_view tesselationEvaluateShaderPath);
+    ShaderSourceBuilder& SetTesselationShaderSource(const std::string& control_shader_source, const std::string& evaluate_shader_source);
+    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& control_shader_path, const std::filesystem::path& evaluate_shader_source);
 
-    virtual ~IShader() = default;
+private:
+    std::array<std::string, ShaderIndex::kCount> shader_sources_;
+
+    std::uint32_t GetLastShaderIndex() const;
+};
+
+
+class Texture;
+
+static constexpr std::int32_t kMinTextureUnits = 16;
+
+class Shader
+{
+    friend class Shader;
+    friend class ShaderSourceBuilder;
+public:
+    static std::shared_ptr<Shader> CreateFromSource(std::span<const std::string> sources);
+    virtual ~Shader() = default;
 
 public:
     virtual void Use() const = 0;
@@ -100,7 +116,7 @@ public:
     virtual void SetUniformVec4(const char* name, const glm::vec4& value) = 0;
 
     virtual void SetUniformMat4(const char* name, const glm::mat4& value) = 0;
-    virtual void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, int32_t count) = 0;
+    virtual void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, std::uint32_t count) = 0;
     virtual void SetUniformMat3(const char* name, const glm::mat3& value) = 0;
 
     virtual int GetUniformInt(const char* name) const = 0;
@@ -111,11 +127,9 @@ public:
     virtual glm::vec4 GetUniformVec4(const char* name) const = 0;
 
     virtual std::vector<UniformInfo> GetUniformInfos() const = 0;
-    virtual void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<ITexture>& textures, uint32_t startTextureUnit = 0) = 0;
+    virtual void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, std::uint32_t start_texture_unit = 0) = 0;
 
 protected:
     virtual void GenerateShaders(std::span<std::string_view> sources) = 0;
-
-private:
-    static std::shared_ptr<IShader> LoadShader(const std::initializer_list<std::string_view>& paths);
+    void GenerateShaders(std::span<const std::string> sources);
 };

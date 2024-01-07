@@ -21,9 +21,9 @@ public:
     void BroadcastRender(Duration duration);
 
 private:
-    entt::registry Registry;
-    std::unordered_map<std::string, Actor> Actors;
-    std::shared_ptr<ResourceManagerImpl> ResourceManagerInstance;
+    entt::registry registry_;
+    std::unordered_map<std::string, Actor> actors_;
+    std::shared_ptr<ResourceManagerImpl> resource_manager_;
 
 private:
     void UpdateSkeletalMeshesAnimation(Duration duration);

@@ -5,8 +5,10 @@
 #include <string_view>  
 #include <vector>
 
-#define ARRAY_NUM_ELEMENTS(Array) static_cast<int32_t>(sizeof(Array) / sizeof(Array[0]))
-#define STD_ARRAY_NUM_ELEMENTS(Array) static_cast<int32_t>(Array.size())
+#include <filesystem>
+
+#define ARRAY_NUM_ELEMENTS(Array) static_cast<std::int32_t>(sizeof(Array) / sizeof(Array[0]))
+#define STD_ARRAY_NUM_ELEMENTS(Array) static_cast<std::int32_t>(Array.size())
 
 template <typename CharType>
 inline bool ContainsString(const std::basic_string<CharType>& str, const CharType* s)
@@ -16,5 +18,4 @@ inline bool ContainsString(const std::basic_string<CharType>& str, const CharTyp
 }
 
 std::vector<std::string> SplitString(const std::string& string, std::string_view delimiter);
-
-std::string LoadFileContent(const std::string& filePath);
+std::string LoadFileContent(const std::filesystem::path& file_path);

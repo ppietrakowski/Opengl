@@ -7,83 +7,83 @@ template <typename T>
 class Buffer
 {
 public:
-    Buffer(int32_t initialCapacity) :
-        Capacity{initialCapacity}
+    Buffer(std::uint32_t initial_capacity) :
+        capacity_{initial_capacity}
     {
-        Data = new T[initialCapacity];
-        Current = Data;
+        data_ = new T[initial_capacity];
+        current_ = data_;
     }
 
     ~Buffer()
     {
-        delete[] Data;
+        delete[] data_;
     }
 
-    void Resize(int32_t newCapacity)
+    void Resize(std::uint32_t new_capacity)
     {
-        if (newCapacity <= Capacity)
+        if (new_capacity <= capacity_)
         {
             return;
         }
 
-        int32_t index = static_cast<int32_t>(std::distance(Data, Current));
+        std::uint32_t index = static_cast<std::uint32_t>(std::distance(data_, current_));
 
-        T* data = new T[newCapacity];
-        std::move(Data, Data + Capacity, data);
+        T* data = new T[new_capacity];
+        std::move(data_, data_ + capacity_, data);
 
-        delete[] Data;
-        Data = data;
-        Current = data[index];
-        Capacity = newCapacity;
+        delete[] data_;
+        data_ = data;
+        current_ = data[index];
+        capacity_ = new_capacity;
     }
 
     void AddInstance(const T& element)
     {
-        if (GetSize() >= Capacity)
+        if (GetSize() >= capacity_)
         {
             return;
         }
 
-        *Current++ = element;
+        *current_++ = element;
     }
 
     void ResetPtrToStart()
     {
-        Current = Data;
+        current_ = data_;
     }
 
     T* GetRawData()
     {
-        return Data;
+        return data_;
     }
 
     const T* GetRawData() const
     {
-        return Data;
+        return data_;
     }
 
-    int32_t GetSize() const
+    std::uint32_t GetSize() const
     {
-        return static_cast<int32_t>(std::distance(Data, Current));
+        return static_cast<std::uint32_t>(std::distance(data_, current_));
     }
 
-    int32_t GetSizeBytes() const
+    std::uint32_t GetSizeBytes() const
     {
         return GetSize() * sizeof(T);
     }
 
-    int32_t GetCapacity() const
+    std::uint32_t GetCapacity() const
     {
-        return Capacity;
+        return capacity_;
     }
 
-    int32_t GetCapacityBytes() const
+    std::uint32_t GetCapacityBytes() const
     {
-        return Capacity * sizeof(T);
+        return capacity_ * sizeof(T);
     }
 
 private:
-    T* Data;
-    T* Current;
-    int32_t Capacity;
+    T* data_;
+    T* current_;
+    std::uint32_t capacity_;
 };

@@ -14,10 +14,10 @@ public:
     bool IsMouseButtonPressedImpl(MouseButton button) override;
     glm::vec2 GetMousePositionImpl() override;
 
-    void Update(const GlfwWindowData& windowData);
+    void Update(const GlfwWindowData& window_data);
 
 private:
-    GLFWwindow* Window;
-    glm::vec2 MousePosition;
+    GLFWwindow* window_;
+    glm::vec2 mouse_position_;
 };
 

@@ -31,10 +31,10 @@ enum class LogLevel
 
 struct LogInfo
 {
-    SourceLocation Location;
-    const char* CategoryName;
-    LogLevel Level;
-    std::string Message;
+    SourceLocation source_location;
+    const char* category_name;
+    LogLevel log_level;
+    std::string message;
 };
 
 class LogDevice
@@ -48,7 +48,7 @@ public:
 
 std::string FormatString(const char* format, ...);
 
-using LogDeviceID = int16_t;
+using LogDeviceID = std::int16_t;
 
 class Logging
 {
@@ -67,9 +67,10 @@ public:
     static void EnableStdLogging();
 
 private:
-    static int32_t IgnoredLogLevels;
+    static std::int32_t ignored_log_levels_;
 
 private:
     static void SortLogDeviceIDs();
 };
 
+std::unique_ptr<LogDevice> CreateStdStreamLogger(std::ostream& stream);

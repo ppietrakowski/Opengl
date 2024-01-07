@@ -14,12 +14,12 @@ extern "C" {
 #include "stb_image.h"
 }
 
-static void StbiDeleter(uint8_t* bytes)
+static void StbiDeleter(std::uint8_t* bytes)
 {
     stbi_image_free(bytes);
 }
 
-std::shared_ptr<ITexture2D> ITexture2D::LoadFromFile(const std::string& filePath)
+std::shared_ptr<Texture2D> Texture2D::LoadFromFile(const std::filesystem::path& file_path)
 {
     if (IRendererAPI::GetApi() == IRendererAPI::kOpenGL)
     {
@@ -31,17 +31,18 @@ std::shared_ptr<ITexture2D> ITexture2D::LoadFromFile(const std::string& filePath
         stbi_set_flip_vertically_on_load(0);
     }
 
-    stbi_image_data_t imageData = stbi_load_from_filepath(filePath.c_str(), STBI_rgb_alpha);
+    std::string path = file_path.string();
+    stbi_image_data_t imageData = stbi_load_from_filepath(path.c_str(), STBI_rgb_alpha);
 
     if (imageData.data == nullptr)
     {
-        throw std::runtime_error{"Failed to load texture " + filePath};
+        throw std::runtime_error{"Failed to load texture " + path};
     }
 
     return CreateFromImage(ImageRgba(imageData.data, imageData.width, imageData.height, &StbiDeleter));
 }
 
-std::shared_ptr<ITexture2D> ITexture2D::Create(const void* data, const TextureSpecification& specification)
+std::shared_ptr<Texture2D> Texture2D::Create(const void* data, const TextureSpecification& specification)
 {
     switch (IRendererAPI::GetApi())
     {
@@ -52,7 +53,7 @@ std::shared_ptr<ITexture2D> ITexture2D::Create(const void* data, const TextureSp
     ERR_FAIL_MSG_V("Invalid API type", nullptr);
 }
 
-std::shared_ptr<ITexture2D> ITexture2D::CreateFromImage(const ImageRgba& image)
+std::shared_ptr<Texture2D> Texture2D::CreateFromImage(const ImageRgba& image)
 {
     switch (IRendererAPI::GetApi())
     {
@@ -63,7 +64,7 @@ std::shared_ptr<ITexture2D> ITexture2D::CreateFromImage(const ImageRgba& image)
     ERR_FAIL_MSG_V("Invalid API type", nullptr);
 }
 
-std::shared_ptr<ITexture2D> ITexture2D::CreateEmpty(const TextureSpecification& specification)
+std::shared_ptr<Texture2D> Texture2D::CreateEmpty(const TextureSpecification& specification)
 {
     switch (IRendererAPI::GetApi())
     {
@@ -74,8 +75,8 @@ std::shared_ptr<ITexture2D> ITexture2D::CreateEmpty(const TextureSpecification& 
     ERR_FAIL_MSG_V("Invalid API type", nullptr);
 }
 
-ImageRgba LoadRgbaImageFromMemory(const void* data, int length)
+ImageRgba LoadRgbaImageFromMemory(const void* data, std::int32_t length)
 {
-    stbi_image_data_t imageData = stbi_load_from_memory_rgba(reinterpret_cast<const uint8_t*>(data), length);
+    stbi_image_data_t imageData = stbi_load_from_memory_rgba(reinterpret_cast<const std::uint8_t*>(data), length);
     return ImageRgba{imageData.data, imageData.width, imageData.height, &StbiDeleter};
 }

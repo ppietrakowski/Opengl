@@ -12,34 +12,34 @@ IMPLEMENT_LOG_CATEGORY(RENDERER);
 IMPLEMENT_LOG_CATEGORY(ASSET_LOADING);
 IMPLEMENT_LOG_CATEGORY(GLOBAL);
 
-int32_t Logging::IgnoredLogLevels = 0;
+std::int32_t Logging::ignored_log_levels_ = 0;
 
 struct Device
 {
-    std::unique_ptr<LogDevice> Log;
-    LogDeviceID DeviceId;
+    std::unique_ptr<LogDevice> log_device;
+    LogDeviceID device_id;
 
     LogDevice* operator->() const
     {
-        return Log.get();
+        return log_device.get();
     }
 };
 
-static std::vector<Device> LogDevices;
-static LogDeviceID LastLogDeviceId = 1;
+static std::vector<Device> log_devices_;
+static LogDeviceID last_log_device_id_ = 1;
 
 namespace
 {
-#define CASE(x) case LogLevel::##x: return #x
+#define CASE(x) case LogLevel::k##x: return #x
     const char* ToString(LogLevel logLevel)
     {
         switch (logLevel)
         {
-            CASE(kInfo);
-            CASE(kWarning);
-            CASE(kError);
-            CASE(kDebug);
-            CASE(kVerbose);
+            CASE(Info);
+            CASE(Warning);
+            CASE(Error);
+            CASE(Debug);
+            CASE(Verbose);
         }
 
         return "Invalid log level";
@@ -49,43 +49,52 @@ namespace
 
 class StdLogDevice : public LogDevice
 {
+public:
+    StdLogDevice(std::ostream& logger) :
+        logger_{&logger}
+    {
+    }
+
     void Print(const LogInfo& info) override
     {
-        const SourceLocation& location = info.Location;
+        const SourceLocation& location = info.source_location;
 
-        std::clog << "[" << info.CategoryName << " " << ToString(info.Level) << "] \"" <<
-            info.Message << "\" in " << location.FunctionName << " in " << location.FileName << ": " << location.Line << std::endl << std::endl;
+        *logger_ << "[" << info.category_name << " " << ToString(info.log_level) << "] \"" <<
+            info.message << "\" in " << location.function_name << " in " << location.file_name << ": " << location.line << std::endl << std::endl;
     }
+
+private:
+    std::ostream* logger_;
 };
 
 void Logging::Initialize()
 {
-    LogDevices.emplace_back(Device{std::make_unique<StdLogDevice>(), kStdLoggerId});
+    EnableStdLogging();
 }
 
 void Logging::IgnoreLogLevel(LogLevel level)
 {
-    IgnoredLogLevels = IgnoredLogLevels | static_cast<uint32_t>(level);
+    ignored_log_levels_ = ignored_log_levels_ | static_cast<std::int32_t>(level);
 }
 
 void Logging::StopIgnoringLogLevel(LogLevel level)
 {
-    IgnoredLogLevels = IgnoredLogLevels & (~static_cast<uint32_t>(level));
+    ignored_log_levels_ = ignored_log_levels_ & (~static_cast<uint32_t>(level));
 }
 
 void Logging::Quit()
 {
-    LogDevices.clear();
+    log_devices_.clear();
 }
 
 void Logging::Log(const LogInfo& info)
 {
-    if (IgnoredLogLevels & static_cast<int32_t>(info.Level))
+    if (ignored_log_levels_ & static_cast<std::int32_t>(info.log_level))
     {
         return;
     }
 
-    for (const Device& device : LogDevices)
+    for (const Device& device : log_devices_)
     {
         device->Print(info);
     }
@@ -93,21 +102,21 @@ void Logging::Log(const LogInfo& info)
 
 LogDeviceID Logging::AddLogDevice(std::unique_ptr<LogDevice>&& device)
 {
-    LogDeviceID deviceId = LastLogDeviceId++;
-    LogDevices.emplace_back(Device{std::move(device), deviceId});
+    LogDeviceID device_id = last_log_device_id_++;
+    log_devices_.emplace_back(Device{std::move(device), device_id});
     SortLogDeviceIDs();
-    return deviceId;
+    return device_id;
 }
 
 void Logging::RemoveLogDevice(LogDeviceID id)
 {
-    auto it = std::find_if(LogDevices.begin(), LogDevices.end(), [id](const Device& device) {
-        return device.DeviceId == id;
+    auto it = std::find_if(log_devices_.begin(), log_devices_.end(), [id](const Device& device) {
+        return device.device_id == id;
     });
 
-    if (it != LogDevices.end())
+    if (it != log_devices_.end())
     {
-        LogDevices.erase(it);
+        log_devices_.erase(it);
     }
 }
 
@@ -118,13 +127,13 @@ void Logging::DisableStdLogging()
 
 void Logging::EnableStdLogging()
 {
-    LogDevices.emplace_back(Device{std::make_unique<StdLogDevice>(), kStdLoggerId});
+    log_devices_.emplace_back(Device{CreateStdStreamLogger(std::clog), kStdLoggerId});
     SortLogDeviceIDs();
 }
 
 void Logging::SortLogDeviceIDs()
 {
-    std::sort(LogDevices.begin(), LogDevices.end(), [](const Device& a, const Device& b) { return a.DeviceId < b.DeviceId; });
+    std::sort(log_devices_.begin(), log_devices_.end(), [](const Device& a, const Device& b) { return a.device_id < b.device_id; });
 }
 
 std::string FormatString(const char* format, ...)
@@ -134,17 +143,22 @@ std::string FormatString(const char* format, ...)
     va_list list;
 
     va_start(list, format);
-    int32_t numCharsWritten = vsnprintf(buffer.data(), buffer.size(), format, list);
+    std::int32_t num_chars_written = vsnprintf(buffer.data(), buffer.size(), format, list);
     va_end(list);
 
-    if (numCharsWritten < 0)
+    if (num_chars_written < 0)
     {
         return "";
     }
-    else if (numCharsWritten == 0)
+    else if (num_chars_written == 0)
     {
         return buffer.data();
     }
 
-    return std::string{buffer.data(), buffer.data() + numCharsWritten};
+    return std::string{buffer.data(), buffer.data() + num_chars_written};
+}
+
+std::unique_ptr<LogDevice> CreateStdStreamLogger(std::ostream& stream)
+{
+    return std::make_unique<StdLogDevice>(stream);
 }

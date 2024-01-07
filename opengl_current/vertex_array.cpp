@@ -4,7 +4,7 @@
 #include "error_macros.h"
 #include "renderer_api.h"
 
-std::shared_ptr<IVertexArray> IVertexArray::Create()
+std::shared_ptr<VertexArray> VertexArray::Create()
 {
     switch (IRendererAPI::GetApi())
     {

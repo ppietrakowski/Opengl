@@ -6,48 +6,48 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-static Game* s_GameInstance = nullptr;
+static Game* game_instance_ = nullptr;
 
 Game::Game(const WindowSettings& settings) :
-    ImguiContext{nullptr}
+    imgui_context_{nullptr}
 {
     Logging::Initialize();
-    Window = IWindow::Create(settings);
-    GraphicsContext = Window->GetContext();
+    window_ = Window::Create(settings);
+    graphics_context_ = window_->GetContext();
 
     // initialize subsystems
     Renderer::Initialize();
-    Renderer::UpdateProjection(CameraProjection{settings.Width, settings.Height, 45.0f});
+    Renderer::UpdateProjection(CameraProjection{settings.width, settings.height, 45.0f});
 
     BindWindowEvents();
     InitializeImGui();
-    s_GameInstance = this;
+    game_instance_ = this;
 }
 
 Game::~Game()
 {
-    Layers.clear();
+    layers_.clear();
 
     // deinitialize all libraries
     Renderer::Quit();
 
-    GraphicsContext->DeinitializeImGui();
+    graphics_context_->DeinitializeImGui();
     ImGui::DestroyContext();
 
     Logging::Quit();
-    s_GameInstance = nullptr;
+    game_instance_ = nullptr;
 }
 
 void Game::Run()
 {
-    std::chrono::nanoseconds deltaSeconds{std::chrono::nanoseconds::zero()};
-    auto lastFrameTime = GetNow();
+    Duration::duration_t delta_seconds{std::chrono::nanoseconds::zero()};
+    auto last_frame_time = GetNow();
 
-    while (Window->IsOpen())
+    while (window_->IsOpen())
     {
-        for (const std::unique_ptr<ILayer>& layer : Layers)
+        for (const std::unique_ptr<ILayer>& layer : layers_)
         {
-            layer->Update(deltaSeconds);
+            layer->Update(delta_seconds);
         }
 
         RenderCommand::Clear();
@@ -55,43 +55,43 @@ void Game::Run()
         // calculate delta time using chrono library
         auto now = GetNow();
 
-        if (deltaSeconds == std::chrono::nanoseconds::zero())
+        if (delta_seconds == std::chrono::nanoseconds::zero())
         {
-            deltaSeconds = (now - lastFrameTime);
+            delta_seconds = (now - last_frame_time);
         }
         else
         {
             // average delta seconds to keep more meaningfull frame time
-            deltaSeconds = ((now - lastFrameTime) + deltaSeconds) / 2;
+            delta_seconds = ((now - last_frame_time) + delta_seconds) / 2;
         }
 
-        lastFrameTime = now;
+        last_frame_time = now;
 
         // broadcast render command
-        for (const std::unique_ptr<ILayer>& layer : Layers)
+        for (const std::unique_ptr<ILayer>& layer : layers_)
         {
-            layer->Render(deltaSeconds);
+            layer->Render(delta_seconds);
         }
 
         RunImguiFrame();
-        Window->Update();
+        window_->Update();
     }
 }
 
 bool Game::IsRunning() const
 {
-    return Window->IsOpen();
+    return window_->IsOpen();
 }
 
 void Game::Quit()
 {
-    Window->Close();
+    window_->Close();
 }
 
 bool Game::InitializeImGui()
 {
-    ImguiContext = ImGui::CreateContext();
-    ImGui::SetCurrentContext(ImguiContext);
+    imgui_context_ = ImGui::CreateContext();
+    ImGui::SetCurrentContext(imgui_context_);
 
     ImGui::StyleColorsDark();
     ImGuiIO& io = ImGui::GetIO();
@@ -99,32 +99,32 @@ bool Game::InitializeImGui()
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-    GraphicsContext->InitializeForImGui();
+    graphics_context_->InitializeForImGui();
     return true;
 }
 
 void Game::RunImguiFrame()
 {
-    GraphicsContext->ImGuiBeginFrame();
+    graphics_context_->ImGuiBeginFrame();
     ImGui::NewFrame();
 
     // broadcast imgui frame draw
-    for (const std::unique_ptr<ILayer>& layer : Layers)
+    for (const std::unique_ptr<ILayer>& layer : layers_)
     {
         layer->OnImguiFrame();
     }
 
     ImGui::Render();
-    GraphicsContext->ImGuiDrawFrame();
+    graphics_context_->ImGuiDrawFrame();
     ImGui::EndFrame();
-    GraphicsContext->UpdateImGuiViewport();
+    graphics_context_->UpdateImGuiViewport();
 }
 
 void Game::BindWindowEvents()
 {
-    Window->SetEventCallback([this](const Event& evt) {
+    window_->SetEventCallback([this](const Event& evt) {
         // events in layer are processed from last to first
-        for (auto it = Layers.rbegin(); it != Layers.rend(); ++it)
+        for (auto it = layers_.rbegin(); it != layers_.rend(); ++it)
         {
             std::unique_ptr<ILayer>& layer = *it;
 
@@ -136,24 +136,24 @@ void Game::BindWindowEvents()
     });
 }
 
-void Game::SetMouseVisible(bool bMouseVisible)
+void Game::SetMouseVisible(bool mouse_visible)
 {
-    Window->SetMouseVisible(bMouseVisible);
+    window_->SetMouseVisible(mouse_visible);
 }
 
-void Game::AddLayer(std::unique_ptr<ILayer>&& gameLayer)
+void Game::AddLayer(std::unique_ptr<ILayer>&& game_layer)
 {
-    Layers.emplace_back(std::move(gameLayer));
+    layers_.emplace_back(std::move(game_layer));
 }
 
 void Game::RemoveLayer(std::type_index index)
 {
-    auto it = std::remove_if(Layers.begin(),
-        Layers.end(),
+    auto it = std::remove_if(layers_.begin(),
+        layers_.end(),
         [index](const std::unique_ptr<ILayer>& layer) { return layer->GetTypeIndex() == index; });
 
-    if (it != Layers.end())
+    if (it != layers_.end())
     {
-        Layers.erase(it);
+        layers_.erase(it);
     }
 }

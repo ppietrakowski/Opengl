@@ -5,7 +5,7 @@
 #include <future>
 
 Level::Level():
-    ResourceManagerInstance{ResourceManager::CreateResourceManager()}
+    resource_manager_{ResourceManager::CreateResourceManager()}
 {
 }
 
@@ -18,58 +18,58 @@ Actor Level::CreateActor(const std::string& name)
 {
     Actor actor;
 
-    actor.HomeLevel = this;
-    actor.EntityHandle = entt::handle{Registry, Registry.create()};
+    actor.home_level_ = this;
+    actor.entity_handle_ = entt::handle{registry_, registry_.create()};
     actor.AddComponent<SceneHierarchyComponent>();
     actor.AddComponent<TransformComponent>();
 
-    SceneHierarchyComponent& sceneHierarchy = actor.GetComponent<SceneHierarchyComponent>();
-    sceneHierarchy.Parent = entt::handle{Registry, entt::null};
+    SceneHierarchyComponent& scene_hierarchy = actor.GetComponent<SceneHierarchyComponent>();
+    scene_hierarchy.parent = entt::handle{registry_, entt::null};
 
     auto& transform = actor.GetComponent<TransformComponent>();
-    transform.Parent = entt::handle{Registry, entt::null};
+    transform.parent = entt::handle{registry_, entt::null};
 
     actor.AddComponent<ActorTagComponent>();
 
     auto& tag = actor.GetComponent<ActorTagComponent>();
-    tag.Name = name;
+    tag.name = name;
 
-    Actors.try_emplace(name, actor);
+    actors_.try_emplace(name, actor);
     return actor;
 }
 
 Actor Level::FindActor(const std::string& name) const
 {
-    return Actors.at(name);
+    return actors_.at(name);
 }
 
 std::vector<Actor> Level::FindActorsWithTag(const std::string& tag) const
 {
-    std::vector<Actor> actorsWithTag;
+    std::vector<Actor> actors_with_tag;
 
-    actorsWithTag.reserve(Actors.size());
+    actors_with_tag.reserve(actors_.size());
 
-    for (auto& [name, actor] : Actors)
+    for (auto& [name, actor] : actors_)
     {
         const ActorTagComponent& t = actor.GetComponent<ActorTagComponent>();
 
-        if (t.Tag == tag)
+        if (t.tag == tag)
         {
-            actorsWithTag.emplace_back(actor);
+            actors_with_tag.emplace_back(actor);
         }
     }
 
-    return actorsWithTag;
+    return actors_with_tag;
 }
 
 void Level::RemoveActor(const std::string& name)
 {
-    auto& actor = Actors.at(name);
+    auto& actor = actors_.at(name);
     auto& tag = actor.GetComponent<ActorTagComponent>();
-    tag.IsAlive = false;
+    tag.is_alive = false;
 
-    Registry.destroy(actor.EntityHandle.entity());
-    Actors.erase(name);
+    registry_.destroy(actor.entity_handle_.entity());
+    actors_.erase(name);
 }
 
 void Level::StartupLevel()
@@ -79,35 +79,35 @@ void Level::StartupLevel()
 void Level::BroadcastUpdate(Duration duration)
 {
     // start all update tasks that are independent from themselfs
-    auto skeletalUpdateTask = std::async(std::launch::async, [this](Duration duration) {
+    auto skeletal_update_task = std::async(std::launch::async, [this](Duration duration) {
         UpdateSkeletalMeshesAnimation(duration);
     }, duration);
 
-    skeletalUpdateTask.wait();
+    skeletal_update_task.wait();
 }
 
 void Level::BroadcastRender(Duration duration)
 {
-    auto staticMeshView = Registry.view<TransformComponent, StaticMeshComponent>();
+    auto static_mesh_view = registry_.view<TransformComponent, StaticMeshComponent>();
 
-    for (auto&& [entity, transform, staticMesh] : staticMeshView.each())
+    for (auto&& [entity, transform, static_mesh] : static_mesh_view.each())
     {
-        staticMesh.Draw(transform.GetWorldTransformMatrix());
+        static_mesh.Draw(transform.GetWorldTransformMatrix());
     }
 
-    auto skeletalMeshView = Registry.view<TransformComponent, SkeletalMeshComponent>();
-    for (auto&& [entity, transform, skeletalMesh] : skeletalMeshView.each())
+    auto skeletal_mesh_view = registry_.view<TransformComponent, SkeletalMeshComponent>();
+    for (auto&& [entity, transform, skeletal_mesh] : skeletal_mesh_view.each())
     {
-        skeletalMesh.Draw(transform.GetWorldTransformMatrix());
+        skeletal_mesh.Draw(transform.GetWorldTransformMatrix());
     }
 }
 
 void Level::UpdateSkeletalMeshesAnimation(Duration duration)
 {
-    auto skeletalMeshView = Registry.view<SkeletalMeshComponent>();
+    auto skeletal_mesh_view = registry_.view<SkeletalMeshComponent>();
 
-    for (auto&& [entity, skeletalMesh] : skeletalMeshView.each())
+    for (auto&& [entity, skeletal_mesh] : skeletal_mesh_view.each())
     {
-        skeletalMesh.UpdateAnimation(duration.GetAsSeconds());
+        skeletal_mesh.UpdateAnimation(duration.GetAsSeconds());
     }
 }

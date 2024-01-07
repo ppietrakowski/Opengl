@@ -9,19 +9,19 @@
 
 struct StaticMeshVertex
 {
-    glm::vec3 Position{0, 0,0};
-    glm::vec3 Normal{0, 0, 0};
-    glm::vec2 TextureCoords{0, 0};
-    int32_t TextureId{0};
+    glm::vec3 position{0, 0,0};
+    glm::vec3 normal{0, 0, 0};
+    glm::vec2 texture_coords{0, 0};
+    std::int32_t texture_id{0};
 
     static inline constexpr VertexAttribute kDataFormat[4] = {{3, PrimitiveVertexType::kFloat}, 
         {3, PrimitiveVertexType::kFloat}, {2, PrimitiveVertexType::kFloat}, {1, PrimitiveVertexType::kInt}};
 
     StaticMeshVertex() = default;
-    StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& textureCoords) :
-        Position{position},
-        Normal{normal},
-        TextureCoords{textureCoords}
+    StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& texture_coords) :
+        position{position},
+        normal{normal},
+        texture_coords{texture_coords}
     {
     }
 
@@ -32,52 +32,51 @@ struct StaticMeshVertex
 class StaticMesh
 {
 public:
-    StaticMesh(const std::filesystem::path& filePath, const std::shared_ptr<Material>& material);
+    StaticMesh(const std::filesystem::path& file_path, const std::shared_ptr<Material>& material);
 
 public:
     void Render(const glm::mat4& transform) const;
-    void Render(const Material& overrideMaterial, const glm::mat4& transform) const;
+    void Render(const Material& override_material, const glm::mat4& transform) const;
 
-    int32_t GetNumPolygons() const;
-    int32_t GetNumTriangles() const;
+    std::int32_t GetNumPolygons() const;
+    std::int32_t GetNumTriangles() const;
 
     const glm::vec3& GetBBoxMin() const;
     const glm::vec3& GetBBoxMax() const;
 
     std::string_view GetName() const
     {
-        return MeshName;
+        return mesh_name_;
     }
 
-    std::vector<std::string> TexturePaths;
-    std::shared_ptr<Material> MainMaterial;
+    std::vector<std::string> texture_paths;
+    std::shared_ptr<Material> main_material;
 
 private:
-    std::shared_ptr<IVertexArray> VertexArray;
-    int32_t NumTriangles;
+    std::shared_ptr<VertexArray> vertex_array_;
+    std::int32_t num_triangles_;
 
-
-    glm::vec3 BboxMin;
-    glm::vec3 BboxMax;
-    std::string MeshName;
+    glm::vec3 bbox_min_;
+    glm::vec3 bbox_max_;
+    std::string mesh_name_;
 };
 
 inline const glm::vec3& StaticMesh::GetBBoxMin() const
 {
-    return BboxMin;
+    return bbox_min_;
 }
 
 inline const glm::vec3& StaticMesh::GetBBoxMax() const
 {
-    return BboxMax;
+    return bbox_max_;
 }
 
-inline int32_t StaticMesh::GetNumPolygons() const
+inline std::int32_t StaticMesh::GetNumPolygons() const
 {
-    return NumTriangles;
+    return num_triangles_;
 }
 
-inline int32_t StaticMesh::GetNumTriangles() const
+inline std::int32_t StaticMesh::GetNumTriangles() const
 {
-    return NumTriangles;
+    return num_triangles_;
 }

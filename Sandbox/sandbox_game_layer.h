@@ -11,8 +11,8 @@ public:
     SandboxGameLayer();
 
     // Inherited via IGameLayer
-    void Update(Duration deltaTime) override;
-    void Render(Duration deltaTime) override;
+    void Update(Duration delta_time) override;
+    void Render(Duration delta_time) override;
     bool OnEvent(const Event& event) override;
     void OnImguiFrame() override;
 
@@ -22,9 +22,9 @@ public:
     }
 
 private:
-    std::shared_ptr<IShader> m_Shader;
-    std::shared_ptr<IShader> m_Unshaded;
-    std::shared_ptr<IShader> m_CurrentUsed;
+    std::shared_ptr<Shader> m_Shader;
+    std::shared_ptr<Shader> m_Unshaded;
+    std::shared_ptr<Shader> m_CurrentUsed;
 
     std::shared_ptr<StaticMesh> m_StaticMesh;
     glm::vec3 m_StaticMeshPosition;

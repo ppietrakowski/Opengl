@@ -10,7 +10,7 @@
 #include <cstring>
 #include <array>
 
-enum class MaterialParamType : int8_t
+enum class MaterialParamType : std::int8_t
 {
     kUnknown = 0,
     kInt,
@@ -24,11 +24,11 @@ enum class MaterialParamType : int8_t
 
 union ParamVal
 {
-    int32_t IntValue;
-    float FloatValue;
-    glm::vec2 Vec2Value;
-    glm::vec3 Vec3Value;
-    glm::vec4 Vec4Value;
+    std::int32_t int_value;
+    float float_value;
+    glm::vec2 vec2_value;
+    glm::vec3 vec3_value;
+    glm::vec4 vec4_value;
 };
 
 class MaterialParam
@@ -38,36 +38,36 @@ class MaterialParam
 public:
     MaterialParam() = default;
     MaterialParam(const MaterialParam&) = default;
-    MaterialParam(const char* uniformName);
-    MaterialParam(const char* uniformName, int32_t value);
-    MaterialParam(const char* uniformName, float value);
-    MaterialParam(const char* uniformName, glm::vec2 value);
-    MaterialParam(const char* uniformName, glm::vec3 value);
-    MaterialParam(const char* uniformName, glm::vec4 value);
+    MaterialParam(const char* uniform_name);
+    MaterialParam(const char* uniform_name, std::int32_t value);
+    MaterialParam(const char* uniform_name, float value);
+    MaterialParam(const char* uniform_name, glm::vec2 value);
+    MaterialParam(const char* uniform_name, glm::vec3 value);
+    MaterialParam(const char* uniform_name, glm::vec4 value);
 
     MaterialParam& operator=(const MaterialParam&) = default;
-    void SetUniform(IShader& shader) const;
+    void SetUniform(Shader& shader) const;
 
-    int32_t GetInt() const;
+    std::int32_t GetInt() const;
     float GetFloat() const;
     glm::vec2 GetVector2() const;
     glm::vec3 GetVector3() const;
     glm::vec4 GetVector4() const;
 
-    std::shared_ptr<ITexture> GetTexture() const;
+    std::shared_ptr<Texture> GetTexture() const;
 
-    void SetInt(int32_t value);
+    void SetInt(std::int32_t value);
     void SetFloat(float value);
     void SetVector2(glm::vec2 value);
     void SetVector3(glm::vec3 value);
     void SetVector4(glm::vec4 value);
-    void SetTexture(const std::shared_ptr<ITexture>& value);
+    void SetTexture(const std::shared_ptr<Texture>& value);
 
-    uint32_t TextureUnit{0};
+    std::uint32_t texture_unit{0};
 
 private:
-    ParamVal ParamValue;
-    std::shared_ptr<ITexture> Texture;
-    MaterialParamType ParamType;
-    char UniformName[64];
+    ParamVal param_value_;
+    std::shared_ptr<Texture> texture_;
+    MaterialParamType param_type_;
+    char uniform_name_[64];
 };

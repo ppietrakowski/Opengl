@@ -11,22 +11,22 @@
 
 struct WindowSettings
 {
-    int32_t Width;
-    int32_t Height;
-    std::string Title;
+    std::int32_t width;
+    std::int32_t height;
+    std::string title;
 };
 
 using EventCallback = std::function<void(const Event&)>;
 
-class IWindow
+class Window
 {
 public:
-    virtual ~IWindow() = default;
+    virtual ~Window() = default;
 
     virtual void Update() = 0;
 
-    virtual int32_t GetWidth() const = 0;
-    virtual int32_t GetHeight() const = 0;
+    virtual std::int32_t GetWidth() const = 0;
+    virtual std::int32_t GetHeight() const = 0;
 
     virtual glm::ivec2 GetWindowPosition() const = 0;
 
@@ -42,11 +42,11 @@ public:
     virtual bool IsVSyncEnabled() const = 0;
 
     virtual void* GetWindowNativeHandle() const = 0;
-    virtual IGraphicsContext* GetContext() const = 0;
+    virtual GraphicsContext* GetContext() const = 0;
 
     virtual void Close() = 0;
-    virtual void SetMouseVisible(bool bMouseVisible) = 0;
+    virtual void SetMouseVisible(bool mouse_visible) = 0;
 
-    static std::unique_ptr<IWindow> Create(const WindowSettings& windowSettings);
+    static std::unique_ptr<Window> Create(const WindowSettings& window_settings);
 };
 

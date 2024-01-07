@@ -1,9 +1,9 @@
 #pragma once
 
-class IGraphicsContext
+class GraphicsContext
 {
 public:
-    virtual ~IGraphicsContext() = default;
+    virtual ~GraphicsContext() = default;
 
     virtual void InitializeForImGui() = 0;
     virtual void DeinitializeImGui() = 0;
@@ -12,6 +12,6 @@ public:
     virtual void UpdateImGuiViewport() = 0;
     virtual void SwapBuffers() = 0;
 
-    virtual void SetVsync(bool bVsyncEnabled) = 0;
+    virtual void SetVsync(bool vsync_enabled) = 0;
 };
 

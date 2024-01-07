@@ -18,23 +18,23 @@ enum class TextureFormat
 
 struct TextureSpecification
 {
-    int32_t Width;
-    int32_t Height;
-    TextureFormat Format;
+    std::int32_t width;
+    std::int32_t height;
+    TextureFormat texture_format;
 };
 
-class ITexture
+class Texture
 {
 public:
-    virtual ~ITexture() = default;
+    virtual ~Texture() = default;
 
 public:
-    virtual int32_t GetWidth() const = 0;
-    virtual int32_t GetHeight() const = 0;
+    virtual std::int32_t GetWidth() const = 0;
+    virtual std::int32_t GetHeight() const = 0;
 
     virtual void SetData(const void* data, const TextureSpecification& specification, glm::ivec2 offset = {0, 0}) = 0;
-    virtual void Bind(int32_t textureUnit) const = 0;
-    virtual void Unbind(int32_t textureUnit) = 0;
+    virtual void Bind(std::uint32_t texture_unit) const = 0;
+    virtual void Unbind(std::uint32_t texture_unit) = 0;
 
     virtual bool GotMinimaps() const = 0;
     virtual void GenerateMipmaps() = 0;
@@ -42,13 +42,13 @@ public:
     virtual TextureFormat GetTextureFormat() const = 0;
 };
 
-class ITexture2D : public ITexture
+class Texture2D : public Texture
 {
 public:
-    static std::shared_ptr<ITexture2D> LoadFromFile(const std::string& filePath);
-    static std::shared_ptr<ITexture2D> Create(const void* data, const TextureSpecification& specification);
-    static std::shared_ptr<ITexture2D> CreateFromImage(const ImageRgba& image);
-    static std::shared_ptr<ITexture2D> CreateEmpty(const TextureSpecification& specification);
+    static std::shared_ptr<Texture2D> LoadFromFile(const std::filesystem::path& file_path);
+    static std::shared_ptr<Texture2D> Create(const void* data, const TextureSpecification& specification);
+    static std::shared_ptr<Texture2D> CreateFromImage(const ImageRgba& image);
+    static std::shared_ptr<Texture2D> CreateEmpty(const TextureSpecification& specification);
 };
 
-ImageRgba LoadRgbaImageFromMemory(const void* data, int32_t length);
+ImageRgba LoadRgbaImageFromMemory(const void* data, std::int32_t length);

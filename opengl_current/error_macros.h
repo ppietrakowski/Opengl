@@ -6,23 +6,19 @@
 
 struct SourceLocation
 {
-    const char* FileName;
-    int32_t Line;
-    const char* FunctionName;
+    const char* file_name;
+    std::uint32_t line;
+    const char* function_name;
 };
 
 struct ErrorHandlerInfo
 {
-    const char* FunctionName;
-    const char* FileName;
-    int32_t Line;
-    const char* ErrorMessage;
+    SourceLocation source_location;
+    const char* error_message;
 
-    ErrorHandlerInfo(const SourceLocation& sourceLocation, const char* errorMessage) :
-        FunctionName{sourceLocation.FunctionName},
-        FileName{sourceLocation.FileName},
-        Line{sourceLocation.Line},
-        ErrorMessage{errorMessage}
+    ErrorHandlerInfo(const SourceLocation& source_location, const char* error_message) :
+        source_location{source_location},
+        error_message{error_message}
     {
     }
 
@@ -42,12 +38,12 @@ struct ErrorHandlerInfo
 #define DEBUG_BREAK() __builtin_trap()
 #endif
 
-typedef void (*ErrorHandlerFn)(void* userData, const ErrorHandlerInfo& info);
+typedef void (*ErrorHandlerFn)(void* user_data, const ErrorHandlerInfo& info);
 
 struct ErrorHandler
 {
-    ErrorHandlerFn ErrorHandlerFunc{nullptr};
-    void* UserData{nullptr};
+    ErrorHandlerFn error_handler_func{nullptr};
+    void* user_data{nullptr};
 
     void Invoke(const ErrorHandlerInfo& info) const;
 };
@@ -60,7 +56,7 @@ void PrintError(const SourceLocation* location, const char* message);
 
 #define CURRENT_SOURCE_LOCATION                                       \
     {                                                                 \
-        __FILE__, static_cast<int32_t>(__LINE__), FUNCTION_SIGNATURE \
+        __FILE__, static_cast<std::uint32_t>(__LINE__), FUNCTION_SIGNATURE \
     }
 
 #define ERR_FAIL()                                            \

@@ -6,7 +6,7 @@
 
 #include <GLFW/glfw3.h>
 
-class GlfwWindow : public IWindow
+class GlfwWindow : public Window
 {
 public:
     GlfwWindow(const WindowSettings& settings);
@@ -15,8 +15,8 @@ public:
 public:
 
     void Update() override;
-    int32_t GetWidth() const override;
-    int32_t GetHeight() const override;
+    std::int32_t GetWidth() const override;
+    std::int32_t GetHeight() const override;
 
     glm::ivec2 GetWindowPosition() const override;
     glm::vec2 GetMousePosition() const override;
@@ -29,16 +29,16 @@ public:
     void DisableVSync() override;
     bool IsVSyncEnabled() const override;
     void* GetWindowNativeHandle() const override;
-    IGraphicsContext* GetContext() const override;
+    GraphicsContext* GetContext() const override;
 
     void Close() override;
-    void SetMouseVisible(bool bMouseVisible) override;
+    void SetMouseVisible(bool mouse_visible) override;
 
 private:
-    GLFWwindow* Window;
-    GlfwInput* Input;
-    IGraphicsContext* GraphicsContext;
-    GlfwWindowData WindowData;
+    GLFWwindow* window_;
+    GlfwInput* input_;
+    GraphicsContext* graphics_context_;
+    GlfwWindowData window_data_;
 
 private:
     void BindWindowCallbacks();

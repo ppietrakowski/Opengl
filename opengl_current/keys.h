@@ -3,7 +3,7 @@
 #include <cstdint>
 
 // KeyCode based on glfw key codes
-using KeyCode = int16_t;
+using KeyCode = std::int32_t;
 
 struct Keys
 {
@@ -145,7 +145,7 @@ struct Keys
 };
 
 // MouseCode based on glfw mouse codes
-using MouseButton = int16_t;
+using MouseButton = std::int16_t;
 
 struct Mouse
 {

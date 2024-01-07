@@ -3,19 +3,19 @@
 #include "error_macros.h"
 
 OpenGlGraphicsContext::OpenGlGraphicsContext(GLFWwindow* contextWindow) :
-    Window{contextWindow}
+    window_{contextWindow}
 {
-    glfwMakeContextCurrent(Window);
+    glfwMakeContextCurrent(window_);
     glfwSwapInterval(1);
-    GLenum errorCode = glewInit();
-    CRASH_EXPECTED_TRUE_MSG(errorCode == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(errorCode)));
+    GLenum error_code = glewInit();
+    CRASH_EXPECTED_TRUE_MSG(error_code == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(error_code)));
 }
 
 void OpenGlGraphicsContext::InitializeForImGui()
 {
-    ImGui_ImplGlfw_InitForOpenGL(Window, true);
-    const char* glslVersion = "#version 430 core";
-    ImGui_ImplOpenGL3_Init(glslVersion);
+    ImGui_ImplGlfw_InitForOpenGL(window_, true);
+    const char* glsl_version = "#version 430 core";
+    ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
 void OpenGlGraphicsContext::DeinitializeImGui()
@@ -42,16 +42,16 @@ void OpenGlGraphicsContext::UpdateImGuiViewport()
     // update viewport if enabled
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
-        GLFWwindow* backupCurrentContext = glfwGetCurrentContext();
+        GLFWwindow* current_context_window = glfwGetCurrentContext();
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
-        glfwMakeContextCurrent(backupCurrentContext);
+        glfwMakeContextCurrent(current_context_window);
     }
 }
 
 void OpenGlGraphicsContext::SwapBuffers()
 {
-    glfwSwapBuffers(Window);
+    glfwSwapBuffers(window_);
 }
 
 void OpenGlGraphicsContext::SetVsync(bool vsync_enabled)

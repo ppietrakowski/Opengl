@@ -3,89 +3,89 @@
 
 glm::mat4 TransformComponent::GetWorldTransformMatrix() const
 {
-    entt::handle parentTraverseIt = Parent;
+    entt::handle parent_traverse_it = parent;
 
-    glm::mat4 worldTransform = CalculateRelativeTransform();
+    glm::mat4 world_transform = CalculateRelativeTransform();
 
-    while (parentTraverseIt.valid())
+    while (parent_traverse_it.valid())
     {
         // accumulate all parent transforms
-        const TransformComponent& parentTransform = parentTraverseIt.get<TransformComponent>();
-        worldTransform = parentTransform.CalculateRelativeTransform() * worldTransform;
-        parentTraverseIt = parentTransform.Parent;
+        const TransformComponent& parent_transform = parent_traverse_it.get<TransformComponent>();
+        world_transform = parent_transform.CalculateRelativeTransform() * world_transform;
+        parent_traverse_it = parent_transform.parent;
     }
 
-    return worldTransform;
+    return world_transform;
 }
 
 void SceneHierarchyComponent::RemoveChild(entt::handle handle)
 {
-    const ActorTagComponent& tagComponent = handle.get<ActorTagComponent>();
-    auto it = Children.find(tagComponent.Name);
-    assert(it != Children.end());
+    const ActorTagComponent& tag_component = handle.get<ActorTagComponent>();
+    auto it = children.find(tag_component.name);
+    assert(it != children.end());
 
-    it->second.get<TransformComponent>().Parent = entt::handle{};
-    Children.erase(it);
+    it->second.get<TransformComponent>().parent = entt::handle{};
+    children.erase(it);
 }
 
 void SceneHierarchyComponent::AddChild(const entt::handle& self, entt::handle handle)
 {
-    const ActorTagComponent& tagComponent = handle.get<ActorTagComponent>();
-    Children[tagComponent.Name] = handle;
-    handle.get<TransformComponent>().Parent = self;
+    const ActorTagComponent& tag_component = handle.get<ActorTagComponent>();
+    children[tag_component.name] = handle;
+    handle.get<TransformComponent>().parent = self;
 }
 
 void SceneHierarchyComponent::InvalidateState()
 {
     auto predicate = [](const std::pair<const std::string, entt::handle>& a) { return !a.second.valid(); };
 
-    auto it = std::find_if(Children.begin(), Children.end(), predicate);
+    auto it = std::find_if(children.begin(), children.end(), predicate);
 
-    while (it != Children.end())
+    while (it != children.end())
     {
-        Children.erase(it);
-        it = std::find_if(Children.begin(), Children.end(), predicate);
+        children.erase(it);
+        it = std::find_if(children.begin(), children.end(), predicate);
     }
 }
 
 const std::string& Actor::GetName() const
 {
-    auto& tagComponent = GetComponent<ActorTagComponent>();
-    return tagComponent.Name;
+    auto& tag_component = GetComponent<ActorTagComponent>();
+    return tag_component.name;
 }
 
 void Actor::SetName(const std::string& name)
 {
-    auto& tagComponent = GetComponent<ActorTagComponent>();
-    tagComponent.Name = name;
+    auto& tag_component = GetComponent<ActorTagComponent>();
+    tag_component.name = name;
 }
 
 void Actor::AddChild(const Actor& actor)
 {
     auto& hierarchy = GetComponent<SceneHierarchyComponent>();
-    hierarchy.AddChild(EntityHandle, actor.EntityHandle);
+    hierarchy.AddChild(entity_handle_, actor.entity_handle_);
 }
 
 void Actor::RemoveChild(const Actor& actor)
 {
     auto& hierarchy = GetComponent<SceneHierarchyComponent>();
-    hierarchy.RemoveChild(actor.EntityHandle);
+    hierarchy.RemoveChild(actor.entity_handle_);
 }
 
 void Actor::DestroyActor()
 {
-    auto& sceneHierarchy = GetComponent<SceneHierarchyComponent>();
-    for (auto& [name, actor] : sceneHierarchy.Children)
+    auto& scene_hierarchy = GetComponent<SceneHierarchyComponent>();
+    for (auto& [name, actor] : scene_hierarchy.children)
     {
-        HomeLevel->RemoveActor(name);
+        home_level_->RemoveActor(name);
     }
 
-    HomeLevel->RemoveActor(GetName());
+    home_level_->RemoveActor(GetName());
 }
 
 bool Actor::IsAlive() const
 {
-    return EntityHandle.valid();
+    return entity_handle_.valid();
 }
 
 Actor::Actor()

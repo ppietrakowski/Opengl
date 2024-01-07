@@ -9,93 +9,105 @@
 #include <fstream>
 #include <algorithm>
 
-std::shared_ptr<IShader> IShader::CreateFromSource(std::string_view vertex_shader_source, std::string_view fragment_shader_source)
+std::shared_ptr<Shader> Shader::CreateFromSource(std::span<const std::string> sources)
 {
+    std::shared_ptr<Shader> shader = nullptr;
+
     switch (IRendererAPI::GetApi())
     {
     case IRendererAPI::kOpenGL:
-        return std::make_shared<OpenGlShader>(vertex_shader_source, fragment_shader_source);
+        shader = std::make_shared<OpenGlShader>();
+        break;
+    default:
+        ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
     }
 
-    ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
-}
-
-std::shared_ptr<IShader> IShader::CreateFromSource(std::string_view vertex_shader_source, std::string_view fragment_shader_source,
-    std::string_view geometry_shader_source)
-{
-    switch (IRendererAPI::GetApi())
-    {
-    case IRendererAPI::kOpenGL:
-        return std::make_shared<OpenGlShader>(vertex_shader_source, fragment_shader_source, geometry_shader_source);
-    }
-
-    ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
-}
-
-std::shared_ptr<IShader> IShader::CreateFromSource(std::string_view vertex_shader_source, std::string_view fragment_shader_source,
-    std::string_view geometry_shader_source, std::string_view tesselation_control_shader, std::string_view tesselation_evaluate_shader)
-{
-    switch (IRendererAPI::GetApi())
-    {
-    case IRendererAPI::kOpenGL:
-        return std::make_shared<OpenGlShader>(vertex_shader_source, fragment_shader_source, geometry_shader_source,
-            tesselation_control_shader, tesselation_evaluate_shader);
-    }
-
-    ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
-}
-
-std::shared_ptr<IShader> IShader::CreateFromSource(std::span<const std::string> sources)
-{
-    std::shared_ptr<IShader> shader = std::make_shared<OpenGlShader>();
-    std::vector<std::string_view> sources_to_string_view;
-
-    sources_to_string_view.resize(sources.size());
-
-    std::transform(sources.begin(), sources.end(), sources_to_string_view.begin(),
-        [](const std::string& s) { return static_cast<std::string_view>(s); });
-
-    shader->GenerateShaders(sources_to_string_view);
+    shader->GenerateShaders(sources);
     return shader;
 }
 
-std::shared_ptr<IShader> IShader::LoadShader(std::string_view vertex_shader_path, std::string_view fragment_shader_path)
+void Shader::GenerateShaders(std::span<const std::string> sources)
 {
-    return LoadShader({vertex_shader_path, fragment_shader_path});
-}
+    ASSERT(sources.size() < ShaderIndex::kCount);
+    std::array<std::string_view, ShaderIndex::kCount> srcs;
+    std::uint32_t index = 0;
 
-std::shared_ptr<IShader> IShader::LoadShader(std::string_view vertexShaderPath, std::string_view fragment_shader_path,
-    std::string_view geometry_shader_path)
-{
-    return LoadShader({vertexShaderPath, fragment_shader_path, geometry_shader_path});
-}
-
-std::shared_ptr<IShader> IShader::LoadShader(std::string_view vertexShaderPath, std::string_view fragment_shader_path,
-    std::string_view geometry_shader_path, std::string_view tesselation_control_shader_path, std::string_view tesselation_evaluate_shader_path)
-{
-    return LoadShader({vertexShaderPath, fragment_shader_path,
-        geometry_shader_path, tesselation_control_shader_path, tesselation_evaluate_shader_path});
-}
-
-
-std::shared_ptr<IShader> IShader::LoadShader(const std::initializer_list<std::string_view>& paths)
-{
-    std::array<std::string, ShaderIndex::kCount> sources;
-    std::size_t index = 0;
-
-    auto it = sources.begin();
-
-    for (const std::string_view& path : paths)
+    for (const std::string& src : sources)
     {
-        sources[index++] = LoadFileContent(std::string{path.begin(), path.end()});
-        ++it;
+        srcs[index++] = src;
     }
 
-    std::array<std::string_view, ShaderIndex::kCount> sources_to_string_view;
-    std::transform(sources.begin(), it, sources_to_string_view.begin(),
-        [](const std::string& s) { return static_cast<std::string_view>(s); });
+    GenerateShaders(std::span<std::string_view>{srcs.begin(), index});
+}
 
-    std::shared_ptr<IShader> shader = std::make_shared<OpenGlShader>();
-    shader->GenerateShaders(std::span<std::string_view>{ sources_to_string_view.begin(), index });
-    return shader;
+std::uint32_t ShaderSourceBuilder::GetLastShaderIndex() const
+{
+    for (auto it = shader_sources_.rbegin(); it != shader_sources_.rend(); ++it)
+    {
+        if (it->empty())
+        {
+            return static_cast<std::uint32_t>(std::distance(shader_sources_.rbegin(), it));
+        }
+    }
+
+    return ShaderIndex::kCount;
+}
+
+std::shared_ptr<Shader> ShaderSourceBuilder::Build()
+{
+    std::uint32_t index = GetLastShaderIndex();
+    return Shader::CreateFromSource(std::span<const std::string>{shader_sources_.begin(), index});
+}
+
+ShaderSourceBuilder& ShaderSourceBuilder::SetVertexShaderSource(const std::string& source)
+{
+    shader_sources_[ShaderIndex::kVertex] = source;
+    return *this;
+}
+
+ShaderSourceBuilder& ShaderSourceBuilder::LoadVertexShaderSource(const std::filesystem::path& file_path)
+{
+    shader_sources_[ShaderIndex::kVertex] = LoadFileContent(file_path);
+    return *this;
+}
+
+ShaderSourceBuilder& ShaderSourceBuilder::SetFragmentShaderSource(const std::string& source)
+{
+    shader_sources_[ShaderIndex::kFragment] = source;
+    return *this;
+}
+
+ShaderSourceBuilder& ShaderSourceBuilder::LoadFragmentShaderSource(const std::filesystem::path& file_path)
+{
+    shader_sources_[ShaderIndex::kFragment] = LoadFileContent(file_path);
+    return *this;
+}
+
+
+ShaderSourceBuilder& ShaderSourceBuilder::SetGeometryShaderSource(const std::string& source)
+{
+    shader_sources_[ShaderIndex::kGeometry] = source;
+    return *this;
+}
+
+ShaderSourceBuilder& ShaderSourceBuilder::LoadGeometryShaderSource(const std::filesystem::path& file_path)
+{
+    shader_sources_[ShaderIndex::kGeometry] = LoadFileContent(file_path);
+    return *this;
+}
+
+ShaderSourceBuilder& ShaderSourceBuilder::SetTesselationShaderSource(const std::string& control_shader_source,
+    const std::string& evaluate_shader_source)
+{
+    shader_sources_[ShaderIndex::kTesselationControlShader] = control_shader_source;
+    shader_sources_[ShaderIndex::kTesselationEvaluateShader] = evaluate_shader_source;
+    return *this;
+}
+
+ShaderSourceBuilder& ShaderSourceBuilder::LoadGeometryShaderSource(const std::filesystem::path& control_shader_path, 
+    const std::filesystem::path& evaluate_shader_source)
+{
+    shader_sources_[ShaderIndex::kTesselationControlShader] = LoadFileContent(control_shader_path);
+    shader_sources_[ShaderIndex::kTesselationEvaluateShader] = LoadFileContent(evaluate_shader_source);
+    return *this;
 }

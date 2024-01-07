@@ -1,33 +1,33 @@
 #include "Input.h"
 
-Input* Input::Instance = nullptr;
+Input* Input::input_instance_ = nullptr;
 
 Input::Input()
 {
-    Instance = this;
+    input_instance_ = this;
 }
 
 bool Input::IsKeyPressed(KeyCode key)
 {
-    return Instance->IsKeyPressedImpl(key);
+    return input_instance_->IsKeyPressedImpl(key);
 }
 
 bool Input::IsMouseButtonPressed(MouseButton button)
 {
-    return Instance->IsMouseButtonPressedImpl(button);
+    return input_instance_->IsMouseButtonPressedImpl(button);
 }
 
 glm::vec2 Input::GetMousePosition()
 {
-    return Instance->GetMousePositionImpl();
+    return input_instance_->GetMousePositionImpl();
 }
 
 float Input::GetMouseX()
 {
-    return Instance->GetMousePositionImpl().x;
+    return input_instance_->GetMousePositionImpl().x;
 }
 
 float Input::GetMouseY()
 {
-    return Instance->GetMousePositionImpl().y;
+    return input_instance_->GetMousePositionImpl().y;
 }

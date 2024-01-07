@@ -19,16 +19,16 @@
 
 #include <chrono>
 
-inline constexpr std::size_t kNumBonesPerVertex = 4;
+inline constexpr std::int32_t kNumBonesPerVertex = 4;
 
 struct SkeletonMeshVertex
 {
-    glm::vec3 Position{0, 0,0};
-    glm::vec3 Normal{0, 0, 0};
-    glm::vec2 TextureCoords{0, 0};
-    int32_t BoneIds[kNumBonesPerVertex] = {0, 0, 0, 0};
-    float BoneWeights[kNumBonesPerVertex] = {0, 0, 0, 0};
-    uint32_t TextureId{0};
+    glm::vec3 position{0, 0,0};
+    glm::vec3 normal{0, 0, 0};
+    glm::vec2 texture_coords{0, 0};
+    std::int32_t bone_ids[kNumBonesPerVertex] = {0, 0, 0, 0};
+    float bone_weights[kNumBonesPerVertex] = {0, 0, 0, 0};
+    std::uint32_t texture_id{0};
 
     static inline constexpr VertexAttribute kDataFormat[6] = {
         { 3, PrimitiveVertexType::kFloat },
@@ -40,17 +40,17 @@ struct SkeletonMeshVertex
     };
 
     SkeletonMeshVertex() = default;
-    SkeletonMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& textureCoords);
+    SkeletonMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& texture_coords);
     SkeletonMeshVertex(const SkeletonMeshVertex&) = default;
     SkeletonMeshVertex& operator=(const SkeletonMeshVertex&) = default;
-    bool AddBoneData(int32_t boneId, float weight);
+    bool AddBoneData(std::int32_t bone_id, float weight);
 };
 
 template <typename T>
 struct KeyProperty
 {
-    T Property;
-    float Timestamp;
+    T property;
+    float timestamp;
 };
 
 using VectorProperty = KeyProperty<glm::vec3>;
@@ -63,36 +63,36 @@ public:
     void AddNewRotationTimestamp(glm::quat rotation, float timestamp);
 
     template <typename T>
-    T Interpolate(float animationTime) const;
+    T Interpolate(float animation_time) const;
 
     template<>
-    glm::vec3 Interpolate<glm::vec3>(float animationTime) const;
+    glm::vec3 Interpolate<glm::vec3>(float animation_time) const;
 
     template<>
-    glm::quat Interpolate<glm::quat>(float animationTime) const;
+    glm::quat Interpolate<glm::quat>(float animation_time) const;
 
 private:
-    std::vector<VectorProperty> PositionKeys;
-    std::vector<QuatProperty> RotationKeys;
+    std::vector<VectorProperty> position_keys_;
+    std::vector<QuatProperty> rotation_keys_;
 
     template <typename T>
-    int32_t GetIndex(float animationTime, const std::vector<KeyProperty<T>>& timestamps) const;
+    std::int32_t GetIndex(float animation_time, const std::vector<KeyProperty<T>>& timestamps) const;
 };
 
 
 struct BoneInfo
 {
-    int32_t BoneTransformIndex;
+    std::int32_t bone_transform_index;
 
     /* Matrix that convert vertex to bone space */
-    glm::mat4 OffsetMatrix;
+    glm::mat4 offset_matrix;
 
     BoneInfo() = default;
     BoneInfo(const BoneInfo&) = default;
     BoneInfo& operator=(const BoneInfo&) = default;
-    BoneInfo(int32_t boneTransformIndex, const glm::mat4& offsetMatrix) :
-        BoneTransformIndex{boneTransformIndex},
-        OffsetMatrix{offsetMatrix}
+    BoneInfo(std::int32_t boneTransformIndex, const glm::mat4& offsetMatrix) :
+        bone_transform_index{boneTransformIndex},
+        offset_matrix{offsetMatrix}
     {
     }
 };
@@ -101,45 +101,45 @@ struct aiNode;
 
 struct Bone
 {
-    std::vector<Bone> Children;
+    std::vector<Bone> children;
 
     /* Index in bone_transform_ array */
-    int32_t BoneTransformIndex{0};
+    std::int32_t bone_transform_index{0};
 
     /* Relative transformation to it's parent */
-    glm::mat4 RelativeTransformMatrix{glm::identity<glm::mat4>()};
+    glm::mat4 relative_transform_matrix{glm::identity<glm::mat4>()};
 
     /* Matrix that convert vertex to bone space */
-    glm::mat4 BoneOffset{glm::identity<glm::mat4>()};
-    std::string Name;
+    glm::mat4 bone_offset{glm::identity<glm::mat4>()};
+    std::string name;
 
-    bool AssignHierarchy(const aiNode* node, const std::unordered_map<std::string, BoneInfo>& bonesInfo);
+    bool AssignHierarchy(const aiNode* node, const std::unordered_map<std::string, BoneInfo>& bones_info);
 };
 
 struct SkeletalAnimation
 {
     // Duration in ticks
-    float Duration{0.0f};
-    float TicksPerSecond{0.0f};
+    float duration{0.0f};
+    float ticks_per_second{0.0f};
 
     // bone name mapped to animation track
-    std::unordered_map<std::string, BoneAnimationTrack> BoneNameToTracks;
+    std::unordered_map<std::string, BoneAnimationTrack> bone_name_to_tracks;
 
-    glm::mat4 GetBoneTransformOrRelative(const Bone& bone, float animationTime) const;
+    glm::mat4 GetBoneTransformOrRelative(const Bone& bone, float animation_time) const;
 };
 
 struct aiScene;
 
 struct BoneAnimationUpdateSpecs
 {
-    const SkeletalAnimation* TargetAnimation;
-    float AnimationTime;
-    const Bone* Joint;
+    const SkeletalAnimation* target_animation;
+    float animation_time;
+    const Bone* bone;
 
     const SkeletalAnimation* operator->() const
     {
-        ASSERT(TargetAnimation != nullptr);
-        return TargetAnimation;
+        ASSERT(target_animation != nullptr);
+        return target_animation;
     }
 };
 
@@ -152,68 +152,68 @@ public:
 
     std::vector<std::string> GetAnimationNames() const;
 
-    void GetAnimationFrames(float elapsedTime, const std::string& name, std::vector<glm::mat4>& transforms) const;
+    void GetAnimationFrames(float elapsed_time, const std::string& name, std::vector<glm::mat4>& transforms) const;
 
     const glm::vec3& GetBboxMin() const
     {
-        return BboxMin;
+        return bbox_min_;
     }
 
     const glm::vec3& GetBboxMax() const
     {
-        return BboxMax;
+        return bbox_max_;
     }
 
     const std::shared_ptr<Material>& GetMaterial() const
     {
-        return MainMaterial;
+        return main_material;
     }
 
-    int32_t GetNumBones() const
+    std::int32_t GetNumBones() const
     {
-        return NumBones;
+        return num_bones_;
     }
 
-    std::shared_ptr<Material> MainMaterial;
-    std::vector<std::string> Textures;
+    std::shared_ptr<Material> main_material;
+    std::vector<std::string> textures;
 
 private:
-    std::shared_ptr<IVertexArray> VertexArray;
-    Bone RootBone;
-    std::unordered_map<std::string, SkeletalAnimation> Animations;
-    glm::mat4 GlobalInverseTransform;
+    std::shared_ptr<VertexArray> vertex_array_;
+    Bone root_bone_;
+    std::unordered_map<std::string, SkeletalAnimation> animations_;
+    glm::mat4 global_inverse_transform_;
 
-    int32_t NumBones;
+    std::int32_t num_bones_;
 
-    glm::vec3 BboxMin;
-    glm::vec3 BboxMax;
+    glm::vec3 bbox_min_;
+    glm::vec3 bbox_max_;
 
 private:
-    void UpdateAnimation(const std::string& animationName, float elapsedTime, std::vector<glm::mat4>& transforms) const;
-    void CalculateTransform(const BoneAnimationUpdateSpecs& updateSpecs, std::vector<glm::mat4>& transforms, const glm::mat4& parentTransform = glm::identity<glm::mat4>()) const;
-    std::shared_ptr<ITexture2D> LoadTexturesFromMaterial(const aiScene* scene, int32_t materialIndex);
-    void LoadAnimation(const aiScene* scene, int32_t animationIndex);
+    void UpdateAnimation(const std::string& animation_name, float elapsed_time, std::vector<glm::mat4>& transforms) const;
+    void CalculateTransform(const BoneAnimationUpdateSpecs& update_specs, std::vector<glm::mat4>& transforms, const glm::mat4& parent_transform = glm::identity<glm::mat4>()) const;
+    std::shared_ptr<Texture2D> LoadTexturesFromMaterial(const aiScene* scene, std::int32_t material_index);
+    void LoadAnimation(const aiScene* scene, std::int32_t animation_index);
     
-    void Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& worldTransform);
+    void Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& world_transform);
 };
 
 template<>
-inline glm::vec3 BoneAnimationTrack::Interpolate(float animationTime) const
+inline glm::vec3 BoneAnimationTrack::Interpolate(float animation_time) const
 {
-    if (PositionKeys.size() == 1)
+    if (position_keys_.size() == 1)
     {
-        return PositionKeys[0].Property;
+        return position_keys_[0].property;
     }
-    else if (!PositionKeys.empty())
+    else if (!position_keys_.empty())
     {
-        int32_t positionIndex = GetIndex(animationTime, PositionKeys);
-        int32_t nextPositionIndex = positionIndex + 1;
+        std::int32_t pos_index = GetIndex(animation_time, position_keys_);
+        std::int32_t next_pos_index = pos_index + 1;
 
-        float deltaTime = PositionKeys[nextPositionIndex].Timestamp - PositionKeys[positionIndex].Timestamp;
-        float factor = (animationTime - PositionKeys[positionIndex].Timestamp) / deltaTime;
+        float delta_time = position_keys_[next_pos_index].timestamp - position_keys_[pos_index].timestamp;
+        float factor = (animation_time - position_keys_[pos_index].timestamp) / delta_time;
         ASSERT(factor >= 0 && factor <= 1);
 
-        return glm::mix(PositionKeys[positionIndex].Property, PositionKeys[nextPositionIndex].Property, factor);
+        return glm::mix(position_keys_[pos_index].property, position_keys_[next_pos_index].property, factor);
     }
     else
     {
@@ -222,23 +222,23 @@ inline glm::vec3 BoneAnimationTrack::Interpolate(float animationTime) const
 }
 
 template<>
-inline glm::quat BoneAnimationTrack::Interpolate(float animationTime) const
+inline glm::quat BoneAnimationTrack::Interpolate(float animation_time) const
 {
-    if (RotationKeys.size() == 1)
+    if (rotation_keys_.size() == 1)
     {
         // not enough keys, use first key as base
-        return RotationKeys[0].Property;
+        return rotation_keys_[0].property;
     }
-    else if (!RotationKeys.empty())
+    else if (!rotation_keys_.empty())
     {
         // find time range based on animationTime
-        int32_t rotationIndex = GetIndex(animationTime, RotationKeys);
-        int32_t nextRotationIndex = rotationIndex + 1;
+        std::int32_t rot_index = GetIndex(animation_time, rotation_keys_);
+        std::int32_t next_rot_index = rot_index + 1;
 
-        float deltaTime = RotationKeys[nextRotationIndex].Timestamp - RotationKeys[rotationIndex].Timestamp;
-        float factor = (animationTime - RotationKeys[rotationIndex].Timestamp) / deltaTime;
+        float delta_time = rotation_keys_[next_rot_index].timestamp - rotation_keys_[rot_index].timestamp;
+        float factor = (animation_time - rotation_keys_[rot_index].timestamp) / delta_time;
         ASSERT(factor >= 0 && factor <= 1);
-        return glm::mix(RotationKeys[rotationIndex].Property, RotationKeys[nextRotationIndex].Property, factor);
+        return glm::mix(rotation_keys_[rot_index].property, rotation_keys_[next_rot_index].property, factor);
     }
 
     return glm::quat{glm::vec3{0, 0, 0}};
@@ -246,54 +246,53 @@ inline glm::quat BoneAnimationTrack::Interpolate(float animationTime) const
 
 
 template <typename T>
-inline int32_t BoneAnimationTrack::GetIndex(float animationTime, const std::vector<KeyProperty<T>>& keys) const
+inline std::int32_t BoneAnimationTrack::GetIndex(float animation_time, const std::vector<KeyProperty<T>>& keys) const
 {
     ASSERT(keys.size() > 0 && "Called BoneAnimationTrack::GetIndex with track without keys");
 
     // run binary search to find first timestamp that is greater than animationTime (max in time range)
-    auto it = std::lower_bound(keys.begin(), keys.end(), animationTime, [](const KeyProperty<T>& k, float time) {
-        return time > k.Timestamp;
+    auto it = std::lower_bound(keys.begin(), keys.end(), animation_time, [](const KeyProperty<T>& k, float time) {
+        return time > k.timestamp;
     });
 
-    bool bIsLastAnimationTimestamp = it == keys.end();
-    if (bIsLastAnimationTimestamp)
+    bool is_last_anim_timestamp = it == keys.end();
+    if (is_last_anim_timestamp)
     {
         return keys.size() > 2 ? static_cast<uint32_t>(keys.size() - 2) : 0;
     }
 
-    int32_t leftSideRange = static_cast<int32_t>(std::distance(keys.begin(), it));
-    ASSERT(leftSideRange >= 0);
+    std::int32_t left_side_range = static_cast<std::int32_t>(std::distance(keys.begin(), it));
+    ASSERT(left_side_range >= 0);
 
-    if (leftSideRange != 0)
+    if (left_side_range != 0)
     {
         // if it's not a first frame of animation, adjust that i now defines left side of range
         // otherwise it's just range {0, 1}
-        --leftSideRange;
+        --left_side_range;
     }
 
-    return leftSideRange;
+    return left_side_range;
 }
 
-inline void SkeletalMesh::UpdateAnimation(const std::string& animationName, float elapsedTime, std::vector<glm::mat4>& transforms) const
+inline void SkeletalMesh::UpdateAnimation(const std::string& animation_name, float elapsed_time, std::vector<glm::mat4>& transforms) const
 {
-    const SkeletalAnimation& animation = Animations.at(animationName);
+    const SkeletalAnimation& animation = animations_.at(animation_name);
 
     // precalculate animation time to
-    float ticksPerSecond = animation.TicksPerSecond;
-    float timeInTicks = elapsedTime * ticksPerSecond;
-    float animationTime = fmod(timeInTicks, animation.Duration);
+    float time_in_ticks = elapsed_time * animation.ticks_per_second;
+    float animation_time = fmod(time_in_ticks, animation.duration);
 
     // run transform update chain starting from root joint
-    CalculateTransform(BoneAnimationUpdateSpecs{&animation, animationTime, &RootBone}, transforms);
+    CalculateTransform(BoneAnimationUpdateSpecs{&animation, animation_time, &root_bone_}, transforms);
 }
 
 
 inline void BoneAnimationTrack::AddNewPositionTimestamp(glm::vec3 position, float timestamp)
 {
-    PositionKeys.emplace_back(VectorProperty{position, timestamp});
+    position_keys_.emplace_back(VectorProperty{position, timestamp});
 }
 
 inline void BoneAnimationTrack::AddNewRotationTimestamp(glm::quat Rotation, float timestamp)
 {
-    RotationKeys.emplace_back(QuatProperty{Rotation, timestamp});
+    rotation_keys_.emplace_back(QuatProperty{Rotation, timestamp});
 }

@@ -3,22 +3,22 @@
 #include "renderer.h"
 
 SkeletalMeshComponent::SkeletalMeshComponent(const std::shared_ptr<SkeletalMesh>& mesh):
-    Mesh{mesh}
+    skeletal_mesh{mesh}
 {
     std::vector<std::string> animations = mesh->GetAnimationNames();
-    AnimationName = animations.back();
-    BoneTransforms.resize(mesh->GetNumBones(), glm::identity<glm::mat4>());
+    animation_name = animations.back();
+    bone_transforms.resize(mesh->GetNumBones(), glm::identity<glm::mat4>());
 
-    DebugBboxMin = Mesh->GetBboxMin();
-    DebugBboxMax = Mesh->GetBboxMax();
+    debug_bbox_min = skeletal_mesh->GetBboxMin();
+    debug_bbox_max = skeletal_mesh->GetBboxMax();
 }
 
-void SkeletalMeshComponent::Draw(const glm::mat4& worldTransform)
+void SkeletalMeshComponent::Draw(const glm::mat4& world_transform)
 {
-    if (bShouldDrawDebugBounds)
+    if (should_draw_debug_bounds)
     {
-        Renderer::DrawDebugBox(DebugBboxMin, DebugBboxMax, worldTransform);
+        Renderer::DrawDebugBox(debug_bbox_min, debug_bbox_max, world_transform);
     }
 
-    Mesh->Draw(BoneTransforms, worldTransform);
+    skeletal_mesh->Draw(bone_transforms, world_transform);
 }

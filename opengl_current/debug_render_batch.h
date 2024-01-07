@@ -11,17 +11,17 @@ public:
     DebugRenderBatch();
 
     void UploadBatchedData();
-    void FlushDraw(IShader& shader);
+    void FlushDraw(Shader& shader);
 
     void AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform);
 
-    bool CanBatchAnotherMesh(int32_t numIndices) const;
+    bool CanBatchAnotherMesh(std::int32_t num_indices) const;
     bool HasBatchedAnyPrimitive() const;
 
 private:
-    Buffer<glm::vec3> Vertices;
-    Buffer<uint32_t> Indices;
-    std::shared_ptr<IVertexArray> VertexArray;
-    int32_t LastIndexNumber{0};
+    Buffer<glm::vec3> vertices_;
+    Buffer<std::uint32_t> indices_;
+    std::shared_ptr<VertexArray> vertex_array_;
+    std::int32_t last_index_number_{0};
 };
 

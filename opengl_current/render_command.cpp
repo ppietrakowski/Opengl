@@ -3,93 +3,93 @@
 
 #include <chrono>
 
-static RenderStats s_RenderStats;
-static std::chrono::nanoseconds s_StartTimestamp = std::chrono::nanoseconds::zero();
-IRendererAPI* RenderCommand::RendererApi = nullptr;
+static RenderStats render_stats_;
+static std::chrono::nanoseconds start_timestamp_ = std::chrono::nanoseconds::zero();
+IRendererAPI* RenderCommand::renderer_api_ = nullptr;
 
 void RenderCommand::Initialize()
 {
-    RendererApi = new OpenGlRenderApi();
+    renderer_api_ = new OpenGlRenderApi();
 }
 
 void RenderCommand::Quit()
 {
-    delete RendererApi;
-    RendererApi = nullptr;
+    delete renderer_api_;
+    renderer_api_ = nullptr;
 }
 
 void RenderCommand::ClearBufferBindings_Debug()
 {
-    RendererApi->ClearBufferBindings_Debug();
+    renderer_api_->ClearBufferBindings_Debug();
 }
 
-void RenderCommand::DrawIndexed(const IndexedDrawData& drawData)
+void RenderCommand::DrawIndexed(const IndexedDrawData& draw_data)
 {
-    RendererApi->DrawIndexed(drawData);
-    s_RenderStats.NumDrawCalls++;
-    s_RenderStats.NumTriangles += (drawData.NumIndices / 3);
+    renderer_api_->DrawIndexed(draw_data);
+    render_stats_.num_drawcalls++;
+    render_stats_.num_drawn_triangles += (draw_data.num_indices / 3);
 }
 
 void RenderCommand::BeginScene()
 {
-    s_RenderStats.NumDrawCalls = 0;
-    s_RenderStats.NumTriangles = 0;
+    render_stats_.num_drawcalls = 0;
+    render_stats_.num_drawn_triangles = 0;
 }
 
 void RenderCommand::EndScene()
 {
     auto now = std::chrono::system_clock::now().time_since_epoch();
-    s_RenderStats.DeltaFrameNanoseconds = (now - s_StartTimestamp).count();
-    s_StartTimestamp = now;
+    render_stats_.delta_frame_nanoseconds = (now - start_timestamp_).count();
+    start_timestamp_ = now;
 }
 
-void RenderCommand::SetClearColor(const RgbaColor& clearColor)
+void RenderCommand::SetClearColor(const RgbaColor& clear_color)
 {
-    RendererApi->SetClearColor(clearColor);
+    renderer_api_->SetClearColor(clear_color);
 }
 
 void RenderCommand::Clear()
 {
-    RendererApi->Clear();
+    renderer_api_->Clear();
 }
 
-void RenderCommand::SetWireframe(bool bWireframeEnabled)
+void RenderCommand::SetWireframe(bool wireframe_enabled)
 {
-    RendererApi->SetWireframe(bWireframeEnabled);
+    renderer_api_->SetWireframe(wireframe_enabled);
 }
 
 bool RenderCommand::IsWireframeEnabled()
 {
-    return RendererApi->IsWireframeEnabled();
+    return renderer_api_->IsWireframeEnabled();
 }
 
-void RenderCommand::SetCullFace(bool bCullFace)
+void RenderCommand::SetCullFace(bool cull_face)
 {
-    RendererApi->SetCullFace(bCullFace);
+    renderer_api_->SetCullFace(cull_face);
 }
 
 bool RenderCommand::DoesCullFaces()
 {
-    return RendererApi->DoesCullFaces();
+    return renderer_api_->DoesCullFaces();
 }
 
-void RenderCommand::SetBlendingEnabled(bool bBlendingEnabled)
+void RenderCommand::SetBlendingEnabled(bool blending_enabled)
 {
-    RendererApi->SetBlendingEnabled(bBlendingEnabled);
+    renderer_api_->SetBlendingEnabled(blending_enabled);
 }
 
-void RenderCommand::SetLineWidth(float lineWidth)
+void RenderCommand::SetLineWidth(float line_width)
 {
-    RendererApi->SetLineWidth(lineWidth);
+    renderer_api_->SetLineWidth(line_width);
 }
 
-void RenderCommand::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
+void RenderCommand::SetViewport(std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height)
 {
-    RendererApi->SetViewport(x, y, width, height);
+    renderer_api_->SetViewport(x, y, width, height);
 }
 
 RenderStats RenderCommand::GetRenderStats()
 {
-    return s_RenderStats;
+    return render_stats_;
 }
 

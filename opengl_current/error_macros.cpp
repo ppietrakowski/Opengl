@@ -10,29 +10,29 @@
 #include <Windows.h>
 #endif
 
-constexpr int32_t kMaxErrorHandlers = 5;
+constexpr std::int32_t kMaxErrorHandlers = 5;
 
-static std::array<ErrorHandler, kMaxErrorHandlers> ErrorHandlers;
-static int32_t NumErrorHandlers = 0;
+static std::array<ErrorHandler, kMaxErrorHandlers> error_handlers_;
+static std::int32_t num_error_handlers_ = 0;
 
 void AddErrorHandler(const ErrorHandler& handler)
 {
-    ERR_FAIL_EXPECTED_TRUE_MSG(NumErrorHandlers < kMaxErrorHandlers, "Max error handlers assigned");
-    ErrorHandlers[NumErrorHandlers++] = handler;
+    ERR_FAIL_EXPECTED_TRUE_MSG(num_error_handlers_ < kMaxErrorHandlers, "Max error handlers assigned");
+    error_handlers_[num_error_handlers_++] = handler;
 }
 
 void RemoveErrorHandler(const ErrorHandler& handler)
 {
     // find first item that's equal to handler
-    for (auto it = ErrorHandlers.begin(); it != ErrorHandlers.end(); ++it)
+    for (auto it = error_handlers_.begin(); it != error_handlers_.end(); ++it)
     {
-        bool bHandlerEqual = handler.UserData == it->UserData && handler.ErrorHandlerFunc == it->ErrorHandlerFunc;
+        bool handler_equal = handler.user_data == it->user_data && handler.error_handler_func == it->error_handler_func;
 
-        if (bHandlerEqual)
+        if (handler_equal)
         {
             // if found, move element to front of array
-            std::move(it + 1, ErrorHandlers.end(), it);
-            NumErrorHandlers--;
+            std::move(it + 1, error_handlers_.end(), it);
+            num_error_handlers_--;
             break;
         }
     }
@@ -50,18 +50,18 @@ void Crash(const SourceLocation* location, const char* description)
 void PrintError(const SourceLocation* location, const char* message)
 {
 #if defined(DEBUG) || defined(_DEBUG)
-    printf("Error in %s: %u in %s msg: %s\n", location->FileName, location->Line, location->FunctionName, message);
+    printf("Error in %s: %u in %s msg: %s\n", location->file_name, location->line, location->function_name, message);
 #endif
 
     ErrorHandlerInfo info{*location,  message};
-    for (int32_t i = 0; i < NumErrorHandlers; ++i)
+    for (std::int32_t i = 0; i < num_error_handlers_; ++i)
     {
-        const ErrorHandler& errorHandler = ErrorHandlers[i];
-        errorHandler.Invoke(info);
+        const ErrorHandler& error_handler = error_handlers_[i];
+        error_handler.Invoke(info);
     }
 }
 
 void ErrorHandler::Invoke(const ErrorHandlerInfo& info) const
 {
-    ErrorHandlerFunc(UserData, info);
+    error_handler_func(user_data, info);
 }
