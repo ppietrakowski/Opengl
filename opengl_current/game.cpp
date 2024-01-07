@@ -37,7 +37,7 @@ Game::~Game() {
 }
 
 void Game::Run() {
-    Duration::duration_t delta_seconds{std::chrono::nanoseconds::zero()};
+    std::chrono::nanoseconds delta_seconds{std::chrono::nanoseconds::zero()};
     auto last_frame_time = GetNow();
 
     while (window_->IsOpen()) {

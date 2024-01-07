@@ -23,6 +23,10 @@ public:
         DurationTime{duration} {
     }
 
+    Duration(std::chrono::nanoseconds duration) :
+        DurationTime{std::chrono::duration_cast<duration_t>(duration)} {
+    }
+
     Duration(const Duration&) = default;
     Duration& operator=(const Duration&) = default;
 
