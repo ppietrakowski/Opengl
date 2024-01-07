@@ -4,16 +4,14 @@
 #include <cstdint>
 
 /* Render primitives, which value is same as openGL equivalents*/
-enum class RenderPrimitive
-{
+enum class RenderPrimitive {
     kPoints = 0x0000, // GL_POINTS
     kLines = 0x0001, // GL_LINES
     kTriangles = 0x0004, // GL_TRIANGLES
     kTrianglesAdjancency = 0x000C // GL_TRIANGLES_ADJANCENCY
 };
 
-struct RgbaColor
-{
+struct RgbaColor {
     std::uint8_t red;
     std::uint8_t green;
     std::uint8_t blue;
@@ -27,14 +25,12 @@ struct RgbaColor
         red{red},
         green{green},
         blue{blue},
-        alpha{alpha}
-    {
+        alpha{alpha} {
     }
 };
 
 
-struct RgbColor
-{
+struct RgbColor {
     std::uint8_t red;
     std::uint8_t green;
     std::uint8_t blue;
@@ -46,38 +42,31 @@ struct RgbColor
     constexpr RgbColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) :
         red{red},
         green{green},
-        blue{blue}
-    {
+        blue{blue} {
     }
 };
 
-inline bool operator==(const RgbaColor& a, const RgbaColor& b)
-{
+inline bool operator==(const RgbaColor& a, const RgbaColor& b) {
     return a.red == b.red && a.green == b.green && a.blue == b.blue && a.alpha == b.alpha;
 }
 
-inline bool operator!=(const RgbaColor& a, const RgbaColor& b)
-{
+inline bool operator!=(const RgbaColor& a, const RgbaColor& b) {
     return a.red != b.red || a.green != b.green || a.blue != b.blue || a.alpha != b.alpha;
 }
 
-struct IndexedDrawData
-{
+struct IndexedDrawData {
     const VertexArray* vertex_array;
     std::int32_t num_indices{0};
     RenderPrimitive draw_primitive{RenderPrimitive::kTriangles};
 
-    void Bind() const
-    {
+    void Bind() const {
         vertex_array->Bind();
     }
 };
 
-class IRendererAPI
-{
+class IRendererAPI {
 public:
-    enum ApiType
-    {
+    enum ApiType {
         kUnknown,
         kOpenGL
     };
@@ -101,8 +90,7 @@ public:
     virtual void ClearBufferBindings_Debug() = 0;
     virtual void SetViewport(std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height) = 0;
 
-    inline static ApiType GetApi()
-    {
+    inline static ApiType GetApi() {
         return renderer_api_type_;
     }
 

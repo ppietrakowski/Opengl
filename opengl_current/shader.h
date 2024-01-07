@@ -14,8 +14,7 @@
 
 #include <array>
 
-enum class UniformType
-{
+enum class UniformType {
     kUndefined,
     kVec4,
     kVec3,
@@ -30,34 +29,29 @@ enum class UniformType
     kSampler2D,
 };
 
-struct UniformInfo
-{
+struct UniformInfo {
     UniformType uniform_type;
     std::string name;
     std::int32_t location;
     int32_t num_textures{0};
 };
 
-struct ShaderCompilationFailedException : public std::runtime_error
-{
+struct ShaderCompilationFailedException : public std::runtime_error {
     ShaderCompilationFailedException(const char* error_message) :
         std::runtime_error{error_message}
     {
     }
 };
 
-struct ShaderProgramLinkingFailedException : public std::runtime_error
-{
+struct ShaderProgramLinkingFailedException : public std::runtime_error {
     ShaderProgramLinkingFailedException(const char* error_message) :
         std::runtime_error{error_message}
     {
     }
 };
 
-struct ShaderIndex
-{
-    enum IndexType
-    {
+struct ShaderIndex {
+    enum IndexType {
         kVertex = 0,
         kFragment,
         kGeometry,
@@ -69,8 +63,7 @@ struct ShaderIndex
 
 class Shader;
 
-class ShaderSourceBuilder
-{
+class ShaderSourceBuilder {
 public:
     std::shared_ptr<Shader> Build();
 
@@ -97,8 +90,7 @@ class Texture;
 
 static constexpr std::int32_t kMinTextureUnits = 16;
 
-class Shader
-{
+class Shader {
     friend class Shader;
     friend class ShaderSourceBuilder;
 public:

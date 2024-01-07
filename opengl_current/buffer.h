@@ -4,25 +4,20 @@
 #include <algorithm>
 
 template <typename T>
-class Buffer
-{
+class Buffer {
 public:
     Buffer(std::uint32_t initial_capacity) :
-        capacity_{initial_capacity}
-    {
+        capacity_{initial_capacity} {
         data_ = new T[initial_capacity];
         current_ = data_;
     }
 
-    ~Buffer()
-    {
+    ~Buffer() {
         delete[] data_;
     }
 
-    void Resize(std::uint32_t new_capacity)
-    {
-        if (new_capacity <= capacity_)
-        {
+    void Resize(std::uint32_t new_capacity) {
+        if (new_capacity <= capacity_) {
             return;
         }
 
@@ -37,48 +32,39 @@ public:
         capacity_ = new_capacity;
     }
 
-    void AddInstance(const T& element)
-    {
-        if (GetSize() >= capacity_)
-        {
+    void AddInstance(const T& element) {
+        if (GetSize() >= capacity_) {
             return;
         }
 
         *current_++ = element;
     }
 
-    void ResetPtrToStart()
-    {
+    void ResetPtrToStart() {
         current_ = data_;
     }
 
-    T* GetRawData()
-    {
+    T* GetRawData() {
         return data_;
     }
 
-    const T* GetRawData() const
-    {
+    const T* GetRawData() const {
         return data_;
     }
 
-    std::uint32_t GetSize() const
-    {
+    std::uint32_t GetSize() const {
         return static_cast<std::uint32_t>(std::distance(data_, current_));
     }
 
-    std::uint32_t GetSizeBytes() const
-    {
+    std::uint32_t GetSizeBytes() const {
         return GetSize() * sizeof(T);
     }
 
-    std::uint32_t GetCapacity() const
-    {
+    std::uint32_t GetCapacity() const {
         return capacity_;
     }
 
-    std::uint32_t GetCapacityBytes() const
-    {
+    std::uint32_t GetCapacityBytes() const {
         return capacity_ * sizeof(T);
     }
 

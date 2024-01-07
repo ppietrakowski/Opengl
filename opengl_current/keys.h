@@ -5,10 +5,8 @@
 // KeyCode based on glfw key codes
 using KeyCode = std::int32_t;
 
-struct Keys
-{
-    enum : KeyCode
-    {
+struct Keys {
+    enum : KeyCode {
         kInvalid = -1,
         // From glfw3.h
         kSpace = 32,
@@ -147,10 +145,8 @@ struct Keys
 // MouseCode based on glfw mouse codes
 using MouseButton = std::int16_t;
 
-struct Mouse
-{
-    enum : MouseButton
-    {
+struct Mouse {
+    enum : MouseButton {
         kInvalid = -1,
         kButton0 = 0,
         kButton1 = 1,

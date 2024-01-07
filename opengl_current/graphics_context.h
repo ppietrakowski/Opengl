@@ -1,7 +1,6 @@
 #pragma once
 
-class GraphicsContext
-{
+class GraphicsContext {
 public:
     virtual ~GraphicsContext() = default;
 

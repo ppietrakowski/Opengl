@@ -3,8 +3,7 @@
 #include "vertex_array.h"
 #include <GL/glew.h>
 
-class OpenGlVertexArray : public VertexArray
-{
+class OpenGlVertexArray : public VertexArray {
 public:
     OpenGlVertexArray();
     ~OpenGlVertexArray();

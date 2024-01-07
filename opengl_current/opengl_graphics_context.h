@@ -7,8 +7,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-class OpenGlGraphicsContext : public GraphicsContext
-{
+class OpenGlGraphicsContext : public GraphicsContext {
 public:
     OpenGlGraphicsContext(GLFWwindow* context_window);
 

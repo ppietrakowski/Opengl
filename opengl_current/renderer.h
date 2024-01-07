@@ -8,8 +8,7 @@
 
 #include <cstdint>
 
-struct CameraProjection
-{
+struct CameraProjection {
     float fov{45.0f};
     float aspect_ratio{0.0f};
     float width;
@@ -22,8 +21,7 @@ struct CameraProjection
         height((float)height),
         fov(fov),
         z_near(z_near),
-        z_far(z_far)
-    {
+        z_far(z_far) {
         aspect_ratio = this->width / this->height;
     }
 
@@ -32,8 +30,7 @@ struct CameraProjection
     CameraProjection& operator=(const CameraProjection&) = default;
 };
 
-class Renderer
-{
+class Renderer {
 public:
     static void Initialize();
     static void Quit();
@@ -78,7 +75,6 @@ private:
     static void UploadUniforms(Shader& shader, const glm::mat4& transform);
 };
 
-inline std::shared_ptr<Texture2D> Renderer::GetDefaultTexture()
-{
+inline std::shared_ptr<Texture2D> Renderer::GetDefaultTexture() {
     return default_texture_;
 }

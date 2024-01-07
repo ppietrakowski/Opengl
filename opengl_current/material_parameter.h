@@ -10,8 +10,7 @@
 #include <cstring>
 #include <array>
 
-enum class MaterialParamType : std::int8_t
-{
+enum class MaterialParamType : std::int8_t {
     kUnknown = 0,
     kInt,
     kFloat,
@@ -22,8 +21,7 @@ enum class MaterialParamType : std::int8_t
     kNumMaterialParamsType
 };
 
-union ParamVal
-{
+union ParamVal {
     std::int32_t int_value;
     float float_value;
     glm::vec2 vec2_value;
@@ -31,8 +29,7 @@ union ParamVal
     glm::vec4 vec4_value;
 };
 
-class MaterialParam
-{
+class MaterialParam {
     friend class Material;
 
 public:

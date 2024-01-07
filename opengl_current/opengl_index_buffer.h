@@ -4,8 +4,7 @@
 
 #include <GL/glew.h>
 
-class OpenGlIndexBuffer : public IndexBuffer
-{
+class OpenGlIndexBuffer : public IndexBuffer {
 public:
     OpenGlIndexBuffer();
     OpenGlIndexBuffer(const std::uint32_t* data, std::int32_t num_indices, bool dynamic = false);

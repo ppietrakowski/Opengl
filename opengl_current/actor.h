@@ -7,15 +7,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <map>
 
-struct ActorTagComponent
-{
+struct ActorTagComponent {
     std::string name;
     std::string tag{"Default"};
     bool is_alive{true};
 };
 
-struct TransformComponent
-{
+struct TransformComponent {
     entt::handle parent;
 
     // Position in parent's space (World space, if parent unspecified)
@@ -28,19 +26,16 @@ struct TransformComponent
 
     glm::mat4 GetWorldTransformMatrix() const;
 
-    glm::mat4 CalculateRelativeTransform() const
-    {
+    glm::mat4 CalculateRelativeTransform() const {
         return glm::translate(glm::identity<glm::mat4>(), position) * glm::mat4_cast(rotation) * glm::scale(glm::identity<glm::mat4>(), scale);
     }
 
-    void SetLocalEulerAngles(const glm::vec3& euler_angles)
-    {
+    void SetLocalEulerAngles(const glm::vec3& euler_angles) {
         rotation = glm::quat{glm::radians(euler_angles)};
     }
 };
 
-struct SceneHierarchyComponent
-{
+struct SceneHierarchyComponent {
     entt::handle parent;
     std::map<std::string, entt::handle> children;
 
@@ -52,8 +47,8 @@ struct SceneHierarchyComponent
 
 class Level;
 
-class Actor
-{
+// Basic gameplay object. This class is copy constructible
+class Actor {
     friend class Level;
 public:
     Actor();
@@ -61,26 +56,22 @@ public:
     Actor& operator=(const Actor&) = default;
 
     template <typename T>
-    T& GetComponent()
-    {
+    T& GetComponent() {
         return entity_handle_.get<T>();
     }
 
     template <typename T>
-    const T& GetComponent() const
-    {
+    const T& GetComponent() const {
         return entity_handle_.get<T>();
     }
 
     template <typename T, typename ...Args>
-    void AddComponent(Args&& ...args)
-    {
+    void AddComponent(Args&& ...args) {
         entity_handle_.emplace<T>(std::forward<Args>(args)...);
     }
 
     template <typename T>
-    void RemoveComponent()
-    {
+    void RemoveComponent() {
         entity_handle_.erase<T>();
     }
 
@@ -90,13 +81,11 @@ public:
     void AddChild(const Actor& actor);
     void RemoveChild(const Actor& actor);
 
-    const Level* GetHomeLevel() const
-    {
+    const Level* GetHomeLevel() const {
         return home_level_;
     }
 
-    Level* GetHomeLevel()
-    {
+    Level* GetHomeLevel() {
         return home_level_;
     }
 

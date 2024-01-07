@@ -7,8 +7,7 @@
 
 #include "vertex_buffer.h"
 
-class IndexBuffer
-{
+class IndexBuffer {
 public:
     static std::shared_ptr<IndexBuffer> Create(const std::uint32_t* data,
         std::int32_t num_indices, bool dynamic = false);
@@ -22,8 +21,7 @@ public:
     virtual std::int32_t GetNumIndices() const = 0;
 
     virtual void UpdateIndices(const std::uint32_t* data, std::int32_t offset, std::int32_t size) = 0;
-    void UpdateIndices(const std::uint32_t* data, std::int32_t size)
-    {
+    void UpdateIndices(const std::uint32_t* data, std::int32_t size) {
         UpdateIndices(data, 0, size);
     }
 

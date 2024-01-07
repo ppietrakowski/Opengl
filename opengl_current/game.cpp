@@ -9,8 +9,7 @@
 static Game* game_instance_ = nullptr;
 
 Game::Game(const WindowSettings& settings) :
-    imgui_context_{nullptr}
-{
+    imgui_context_{nullptr} {
     Logging::Initialize();
     window_ = Window::Create(settings);
     graphics_context_ = window_->GetContext();
@@ -24,8 +23,7 @@ Game::Game(const WindowSettings& settings) :
     game_instance_ = this;
 }
 
-Game::~Game()
-{
+Game::~Game() {
     layers_.clear();
 
     // deinitialize all libraries
@@ -38,15 +36,12 @@ Game::~Game()
     game_instance_ = nullptr;
 }
 
-void Game::Run()
-{
+void Game::Run() {
     Duration::duration_t delta_seconds{std::chrono::nanoseconds::zero()};
     auto last_frame_time = GetNow();
 
-    while (window_->IsOpen())
-    {
-        for (const std::unique_ptr<ILayer>& layer : layers_)
-        {
+    while (window_->IsOpen()) {
+        for (const std::unique_ptr<ILayer>& layer : layers_) {
             layer->Update(delta_seconds);
         }
 
@@ -55,12 +50,9 @@ void Game::Run()
         // calculate delta time using chrono library
         auto now = GetNow();
 
-        if (delta_seconds == std::chrono::nanoseconds::zero())
-        {
+        if (delta_seconds == std::chrono::nanoseconds::zero()) {
             delta_seconds = (now - last_frame_time);
-        }
-        else
-        {
+        } else {
             // average delta seconds to keep more meaningfull frame time
             delta_seconds = ((now - last_frame_time) + delta_seconds) / 2;
         }
@@ -68,8 +60,7 @@ void Game::Run()
         last_frame_time = now;
 
         // broadcast render command
-        for (const std::unique_ptr<ILayer>& layer : layers_)
-        {
+        for (const std::unique_ptr<ILayer>& layer : layers_) {
             layer->Render(delta_seconds);
         }
 
@@ -78,18 +69,15 @@ void Game::Run()
     }
 }
 
-bool Game::IsRunning() const
-{
+bool Game::IsRunning() const {
     return window_->IsOpen();
 }
 
-void Game::Quit()
-{
+void Game::Quit() {
     window_->Close();
 }
 
-bool Game::InitializeImGui()
-{
+bool Game::InitializeImGui() {
     imgui_context_ = ImGui::CreateContext();
     ImGui::SetCurrentContext(imgui_context_);
 
@@ -103,14 +91,12 @@ bool Game::InitializeImGui()
     return true;
 }
 
-void Game::RunImguiFrame()
-{
+void Game::RunImguiFrame() {
     graphics_context_->ImGuiBeginFrame();
     ImGui::NewFrame();
 
     // broadcast imgui frame draw
-    for (const std::unique_ptr<ILayer>& layer : layers_)
-    {
+    for (const std::unique_ptr<ILayer>& layer : layers_) {
         layer->OnImguiFrame();
     }
 
@@ -120,40 +106,33 @@ void Game::RunImguiFrame()
     graphics_context_->UpdateImGuiViewport();
 }
 
-void Game::BindWindowEvents()
-{
+void Game::BindWindowEvents() {
     window_->SetEventCallback([this](const Event& evt) {
         // events in layer are processed from last to first
-        for (auto it = layers_.rbegin(); it != layers_.rend(); ++it)
-        {
+        for (auto it = layers_.rbegin(); it != layers_.rend(); ++it) {
             std::unique_ptr<ILayer>& layer = *it;
 
-            if (layer->OnEvent(evt))
-            {
+            if (layer->OnEvent(evt)) {
                 return;
             }
         }
     });
 }
 
-void Game::SetMouseVisible(bool mouse_visible)
-{
+void Game::SetMouseVisible(bool mouse_visible) {
     window_->SetMouseVisible(mouse_visible);
 }
 
-void Game::AddLayer(std::unique_ptr<ILayer>&& game_layer)
-{
+void Game::AddLayer(std::unique_ptr<ILayer>&& game_layer) {
     layers_.emplace_back(std::move(game_layer));
 }
 
-void Game::RemoveLayer(std::type_index index)
-{
+void Game::RemoveLayer(std::type_index index) {
     auto it = std::remove_if(layers_.begin(),
         layers_.end(),
         [index](const std::unique_ptr<ILayer>& layer) { return layer->GetTypeIndex() == index; });
 
-    if (it != layers_.end())
-    {
+    if (it != layers_.end()) {
         layers_.erase(it);
     }
 }

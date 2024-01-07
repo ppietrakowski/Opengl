@@ -16,8 +16,7 @@ std::shared_ptr<Texture2D> Renderer::default_texture_;
 
 static DebugRenderBatch* debug_batch_ = nullptr;
 
-void Renderer::Quit()
-{
+void Renderer::Quit() {
     delete debug_batch_;
     default_texture_.reset();
     RenderCommand::Quit();
@@ -26,8 +25,7 @@ void Renderer::Quit()
 static constexpr RgbColor kBlack{0, 0, 0};
 static constexpr RgbColor kMagenta{255, 0, 255};
 
-void Renderer::Initialize()
-{
+void Renderer::Initialize() {
     // array of checkerboard with black and magenta
     RgbColor colors[4][4] =
     {
@@ -48,27 +46,23 @@ void Renderer::Initialize()
     RenderCommand::SetCullFace(true);
 }
 
-void Renderer::UpdateProjection(const CameraProjection& projection)
-{
+void Renderer::UpdateProjection(const CameraProjection& projection) {
     projection_ = glm::perspective(glm::radians(projection.fov), projection.aspect_ratio, projection.z_near, projection.z_far);
 }
 
-void Renderer::BeginScene(const glm::mat4& view, glm::vec3 camera_pos)
-{
+void Renderer::BeginScene(const glm::mat4& view, glm::vec3 camera_pos) {
     RenderCommand::BeginScene();
     view_ = view;
     projection_view_ = projection_ * view;
     camera_position_ = camera_pos;
 }
 
-void Renderer::EndScene()
-{
+void Renderer::EndScene() {
     RenderCommand::SetLineWidth(1);
     RenderCommand::EndScene();
 }
 
-void Renderer::Submit(const Material& material, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive)
-{
+void Renderer::Submit(const Material& material, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive) {
     Shader& shader = material.GetShader();
     shader.Use();
     material.SetupRenderState();
@@ -79,8 +73,7 @@ void Renderer::Submit(const Material& material, const VertexArray& vertex_array,
 }
 
 void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms,
-    std::int32_t count, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive)
-{
+    std::int32_t count, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive) {
     Shader& shader = material.GetShader();
 
     shader.Use();
@@ -96,14 +89,12 @@ void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat
 void Renderer::Submit(Shader& shader,
     const VertexArray& vertex_array,
     const glm::mat4& transform,
-    RenderPrimitive render_primitive)
-{
+    RenderPrimitive render_primitive) {
     Submit(shader, vertex_array.GetNumIndices(), vertex_array, transform, render_primitive);
 }
 
 void Renderer::Submit(Shader& shader, std::int32_t num_indices, const VertexArray& vertex_array,
-    const glm::mat4& transform, RenderPrimitive render_primitive)
-{
+    const glm::mat4& transform, RenderPrimitive render_primitive) {
     ASSERT(num_indices <= vertex_array.GetNumIndices());
 
     shader.Use();
@@ -111,24 +102,20 @@ void Renderer::Submit(Shader& shader, std::int32_t num_indices, const VertexArra
     RenderCommand::DrawIndexed(IndexedDrawData{&vertex_array, vertex_array.GetNumIndices(), render_primitive});
 }
 
-void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform)
-{
-    if (!debug_batch_->HasBatchedAnyPrimitive())
-    {
+void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform) {
+    if (!debug_batch_->HasBatchedAnyPrimitive()) {
         RenderCommand::SetLineWidth(2);
     }
 
     debug_batch_->AddBoxInstance(boxmin, boxmax, transform);
 }
 
-void Renderer::FlushDrawDebug(Shader& shader)
-{
+void Renderer::FlushDrawDebug(Shader& shader) {
     debug_batch_->UploadBatchedData();
     debug_batch_->FlushDraw(shader);
 }
 
-void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform)
-{
+void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform) {
     shader.SetUniformMat4("u_projection_view", projection_view_);
     shader.SetUniformMat4("u_transform", transform);
     shader.SetUniformMat4("u_view", view_);

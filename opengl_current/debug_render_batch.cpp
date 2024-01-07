@@ -16,18 +16,15 @@ constexpr std::int32_t kNumBoxVertices = 8;
 constexpr std::int32_t kMaxIndices = kMaxDebugNumBox * STD_ARRAY_NUM_ELEMENTS(kBaseBoxIndices);
 
 /* Just does bind and unbind within scope */
-struct DebugVertexArrayScope
-{
+struct DebugVertexArrayScope {
     VertexArray* target;
 
     DebugVertexArrayScope(VertexArray& target) :
-        target{&target}
-    {
+        target{&target} {
         target.Bind();
     }
 
-    ~DebugVertexArrayScope()
-    {
+    ~DebugVertexArrayScope() {
         target->Unbind();
     }
 };
@@ -35,8 +32,7 @@ struct DebugVertexArrayScope
 DebugRenderBatch::DebugRenderBatch() :
     vertices_{kMaxDebugNumBox * kNumBoxVertices},
     indices_{kMaxIndices},
-    vertex_array_{VertexArray::Create()}
-{
+    vertex_array_{VertexArray::Create()} {
     // initialize box batching
     VertexAttribute attributes[] = {{3, PrimitiveVertexType::kFloat}};
 
@@ -46,8 +42,7 @@ DebugRenderBatch::DebugRenderBatch() :
     vertex_array_->Unbind();
 }
 
-void DebugRenderBatch::UploadBatchedData()
-{
+void DebugRenderBatch::UploadBatchedData() {
     DebugVertexArrayScope bind_array_scope{*vertex_array_};
 
     std::shared_ptr<VertexBuffer> vertex_buffer = vertex_array_->GetVertexBufferAt(0);
@@ -57,18 +52,15 @@ void DebugRenderBatch::UploadBatchedData()
     index_buffer->UpdateIndices(indices_.GetRawData(), indices_.GetSize());
 }
 
-void DebugRenderBatch::FlushDraw(Shader& shader)
-{
+void DebugRenderBatch::FlushDraw(Shader& shader) {
     Renderer::Submit(shader, indices_.GetSize(), *vertex_array_, glm::mat4{1.0}, RenderPrimitive::kLines);
     vertices_.ResetPtrToStart();
     indices_.ResetPtrToStart();
     last_index_number_ = 0;
 }
 
-void DebugRenderBatch::AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform)
-{
-    if (!CanBatchAnotherMesh(ARRAY_NUM_ELEMENTS(kBaseBoxIndices)))
-    {
+void DebugRenderBatch::AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform) {
+    if (!CanBatchAnotherMesh(ARRAY_NUM_ELEMENTS(kBaseBoxIndices))) {
         return;
     }
 
@@ -85,13 +77,11 @@ void DebugRenderBatch::AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const 
     };
 
 
-    for (const glm::vec3& vertex : boxVertices)
-    {
+    for (const glm::vec3& vertex : boxVertices) {
         vertices_.AddInstance(transform * glm::vec4{vertex, 1.0f});
     }
 
-    for (std::uint32_t index : kBaseBoxIndices)
-    {
+    for (std::uint32_t index : kBaseBoxIndices) {
         indices_.AddInstance(index + last_index_number_);
     }
 
@@ -99,12 +89,10 @@ void DebugRenderBatch::AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const 
     last_index_number_ += max_num_indices;
 }
 
-bool DebugRenderBatch::CanBatchAnotherMesh(std::int32_t num_indices) const
-{
+bool DebugRenderBatch::CanBatchAnotherMesh(std::int32_t num_indices) const {
     return last_index_number_ + num_indices < kMaxIndices && vertices_.GetSize() < vertices_.GetCapacity();
 }
 
-bool DebugRenderBatch::HasBatchedAnyPrimitive() const
-{
+bool DebugRenderBatch::HasBatchedAnyPrimitive() const {
     return vertices_.GetSize() > 0;
 }

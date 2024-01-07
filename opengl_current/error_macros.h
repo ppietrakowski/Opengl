@@ -4,22 +4,19 @@
 #include <cstdint>
 #include <stdexcept>
 
-struct SourceLocation
-{
+struct SourceLocation {
     const char* file_name;
     std::uint32_t line;
     const char* function_name;
 };
 
-struct ErrorHandlerInfo
-{
+struct ErrorHandlerInfo {
     SourceLocation source_location;
     const char* error_message;
 
     ErrorHandlerInfo(const SourceLocation& source_location, const char* error_message) :
         source_location{source_location},
-        error_message{error_message}
-    {
+        error_message{error_message} {
     }
 
     ErrorHandlerInfo(const ErrorHandlerInfo&) = default;
@@ -40,8 +37,7 @@ struct ErrorHandlerInfo
 
 typedef void (*ErrorHandlerFn)(void* user_data, const ErrorHandlerInfo& info);
 
-struct ErrorHandler
-{
+struct ErrorHandler {
     ErrorHandlerFn error_handler_func{nullptr};
     void* user_data{nullptr};
 

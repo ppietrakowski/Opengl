@@ -2,13 +2,11 @@
 
 #include <cstdint>
 
-inline void DefaultImageDataDeleter(uint8_t* data)
-{
+inline void DefaultImageDataDeleter(uint8_t* data) {
     delete[] data;
 }
 
-class ImageRgba
-{
+class ImageRgba {
 public:
     ImageRgba(std::uint8_t* image, std::int32_t width, std::int32_t height, void (*deleter)(std::uint8_t*) = &DefaultImageDataDeleter);
 

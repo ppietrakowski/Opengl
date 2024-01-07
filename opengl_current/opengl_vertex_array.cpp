@@ -4,32 +4,27 @@
 #include "error_macros.h"
 
 OpenGlVertexArray::OpenGlVertexArray() :
-    renderer_id_{0}
-{
+    renderer_id_{0} {
     glBindVertexArray(0);
     glGenVertexArrays(1, &renderer_id_);
 }
 
-OpenGlVertexArray::~OpenGlVertexArray()
-{
+OpenGlVertexArray::~OpenGlVertexArray() {
     glDeleteVertexArrays(1, &renderer_id_);
 }
 
-void OpenGlVertexArray::Bind() const
-{
+void OpenGlVertexArray::Bind() const {
     glBindVertexArray(renderer_id_);
 }
 
-void OpenGlVertexArray::Unbind() const
-{
+void OpenGlVertexArray::Unbind() const {
     glBindVertexArray(0);
 }
 
 #define GET_ATTRIBUTE_INDEX(attribute) static_cast<std::int32_t>(attribute.vertex_type)
 #define GET_GL_TYPE_INDEX(attribute) static_cast<std::int32_t>(attribute.vertex_type)
 
-void OpenGlVertexArray::AddBufferInternal(const std::shared_ptr<VertexBuffer>& vertex_buffer, std::span<const VertexAttribute> attributes)
-{
+void OpenGlVertexArray::AddBufferInternal(const std::shared_ptr<VertexBuffer>& vertex_buffer, std::span<const VertexAttribute> attributes) {
     constexpr std::int32_t kMaxAttributes = static_cast<std::int32_t>(PrimitiveVertexType::kMaxPrimitiveVertexType);
 
     // start index for new buffer
@@ -42,8 +37,7 @@ void OpenGlVertexArray::AddBufferInternal(const std::shared_ptr<VertexBuffer>& v
     Bind();
     vertex_buffer->Bind();
 
-    for (const VertexAttribute& attribute : attributes)
-    {
+    for (const VertexAttribute& attribute : attributes) {
         std::int32_t size_index = GET_ATTRIBUTE_INDEX(attribute);
         ASSERT(size_index < kMaxAttributes);
         stride += attribute.num_components * static_cast<std::int32_t>(kAttributeSizes[size_index]);
@@ -51,20 +45,16 @@ void OpenGlVertexArray::AddBufferInternal(const std::shared_ptr<VertexBuffer>& v
 
     std::uintptr_t offset = 0;
 
-    for (const VertexAttribute& attribute : attributes)
-    {
+    for (const VertexAttribute& attribute : attributes) {
         glEnableVertexAttribArray(attribute_start_index);
         GLenum bDataNormalized = GL_FALSE;
 
         std::int32_t gl_type_index = GET_GL_TYPE_INDEX(attribute);
         ASSERT(gl_type_index < kMaxAttributes);
 
-        if (attribute.vertex_type != PrimitiveVertexType::kFloat)
-        {
+        if (attribute.vertex_type != PrimitiveVertexType::kFloat) {
             glVertexAttribIPointer(attribute_start_index, attribute.num_components, kAttributeConversionTable[gl_type_index], stride, reinterpret_cast<const void*>(offset));
-        }
-        else
-        {
+        } else {
             glVertexAttribPointer(attribute_start_index, attribute.num_components, kAttributeConversionTable[gl_type_index],
                 bDataNormalized, stride, reinterpret_cast<const void*>(offset));
         }
@@ -79,12 +69,10 @@ void OpenGlVertexArray::AddBufferInternal(const std::shared_ptr<VertexBuffer>& v
     vertex_buffers_.emplace_back(vertex_buffer);
 }
 
-void OpenGlVertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer>& index_buffer)
-{
+void OpenGlVertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer>& index_buffer) {
     Bind();
 
-    if (index_buffer_ != nullptr && index_buffer_->IsValid())
-    {
+    if (index_buffer_ != nullptr && index_buffer_->IsValid()) {
         index_buffer_->Unbind();
     }
 
@@ -92,18 +80,15 @@ void OpenGlVertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer>& index
     index_buffer_ = index_buffer;
 }
 
-std::int32_t OpenGlVertexArray::GetNumIndices() const
-{
+std::int32_t OpenGlVertexArray::GetNumIndices() const {
     ERR_FAIL_EXPECTED_TRUE_V(index_buffer_->IsValid(), 0);
     return index_buffer_->GetNumIndices();
 }
 
-std::shared_ptr<VertexBuffer> OpenGlVertexArray::GetVertexBufferAt(std::int32_t index)
-{
+std::shared_ptr<VertexBuffer> OpenGlVertexArray::GetVertexBufferAt(std::int32_t index) {
     return vertex_buffers_.at(index);
 }
 
-std::shared_ptr<IndexBuffer> OpenGlVertexArray::GetIndexBuffer()
-{
+std::shared_ptr<IndexBuffer> OpenGlVertexArray::GetIndexBuffer() {
     return index_buffer_;
 }

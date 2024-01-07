@@ -3,15 +3,13 @@
 #include "renderer_api.h"
 #include <cstdint>
 
-struct RenderStats
-{
+struct RenderStats {
     std::int32_t num_drawcalls{0};
     std::int32_t num_drawn_triangles{0};
     std::int64_t delta_frame_nanoseconds{0};
 };
 
-class RenderCommand
-{
+class RenderCommand {
 public:
     RenderCommand() = delete;
     RenderCommand(const RenderCommand&) = delete;

@@ -2,8 +2,7 @@
 
 #include "static_mesh.h"
 
-struct StaticMeshComponent
-{
+struct StaticMeshComponent {
     std::shared_ptr<StaticMesh> static_mesh;
 
     StaticMeshComponent() = default;

@@ -9,8 +9,7 @@
 #include "event.h"
 #include "graphics_context.h"
 
-struct WindowSettings
-{
+struct WindowSettings {
     std::int32_t width;
     std::int32_t height;
     std::string title;
@@ -18,8 +17,7 @@ struct WindowSettings
 
 using EventCallback = std::function<void(const Event&)>;
 
-class Window
-{
+class Window {
 public:
     virtual ~Window() = default;
 

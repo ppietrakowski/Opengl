@@ -6,8 +6,7 @@
 
 #include <GLFW/glfw3.h>
 
-class GlfwWindow : public Window
-{
+class GlfwWindow : public Window {
 public:
     GlfwWindow(const WindowSettings& settings);
     ~GlfwWindow();

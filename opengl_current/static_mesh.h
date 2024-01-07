@@ -7,30 +7,27 @@
 #include <filesystem>
 #include <memory>
 
-struct StaticMeshVertex
-{
+struct StaticMeshVertex {
     glm::vec3 position{0, 0,0};
     glm::vec3 normal{0, 0, 0};
     glm::vec2 texture_coords{0, 0};
     std::int32_t texture_id{0};
 
-    static inline constexpr VertexAttribute kDataFormat[4] = {{3, PrimitiveVertexType::kFloat}, 
+    static inline constexpr VertexAttribute kDataFormat[4] = {{3, PrimitiveVertexType::kFloat},
         {3, PrimitiveVertexType::kFloat}, {2, PrimitiveVertexType::kFloat}, {1, PrimitiveVertexType::kInt}};
 
     StaticMeshVertex() = default;
     StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& texture_coords) :
         position{position},
         normal{normal},
-        texture_coords{texture_coords}
-    {
+        texture_coords{texture_coords} {
     }
 
     StaticMeshVertex(const StaticMeshVertex&) = default;
     StaticMeshVertex& operator=(const StaticMeshVertex&) = default;
 };
 
-class StaticMesh
-{
+class StaticMesh {
 public:
     StaticMesh(const std::filesystem::path& file_path, const std::shared_ptr<Material>& material);
 
@@ -44,8 +41,7 @@ public:
     const glm::vec3& GetBBoxMin() const;
     const glm::vec3& GetBBoxMax() const;
 
-    std::string_view GetName() const
-    {
+    std::string_view GetName() const {
         return mesh_name_;
     }
 
@@ -61,22 +57,18 @@ private:
     std::string mesh_name_;
 };
 
-inline const glm::vec3& StaticMesh::GetBBoxMin() const
-{
+inline const glm::vec3& StaticMesh::GetBBoxMin() const {
     return bbox_min_;
 }
 
-inline const glm::vec3& StaticMesh::GetBBoxMax() const
-{
+inline const glm::vec3& StaticMesh::GetBBoxMax() const {
     return bbox_max_;
 }
 
-inline std::int32_t StaticMesh::GetNumPolygons() const
-{
+inline std::int32_t StaticMesh::GetNumPolygons() const {
     return num_triangles_;
 }
 
-inline std::int32_t StaticMesh::GetNumTriangles() const
-{
+inline std::int32_t StaticMesh::GetNumTriangles() const {
     return num_triangles_;
 }

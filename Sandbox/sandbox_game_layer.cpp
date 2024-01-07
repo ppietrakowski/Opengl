@@ -9,8 +9,7 @@
 
 SandboxGameLayer::SandboxGameLayer() :
     m_CameraRotation{glm::vec3{0, 0, 0}},
-    m_CameraPosition{0.0f, 0.0f, 0.0f}
-{
+    m_CameraPosition{0.0f, 0.0f, 0.0f} {
     m_Shader = ResourceManager::GetShader("shaders/default.shd");
     m_Unshaded = ResourceManager::GetShader("shaders/unshaded.shd");
     auto skeletalShader = ResourceManager::GetShader("shaders/skeletal_default.shd");
@@ -54,8 +53,7 @@ SandboxGameLayer::SandboxGameLayer() :
 
     uint32_t i = 0;
 
-    for (const auto& path : m_SkeletalMesh->textures)
-    {
+    for (const auto& path : m_SkeletalMesh->textures) {
         std::string name = "diffuse" + std::to_string(i + 1);
         auto material = m_SkeletalMesh->main_material;
         material->SetTextureProperty(name.c_str(), ResourceManager::GetTexture2D(path));
@@ -67,9 +65,8 @@ SandboxGameLayer::SandboxGameLayer() :
     std::vector<std::string> animations = std::move(m_SkeletalMesh->GetAnimationNames());
     RenderCommand::SetClearColor(RgbaColor{50, 30, 170});
 
-    for (int i = 0; i < 10; ++i)
-    {
-        m_SkeletalMeshActor = m_Level.CreateActor("SkeletalMesh");
+    for (int i = 0; i < 50; ++i) {
+        m_SkeletalMeshActor = m_Level.CreateActor("SkeletalMesh" + std::to_string(i));
         m_SkeletalMeshActor.AddComponent<SkeletalMeshComponent>(m_SkeletalMesh);
         m_SkeletalMeshActor.GetComponent<TransformComponent>().scale = glm::vec3{0.01f, 0.01f, 0.01f};
         m_SkeletalMeshActor.GetComponent<TransformComponent>().position = glm::vec3{0, -2 * i - 2, -i - 1};
@@ -77,44 +74,34 @@ SandboxGameLayer::SandboxGameLayer() :
 
     Actor staticMeshActor = m_Level.CreateActor("StaticMeshActor");
     staticMeshActor.AddComponent<StaticMeshComponent>(m_StaticMesh);
-    staticMeshActor.GetComponent<TransformComponent>().SetLocalEulerAngles(glm::vec3{0, 90, 0}); 
+    staticMeshActor.GetComponent<TransformComponent>().SetLocalEulerAngles(glm::vec3{0, 90, 0});
 }
 
-void SandboxGameLayer::Update(Duration deltaTime)
-{
+void SandboxGameLayer::Update(Duration deltaTime) {
     float dt = deltaTime.GetAsSeconds();
 
-    if (Input::IsKeyPressed(Keys::kW))
-    {
+    if (Input::IsKeyPressed(Keys::kW)) {
         glm::vec3 worldForward = glm::vec3{0, 0, -1};
         glm::vec3 forward = m_CameraRotation * worldForward * dt * m_MoveSpeed;
         m_CameraPosition += forward;
-    }
-    else if (Input::IsKeyPressed(Keys::kS))
-    {
+    } else if (Input::IsKeyPressed(Keys::kS)) {
         glm::vec3 worldBackward = glm::vec3{0, 0, 1};
         glm::vec3 backward = m_CameraRotation * worldBackward * dt * m_MoveSpeed;
         m_CameraPosition += backward;
     }
 
-    if (Input::IsKeyPressed(Keys::kE))
-    {
+    if (Input::IsKeyPressed(Keys::kE)) {
         m_Yaw -= m_YawRotationRate * dt;
         m_CameraRotation = glm::quat{glm::radians(glm::vec3{m_Pitch, m_Yaw, 0.0f})};
-    }
-    else if (Input::IsKeyPressed(Keys::kQ))
-    {
+    } else if (Input::IsKeyPressed(Keys::kQ)) {
         m_Yaw += m_YawRotationRate * dt;
         m_CameraRotation = glm::quat{glm::radians(glm::vec3{m_Pitch, m_Yaw, 0.0f})};
     }
 
-    if (Input::IsKeyPressed(Keys::kY))
-    {
+    if (Input::IsKeyPressed(Keys::kY)) {
         glm::vec3 worldUp = glm::vec3{0, 1, 0};
         m_CameraPosition += m_AscendSpeed * worldUp * dt;
-    }
-    else if (Input::IsKeyPressed(Keys::kH))
-    {
+    } else if (Input::IsKeyPressed(Keys::kH)) {
         glm::vec3 worldDown = glm::vec3{0, -1, 0};
         m_CameraPosition += m_AscendSpeed * worldDown * dt;
     }
@@ -124,8 +111,7 @@ void SandboxGameLayer::Update(Duration deltaTime)
     m_Level.BroadcastUpdate(deltaTime);
 }
 
-void SandboxGameLayer::Render(Duration deltaTime)
-{
+void SandboxGameLayer::Render(Duration deltaTime) {
     Renderer::BeginScene(glm::inverse(glm::translate(m_CameraPosition) * glm::mat4_cast(m_CameraRotation)), m_CameraPosition);
     m_CurrentUsed->SetUniformVec3("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
     m_StaticMesh->Render(*m_CurrentMaterial, glm::translate(glm::identity<glm::mat4>(), m_StaticMeshPosition));
@@ -141,22 +127,18 @@ void SandboxGameLayer::Render(Duration deltaTime)
     Renderer::EndScene();
 }
 
-bool SandboxGameLayer::OnEvent(const Event& event)
-{
-    if (event.type == EventType::kMouseMoved)
-    {
+bool SandboxGameLayer::OnEvent(const Event& event) {
+    if (event.type == EventType::kMouseMoved) {
         glm::vec2 delta = event.mouse_move.mouse_position - event.mouse_move.last_mouse_position;
         float dt = m_LastDeltaSeconds.GetAsSeconds();
 
         m_Yaw -= m_YawRotationRate * delta.x * dt;
         m_Pitch -= m_PitchRotationRate * delta.y * dt;
 
-        if (m_Pitch < -89)
-        {
+        if (m_Pitch < -89) {
             m_Pitch = -89;
         }
-        if (m_Pitch > 89)
-        {
+        if (m_Pitch > 89) {
             m_Pitch = 89;
         }
 
@@ -164,8 +146,7 @@ bool SandboxGameLayer::OnEvent(const Event& event)
         return true;
     }
 
-    if (event.type == EventType::kMouseButtonPressed)
-    {
+    if (event.type == EventType::kMouseButtonPressed) {
         DO_ONCE([this]() {
             Actor actor = m_Level.FindActor("StaticMeshActor");
             actor.DestroyActor();
@@ -175,14 +156,10 @@ bool SandboxGameLayer::OnEvent(const Event& event)
         m_bSterringEntity = !m_bSterringEntity;
     }
 
-    if (event.type == EventType::kKeyPressed && event.key_event.code == Keys::kP)
-    {
-        if (m_CurrentMaterial.get() == m_WireframeMaterial.get())
-        {
+    if (event.type == EventType::kKeyPressed && event.key_event.code == Keys::kP) {
+        if (m_CurrentMaterial.get() == m_WireframeMaterial.get()) {
             m_CurrentMaterial = m_Material;
-        }
-        else
-        {
+        } else {
             m_CurrentMaterial = m_WireframeMaterial;
         }
     }
@@ -190,17 +167,13 @@ bool SandboxGameLayer::OnEvent(const Event& event)
     return false;
 }
 
-void SandboxGameLayer::OnImguiFrame()
-{
+void SandboxGameLayer::OnImguiFrame() {
     static std::int32_t lastFramerate = 0;
     static std::int32_t frameNum{0};
 
-    if (frameNum == 2)
-    {
+    if (frameNum == 2) {
         lastFramerate = (lastFramerate + static_cast<std::int32_t>(1000 / m_LastDeltaSeconds.GetAsMilliseconds())) / 2;
-    }
-    else
-    {
+    } else {
         frameNum++;
     }
 

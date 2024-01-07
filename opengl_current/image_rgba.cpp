@@ -7,17 +7,14 @@ ImageRgba::ImageRgba(std::uint8_t* image, std::int32_t width, std::int32_t heigh
     image_data_{image},
     width_{width},
     height_{height},
-    deleter_{deleter}
-{
+    deleter_{deleter} {
 }
 
-ImageRgba::ImageRgba(ImageRgba&& image) noexcept
-{
+ImageRgba::ImageRgba(ImageRgba&& image) noexcept {
     *this = std::move(image);
 }
 
-ImageRgba& ImageRgba::operator=(ImageRgba&& image) noexcept
-{
+ImageRgba& ImageRgba::operator=(ImageRgba&& image) noexcept {
     image_data_ = image.image_data_;
     width_ = image.width_;
     height_ = image.height_;
@@ -27,22 +24,18 @@ ImageRgba& ImageRgba::operator=(ImageRgba&& image) noexcept
     return *this;
 }
 
-ImageRgba::~ImageRgba()
-{
+ImageRgba::~ImageRgba() {
     deleter_(image_data_);
 }
 
-const std::uint8_t* ImageRgba::GetRawImageData() const
-{
+const std::uint8_t* ImageRgba::GetRawImageData() const {
     return image_data_;
 }
 
-std::int32_t ImageRgba::GetWidth() const
-{
+std::int32_t ImageRgba::GetWidth() const {
     return width_;
 }
 
-std::int32_t ImageRgba::GetHeight() const
-{
+std::int32_t ImageRgba::GetHeight() const {
     return height_;
 }

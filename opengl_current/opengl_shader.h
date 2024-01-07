@@ -3,8 +3,7 @@
 #include <GL/glew.h>
 #include "shader.h"
 
-class OpenGlShader : public Shader
-{
+class OpenGlShader : public Shader {
 public:
     OpenGlShader();
     ~OpenGlShader();

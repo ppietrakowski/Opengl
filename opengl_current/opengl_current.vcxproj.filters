@@ -156,9 +156,6 @@
     <ClCompile Include="vertex_buffer.cpp">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="game_layer.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
     <ClCompile Include="actor.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>

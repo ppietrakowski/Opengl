@@ -3,8 +3,7 @@
 #include <GL/glew.h>
 #include "vertex_buffer.h"
 
-class OpenGlVertexBuffer : public VertexBuffer
-{
+class OpenGlVertexBuffer : public VertexBuffer {
 public:
     OpenGlVertexBuffer(const void* data, std::int32_t size_bytes, bool dynamic = false);
     OpenGlVertexBuffer(std::int32_t max_size_bytes);

@@ -20,8 +20,7 @@ DECLARE_LOG_CATEGORY(GLOBAL);
 #define ELOG_DEBUG(category, Format, ...) ELOG(LogLevel::kDebug, category, Format, __VA_ARGS__)
 #define ELOG_VERBOSE(category, Format, ...) ELOG(LogLevel::kVerbose, category, Format, __VA_ARGS__)
 
-enum class LogLevel
-{
+enum class LogLevel {
     kInfo = 1,
     kWarning = 1 << 1,
     kError = 1 << 2,
@@ -29,16 +28,14 @@ enum class LogLevel
     kVerbose = 1 << 4
 };
 
-struct LogInfo
-{
+struct LogInfo {
     SourceLocation source_location;
     const char* category_name;
     LogLevel log_level;
     std::string message;
 };
 
-class LogDevice
-{
+class LogDevice {
 public:
     virtual ~LogDevice() = default;
 
@@ -50,8 +47,7 @@ std::string FormatString(const char* format, ...);
 
 using LogDeviceID = std::int16_t;
 
-class Logging
-{
+class Logging {
 public:
     static void Initialize();
     static void Quit();

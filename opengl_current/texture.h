@@ -10,21 +10,18 @@
 
 #include "image_rgba.h"
 
-enum class TextureFormat
-{
+enum class TextureFormat {
     kRgb,
     kRgba
 };
 
-struct TextureSpecification
-{
+struct TextureSpecification {
     std::int32_t width;
     std::int32_t height;
     TextureFormat texture_format;
 };
 
-class Texture
-{
+class Texture {
 public:
     virtual ~Texture() = default;
 
@@ -42,8 +39,7 @@ public:
     virtual TextureFormat GetTextureFormat() const = 0;
 };
 
-class Texture2D : public Texture
-{
+class Texture2D : public Texture {
 public:
     static std::shared_ptr<Texture2D> LoadFromFile(const std::filesystem::path& file_path);
     static std::shared_ptr<Texture2D> Create(const void* data, const TextureSpecification& specification);

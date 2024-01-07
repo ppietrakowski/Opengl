@@ -2,9 +2,8 @@
 
 #include "renderer.h"
 
-SkeletalMeshComponent::SkeletalMeshComponent(const std::shared_ptr<SkeletalMesh>& mesh):
-    skeletal_mesh{mesh}
-{
+SkeletalMeshComponent::SkeletalMeshComponent(const std::shared_ptr<SkeletalMesh>& mesh) :
+    skeletal_mesh{mesh} {
     std::vector<std::string> animations = mesh->GetAnimationNames();
     animation_name = animations.back();
     bone_transforms.resize(mesh->GetNumBones(), glm::identity<glm::mat4>());
@@ -13,10 +12,8 @@ SkeletalMeshComponent::SkeletalMeshComponent(const std::shared_ptr<SkeletalMesh>
     debug_bbox_max = skeletal_mesh->GetBboxMax();
 }
 
-void SkeletalMeshComponent::Draw(const glm::mat4& world_transform)
-{
-    if (should_draw_debug_bounds)
-    {
+void SkeletalMeshComponent::Draw(const glm::mat4& world_transform) {
+    if (should_draw_debug_bounds) {
         Renderer::DrawDebugBox(debug_bbox_min, debug_bbox_max, world_transform);
     }
 

@@ -2,8 +2,7 @@
 
 #include "material_parameter.h"
 
-class Material
-{
+class Material {
 public:
     Material(const std::shared_ptr<Shader>& shader);
 
@@ -32,8 +31,7 @@ public:
     void SetupRenderState() const;
     void SetShaderUniforms() const;
 
-    Shader& GetShader() const
-    {
+    Shader& GetShader() const {
         return *shader_;
     }
 
@@ -52,13 +50,11 @@ private:
     void TryAddNewProperty(const UniformInfo& info);
     void AddNewProperty(const UniformInfo& info);
 
-    MaterialParam& GetParam(const char* name)
-    {
+    MaterialParam& GetParam(const char* name) {
         return material_params_.at(name);
     }
 
-    const MaterialParam& GetParam(const char* name) const
-    {
+    const MaterialParam& GetParam(const char* name) const {
         return material_params_.at(name);
     }
 };

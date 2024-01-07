@@ -4,10 +4,8 @@
 #include "opengl_vertex_buffer.h"
 #include "error_macros.h"
 
-std::shared_ptr<VertexBuffer> VertexBuffer::Create(const void* data, std::int32_t size_bytes, bool dynamic)
-{
-    switch (IRendererAPI::GetApi())
-    {
+std::shared_ptr<VertexBuffer> VertexBuffer::Create(const void* data, std::int32_t size_bytes, bool dynamic) {
+    switch (IRendererAPI::GetApi()) {
     case IRendererAPI::kOpenGL:
         return std::make_shared<OpenGlVertexBuffer>(data, size_bytes, dynamic);
     }
@@ -15,10 +13,8 @@ std::shared_ptr<VertexBuffer> VertexBuffer::Create(const void* data, std::int32_
     ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
 }
 
-std::shared_ptr<VertexBuffer> VertexBuffer::CreateEmpty(std::int32_t max_size_bytes)
-{
-    switch (IRendererAPI::GetApi())
-    {
+std::shared_ptr<VertexBuffer> VertexBuffer::CreateEmpty(std::int32_t max_size_bytes) {
+    switch (IRendererAPI::GetApi()) {
     case IRendererAPI::kOpenGL:
         return std::make_shared<OpenGlVertexBuffer>(max_size_bytes);
     }

@@ -15,8 +15,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <functional>
 
-class Game
-{
+class Game {
 public:
     Game(const WindowSettings& settings);
     ~Game();
@@ -45,8 +44,7 @@ private:
     void BindWindowEvents();
 };
 
-inline std::chrono::nanoseconds GetNow()
-{
+inline std::chrono::nanoseconds GetNow() {
     using std::chrono::system_clock;
     return system_clock::now().time_since_epoch();
 }

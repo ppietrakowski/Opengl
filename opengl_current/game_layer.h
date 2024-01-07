@@ -8,8 +8,7 @@
 #include <chrono>
 
 
-class ILayer
-{
+class ILayer {
 public:
     virtual ~ILayer() = default;
 
@@ -19,8 +18,7 @@ public:
     virtual bool OnEvent(const Event& event) = 0;
     virtual void OnImguiFrame() = 0;
 
-    virtual std::type_index GetTypeIndex() const
-    {
+    virtual std::type_index GetTypeIndex() const {
         return typeid(ILayer);
     }
 };

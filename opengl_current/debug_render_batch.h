@@ -5,8 +5,7 @@
 #include "shader.h"
 #include <glm/glm.hpp>
 
-class DebugRenderBatch
-{
+class DebugRenderBatch {
 public:
     DebugRenderBatch();
 

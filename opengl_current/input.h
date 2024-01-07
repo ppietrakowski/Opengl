@@ -3,8 +3,7 @@
 #include "Keys.h"
 #include <glm/glm.hpp>
 
-class Input
-{
+class Input {
 public:
     Input();
     virtual ~Input() = default;

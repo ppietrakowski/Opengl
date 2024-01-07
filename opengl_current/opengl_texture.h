@@ -2,8 +2,7 @@
 
 #include "texture.h"
 
-class OpenGlTexture2D : public Texture2D
-{
+class OpenGlTexture2D : public Texture2D {
 public:
     OpenGlTexture2D(const TextureSpecification& specification);
     OpenGlTexture2D(const void* data, const TextureSpecification& specification);
