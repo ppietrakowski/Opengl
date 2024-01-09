@@ -20,6 +20,7 @@
 #include <chrono>
 
 inline constexpr std::int32_t kNumBonesPerVertex = 4;
+static constexpr const char* kDefaultAnimationName = "TPose";
 
 struct SkeletonMeshVertex {
     glm::vec3 position{0, 0,0};

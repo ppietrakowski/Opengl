@@ -5,8 +5,8 @@
 #include "opengl_index_buffer.h"
 
 std::shared_ptr<IndexBuffer> IndexBuffer::Create(const std::uint32_t* data, std::int32_t num_indices, bool dynamic) {
-    switch (IRendererAPI::GetApi()) {
-    case IRendererAPI::kOpenGL:
+    switch (RendererAPI::GetApi()) {
+    case RendererAPI::kOpenGL:
         return std::make_shared<OpenGlIndexBuffer>(data, num_indices, dynamic);
     }
 
@@ -14,8 +14,8 @@ std::shared_ptr<IndexBuffer> IndexBuffer::Create(const std::uint32_t* data, std:
 }
 
 std::shared_ptr<IndexBuffer> IndexBuffer::CreateEmpty(std::int32_t total_num_indices) {
-    switch (IRendererAPI::GetApi()) {
-    case IRendererAPI::kOpenGL:
+    switch (RendererAPI::GetApi()) {
+    case RendererAPI::kOpenGL:
         return std::make_shared<OpenGlIndexBuffer>(total_num_indices);
     }
 

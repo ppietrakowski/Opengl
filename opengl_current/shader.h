@@ -101,7 +101,7 @@ public:
     virtual void Use() const = 0;
     virtual void StopUsing() const = 0;
 
-    virtual void setUniform(const char* name, int value) = 0;
+    virtual void SetUniform(const char* name, std::int32_t value) = 0;
     virtual void SetUniform(const char* name, float value) = 0;
     virtual void SetUniform(const char* name, glm::vec2 value) = 0;
     virtual void SetUniform(const char* name, const glm::vec3& value) = 0;

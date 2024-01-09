@@ -64,7 +64,7 @@ struct IndexedDrawData {
     }
 };
 
-class IRendererAPI {
+class RendererAPI {
 public:
     enum ApiType {
         kUnknown,
@@ -72,7 +72,7 @@ public:
     };
 
 public:
-    virtual ~IRendererAPI() = default;
+    virtual ~RendererAPI() = default;
 
     virtual void Clear() = 0;
     virtual void SetClearColor(const RgbaColor& clear_color) = 0;

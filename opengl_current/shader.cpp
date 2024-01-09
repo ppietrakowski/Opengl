@@ -12,8 +12,8 @@
 std::shared_ptr<Shader> Shader::CreateFromSource(std::span<const std::string> sources) {
     std::shared_ptr<Shader> shader = nullptr;
 
-    switch (IRendererAPI::GetApi()) {
-    case IRendererAPI::kOpenGL:
+    switch (RendererAPI::GetApi()) {
+    case RendererAPI::kOpenGL:
         shader = std::make_shared<OpenGlShader>();
         break;
     default:

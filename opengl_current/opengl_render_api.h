@@ -3,7 +3,7 @@
 #include "renderer_api.h"
 #include <GL/glew.h>
 
-class OpenGlRenderApi : public IRendererAPI {
+class OpenGlRenderApi : public RendererAPI {
 public:
     OpenGlRenderApi();
 

@@ -13,7 +13,7 @@ public:
     void Use() const override;
     void StopUsing() const override;
 
-    void setUniform(const char* name, std::int32_t value) override;
+    void SetUniform(const char* name, std::int32_t value) override;
     void SetUniform(const char* name, float value) override;
     void SetUniform(const char* name, glm::vec2 value) override;
     void SetUniform(const char* name, const glm::vec3& value) override;

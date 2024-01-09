@@ -150,7 +150,7 @@ void OpenGlShader::StopUsing() const {
     glUseProgram(0);
 }
 
-void OpenGlShader::setUniform(const char* name, std::int32_t  value) {
+void OpenGlShader::SetUniform(const char* name, std::int32_t  value) {
     glUniform1i(GetUniformLocation(name), value);
 }
 

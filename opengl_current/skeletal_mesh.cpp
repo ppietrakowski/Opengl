@@ -78,8 +78,6 @@ bool SkeletonMeshVertex::AddBoneData(std::int32_t bone_id, float weight) {
     return false;
 }
 
-static constexpr const char* kDefaultAnimationName = "TPose";
-
 SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material) :
     main_material{material},
     num_bones_{0},

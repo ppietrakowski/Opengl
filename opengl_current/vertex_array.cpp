@@ -5,8 +5,8 @@
 #include "renderer_api.h"
 
 std::shared_ptr<VertexArray> VertexArray::Create() {
-    switch (IRendererAPI::GetApi()) {
-    case IRendererAPI::kOpenGL:
+    switch (RendererAPI::GetApi()) {
+    case RendererAPI::kOpenGL:
         return std::make_shared<OpenGlVertexArray>();
     }
 

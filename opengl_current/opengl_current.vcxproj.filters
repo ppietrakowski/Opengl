@@ -317,9 +317,6 @@
     <ClInclude Include="stb_image.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="level.h">
-      <Filter>Header Files\scene</Filter>
-    </ClInclude>
     <ClInclude Include="skeletal_mesh_component.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
@@ -331,6 +328,12 @@
     </ClInclude>
     <ClInclude Include="resouce_manager.h">
       <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="level.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="animation_component.h">
+      <Filter>Header Files\renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

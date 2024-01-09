@@ -192,6 +192,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="actor.h" />
+    <ClInclude Include="animation_component.h" />
     <ClInclude Include="assimp_utils.h" />
     <ClInclude Include="buffer.h" />
     <ClInclude Include="core.h" />

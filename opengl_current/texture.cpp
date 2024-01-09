@@ -19,7 +19,7 @@ static void StbiDeleter(std::uint8_t* bytes) {
 }
 
 std::shared_ptr<Texture2D> Texture2D::LoadFromFile(const std::filesystem::path& file_path) {
-    if (IRendererAPI::GetApi() == IRendererAPI::kOpenGL) {
+    if (RendererAPI::GetApi() == RendererAPI::kOpenGL) {
         // Flip the image vertically if needed
         stbi_set_flip_vertically_on_load(1);
     } else {
@@ -37,8 +37,8 @@ std::shared_ptr<Texture2D> Texture2D::LoadFromFile(const std::filesystem::path& 
 }
 
 std::shared_ptr<Texture2D> Texture2D::Create(const void* data, const TextureSpecification& specification) {
-    switch (IRendererAPI::GetApi()) {
-    case IRendererAPI::kOpenGL:
+    switch (RendererAPI::GetApi()) {
+    case RendererAPI::kOpenGL:
         return std::make_shared<OpenGlTexture2D>(data, specification);
     }
 
@@ -46,8 +46,8 @@ std::shared_ptr<Texture2D> Texture2D::Create(const void* data, const TextureSpec
 }
 
 std::shared_ptr<Texture2D> Texture2D::CreateFromImage(const ImageRgba& image) {
-    switch (IRendererAPI::GetApi()) {
-    case IRendererAPI::kOpenGL:
+    switch (RendererAPI::GetApi()) {
+    case RendererAPI::kOpenGL:
         return std::make_shared<OpenGlTexture2D>(image);
     }
 
@@ -55,8 +55,8 @@ std::shared_ptr<Texture2D> Texture2D::CreateFromImage(const ImageRgba& image) {
 }
 
 std::shared_ptr<Texture2D> Texture2D::CreateEmpty(const TextureSpecification& specification) {
-    switch (IRendererAPI::GetApi()) {
-    case IRendererAPI::kOpenGL:
+    switch (RendererAPI::GetApi()) {
+    case RendererAPI::kOpenGL:
         return std::make_shared<OpenGlTexture2D>(specification);
     }
 
