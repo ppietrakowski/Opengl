@@ -64,7 +64,7 @@ public:
     TPrimitiveParameter(const TPrimitiveParameter<T>&) = default;
     TPrimitiveParameter& operator=(const TPrimitiveParameter<T>&) = default;
 
-    void set(T value) override {
+    void SetValue(T value) override {
         m_Value = value;
     }
 
