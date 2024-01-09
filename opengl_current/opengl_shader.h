@@ -13,15 +13,15 @@ public:
     void Use() const override;
     void StopUsing() const override;
 
-    void SetUniformInt(const char* name, std::int32_t value) override;
-    void SetUniformFloat(const char* name, float value) override;
-    void SetUniformVec2(const char* name, glm::vec2 value) override;
-    void SetUniformVec3(const char* name, const glm::vec3& value) override;
-    void SetUniformVec4(const char* name, const glm::vec4& value) override;
+    void setUniform(const char* name, std::int32_t value) override;
+    void SetUniform(const char* name, float value) override;
+    void SetUniform(const char* name, glm::vec2 value) override;
+    void SetUniform(const char* name, const glm::vec3& value) override;
+    void SetUniform(const char* name, const glm::vec4& value) override;
 
-    void SetUniformMat4(const char* name, const glm::mat4& value) override;
+    void SetUniform(const char* name, const glm::mat4& value) override;
     void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, std::uint32_t count) override;
-    void SetUniformMat3(const char* name, const glm::mat3& value) override;
+    void SetUniform(const char* name, const glm::mat3& value) override;
 
     std::int32_t GetUniformInt(const char* name) const override;
 

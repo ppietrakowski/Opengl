@@ -20,23 +20,23 @@ SandboxGameLayer::SandboxGameLayer() :
     m_SkeletalMesh->main_material = ResourceManager::CreateMaterial("shaders/skeletal_default.shd", "skeletal1");
     m_CurrentUsed = m_Shader;
     m_CurrentUsed->Use();
-    m_CurrentUsed->SetUniformVec3("u_light_color", glm::vec3{1, 1, 1});
-    m_CurrentUsed->SetUniformVec3("u_light_pos", glm::vec3{-1, 0, -5});
-    m_Shader->SetUniformVec3("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
+    m_CurrentUsed->SetUniform("u_light_color", glm::vec3{1, 1, 1});
+    m_CurrentUsed->SetUniform("u_light_pos", glm::vec3{-1, 0, -5});
+    m_Shader->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
 
-    m_CurrentUsed->SetUniformVec3("u_material.ambient", glm::vec3{0.01f, 0.01f, 0.01f});
-    m_CurrentUsed->SetUniformVec3("u_material.specular", glm::vec3{0.797357, 0.723991, 0.208006});
-    m_CurrentUsed->SetUniformFloat("u_material.shininess", 87.2f);
+    m_CurrentUsed->SetUniform("u_material.ambient", glm::vec3{0.01f, 0.01f, 0.01f});
+    m_CurrentUsed->SetUniform("u_material.specular", glm::vec3{0.797357, 0.723991, 0.208006});
+    m_CurrentUsed->SetUniform("u_material.shininess", 87.2f);
 
     m_Unshaded->Use();
-    m_Unshaded->SetUniformVec3("u_material.diffuse", glm::vec3{1, 0, 0});
+    m_Unshaded->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
     m_CurrentUsed->Use();
 
-    m_Shader->SetUniformMat4("u_projection_view", glm::identity<glm::mat4>());
-    m_Shader->SetUniformMat4("u_transform", glm::identity<glm::mat4>());
+    m_Shader->SetUniform("u_projection_view", glm::identity<glm::mat4>());
+    m_Shader->SetUniform("u_transform", glm::identity<glm::mat4>());
     glm::vec3 white{1.0f, 1.0f, 1.0f};
 
-    m_Shader->SetUniformVec3("u_material.Tint", white);
+    m_Shader->SetUniform("u_material.Tint", white);
 
     m_WireframeMaterial = ResourceManager::CreateMaterial("shaders/unshaded.shd", "wireframe");
     m_Material = ResourceManager::CreateMaterial("shaders/default.shd", "postac_material");
@@ -113,11 +113,11 @@ void SandboxGameLayer::Update(Duration deltaTime) {
 
 void SandboxGameLayer::Render(Duration deltaTime) {
     Renderer::BeginScene(glm::inverse(glm::translate(m_CameraPosition) * glm::mat4_cast(m_CameraRotation)), m_CameraPosition);
-    m_CurrentUsed->SetUniformVec3("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
+    m_CurrentUsed->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
     m_StaticMesh->Render(*m_CurrentMaterial, glm::translate(glm::identity<glm::mat4>(), m_StaticMeshPosition));
 
     m_Unshaded->Use();
-    m_Unshaded->SetUniformVec3("u_material.diffuse", glm::vec3{1, 0, 0});
+    m_Unshaded->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
     Renderer::DrawDebugBox(m_StaticMesh->GetBBoxMin(), m_StaticMesh->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), m_StaticMeshPosition));
     Renderer::DrawDebugBox(m_StaticMesh->GetBBoxMin(), m_StaticMesh->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), m_StaticMeshPosition + glm::vec3{10, 0, 0}));
 

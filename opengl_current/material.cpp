@@ -107,10 +107,7 @@ void Material::AddNewProperty(const UniformInfo& info) {
     }
     case UniformType::kSampler2D:
     {
-        MaterialParam param{info.name.c_str()};
-        param.texture_ = Renderer::GetDefaultTexture();
-        param.texture_unit = num_texture_units_++;
-
+        MaterialParam param{info.name.c_str(), Renderer::GetDefaultTexture(), num_texture_units_++};
         material_params_.try_emplace(info.name.substr(kMaterialTag.length()), param);
         break;
     }

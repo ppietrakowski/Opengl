@@ -101,15 +101,15 @@ public:
     virtual void Use() const = 0;
     virtual void StopUsing() const = 0;
 
-    virtual void SetUniformInt(const char* name, int value) = 0;
-    virtual void SetUniformFloat(const char* name, float value) = 0;
-    virtual void SetUniformVec2(const char* name, glm::vec2 value) = 0;
-    virtual void SetUniformVec3(const char* name, const glm::vec3& value) = 0;
-    virtual void SetUniformVec4(const char* name, const glm::vec4& value) = 0;
+    virtual void setUniform(const char* name, int value) = 0;
+    virtual void SetUniform(const char* name, float value) = 0;
+    virtual void SetUniform(const char* name, glm::vec2 value) = 0;
+    virtual void SetUniform(const char* name, const glm::vec3& value) = 0;
+    virtual void SetUniform(const char* name, const glm::vec4& value) = 0;
 
-    virtual void SetUniformMat4(const char* name, const glm::mat4& value) = 0;
+    virtual void SetUniform(const char* name, const glm::mat4& value) = 0;
     virtual void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, std::uint32_t count) = 0;
-    virtual void SetUniformMat3(const char* name, const glm::mat3& value) = 0;
+    virtual void SetUniform(const char* name, const glm::mat3& value) = 0;
 
     virtual int GetUniformInt(const char* name) const = 0;
 

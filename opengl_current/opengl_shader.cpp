@@ -150,27 +150,27 @@ void OpenGlShader::StopUsing() const {
     glUseProgram(0);
 }
 
-void OpenGlShader::SetUniformInt(const char* name, std::int32_t  value) {
+void OpenGlShader::setUniform(const char* name, std::int32_t  value) {
     glUniform1i(GetUniformLocation(name), value);
 }
 
-void OpenGlShader::SetUniformFloat(const char* name, float value) {
+void OpenGlShader::SetUniform(const char* name, float value) {
     glUniform1f(GetUniformLocation(name), value);
 }
 
-void OpenGlShader::SetUniformVec2(const char* name, glm::vec2 value) {
+void OpenGlShader::SetUniform(const char* name, glm::vec2 value) {
     glUniform2fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
-void OpenGlShader::SetUniformVec3(const char* name, const glm::vec3& value) {
+void OpenGlShader::SetUniform(const char* name, const glm::vec3& value) {
     glUniform3fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
-void OpenGlShader::SetUniformVec4(const char* name, const glm::vec4& value) {
+void OpenGlShader::SetUniform(const char* name, const glm::vec4& value) {
     glUniform4fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
-void OpenGlShader::SetUniformMat4(const char* name, const glm::mat4& value) {
+void OpenGlShader::SetUniform(const char* name, const glm::mat4& value) {
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
 }
 
@@ -178,7 +178,7 @@ void OpenGlShader::SetUniformMat4Array(const char* name, std::span<const glm::ma
     glUniformMatrix4fv(GetUniformLocation(name), static_cast<GLsizei>(count), GL_FALSE, glm::value_ptr(values[0]));
 }
 
-void OpenGlShader::SetUniformMat3(const char* name, const glm::mat3& value) {
+void OpenGlShader::SetUniform(const char* name, const glm::mat3& value) {
     glUniformMatrix3fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
 }
 

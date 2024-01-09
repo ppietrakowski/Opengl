@@ -116,11 +116,11 @@ void Renderer::FlushDrawDebug(Shader& shader) {
 }
 
 void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform) {
-    shader.SetUniformMat4("u_projection_view", projection_view_);
-    shader.SetUniformMat4("u_transform", transform);
-    shader.SetUniformMat4("u_view", view_);
-    shader.SetUniformVec3("u_camera_location", camera_position_);
+    shader.SetUniform("u_projection_view", projection_view_);
+    shader.SetUniform("u_transform", transform);
+    shader.SetUniform("u_view", view_);
+    shader.SetUniform("u_camera_location", camera_position_);
 
     glm::mat3 normal_matrix = glm::inverseTranspose(transform);
-    shader.SetUniformMat3("u_normal_transform", normal_matrix);
+    shader.SetUniform("u_normal_transform", normal_matrix);
 }
