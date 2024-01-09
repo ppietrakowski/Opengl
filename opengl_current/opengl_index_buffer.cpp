@@ -41,6 +41,7 @@ void OpenGlIndexBuffer::Unbind() const {
 
 void OpenGlIndexBuffer::UpdateIndices(const uint32_t* data, std::int32_t offset, std::int32_t size) {
     ERR_FAIL_EXPECTED_TRUE(IsValid());
+    ERR_FAIL_EXPECTED_TRUE_MSG(size <= num_indices_, "Size over declared is causing memory allocation -> may occur memory leak");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer_id_);
     std::int32_t size_bytes = size * sizeof(std::uint32_t);

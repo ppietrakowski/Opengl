@@ -24,11 +24,11 @@ public:
         std::uint32_t index = static_cast<std::uint32_t>(std::distance(data_, current_));
 
         T* data = new T[new_capacity];
-        std::move(data_, data_ + capacity_, data);
+        std::move(data_, current_, data);
 
         delete[] data_;
         data_ = data;
-        current_ = data[index];
+        current_ = &data[index];
         capacity_ = new_capacity;
     }
 

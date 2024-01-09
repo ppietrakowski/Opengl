@@ -46,6 +46,13 @@ public:
         const glm::mat4& transform = glm::mat4{1.0f},
         RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
 
+    static void Submit(const Material& material,
+        std::int32_t num_indices,
+        const VertexArray& vertex_array,
+        const glm::mat4& transform = glm::mat4{1.0f},
+        RenderPrimitive render_primitive = RenderPrimitive::kTriangles);
+
+
     static void SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, std::int32_t num_indices,
         const VertexArray& vertex_array,
         const glm::mat4& transform = glm::mat4{1.0f},

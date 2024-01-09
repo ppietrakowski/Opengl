@@ -36,6 +36,7 @@ private:
     std::shared_ptr<Material> m_WireframeMaterial;
     std::shared_ptr<Material> m_CurrentMaterial;
     std::shared_ptr<Material> m_MaterialTest;
+    std::shared_ptr<InstancedMesh> m_InstancedMesh;
 
     float m_Yaw = 0.0f;
     float m_Pitch = 0.0f;

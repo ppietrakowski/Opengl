@@ -48,8 +48,6 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
         throw std::runtime_error{importer.GetErrorString()};
     }
 
-    std::vector<StaticMeshVertex> vertices;
-    std::vector<std::uint32_t> indices;
     std::int32_t total_vertices = 0;
     std::int32_t total_indices = 0;
 

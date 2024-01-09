@@ -72,6 +72,16 @@ void Renderer::Submit(const Material& material, const VertexArray& vertex_array,
     RenderCommand::DrawIndexed(IndexedDrawData{&vertex_array, vertex_array.GetNumIndices(), render_primitive});
 }
 
+void Renderer::Submit(const Material& material, std::int32_t num_indices, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive) {
+    Shader& shader = material.GetShader();
+    shader.Use();
+    material.SetupRenderState();
+    material.SetShaderUniforms();
+
+    UploadUniforms(shader, transform);
+    RenderCommand::DrawIndexed(IndexedDrawData{&vertex_array, num_indices, render_primitive});
+}
+
 void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms,
     std::int32_t count, const VertexArray& vertex_array, const glm::mat4& transform, RenderPrimitive render_primitive) {
     Shader& shader = material.GetShader();

@@ -5,7 +5,7 @@
 
 static RenderStats render_stats_;
 static std::chrono::nanoseconds start_timestamp_ = std::chrono::nanoseconds::zero();
-IRendererAPI* RenderCommand::renderer_api_ = nullptr;
+RendererAPI* RenderCommand::renderer_api_ = nullptr;
 
 void RenderCommand::Initialize() {
     renderer_api_ = new OpenGlRenderApi();

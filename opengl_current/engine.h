@@ -18,3 +18,4 @@
 #include "level.h"
 #include "skeletal_mesh_component.h"
 #include "static_mesh_component.h"
+#include "instanced_mesh.h"

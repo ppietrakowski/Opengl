@@ -47,6 +47,8 @@ public:
 
     std::vector<std::string> texture_paths;
     std::shared_ptr<Material> main_material;
+    std::vector<StaticMeshVertex> vertices;
+    std::vector<std::uint32_t> indices;
 
 private:
     std::shared_ptr<VertexArray> vertex_array_;

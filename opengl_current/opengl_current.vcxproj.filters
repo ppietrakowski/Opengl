@@ -165,11 +165,14 @@
     <ClCompile Include="skeletal_mesh_component.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
+    <ClCompile Include="resouce_manager.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
     <ClCompile Include="static_mesh_component.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
-    <ClCompile Include="resouce_manager.cpp">
-      <Filter>Source Files\scene</Filter>
+    <ClCompile Include="instanced_mesh.cpp">
+      <Filter>Source Files\renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -333,6 +336,9 @@
       <Filter>Header Files\scene</Filter>
     </ClInclude>
     <ClInclude Include="animation_component.h">
+      <Filter>Header Files\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="instanced_mesh.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
   </ItemGroup>

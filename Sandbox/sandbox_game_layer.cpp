@@ -65,7 +65,7 @@ SandboxGameLayer::SandboxGameLayer() :
     std::vector<std::string> animations = std::move(m_SkeletalMesh->GetAnimationNames());
     RenderCommand::SetClearColor(RgbaColor{50, 30, 170});
 
-    for (int i = 0; i < 50; ++i) {
+    for (int i = 0; i <2; ++i) {
         m_SkeletalMeshActor = m_Level.CreateActor("SkeletalMesh" + std::to_string(i));
         m_SkeletalMeshActor.AddComponent<SkeletalMeshComponent>(m_SkeletalMesh);
         m_SkeletalMeshActor.GetComponent<TransformComponent>().scale = glm::vec3{0.01f, 0.01f, 0.01f};
@@ -75,6 +75,8 @@ SandboxGameLayer::SandboxGameLayer() :
     Actor staticMeshActor = m_Level.CreateActor("StaticMeshActor");
     staticMeshActor.AddComponent<StaticMeshComponent>(m_StaticMesh);
     staticMeshActor.GetComponent<TransformComponent>().SetLocalEulerAngles(glm::vec3{0, 90, 0});
+
+    m_InstancedMesh = std::make_shared<InstancedMesh>(*m_StaticMesh);
 }
 
 void SandboxGameLayer::Update(Duration deltaTime) {
@@ -113,9 +115,16 @@ void SandboxGameLayer::Update(Duration deltaTime) {
 
 void SandboxGameLayer::Render(Duration deltaTime) {
     Renderer::BeginScene(glm::inverse(glm::translate(m_CameraPosition) * glm::mat4_cast(m_CameraRotation)), m_CameraPosition);
+    m_CurrentUsed->Use();
     m_CurrentUsed->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
-    m_StaticMesh->Render(*m_CurrentMaterial, glm::translate(glm::identity<glm::mat4>(), m_StaticMeshPosition));
 
+    m_CurrentUsed->StopUsing();
+
+    for (int i = 0; i < 100; ++i) {
+        m_InstancedMesh->QueueDraw(glm::vec3{5.0f * i, 2.0f, 1.0f}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}, 0);
+    }
+    
+    m_InstancedMesh->Draw(glm::identity<glm::mat4>(), *m_StaticMesh->main_material);
     m_Unshaded->Use();
     m_Unshaded->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
     Renderer::DrawDebugBox(m_StaticMesh->GetBBoxMin(), m_StaticMesh->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), m_StaticMeshPosition));
