@@ -3,24 +3,31 @@
 #include "buffer.h"
 #include "vertex_array.h"
 #include "shader.h"
+#include "instancing.h"
 #include <glm/glm.hpp>
+
+struct DebugVertex {
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 texture_coords;
+};
+
+template<>
+struct TInstanceConvert<DebugVertex> {
+    template <typename ...Args>
+    static DebugVertex ConvertInstancePosToT(glm::vec3 v, glm::vec3 normal, glm::vec2 texture_coords, Args&& ...args) {
+        return DebugVertex{v};
+    }
+};
 
 class DebugRenderBatch {
 public:
     DebugRenderBatch();
 
-    void UploadBatchedData();
-    void FlushDraw(Shader& shader);
-
-    void AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform);
-
-    bool CanBatchAnotherMesh(std::int32_t num_indices) const;
-    bool HasBatchedAnyPrimitive() const;
+    void FlushDraw(Material& material);
+    void AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
 
 private:
-    Buffer<glm::vec3> vertices_;
-    Buffer<std::uint32_t> indices_;
-    std::shared_ptr<VertexArray> vertex_array_;
-    std::int32_t last_index_number_{0};
+    InstanceBase<DebugVertex> instance_draw_;
 };
 

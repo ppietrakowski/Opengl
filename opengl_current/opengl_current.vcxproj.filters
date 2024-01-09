@@ -341,5 +341,8 @@
     <ClInclude Include="instanced_mesh.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="instancing.h">
+      <Filter>Header Files\renderer</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

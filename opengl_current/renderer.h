@@ -69,8 +69,8 @@ public:
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();
 
-    static void DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform);
-    static void FlushDrawDebug(Shader& shader);
+    static void DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
+    static void FlushDrawDebug(Material& shader);
 
 private:
     static glm::mat4 view_;

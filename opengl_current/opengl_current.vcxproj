@@ -221,6 +221,7 @@
     <ClInclude Include="index_buffer.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="instanced_mesh.h" />
+    <ClInclude Include="instancing.h" />
     <ClInclude Include="keys.h" />
     <ClInclude Include="level.h" />
     <ClInclude Include="logging.h" />

@@ -127,12 +127,12 @@ void SandboxGameLayer::Render(Duration deltaTime) {
     m_InstancedMesh->Draw(glm::identity<glm::mat4>(), *m_StaticMesh->main_material);
     m_Unshaded->Use();
     m_Unshaded->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
-    Renderer::DrawDebugBox(m_StaticMesh->GetBBoxMin(), m_StaticMesh->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), m_StaticMeshPosition));
-    Renderer::DrawDebugBox(m_StaticMesh->GetBBoxMin(), m_StaticMesh->GetBBoxMax(), glm::translate(glm::identity<glm::mat4>(), m_StaticMeshPosition + glm::vec3{10, 0, 0}));
+    Renderer::DrawDebugBox(m_StaticMesh->GetBBoxMin(), m_StaticMesh->GetBBoxMax(), m_StaticMeshPosition, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1});
+    Renderer::DrawDebugBox(m_StaticMesh->GetBBoxMin(), m_StaticMesh->GetBBoxMax(), m_StaticMeshPosition + glm::vec3{10, 0, 0}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1});
 
-    Renderer::DrawDebugBox(m_BboxMin, m_BboxMax, glm::translate(glm::identity<glm::mat4>(), glm::vec3{10, 2, 10}));
+    Renderer::DrawDebugBox(m_BboxMin, m_BboxMax, glm::vec3{10, 2, 10}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1});
     m_Level.BroadcastRender(deltaTime);
-    Renderer::FlushDrawDebug(*m_Unshaded);
+    Renderer::FlushDrawDebug(*m_WireframeMaterial);
     Renderer::EndScene();
 }
 

@@ -73,7 +73,7 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
             aiVector3D normal = mesh->mNormals[j];
             aiVector3D texture_coords = mesh->mTextureCoords[0][j];
 
-            vertices.emplace_back(ToGlm(pos), ToGlm(normal), ToGlm(texture_coords));
+            vertices.emplace_back(ToGlm(pos), ToGlm(normal), ToGlm(texture_coords), 0);
         }
 
         for (std::uint32_t j = 0; j < mesh->mNumFaces; ++j) {

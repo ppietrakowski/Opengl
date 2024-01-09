@@ -112,16 +112,11 @@ void Renderer::Submit(Shader& shader, std::int32_t num_indices, const VertexArra
     RenderCommand::DrawIndexed(IndexedDrawData{&vertex_array, vertex_array.GetNumIndices(), render_primitive});
 }
 
-void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const glm::mat4& transform) {
-    if (!debug_batch_->HasBatchedAnyPrimitive()) {
-        RenderCommand::SetLineWidth(2);
-    }
-
-    debug_batch_->AddBoxInstance(boxmin, boxmax, transform);
+void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
+    debug_batch_->AddBoxInstance(boxmin, boxmax, position, rotation, scale);
 }
 
-void Renderer::FlushDrawDebug(Shader& shader) {
-    debug_batch_->UploadBatchedData();
+void Renderer::FlushDrawDebug(Material& shader) {
     debug_batch_->FlushDraw(shader);
 }
 

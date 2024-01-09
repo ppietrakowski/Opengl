@@ -13,9 +13,5 @@ SkeletalMeshComponent::SkeletalMeshComponent(const std::shared_ptr<SkeletalMesh>
 }
 
 void SkeletalMeshComponent::Draw(const glm::mat4& world_transform) {
-    if (should_draw_debug_bounds) {
-        Renderer::DrawDebugBox(debug_bbox_min, debug_bbox_max, world_transform);
-    }
-
     skeletal_mesh->Draw(bone_transforms, world_transform);
 }

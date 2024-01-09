@@ -3,6 +3,7 @@
 #include "shader.h"
 #include "vertex_array.h"
 #include "material.h"
+#include "instancing.h"
 
 #include <filesystem>
 #include <memory>
@@ -17,14 +18,23 @@ struct StaticMeshVertex {
         {3, PrimitiveVertexType::kFloat}, {2, PrimitiveVertexType::kFloat}, {1, PrimitiveVertexType::kInt}};
 
     StaticMeshVertex() = default;
-    StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& texture_coords) :
+    StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& texture_coords, std::int32_t texture_id) :
         position{position},
         normal{normal},
-        texture_coords{texture_coords} {
+        texture_coords{texture_coords},
+        texture_id{texture_id} {
     }
 
     StaticMeshVertex(const StaticMeshVertex&) = default;
     StaticMeshVertex& operator=(const StaticMeshVertex&) = default;
+};
+
+template<>
+struct TInstanceConvert<StaticMeshVertex> {
+    template <typename ...Args>
+    static StaticMeshVertex ConvertInstancePosToT(glm::vec3 v, glm::vec3 normal, glm::vec2 texture_coords, Args&& ...args) {
+        return StaticMeshVertex(v, normal, texture_coords, std::forward<Args>(args)...);
+    }
 };
 
 class StaticMesh {
