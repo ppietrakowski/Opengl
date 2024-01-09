@@ -5,6 +5,7 @@
 #include "vertex_array.h"
 #include "texture.h"
 #include "material.h"
+#include "transform.h"
 
 #include <cstdint>
 
@@ -38,7 +39,7 @@ public:
     static void UpdateProjection(const CameraProjection& projection);
 
 public:
-    static void BeginScene(const glm::mat4& view, glm::vec3 camera_pos);
+    static void BeginScene(const glm::mat4& view, glm::vec3 camera_pos, glm::quat camera_rotation);
     static void EndScene();
 
     static void Submit(const Material& material,
@@ -69,8 +70,11 @@ public:
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();
 
-    static void DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
+    static void DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform);
+    static void DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform, const glm::vec4& color);
     static void FlushDrawDebug(Material& shader);
+
+    static bool IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_min, glm::vec3 bbox_max);
 
 private:
     static glm::mat4 view_;

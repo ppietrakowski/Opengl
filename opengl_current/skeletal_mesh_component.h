@@ -18,12 +18,5 @@ struct SkeletalMeshComponent {
     void Draw(const glm::mat4& world_transform);
 };
 
-inline void SkeletalMeshComponent::UpdateAnimation(float delta_seconds) {
-    time += delta_seconds;
-    skeletal_mesh->GetAnimationFrames(time, animation_name, bone_transforms);
-
-    debug_bbox_min = skeletal_mesh->GetBboxMin();
-    debug_bbox_max = skeletal_mesh->GetBboxMax();
-}
 
 

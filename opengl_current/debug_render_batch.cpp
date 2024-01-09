@@ -1,6 +1,5 @@
 #include "debug_render_batch.h"
 #include "renderer.h"
-
 #include <array>
 
 // Predefined box indices (base for offsets for box batching)
@@ -16,27 +15,35 @@ constexpr std::int32_t kNumBoxVertices = 8;
 constexpr std::int32_t kMaxIndices = kMaxDebugNumBox * STD_ARRAY_NUM_ELEMENTS(kBaseBoxIndices);
 
 DebugRenderBatch::DebugRenderBatch() :
-    instance_draw_{std::array{VertexAttribute{3, PrimitiveVertexType::kFloat}, VertexAttribute{3, PrimitiveVertexType::kFloat}, VertexAttribute{2, PrimitiveVertexType::kFloat}}}
-{
+    instance_draw_{std::array{VertexAttribute{3, PrimitiveVertexType::kFloat}, VertexAttribute{4, PrimitiveVertexType::kFloat}}} {
 }
 
 void DebugRenderBatch::FlushDraw(Material& material) {
     instance_draw_.Draw(glm::mat4{1.0f}, material, RenderPrimitive::kLines);
 }
 
-void DebugRenderBatch::AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
-    std::array<DebugVertex, 8> boxVertices = {
-        DebugVertex{glm::vec3{boxmin[0], boxmin[1], boxmin[2]}},
-        DebugVertex{glm::vec3{boxmax[0], boxmin[1], boxmin[2]}},
-        DebugVertex{glm::vec3{boxmax[0], boxmax[1], boxmin[2]}},
-        DebugVertex{glm::vec3{boxmin[0], boxmax[1], boxmin[2]}},
+void DebugRenderBatch::AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform) {
+    AddBoxInstance(boxmin, boxmax, transform, glm::vec4{0, 0, 0, 1});
+}
 
-        DebugVertex{glm::vec3{boxmin[0], boxmin[1], boxmax[2]}},
-        DebugVertex{glm::vec3{boxmax[0], boxmin[1], boxmax[2]}},
-        DebugVertex{glm::vec3{boxmax[0], boxmax[1], boxmax[2]}},
-        DebugVertex{glm::vec3{boxmin[0], boxmax[1], boxmax[2]}}
+void DebugRenderBatch::AddBoxInstance(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform, const glm::vec4& color) {
+
+    if (!Renderer::IsVisibleToCamera(transform.position, boxmin, boxmax)) {
+        return;
+    }
+
+    std::array<DebugVertex, 8> boxVertices = {
+        DebugVertex{glm::vec3{boxmin[0], boxmin[1], boxmin[2]}, color},
+        DebugVertex{glm::vec3{boxmax[0], boxmin[1], boxmin[2]}, color},
+        DebugVertex{glm::vec3{boxmax[0], boxmax[1], boxmin[2]}, color},
+        DebugVertex{glm::vec3{boxmin[0], boxmax[1], boxmin[2]}, color},
+
+        DebugVertex{glm::vec3{boxmin[0], boxmin[1], boxmax[2]}, color},
+        DebugVertex{glm::vec3{boxmax[0], boxmin[1], boxmax[2]}, color},
+        DebugVertex{glm::vec3{boxmax[0], boxmax[1], boxmax[2]}, color},
+        DebugVertex{glm::vec3{boxmin[0], boxmax[1], boxmax[2]}, color}
     };
 
-    instance_draw_.QueueDraw(boxVertices, kBaseBoxIndices, position, rotation, scale);
+    instance_draw_.QueueDraw(InstanceInfo<DebugVertex>{boxVertices, kBaseBoxIndices, transform});
 }
 

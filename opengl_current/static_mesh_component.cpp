@@ -5,7 +5,6 @@ StaticMeshComponent::StaticMeshComponent(const std::shared_ptr<StaticMesh>& mesh
 }
 
 void StaticMeshComponent::Draw(const glm::mat4& world_transform) const {
-    if (static_mesh) {
-        static_mesh->Render(world_transform);
-    }
+    ASSERT(static_mesh);
+    static_mesh->Render(world_transform);
 }

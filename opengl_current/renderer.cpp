@@ -6,6 +6,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
+#include <glm/gtc/matrix_access.hpp>
 #include <array>
 
 glm::mat4 Renderer::view_{1.0f};
@@ -50,7 +51,7 @@ void Renderer::UpdateProjection(const CameraProjection& projection) {
     projection_ = glm::perspective(glm::radians(projection.fov), projection.aspect_ratio, projection.z_near, projection.z_far);
 }
 
-void Renderer::BeginScene(const glm::mat4& view, glm::vec3 camera_pos) {
+void Renderer::BeginScene(const glm::mat4& view, glm::vec3 camera_pos, glm::quat camera_rotation) {
     RenderCommand::BeginScene();
     view_ = view;
     projection_view_ = projection_ * view;
@@ -112,12 +113,34 @@ void Renderer::Submit(Shader& shader, std::int32_t num_indices, const VertexArra
     RenderCommand::DrawIndexed(IndexedDrawData{&vertex_array, vertex_array.GetNumIndices(), render_primitive});
 }
 
-void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
-    debug_batch_->AddBoxInstance(boxmin, boxmax, position, rotation, scale);
+void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform) {
+    debug_batch_->AddBoxInstance(boxmin, boxmax, transform);
+}
+
+void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform, const glm::vec4& color) {
+    debug_batch_->AddBoxInstance(boxmin, boxmax, transform, color);
 }
 
 void Renderer::FlushDrawDebug(Material& shader) {
     debug_batch_->FlushDraw(shader);
+}
+
+bool Renderer::IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_min, glm::vec3 bbox_max) {
+    // only need apply translation for testing
+    glm::mat4 transform_matrix = glm::translate(glm::identity<glm::mat4>(), worldspace_position);
+
+    // Apply transformations to the bounding box
+    glm::vec3 min_box_ws = transform_matrix * glm::vec4(bbox_min, 1.0f);
+    glm::vec3 max_box_ws = transform_matrix * glm::vec4(bbox_max, 1.0f);
+
+    // Calculate the bounding box corners in clip space
+    glm::vec4 min_clipspace = projection_view_ * glm::vec4(min_box_ws, 1.0f);
+    glm::vec4 max_clipspace = projection_view_ * glm::vec4(max_box_ws, 1.0f);
+
+    // Check for intersection with the view frustum
+    return !(max_clipspace.x < -max_clipspace.w || min_clipspace.x > min_clipspace.w ||
+        max_clipspace.y < -max_clipspace.w || min_clipspace.y > min_clipspace.w ||
+        max_clipspace.z < -max_clipspace.w || min_clipspace.z > min_clipspace.w);
 }
 
 void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform) {

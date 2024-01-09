@@ -34,16 +34,16 @@ public:
     virtual std::shared_ptr<IndexBuffer> GetIndexBuffer() = 0;
 
     template <typename T>
-    void AddBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes) {
+    void AddVertexBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes) {
         AddBufferInternal(VertexBuffer::Create(data.data(), static_cast<std::int32_t>(data.size_bytes())), attributes);
     }
 
     template <typename T>
-    void AddDynamicBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes) {
+    void AddDynamicVertexBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes) {
         AddBufferInternal(VertexBuffer::Create(data.data(), static_cast<std::int32_t>(data.size_bytes()), true), attributes);
     }
 
-    void AddDynamicBuffer(std::int32_t max_size, std::span<const VertexAttribute> attributes) {
+    void AddDynamicVertexBuffer(std::int32_t max_size, std::span<const VertexAttribute> attributes) {
         AddBufferInternal(VertexBuffer::CreateEmpty(max_size), attributes);
     }
 

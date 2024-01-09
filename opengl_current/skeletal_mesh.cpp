@@ -184,13 +184,16 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     animations_[kDefaultAnimationName].duration = 10;
 
     root_bone_.AssignHierarchy(scene->mRootNode, bones_info);
-    vertex_array_->AddBuffer<SkeletonMeshVertex>(vertices, SkeletonMeshVertex::kDataFormat);
+    vertex_array_->AddVertexBuffer<SkeletonMeshVertex>(vertices, SkeletonMeshVertex::kDataFormat);
     vertex_array_->SetIndexBuffer(IndexBuffer::Create(indices.data(), static_cast<uint32_t>(indices.size())));
 
     // find global transform for converting from bone space back to local space
     global_inverse_transform_ = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
 
     FindAabCollision(vertices, bbox_min_, bbox_max_);
+    bbox_min_ *= 0.01f;
+    bbox_max_ *= 0.01f;
+
     bbox_min_.x *= 0.2f;
     bbox_max_.x *= 0.2f;
 }

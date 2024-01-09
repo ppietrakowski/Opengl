@@ -92,7 +92,7 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
     std::shared_ptr<IndexBuffer> index_buffer = IndexBuffer::Create(indices.data(),
         static_cast<std::int32_t>(indices.size()));
 
-    vertex_array_->AddBuffer<StaticMeshVertex>(vertices, StaticMeshVertex::kDataFormat);
+    vertex_array_->AddVertexBuffer<StaticMeshVertex>(vertices, StaticMeshVertex::kDataFormat);
     vertex_array_->SetIndexBuffer(index_buffer);
 
     num_triangles_ = static_cast<std::int32_t>(indices.size()) / 3;

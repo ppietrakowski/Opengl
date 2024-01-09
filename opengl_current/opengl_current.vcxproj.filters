@@ -344,5 +344,8 @@
     <ClInclude Include="instancing.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="transform.h">
+      <Filter>Header Files\renderer</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

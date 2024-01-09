@@ -16,6 +16,10 @@ glm::mat4 TransformComponent::GetWorldTransformMatrix() const {
     return world_transform;
 }
 
+glm::vec3 TransformComponent::GetWorldPosition() const {
+    return GetWorldTransformMatrix() * glm::vec4{position, 1};
+}
+
 void SceneHierarchyComponent::RemoveChild(entt::handle handle) {
     const ActorTagComponent& tag_component = handle.get<ActorTagComponent>();
     auto it = children.find(tag_component.name);

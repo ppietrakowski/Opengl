@@ -22,41 +22,36 @@ public:
     }
 
 private:
-    std::shared_ptr<Shader> m_Shader;
-    std::shared_ptr<Shader> m_Unshaded;
-    std::shared_ptr<Shader> m_CurrentUsed;
+    std::shared_ptr<Shader> default_shader_;
+    std::shared_ptr<Shader> debug_shader_;
+    std::shared_ptr<Shader> current_used_shader_;
 
-    std::shared_ptr<StaticMesh> m_StaticMesh;
-    glm::vec3 m_StaticMeshPosition;
+    std::shared_ptr<StaticMesh> static_mesh_;
+    glm::vec3 static_mesh_position_;
 
-    glm::vec3 m_CameraPosition;
-    glm::quat m_CameraRotation;
+    glm::vec3 camera_position_;
+    glm::quat camera_rotation_;
 
-    std::shared_ptr<Material> m_Material;
-    std::shared_ptr<Material> m_WireframeMaterial;
-    std::shared_ptr<Material> m_CurrentMaterial;
-    std::shared_ptr<Material> m_MaterialTest;
-    std::shared_ptr<InstancedMesh> m_InstancedMesh;
+    std::shared_ptr<Material> default_material_;
+    std::shared_ptr<Material> debug_material_;
+    std::shared_ptr<Material> current_material_;
+    std::shared_ptr<InstancedMesh> instanced_mesh_;
 
-    float m_Yaw = 0.0f;
-    float m_Pitch = 0.0f;
+    float camera_yaw_ = 0.0f;
+    float camera_pitch_ = 0.0f;
 
-    Duration m_LastDeltaSeconds;
-    bool m_bWasPressedLastTime = false;
-    bool m_bSterringEntity{false};
+    Duration last_delta_seconds_;
 
-    float m_MoveSpeed = 20.0f;
-    float m_YawRotationRate = 10.0f;
-    float m_PitchRotationRate = 10.0f;
-    float m_AscendSpeed = 20.0f;
+    float move_speed_ = 20.0f;
+    float yaw_rotation_rate_ = 10.0f;
+    float pitch_rotation_rate_ = 10.0f;
+    float ascend_speed_ = 20.0f;
 
-    glm::vec3 m_BboxMin;
-    glm::vec3 m_BboxMax;
-    Duration m_StartupTime{GetNow()};
-    Duration m_Duration{GetNow()};
-    std::shared_ptr<SkeletalMesh> m_SkeletalMesh;
+    glm::vec3 bbox_min_;
+    glm::vec3 bbox_max_;
+    std::shared_ptr<SkeletalMesh> test_skeletal_mesh_;
 
-    Level m_Level;
-    Actor m_SkeletalMeshActor;
+    Level level_;
+    Actor skeletal_mesh_actor_;
 };
 

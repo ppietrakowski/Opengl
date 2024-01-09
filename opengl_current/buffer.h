@@ -6,7 +6,7 @@
 template <typename T>
 class Buffer {
 public:
-    Buffer(std::uint32_t initial_capacity) :
+    Buffer(std::int32_t initial_capacity) :
         capacity_{initial_capacity} {
         data_ = new T[initial_capacity];
         current_ = data_;
@@ -16,12 +16,12 @@ public:
         delete[] data_;
     }
 
-    void Resize(std::uint32_t new_capacity) {
+    void Resize(std::int32_t new_capacity) {
         if (new_capacity <= capacity_) {
             return;
         }
 
-        std::uint32_t index = static_cast<std::uint32_t>(std::distance(data_, current_));
+        std::int32_t index = static_cast<std::int32_t>(std::distance(data_, current_));
 
         T* data = new T[new_capacity];
         std::move(data_, current_, data);
@@ -52,24 +52,24 @@ public:
         return data_;
     }
 
-    std::uint32_t GetSize() const {
-        return static_cast<std::uint32_t>(std::distance(data_, current_));
+    std::int32_t GetSize() const {
+        return static_cast<std::int32_t>(std::distance(data_, current_));
     }
 
-    std::uint32_t GetSizeBytes() const {
+    std::int32_t GetSizeBytes() const {
         return GetSize() * sizeof(T);
     }
 
-    std::uint32_t GetCapacity() const {
+    std::int32_t GetCapacity() const {
         return capacity_;
     }
 
-    std::uint32_t GetCapacityBytes() const {
+    std::int32_t GetCapacityBytes() const {
         return capacity_ * sizeof(T);
     }
 
 private:
     T* data_;
     T* current_;
-    std::uint32_t capacity_;
+    std::int32_t capacity_;
 };

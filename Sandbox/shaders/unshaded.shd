@@ -1,2 +1,2 @@
-VertexShader=default.vert
+VertexShader=debug.vert
 FragmentShader=Unshaded.frag

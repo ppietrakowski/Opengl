@@ -30,10 +30,14 @@ struct StaticMeshVertex {
 };
 
 template<>
-struct TInstanceConvert<StaticMeshVertex> {
-    template <typename ...Args>
-    static StaticMeshVertex ConvertInstancePosToT(glm::vec3 v, glm::vec3 normal, glm::vec2 texture_coords, Args&& ...args) {
-        return StaticMeshVertex(v, normal, texture_coords, std::forward<Args>(args)...);
+struct InstanceCreator<StaticMeshVertex> {
+    static StaticMeshVertex CreateInstanceFrom(const StaticMeshVertex& vertex, const glm::mat4& transform, std::int32_t texture_id) {
+        StaticMeshVertex v{vertex};
+        glm::mat3 normal_matrix = transform;
+        v.position = transform * glm::vec4{v.position,1};
+        v.normal = normal_matrix * v.normal;
+        v.texture_id = texture_id;
+        return v;
     }
 };
 

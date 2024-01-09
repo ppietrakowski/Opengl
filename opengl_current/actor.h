@@ -33,6 +33,8 @@ struct TransformComponent {
     void SetLocalEulerAngles(const glm::vec3& euler_angles) {
         rotation = glm::quat{glm::radians(euler_angles)};
     }
+
+    glm::vec3 GetWorldPosition() const;
 };
 
 struct SceneHierarchyComponent {
