@@ -25,7 +25,7 @@ struct CameraProjection
         ZNear(z_near),
         ZFar(z_far)
     {
-        AspectRatio = this->Width / this->Height;
+        AspectRatio = Width / Height;
     }
 
     CameraProjection() = default;

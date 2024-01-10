@@ -3,15 +3,6 @@
 #include "vertex_array.h"
 #include <cstdint>
 
-/* Render primitives, which value is same as openGL equivalents*/
-enum class RenderPrimitive
-{
-    Points = 0x0000, // GL_POINTS
-    Lines = 0x0001, // GL_LINES
-    Triangles = 0x0004, // GL_TRIANGLES
-    TrianglesAdjancency = 0x000C // GL_TRIANGLES_ADJANCENCY
-};
-
 struct RgbaColor
 {
     std::uint8_t Red;
@@ -60,18 +51,6 @@ inline bool operator!=(const RgbaColor& a, const RgbaColor& b)
 {
     return a.Red != b.Red || a.Green != b.Green || a.Blue != b.Blue || a.Alpha != b.Alpha;
 }
-
-struct IndexedDrawData
-{
-    const VertexArray* TargetVertexArray;
-    std::int32_t NumIndices{0};
-    RenderPrimitive DrawPrimitive{RenderPrimitive::Triangles};
-
-    void Bind() const
-    {
-        TargetVertexArray->Bind();
-    }
-};
 
 class RendererAPI
 {
