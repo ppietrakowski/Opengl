@@ -17,7 +17,7 @@ InstancedMesh::InstancedMesh(const std::shared_ptr<StaticMesh>& staticMesh) :
 
 void InstancedMesh::Draw(const glm::mat4& transform, Material& material)
 {
-    m_InstanceDraw.Draw(transform, material);
+    m_InstanceDraw.DrawTriangles(transform, material);
 }
 
 void InstancedMesh::QueueDraw(const Transform& transform, std::int32_t textureId)

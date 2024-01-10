@@ -23,9 +23,25 @@ void RenderCommand::ClearBufferBindings_Debug()
     s_RendererApi->ClearBufferBindings_Debug();
 }
 
-void RenderCommand::DrawIndexed(const IndexedDrawData& drawData)
+void RenderCommand::DrawTriangles(const VertexArray& vertexArray, std::int32_t numIndices)
 {
-    s_RendererApi->DrawIndexed(drawData);
+    s_RendererApi->DrawTriangles(vertexArray, numIndices);
+    s_RenderStats.NumDrawcalls++;
+}
+
+void RenderCommand::DrawTrianglesAdjancency(const VertexArray& vertexArray, std::int32_t numIndices)
+{
+    s_RendererApi->DrawTrianglesAdjancency(vertexArray, numIndices);
+    s_RenderStats.NumDrawcalls++;
+}
+void RenderCommand::DrawLines(const VertexArray& vertexArray, std::int32_t numIndices)
+{
+    s_RendererApi->DrawLines(vertexArray, numIndices);
+    s_RenderStats.NumDrawcalls++;
+}
+void RenderCommand::DrawPoints(const VertexArray& vertexArray, std::int32_t numIndices)
+{
+    s_RendererApi->DrawPoints(vertexArray, numIndices);
     s_RenderStats.NumDrawcalls++;
 }
 

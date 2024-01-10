@@ -85,7 +85,7 @@ public:
         m_Indices.resize(maxNumIndices);
 
         ELOG_VERBOSE(LOG_RENDERER, "Rebuilding buffers for instancing (vertex buffer size=%u vertices, max num indices=%u)", m_Vertices.capacity() * sizeof(VerticesType), m_Indices.capacity());
-        
+
         // rebuild vertex and index buffers to match new size
         m_VertexArray = VertexArray::Create();
         m_VertexArray->AddDynamicVertexBuffer(static_cast<std::int32_t>(m_Vertices.capacity() * sizeof(VerticesType)), m_Attribute);
@@ -93,12 +93,38 @@ public:
         m_bBuffersDirty = true;
     }
 
-    void Draw(const glm::mat4& transform, Material& material, RenderPrimitive primitive = RenderPrimitive::Triangles)
+    void DrawTriangles(const glm::mat4& transform, Material& material)
     {
         DebugVertexArrayScope bind_array_scope{*m_VertexArray};
         UpdateBuffers();
 
-        Renderer::Submit(material, m_CurrentIndex, *m_VertexArray, transform, primitive);
+        Renderer::SubmitTriangles(material, m_CurrentIndex, *m_VertexArray, transform);
+
+        if (m_bClearPostDraw)
+        {
+            Clear();
+        }
+    }
+
+    void DrawLines(const glm::mat4& transform, Material& material)
+    {
+        DebugVertexArrayScope bind_array_scope{*m_VertexArray};
+        UpdateBuffers();
+
+        Renderer::SubmitLines(material, m_CurrentIndex, *m_VertexArray, transform);
+
+        if (m_bClearPostDraw)
+        {
+            Clear();
+        }
+    }
+
+    void DrawPoints(const glm::mat4& transform, Material& material)
+    {
+        DebugVertexArrayScope bind_array_scope{*m_VertexArray};
+        UpdateBuffers();
+
+        Renderer::SubmitPoints(material, m_CurrentIndex, *m_VertexArray, transform);
 
         if (m_bClearPostDraw)
         {
@@ -136,7 +162,7 @@ public:
         instance.StartVertex = m_IndicesStartIndex;
 
         UpdateIndices(instanceInfo);
-        UpdateVertices(instanceInfo);
+        UpdateVertices(instanceInfo, std::forward<Args>(args)...);
 
         instance.EndIndex = m_CurrentIndex;
         instance.EndVertex = m_IndicesStartIndex;
@@ -171,7 +197,7 @@ private:
 
     // if not set, the clear method is not invoked automaticely
     bool m_bClearPostDraw : 1{true};
-    
+
     // flag used for check is need to update buffers
     bool m_bBuffersDirty : 1{false};
 
@@ -194,7 +220,7 @@ private:
         return (m_IndicesStartIndex + instanceInfo.GetNumVertices() >= m_Vertices.capacity()) ||
             (m_CurrentIndex + instanceInfo.BaseIndices.size() >= m_Indices.capacity());
     }
-    
+
     void Expand(const InstanceInfo<VerticesType>& instanceInfo)
     {
         std::int32_t newVerticesSize = static_cast<std::int32_t>(m_Vertices.capacity() + m_Vertices.capacity() / 2);
@@ -209,7 +235,7 @@ private:
 
         bool bHasEnoughIndicesCapacity = newIndicesSize >= m_Indices.size() + instanceInfo.BaseIndices.size();
 
-        if (bHasEnoughIndicesCapacity)
+        if (!bHasEnoughIndicesCapacity)
         {
             newIndicesSize = static_cast<std::int32_t>(m_Indices.size() + instanceInfo.BaseIndices.size() + 1);
         }
@@ -226,7 +252,8 @@ private:
         }
     }
 
-    void UpdateVertices(const InstanceInfo<VerticesType>& instanceInfo)
+    template <typename ...Args>
+    void UpdateVertices(const InstanceInfo<VerticesType>& instanceInfo, Args&& ...args)
     {
         glm::mat4 transform = instanceInfo.CalculateTransformMatrix();
         for (const VerticesType& vertex : instanceInfo.BaseVertices)

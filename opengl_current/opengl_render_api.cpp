@@ -21,11 +21,28 @@ void OpenGlRenderApi::SetClearColor(const RgbaColor& clearColor)
     }
 }
 
-void OpenGlRenderApi::DrawIndexed(const IndexedDrawData& drawData)
+void OpenGlRenderApi::DrawTriangles(const VertexArray& vertexArray, std::int32_t numIndices)
 {
-    drawData.Bind();
-    glDrawElements(static_cast<GLenum>(drawData.DrawPrimitive),
-        static_cast<GLsizei>(drawData.NumIndices), GL_UNSIGNED_INT, nullptr);
+    vertexArray.Bind();
+    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, nullptr);
+}
+
+void OpenGlRenderApi::DrawTrianglesAdjancency(const VertexArray& vertexArray, std::int32_t numIndices)
+{
+    vertexArray.Bind();
+    glDrawElements(GL_TRIANGLES_ADJACENCY, numIndices, GL_UNSIGNED_INT, nullptr);
+}
+
+void OpenGlRenderApi::DrawLines(const VertexArray& vertexArray, std::int32_t numIndices)
+{
+    vertexArray.Bind();
+    glDrawElements(GL_LINES, numIndices, GL_UNSIGNED_INT, nullptr);
+}
+
+void OpenGlRenderApi::DrawPoints(const VertexArray& vertexArray, std::int32_t numIndices)
+{
+    vertexArray.Bind();
+    glDrawElements(GL_POINTS, numIndices, GL_UNSIGNED_INT, nullptr);
 }
 
 void OpenGlRenderApi::SetWireframe(bool bWireframeEnabled)

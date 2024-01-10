@@ -67,59 +67,61 @@ void Renderer::EndScene()
     RenderCommand::EndScene();
 }
 
-void Renderer::Submit(const Material& material, const VertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
-{
-    Shader& shader = material.GetShader();
-    shader.Use();
-    material.SetupRenderState();
-    material.SetShaderUniforms();
-
-    UploadUniforms(shader, transform);
-    RenderCommand::DrawIndexed(IndexedDrawData{&vertexArray, vertexArray.GetNumIndices(), renderPrimitive});
-}
-
-void Renderer::Submit(const Material& material, std::int32_t numIndices, const VertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
-{
-    Shader& shader = material.GetShader();
-    shader.Use();
-    material.SetupRenderState();
-    material.SetShaderUniforms();
-
-    UploadUniforms(shader, transform);
-    RenderCommand::DrawIndexed(IndexedDrawData{&vertexArray, numIndices, renderPrimitive});
-}
-
-void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms,
-    std::int32_t count, const VertexArray& vertexArray, const glm::mat4& transform, RenderPrimitive renderPrimitive)
-{
-    Shader& shader = material.GetShader();
-
-    shader.Use();
-    material.SetupRenderState();
-    material.SetShaderUniforms();
-
-    UploadUniforms(shader, transform);
-    shader.SetUniformMat4Array("u_bone_transforms", transforms, count);
-    RenderCommand::DrawIndexed(IndexedDrawData{&vertexArray, vertexArray.GetNumIndices(), renderPrimitive});
-}
-
-
-void Renderer::Submit(Shader& shader,
-    const VertexArray& vertexArray,
-    const glm::mat4& transform,
-    RenderPrimitive renderPrimitive)
-{
-    Submit(shader, vertexArray.GetNumIndices(), vertexArray, transform, renderPrimitive);
-}
-
-void Renderer::Submit(Shader& shader, std::int32_t numIndices, const VertexArray& vertexArray,
-    const glm::mat4& transform, RenderPrimitive renderPrimitive)
+void Renderer::SubmitTriangles(const Material& material, std::int32_t numIndices, const VertexArray& vertexArray, const glm::mat4& transform)
 {
     ASSERT(numIndices <= vertexArray.GetNumIndices());
 
+    Shader& shader = material.GetShader();
     shader.Use();
+    material.SetupRenderState();
+    material.SetShaderUniforms();
+
     UploadUniforms(shader, transform);
-    RenderCommand::DrawIndexed(IndexedDrawData{&vertexArray, vertexArray.GetNumIndices(), renderPrimitive});
+    RenderCommand::DrawTriangles(vertexArray, numIndices);
+}
+
+void Renderer::SubmitTriangles(const Material& material, const VertexArray& vertexArray, const glm::mat4& transform)
+{
+    SubmitTriangles(material, vertexArray.GetNumIndices(), vertexArray, transform);
+}
+
+void Renderer::SubmitLines(const Material& material, std::int32_t numIndices, const VertexArray& vertexArray, const glm::mat4& transform)
+{
+    ASSERT(numIndices <= vertexArray.GetNumIndices());
+
+    Shader& shader = material.GetShader();
+    shader.Use();
+    material.SetupRenderState();
+    material.SetShaderUniforms();
+
+    UploadUniforms(shader, transform);
+    RenderCommand::DrawLines(vertexArray, numIndices);
+}
+
+void Renderer::SubmitPoints(const Material& material, std::int32_t numIndices, const VertexArray& vertexArray, const glm::mat4& transform)
+{
+    ASSERT(numIndices <= vertexArray.GetNumIndices());
+
+    Shader& shader = material.GetShader();
+    shader.Use();
+    material.SetupRenderState();
+    material.SetShaderUniforms();
+
+    UploadUniforms(shader, transform);
+    RenderCommand::DrawPoints(vertexArray, numIndices);
+}
+
+void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, const VertexArray& vertexArray, const glm::mat4& transform)
+{
+    Shader& shader = material.GetShader();
+
+    shader.Use();
+    material.SetupRenderState();
+    material.SetShaderUniforms();
+
+    UploadUniforms(shader, transform);
+    shader.SetUniformMat4Array("u_bone_transforms", transforms, (uint32_t)transforms.size());
+    RenderCommand::DrawTriangles(vertexArray, vertexArray.GetNumIndices());
 }
 
 void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform)

@@ -11,7 +11,10 @@ public:
 private:
     void Clear() override;
     void SetClearColor(const RgbaColor& clearColor) override;
-    void DrawIndexed(const IndexedDrawData& drawData) override;
+    void DrawTriangles(const VertexArray& vertexArray, std::int32_t numIndices) override;
+    void DrawTrianglesAdjancency(const VertexArray& vertexArray, std::int32_t numIndices) override;
+    void DrawLines(const VertexArray& vertexArray, std::int32_t numIndices) override;
+    void DrawPoints(const VertexArray& vertexArray, std::int32_t numIndices) override;
 
     void SetWireframe(bool bWireframeEnabled) override;
     bool IsWireframeEnabled() override;

@@ -265,7 +265,7 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, std::int32_t animIndex)
 
 void SkeletalMesh::Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& worldTransform)
 {
-    Renderer::SubmitSkeleton(*MainMaterial, transforms, m_NumBones, *m_VertexArray, worldTransform);
+    Renderer::SubmitSkeleton(*MainMaterial, transforms, *m_VertexArray, worldTransform);
 }
 
 std::vector<std::string> SkeletalMesh::GetAnimationNames() const

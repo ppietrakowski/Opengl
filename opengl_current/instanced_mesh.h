@@ -5,7 +5,8 @@
 
 #include <glm/gtc/quaternion.hpp>
 
-class InstancedMesh {
+class InstancedMesh
+{
 public:
     InstancedMesh(const std::shared_ptr<StaticMesh>& staticMesh);
 
@@ -13,13 +14,14 @@ public:
 
     void QueueDraw(const Transform& transform, std::int32_t textureId);
 
-    const StaticMesh& GetMesh() const {
+    const StaticMesh& GetMesh() const
+    {
         return *m_StaticMesh;
     }
 
     void RemoveInstance(std::int32_t index);
 
-private: 
+private:
     std::vector<StaticMeshVertex> m_BaseVertices;
     std::vector<std::uint32_t> m_BaseIndices;
     InstanceBase<StaticMeshVertex> m_InstanceDraw;

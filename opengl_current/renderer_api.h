@@ -87,7 +87,10 @@ public:
 
     virtual void Clear() = 0;
     virtual void SetClearColor(const RgbaColor& clearColor) = 0;
-    virtual void DrawIndexed(const IndexedDrawData& drawData) = 0;
+    virtual void DrawTriangles(const VertexArray& vertexArray, std::int32_t numIndices) = 0;
+    virtual void DrawTrianglesAdjancency(const VertexArray& vertexArray, std::int32_t numIndices) = 0;
+    virtual void DrawLines(const VertexArray& vertexArray, std::int32_t numIndices) = 0;
+    virtual void DrawPoints(const VertexArray& vertexArray, std::int32_t numIndices) = 0;
 
     virtual void SetWireframe(bool bWireframeEnabled) = 0;
     virtual bool IsWireframeEnabled() = 0;

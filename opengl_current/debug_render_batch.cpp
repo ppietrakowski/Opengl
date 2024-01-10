@@ -17,7 +17,7 @@ DebugRenderBatch::DebugRenderBatch() :
 
 void DebugRenderBatch::FlushDraw(Material& material)
 {
-    m_InstanceDraw.Draw(glm::mat4{1.0f}, material, RenderPrimitive::Lines);
+    m_InstanceDraw.DrawLines(glm::mat4{1.0f}, material);
 }
 
 void DebugRenderBatch::AddBoxInstance(glm::vec3 boxMin, glm::vec3 boxMax, const Transform& transform)

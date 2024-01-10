@@ -18,8 +18,8 @@ struct CameraProjection
     float ZNear{0.1f};
     float ZFar{1000.0f};
 
-    CameraProjection(std::int32_t Width, std::int32_t height, float fov = 45.0f, float z_near = 0.1f, float z_far = 1000.0f) :
-        Width((float)Width),
+    CameraProjection(std::int32_t width, std::int32_t height, float fov = 45.0f, float z_near = 0.1f, float z_far = 1000.0f) :
+        Width((float)width),
         Height((float)height),
         Fov(fov),
         ZNear(z_near),
@@ -45,31 +45,28 @@ public:
     static void BeginScene(const glm::mat4& view, glm::vec3 cameraPos, glm::quat cameraRotation);
     static void EndScene();
 
-    static void Submit(const Material& material,
-        const VertexArray& vertexArray,
-        const glm::mat4& transform = glm::mat4{1.0f},
-        RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
-
-    static void Submit(const Material& material,
+    static void SubmitTriangles(const Material& material,
         std::int32_t numIndices,
         const VertexArray& vertexArray,
-        const glm::mat4& transform = glm::mat4{1.0f},
-        RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
+        const glm::mat4& transform = glm::mat4{1.0f});
 
-
-    static void SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, std::int32_t numIndices,
+    static void SubmitTriangles(const Material& material,
         const VertexArray& vertexArray,
-        const glm::mat4& transform = glm::mat4{1.0f},
-        RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
+        const glm::mat4& transform = glm::mat4{1.0f});
 
-    static void Submit(Shader& shader,
+    static void SubmitLines(const Material& material,
+        std::int32_t numIndices,
         const VertexArray& vertexArray,
-        const glm::mat4& transform = glm::mat4{1.0f},
-        RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
+        const glm::mat4& transform = glm::mat4{1.0f});
 
-    static void Submit(Shader& shader,
-        std::int32_t numIndices, const VertexArray& vertexArray,
-        const glm::mat4& transform = glm::mat4{1.0f}, RenderPrimitive renderPrimitive = RenderPrimitive::Triangles);
+    static void SubmitPoints(const Material& material,
+        std::int32_t numIndices,
+        const VertexArray& vertexArray,
+        const glm::mat4& transform = glm::mat4{1.0f});
+
+    static void SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms,
+        const VertexArray& vertexArray,
+        const glm::mat4& transform = glm::mat4{1.0f});
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();
 

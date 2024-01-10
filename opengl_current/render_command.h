@@ -22,7 +22,10 @@ public:
 
     static void ClearBufferBindings_Debug();
 
-    static void DrawIndexed(const IndexedDrawData& drawData);
+    static void DrawTriangles(const VertexArray& vertexArray, std::int32_t numIndices);
+    static void DrawTrianglesAdjancency(const VertexArray& vertexArray, std::int32_t numIndices);
+    static void DrawLines(const VertexArray& vertexArray, std::int32_t numIndices);
+    static void DrawPoints(const VertexArray& vertexArray, std::int32_t numIndices);
 
     static void BeginScene();
     static void EndScene();
