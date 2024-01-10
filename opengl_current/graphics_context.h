@@ -1,6 +1,7 @@
 #pragma once
 
-class GraphicsContext {
+class GraphicsContext
+{
 public:
     virtual ~GraphicsContext() = default;
 
@@ -11,6 +12,6 @@ public:
     virtual void UpdateImGuiViewport() = 0;
     virtual void SwapBuffers() = 0;
 
-    virtual void SetVsync(bool vsync_enabled) = 0;
+    virtual void SetVsync(bool bVsyncEnabled) = 0;
 };
 

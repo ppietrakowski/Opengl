@@ -3,7 +3,8 @@
 #include "Keys.h"
 #include <glm/glm.hpp>
 
-class Input {
+class Input
+{
 public:
     Input();
     virtual ~Input() = default;
@@ -18,7 +19,7 @@ public:
     static float GetMouseY();
 
 private:
-    static Input* input_instance_;
+    static Input* s_Instance;
 
     virtual bool IsKeyPressedImpl(KeyCode key) = 0;
     virtual bool IsMouseButtonPressedImpl(MouseButton button) = 0;

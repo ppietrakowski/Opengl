@@ -4,7 +4,8 @@
 #include "duration.h"
 #include "resouce_manager.h"
 
-class Level {
+class Level
+{
 public:
     Level();
     ~Level();
@@ -20,17 +21,18 @@ public:
     void BroadcastRender(Duration duration);
 
 private:
-    entt::registry registry_;
-    std::vector<Actor> actors_;
-    std::shared_ptr<ResourceManagerImpl> resource_manager_;
+    entt::registry m_Registry;
+    std::vector<Actor> m_Actors;
+    std::shared_ptr<ResourceManagerImpl> m_ResourceManager;
 
 private:
     void UpdateSkeletalMeshesAnimation(Duration duration);
 
-    Actor ConstructFromEntity(entt::entity entity) const {
+    Actor ConstructFromEntity(entt::entity entity) const
+    {
         Actor a{};
-        a.entity_handle_ = entt::handle{const_cast<entt::registry&>(registry_), entity};
-        a.home_level_ = const_cast<Level*>(this);
+        a.m_EntityHandle = entt::handle{const_cast<entt::registry&>(m_Registry), entity};
+        a.m_HomeLevel = const_cast<Level*>(this);
         return a;
     }
 };

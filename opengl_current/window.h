@@ -9,15 +9,17 @@
 #include "event.h"
 #include "graphics_context.h"
 
-struct WindowSettings {
-    std::int32_t width;
-    std::int32_t height;
-    std::string title;
+struct WindowSettings
+{
+    std::int32_t Width;
+    std::int32_t Height;
+    std::string Title;
 };
 
 using EventCallback = std::function<void(const Event&)>;
 
-class Window {
+class Window
+{
 public:
     virtual ~Window() = default;
 
@@ -43,8 +45,8 @@ public:
     virtual GraphicsContext* GetContext() const = 0;
 
     virtual void Close() = 0;
-    virtual void SetMouseVisible(bool mouse_visible) = 0;
+    virtual void SetMouseVisible(bool bMouseVisible) = 0;
 
-    static std::unique_ptr<Window> Create(const WindowSettings& window_settings);
+    static std::unique_ptr<Window> Create(const WindowSettings& windowSettings);
 };
 

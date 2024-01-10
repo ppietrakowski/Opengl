@@ -1,83 +1,98 @@
 #include "actor.h"
 #include "level.h"
 
-glm::mat4 TransformComponent::GetWorldTransformMatrix() const {
-    entt::handle parent_traverse_it = parent;
+glm::mat4 TransformComponent::GetWorldTransformMatrix() const
+{
+    entt::handle parentTraverseIt = Parent;
 
-    glm::mat4 world_transform = CalculateRelativeTransform();
+    glm::mat4 worldTransform = CalculateRelativeTransform();
 
-    while (parent_traverse_it.valid()) {
+    while (parentTraverseIt.valid())
+    {
         // accumulate all parent transforms
-        const TransformComponent& parent_transform = parent_traverse_it.get<TransformComponent>();
-        world_transform = parent_transform.CalculateRelativeTransform() * world_transform;
-        parent_traverse_it = parent_transform.parent;
+        const TransformComponent& parentTransform = parentTraverseIt.get<TransformComponent>();
+        worldTransform = parentTransform.CalculateRelativeTransform() * worldTransform;
+        parentTraverseIt = parentTransform.Parent;
     }
 
-    return world_transform;
+    return worldTransform;
 }
 
-glm::vec3 TransformComponent::GetWorldPosition() const {
-    return GetWorldTransformMatrix() * glm::vec4{position, 1};
+glm::vec3 TransformComponent::GetWorldPosition() const
+{
+    return GetWorldTransformMatrix() * glm::vec4{Position, 1};
 }
 
-void SceneHierarchyComponent::RemoveChild(entt::handle handle) {
-    const ActorTagComponent& tag_component = handle.get<ActorTagComponent>();
-    auto it = children.find(tag_component.name);
-    assert(it != children.end());
+void SceneHierarchyComponent::RemoveChild(entt::handle handle)
+{
+    const ActorTagComponent& tagComponent = handle.get<ActorTagComponent>();
+    auto it = Children.find(tagComponent.Name);
+    ASSERT(it != Children.end());
 
-    it->second.get<TransformComponent>().parent = entt::handle{};
-    children.erase(it);
+    it->second.get<TransformComponent>().Parent = entt::handle{};
+    Children.erase(it);
 }
 
-void SceneHierarchyComponent::AddChild(const entt::handle& self, entt::handle handle) {
-    const ActorTagComponent& tag_component = handle.get<ActorTagComponent>();
-    children[tag_component.name] = handle;
-    handle.get<TransformComponent>().parent = self;
+void SceneHierarchyComponent::AddChild(const entt::handle& self, entt::handle handle)
+{
+    const ActorTagComponent& tagComponent = handle.get<ActorTagComponent>();
+    Children[tagComponent.Name] = handle;
+    handle.get<TransformComponent>().Parent = self;
 }
 
-void SceneHierarchyComponent::InvalidateState() {
+void SceneHierarchyComponent::InvalidateState()
+{
     auto predicate = [](const std::pair<const std::string, entt::handle>& a) { return !a.second.valid(); };
 
-    auto it = std::find_if(children.begin(), children.end(), predicate);
+    auto it = std::find_if(Children.begin(), Children.end(), predicate);
 
-    while (it != children.end()) {
-        children.erase(it);
-        it = std::find_if(children.begin(), children.end(), predicate);
+    while (it != Children.end())
+    {
+        Children.erase(it);
+        it = std::find_if(Children.begin(), Children.end(), predicate);
     }
 }
 
-const std::string& Actor::GetName() const {
-    auto& tag_component = GetComponent<ActorTagComponent>();
-    return tag_component.name;
+const std::string& Actor::GetName() const
+{
+    auto& tagComponent = GetComponent<ActorTagComponent>();
+    return tagComponent.Name;
 }
 
-void Actor::SetName(const std::string& name) {
-    auto& tag_component = GetComponent<ActorTagComponent>();
-    tag_component.name = name;
+void Actor::SetName(const std::string& name)
+{
+    auto& tagComponent = GetComponent<ActorTagComponent>();
+    tagComponent.Name = name;
 }
 
-void Actor::AddChild(const Actor& actor) {
+void Actor::AddChild(const Actor& actor)
+{
     auto& hierarchy = GetComponent<SceneHierarchyComponent>();
-    hierarchy.AddChild(entity_handle_, actor.entity_handle_);
+    hierarchy.AddChild(m_EntityHandle, actor.m_EntityHandle);
 }
 
-void Actor::RemoveChild(const Actor& actor) {
+void Actor::RemoveChild(const Actor& actor)
+{
     auto& hierarchy = GetComponent<SceneHierarchyComponent>();
-    hierarchy.RemoveChild(actor.entity_handle_);
+    hierarchy.RemoveChild(actor.m_EntityHandle);
 }
 
-void Actor::DestroyActor() {
-    auto& scene_hierarchy = GetComponent<SceneHierarchyComponent>();
-    for (auto& [name, actor] : scene_hierarchy.children) {
-        home_level_->RemoveActor(name);
+void Actor::DestroyActor()
+{
+    auto& sceneHierarchy = GetComponent<SceneHierarchyComponent>();
+    for (auto& [name, actor] : sceneHierarchy.Children)
+    {
+        m_HomeLevel->RemoveActor(name);
     }
 
-    home_level_->RemoveActor(GetName());
+    m_HomeLevel->RemoveActor(GetName());
 }
 
-bool Actor::IsAlive() const {
-    return entity_handle_.valid();
+bool Actor::IsAlive() const
+{
+    return m_EntityHandle.valid();
 }
 
-Actor::Actor() {
+Actor::Actor()
+{
 }

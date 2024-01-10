@@ -3,49 +3,58 @@
 #include "error_macros.h"
 
 OpenGlGraphicsContext::OpenGlGraphicsContext(GLFWwindow* contextWindow) :
-    window_{contextWindow} {
-    glfwMakeContextCurrent(window_);
+    m_Window{contextWindow}
+{
+    glfwMakeContextCurrent(m_Window);
     glfwSwapInterval(1);
-    GLenum error_code = glewInit();
-    CRASH_EXPECTED_TRUE_MSG(error_code == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(error_code)));
+    GLenum errorCode = glewInit();
+    CRASH_EXPECTED_TRUE_MSG(errorCode == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(errorCode)));
 }
 
-void OpenGlGraphicsContext::InitializeForImGui() {
-    ImGui_ImplGlfw_InitForOpenGL(window_, true);
+void OpenGlGraphicsContext::InitializeForImGui()
+{
+    ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
     const char* glsl_version = "#version 430 core";
     ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
-void OpenGlGraphicsContext::DeinitializeImGui() {
+void OpenGlGraphicsContext::DeinitializeImGui()
+{
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 }
 
-void OpenGlGraphicsContext::ImGuiBeginFrame() {
+void OpenGlGraphicsContext::ImGuiBeginFrame()
+{
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
 }
 
-void OpenGlGraphicsContext::ImGuiDrawFrame() {
+void OpenGlGraphicsContext::ImGuiDrawFrame()
+{
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void OpenGlGraphicsContext::UpdateImGuiViewport() {
+void OpenGlGraphicsContext::UpdateImGuiViewport()
+{
     ImGuiIO& io = ImGui::GetIO();
 
     // update viewport if enabled
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-        GLFWwindow* current_context_window = glfwGetCurrentContext();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        GLFWwindow* currentContextWindow = glfwGetCurrentContext();
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
-        glfwMakeContextCurrent(current_context_window);
+        glfwMakeContextCurrent(currentContextWindow);
     }
 }
 
-void OpenGlGraphicsContext::SwapBuffers() {
-    glfwSwapBuffers(window_);
+void OpenGlGraphicsContext::SwapBuffers()
+{
+    glfwSwapBuffers(m_Window);
 }
 
-void OpenGlGraphicsContext::SetVsync(bool vsync_enabled) {
-    glfwSwapInterval(vsync_enabled ? 1 : 0);
+void OpenGlGraphicsContext::SetVsync(bool bVsyncEnabled)
+{
+    glfwSwapInterval(bVsyncEnabled ? 1 : 0);
 }

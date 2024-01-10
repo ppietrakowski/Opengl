@@ -4,19 +4,22 @@
 #include <cstdint>
 #include <stdexcept>
 
-struct SourceLocation {
-    const char* file_name;
-    std::uint32_t line;
-    const char* function_name;
+struct SourceLocation
+{
+    const char* FileName;
+    std::uint32_t Line;
+    const char* FunctionName;
 };
 
-struct ErrorHandlerInfo {
-    SourceLocation source_location;
-    const char* error_message;
+struct ErrorHandlerInfo
+{
+    SourceLocation SourceCodeLocation;
+    const char* ErrorMessage;
 
-    ErrorHandlerInfo(const SourceLocation& source_location, const char* error_message) :
-        source_location{source_location},
-        error_message{error_message} {
+    ErrorHandlerInfo(const SourceLocation& sourceLocation, const char* errorMessage) :
+        SourceCodeLocation{sourceLocation},
+        ErrorMessage{errorMessage}
+    {
     }
 
     ErrorHandlerInfo(const ErrorHandlerInfo&) = default;
@@ -35,11 +38,12 @@ struct ErrorHandlerInfo {
 #define DEBUG_BREAK() __builtin_trap()
 #endif
 
-typedef void (*ErrorHandlerFn)(void* user_data, const ErrorHandlerInfo& info);
+typedef void (*ErrorHandlerFn)(void* userData, const ErrorHandlerInfo& info);
 
-struct ErrorHandler {
-    ErrorHandlerFn error_handler_func{nullptr};
-    void* user_data{nullptr};
+struct ErrorHandler
+{
+    ErrorHandlerFn ErrorHandlerFunc{nullptr};
+    void* UserData{nullptr};
 
     void Invoke(const ErrorHandlerInfo& info) const;
 };

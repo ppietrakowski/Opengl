@@ -17,7 +17,7 @@ SandboxGameLayer::SandboxGameLayer() :
     ResourceManager::CreateMaterial("shaders/default.shd", "default");
 
     test_skeletal_mesh_ = ResourceManager::GetSkeletalMesh("untitled.fbx");
-    test_skeletal_mesh_->main_material = ResourceManager::CreateMaterial("shaders/skeletal_default.shd", "skeletal1");
+    test_skeletal_mesh_->MainMaterial = ResourceManager::CreateMaterial("shaders/skeletal_default.shd", "skeletal1");
     current_used_shader_ = default_shader_;
     current_used_shader_->Use();
     current_used_shader_->SetUniform("u_light_color", glm::vec3{1, 1, 1});
@@ -45,17 +45,17 @@ SandboxGameLayer::SandboxGameLayer() :
     default_material_->SetVector3Property("ambient", glm::vec3{0.01f, 0.01f, 0.01f});
     default_material_->SetVector3Property("specular", glm::vec3{0.797357, 0.723991, 0.208006});
     default_material_->SetFloatProperty("shininess", 87.2f);
-    debug_material_->use_wireframe = true;
+    debug_material_->bUseWireframe = true;
     current_material_ = default_material_;
     ELOG_INFO(LOG_GLOBAL, "Loading postac.obj");
     static_mesh_ = ResourceManager::GetStaticMesh("postac.obj");
-    static_mesh_->main_material = default_material_;
+    static_mesh_->MainMaterial = default_material_;
 
     uint32_t i = 0;
 
-    std::shared_ptr<Material> material = test_skeletal_mesh_->main_material;
+    std::shared_ptr<Material> material = test_skeletal_mesh_->MainMaterial;
 
-    for (const auto& path : test_skeletal_mesh_->textures) {
+    for (const auto& path : test_skeletal_mesh_->Textures) {
         std::string name = "diffuse" + std::to_string(i + 1);
         material->SetTextureProperty(name.c_str(), ResourceManager::GetTexture2D(path));
         ++i;
@@ -69,8 +69,8 @@ SandboxGameLayer::SandboxGameLayer() :
     for (int i = 0; i < 2; ++i) {
         skeletal_mesh_actor_ = level_.CreateActor("SkeletalMesh" + std::to_string(i));
         skeletal_mesh_actor_.AddComponent<SkeletalMeshComponent>(test_skeletal_mesh_);
-        skeletal_mesh_actor_.GetComponent<TransformComponent>().scale = glm::vec3{0.01f, 0.01f, 0.01f};
-        skeletal_mesh_actor_.GetComponent<TransformComponent>().position = glm::vec3{0, -2 * i - 2, -i - 1};
+        skeletal_mesh_actor_.GetComponent<TransformComponent>().Scale = glm::vec3{0.01f, 0.01f, 0.01f};
+        skeletal_mesh_actor_.GetComponent<TransformComponent>().Position = glm::vec3{0, -2 * i - 2, -i - 1};
     }
 
     Actor static_mesh_actor = level_.CreateActor("StaticMeshActor");
@@ -83,7 +83,7 @@ SandboxGameLayer::SandboxGameLayer() :
 }
 
 void SandboxGameLayer::Update(Duration delta_time) {
-    float dt = delta_time.GetAsSeconds();
+    float dt = delta_time.GetSeconds();
 
     if (Input::IsKeyPressed(Keys::kW)) {
         glm::vec3 world_forward = glm::vec3{0, 0, -1};
@@ -126,7 +126,7 @@ void SandboxGameLayer::Render(Duration delta_time) {
         Renderer::DrawDebugBox(instanced_mesh_->GetMesh().GetBBoxMin(), instanced_mesh_->GetMesh().GetBBoxMax(), transform);
     }
 
-    instanced_mesh_->Draw(glm::identity<glm::mat4>(), *static_mesh_->main_material);
+    instanced_mesh_->Draw(glm::identity<glm::mat4>(), *static_mesh_->MainMaterial);
     debug_shader_->Use();
     debug_shader_->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
     Renderer::DrawDebugBox(static_mesh_->GetBBoxMin(), static_mesh_->GetBBoxMax(), Transform{static_mesh_position_, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}}, glm::vec4{1, 0, 0, 1});
@@ -140,9 +140,9 @@ void SandboxGameLayer::Render(Duration delta_time) {
 }
 
 bool SandboxGameLayer::OnEvent(const Event& event) {
-    if (event.type == EventType::kMouseMoved) {
-        glm::vec2 delta = event.mouse_move.mouse_position - event.mouse_move.last_mouse_position;
-        float dt = last_delta_seconds_.GetAsSeconds();
+    if (event.Type == EventType::MouseMoved) {
+        glm::vec2 delta = event.MouseMove.MousePosition - event.MouseMove.LastMousePosition;
+        float dt = last_delta_seconds_.GetSeconds();
 
         camera_yaw_ -= yaw_rotation_rate_ * delta.x * dt;
         camera_pitch_ -= pitch_rotation_rate_ * delta.y * dt;
@@ -158,7 +158,7 @@ bool SandboxGameLayer::OnEvent(const Event& event) {
         return true;
     }
 
-    if (event.type == EventType::kMouseButtonPressed) {
+    if (event.Type == EventType::MouseButtonPressed) {
         DO_ONCE([this]() {
             Actor actor = level_.FindActor("StaticMeshActor");
             actor.DestroyActor();
@@ -166,7 +166,7 @@ bool SandboxGameLayer::OnEvent(const Event& event) {
         );
     }
 
-    if (event.type == EventType::kKeyPressed && event.key_event.code == Keys::kP) {
+    if (event.Type == EventType::KeyPressed && event.Key.Key == Keys::kP) {
         if (current_material_.get() == debug_material_.get()) {
             current_material_ = default_material_;
         } else {
@@ -182,7 +182,7 @@ void SandboxGameLayer::OnImguiFrame() {
     static std::int32_t num_frame{0};
 
     if (num_frame == 2) {
-        last_framerate = (last_framerate + static_cast<std::int32_t>(1000 / last_delta_seconds_.GetAsMilliseconds())) / 2;
+        last_framerate = (last_framerate + static_cast<std::int32_t>(1000 / last_delta_seconds_.GetMilliseconds())) / 2;
     } else {
         num_frame++;
     }
@@ -193,7 +193,7 @@ void SandboxGameLayer::OnImguiFrame() {
     RenderStats stats = RenderCommand::GetRenderStats();
 
     ImGui::Text("Fps: %i", last_framerate);
-    ImGui::Text("Frame time: %.2f ms", last_delta_seconds_.GetAsMilliseconds());
-    ImGui::Text("Drawcalls: %u", stats.num_drawcalls);
+    ImGui::Text("Frame time: %.2f ms", last_delta_seconds_.GetMilliseconds());
+    ImGui::Text("Drawcalls: %u", stats.NumDrawcalls);
     ImGui::End();
 }

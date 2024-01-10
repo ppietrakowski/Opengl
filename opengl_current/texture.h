@@ -10,18 +10,21 @@
 
 #include "image_rgba.h"
 
-enum class TextureFormat {
-    kRgb,
-    kRgba
+enum class TextureFormat
+{
+    Rgb,
+    Rgba
 };
 
-struct TextureSpecification {
-    std::int32_t width;
-    std::int32_t height;
-    TextureFormat texture_format;
+struct TextureSpecification
+{
+    std::int32_t Width;
+    std::int32_t Height;
+    TextureFormat Format;
 };
 
-class Texture {
+class Texture
+{
 public:
     virtual ~Texture() = default;
 
@@ -30,8 +33,8 @@ public:
     virtual std::int32_t GetHeight() const = 0;
 
     virtual void SetData(const void* data, const TextureSpecification& specification, glm::ivec2 offset = {0, 0}) = 0;
-    virtual void Bind(std::uint32_t texture_unit) const = 0;
-    virtual void Unbind(std::uint32_t texture_unit) = 0;
+    virtual void Bind(std::uint32_t textureUnit) const = 0;
+    virtual void Unbind(std::uint32_t textureUnit) = 0;
 
     virtual bool GotMinimaps() const = 0;
     virtual void GenerateMipmaps() = 0;
@@ -39,9 +42,10 @@ public:
     virtual TextureFormat GetTextureFormat() const = 0;
 };
 
-class Texture2D : public Texture {
+class Texture2D : public Texture
+{
 public:
-    static std::shared_ptr<Texture2D> LoadFromFile(const std::filesystem::path& file_path);
+    static std::shared_ptr<Texture2D> LoadFromFile(const std::filesystem::path& filePath);
     static std::shared_ptr<Texture2D> Create(const void* data, const TextureSpecification& specification);
     static std::shared_ptr<Texture2D> CreateFromImage(const ImageRgba& image);
     static std::shared_ptr<Texture2D> CreateEmpty(const TextureSpecification& specification);

@@ -14,73 +14,80 @@
 
 #include <array>
 
-enum class UniformType {
-    kUndefined,
-    kVec4,
-    kVec3,
-    kVec2,
-    kFloat,
-    kInt,
-    kIvec2,
-    kIvec3,
-    kMat4x4,
-    kMat3x3,
-    kBoolean,
-    kSampler2D,
+enum class UniformType
+{
+    Undefined,
+    Vec4,
+    Vec3,
+    Vec2,
+    Float,
+    Int,
+    Ivec2,
+    Ivec3,
+    Mat4x4,
+    Mat3x3,
+    Boolean,
+    Sampler2D,
 };
 
-struct UniformInfo {
-    UniformType uniform_type;
-    std::string name;
-    std::int32_t location;
-    int32_t num_textures{0};
+struct UniformInfo
+{
+    UniformType Type;
+    std::string Name;
+    std::int32_t Location;
+    int32_t NumTextures{0};
 };
 
-struct ShaderCompilationFailedException : public std::runtime_error {
-    ShaderCompilationFailedException(const char* error_message) :
-        std::runtime_error{error_message}
+struct ShaderCompilationFailedException : public std::runtime_error
+{
+    ShaderCompilationFailedException(const char* errorMessage) :
+        std::runtime_error{errorMessage}
     {
     }
 };
 
-struct ShaderProgramLinkingFailedException : public std::runtime_error {
-    ShaderProgramLinkingFailedException(const char* error_message) :
-        std::runtime_error{error_message}
+struct ShaderProgramLinkingFailedException : public std::runtime_error
+{
+    ShaderProgramLinkingFailedException(const char* errorMessage) :
+        std::runtime_error{errorMessage}
     {
     }
 };
 
-struct ShaderIndex {
-    enum IndexType {
-        kVertex = 0,
-        kFragment,
-        kGeometry,
-        kTesselationControlShader,
-        kTesselationEvaluateShader,
-        kCount
+struct ShaderIndex
+{
+    enum IndexType
+    {
+        Vertex = 0,
+        Fragment,
+        Geometry,
+        TesselationControlShader,
+        TesselationEvaluateShader,
+        Count
     };
 };
 
 class Shader;
 
-class ShaderSourceBuilder {
+class ShaderSourceBuilder
+{
 public:
     std::shared_ptr<Shader> Build();
 
     ShaderSourceBuilder& SetVertexShaderSource(const std::string& source);
-    ShaderSourceBuilder& LoadVertexShaderSource(const std::filesystem::path& file_path);
+    ShaderSourceBuilder& LoadVertexShaderSource(const std::filesystem::path& filePath);
 
     ShaderSourceBuilder& SetFragmentShaderSource(const std::string& source);
-    ShaderSourceBuilder& LoadFragmentShaderSource(const std::filesystem::path& file_path);
+    ShaderSourceBuilder& LoadFragmentShaderSource(const std::filesystem::path& filePath);
 
     ShaderSourceBuilder& SetGeometryShaderSource(const std::string& source);
-    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& file_path);
+    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& filePath);
 
-    ShaderSourceBuilder& SetTesselationShaderSource(const std::string& control_shader_source, const std::string& evaluate_shader_source);
-    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& control_shader_path, const std::filesystem::path& evaluate_shader_source);
+    ShaderSourceBuilder& SetTesselationShaderSource(const std::string& controlShaderSource, const std::string& evaluateShaderSource);
+    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& controlShaderPath, const std::filesystem::path& evaluateShaderPath);
 
 private:
-    std::array<std::string, ShaderIndex::kCount> shader_sources_;
+    std::array<std::string, ShaderIndex::Count> m_ShaderSources;
 
     std::uint32_t GetLastShaderIndex() const;
 };
@@ -88,9 +95,10 @@ private:
 
 class Texture;
 
-static constexpr std::int32_t kMinTextureUnits = 16;
+static constexpr std::int32_t MinTextureUnits = 16;
 
-class Shader {
+class Shader
+{
     friend class Shader;
     friend class ShaderSourceBuilder;
 public:
@@ -119,7 +127,7 @@ public:
     virtual glm::vec4 GetUniformVec4(const char* name) const = 0;
 
     virtual std::vector<UniformInfo> GetUniformInfos() const = 0;
-    virtual void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, std::uint32_t start_texture_unit = 0) = 0;
+    virtual void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, std::uint32_t startTextureUnit = 0) = 0;
 
 protected:
     virtual void GenerateShaders(std::span<std::string_view> sources) = 0;

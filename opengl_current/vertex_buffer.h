@@ -7,10 +7,11 @@
 
 #include "core.h"
 
-class VertexBuffer {
+class VertexBuffer
+{
 public:
-    static std::shared_ptr<VertexBuffer> Create(const void* data, std::int32_t size_bytes, bool dynamic = false);
-    static std::shared_ptr<VertexBuffer> CreateEmpty(std::int32_t max_size_bytes);
+    static std::shared_ptr<VertexBuffer> Create(const void* data, std::int32_t sizeBytes, bool bDynamic = false);
+    static std::shared_ptr<VertexBuffer> CreateEmpty(std::int32_t maxSizeBytes);
     virtual ~VertexBuffer() = default;
 
 public:
@@ -20,10 +21,10 @@ public:
 
     virtual void UpdateVertices(const void* buffer, std::int32_t offset, std::int32_t size) = 0;
 
-    void UpdateVertices(const void* buffer, std::int32_t size) {
+    void UpdateVertices(const void* buffer, std::int32_t size)
+    {
         UpdateVertices(buffer, 0, size);
     }
 
     virtual std::int32_t GetVerticesSizeBytes() const = 0;
-    virtual bool IsValid() const = 0;
 };

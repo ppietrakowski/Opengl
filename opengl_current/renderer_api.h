@@ -4,97 +4,109 @@
 #include <cstdint>
 
 /* Render primitives, which value is same as openGL equivalents*/
-enum class RenderPrimitive {
-    kPoints = 0x0000, // GL_POINTS
-    kLines = 0x0001, // GL_LINES
-    kTriangles = 0x0004, // GL_TRIANGLES
-    kTrianglesAdjancency = 0x000C // GL_TRIANGLES_ADJANCENCY
+enum class RenderPrimitive
+{
+    Points = 0x0000, // GL_POINTS
+    Lines = 0x0001, // GL_LINES
+    Triangles = 0x0004, // GL_TRIANGLES
+    TrianglesAdjancency = 0x000C // GL_TRIANGLES_ADJANCENCY
 };
 
-struct RgbaColor {
-    std::uint8_t red;
-    std::uint8_t green;
-    std::uint8_t blue;
-    std::uint8_t alpha;
+struct RgbaColor
+{
+    std::uint8_t Red;
+    std::uint8_t Green;
+    std::uint8_t Blue;
+    std::uint8_t Alpha;
 
     RgbaColor() = default;
     RgbaColor(const RgbaColor&) = default;
     RgbaColor& operator=(const RgbaColor&) = default;
 
     constexpr RgbaColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha = 255) :
-        red{red},
-        green{green},
-        blue{blue},
-        alpha{alpha} {
+        Red{red},
+        Green{green},
+        Blue{blue},
+        Alpha{alpha}
+    {
     }
 };
 
 
-struct RgbColor {
-    std::uint8_t red;
-    std::uint8_t green;
-    std::uint8_t blue;
+struct RgbColor
+{
+    std::uint8_t Red;
+    std::uint8_t Green;
+    std::uint8_t Blue;
 
     RgbColor() = default;
     RgbColor(const RgbColor&) = default;
     RgbColor& operator=(const RgbColor&) = default;
 
     constexpr RgbColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) :
-        red{red},
-        green{green},
-        blue{blue} {
+        Red{red},
+        Green{green},
+        Blue{blue}
+    {
     }
 };
 
-inline bool operator==(const RgbaColor& a, const RgbaColor& b) {
-    return a.red == b.red && a.green == b.green && a.blue == b.blue && a.alpha == b.alpha;
+inline bool operator==(const RgbaColor& a, const RgbaColor& b)
+{
+    return a.Red == b.Red && a.Green == b.Green && a.Blue == b.Blue && a.Alpha == b.Alpha;
 }
 
-inline bool operator!=(const RgbaColor& a, const RgbaColor& b) {
-    return a.red != b.red || a.green != b.green || a.blue != b.blue || a.alpha != b.alpha;
+inline bool operator!=(const RgbaColor& a, const RgbaColor& b)
+{
+    return a.Red != b.Red || a.Green != b.Green || a.Blue != b.Blue || a.Alpha != b.Alpha;
 }
 
-struct IndexedDrawData {
-    const VertexArray* vertex_array;
-    std::int32_t num_indices{0};
-    RenderPrimitive draw_primitive{RenderPrimitive::kTriangles};
+struct IndexedDrawData
+{
+    const VertexArray* TargetVertexArray;
+    std::int32_t NumIndices{0};
+    RenderPrimitive DrawPrimitive{RenderPrimitive::Triangles};
 
-    void Bind() const {
-        vertex_array->Bind();
+    void Bind() const
+    {
+        TargetVertexArray->Bind();
     }
 };
 
-class RendererAPI {
+class RendererAPI
+{
 public:
-    enum ApiType {
-        kUnknown,
-        kOpenGL
+    enum ApiType
+    {
+        Unknown,
+        OpenGL
     };
 
 public:
     virtual ~RendererAPI() = default;
 
     virtual void Clear() = 0;
-    virtual void SetClearColor(const RgbaColor& clear_color) = 0;
-    virtual void DrawIndexed(const IndexedDrawData& draw_data) = 0;
+    virtual void SetClearColor(const RgbaColor& clearColor) = 0;
+    virtual void DrawIndexed(const IndexedDrawData& drawData) = 0;
 
-    virtual void SetWireframe(bool wireframe_enabled) = 0;
+    virtual void SetWireframe(bool bWireframeEnabled) = 0;
     virtual bool IsWireframeEnabled() = 0;
 
-    virtual void SetCullFace(bool cull_face) = 0;
+    virtual void SetCullFace(bool bCullFace) = 0;
     virtual bool DoesCullFaces() = 0;
 
-    virtual void SetBlendingEnabled(bool blending_enabled) = 0;
+    virtual void SetBlendingEnabled(bool bBlendingEnabled) = 0;
     virtual void SetLineWidth(float lineWidth) = 0;
 
     virtual void ClearBufferBindings_Debug() = 0;
     virtual void SetViewport(std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height) = 0;
 
-    inline static ApiType GetApi() {
-        return renderer_api_type_;
+    inline static ApiType GetApi()
+    {
+        return s_RendererApiType;
     }
 
 private:
-    static ApiType renderer_api_type_;
+    static ApiType s_RendererApiType;
 };
 

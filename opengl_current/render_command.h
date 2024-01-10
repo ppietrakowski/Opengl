@@ -3,12 +3,14 @@
 #include "renderer_api.h"
 #include <cstdint>
 
-struct RenderStats {
-    std::int32_t num_drawcalls{0};
-    std::int64_t delta_frame_nanoseconds{0};
+struct RenderStats
+{
+    std::int32_t NumDrawcalls{0};
+    std::int64_t DeltaFrameNanoseconds{0};
 };
 
-class RenderCommand {
+class RenderCommand
+{
 public:
     RenderCommand() = delete;
     RenderCommand(const RenderCommand&) = delete;
@@ -20,27 +22,27 @@ public:
 
     static void ClearBufferBindings_Debug();
 
-    static void DrawIndexed(const IndexedDrawData& draw_data);
+    static void DrawIndexed(const IndexedDrawData& drawData);
 
     static void BeginScene();
     static void EndScene();
-    static void SetClearColor(const RgbaColor& clear_color);
+    static void SetClearColor(const RgbaColor& clearColor);
     static void Clear();
 
-    static void SetWireframe(bool wireframe_enabled);
+    static void SetWireframe(bool bWireframeEnabled);
     static bool IsWireframeEnabled();
 
-    static void SetCullFace(bool cull_face);
+    static void SetCullFace(bool bCullFaces);
     static bool DoesCullFaces();
 
-    static void SetBlendingEnabled(bool blending_enabled);
+    static void SetBlendingEnabled(bool bBlendingEnabled);
 
-    static void SetLineWidth(float line_width);
+    static void SetLineWidth(float lineWidth);
     static void SetViewport(std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height);
 
     static RenderStats GetRenderStats();
 
 private:
-    static RendererAPI* renderer_api_;
+    static RendererAPI* s_RendererApi;
 };
 

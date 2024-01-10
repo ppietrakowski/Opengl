@@ -6,59 +6,67 @@
 
 #include "keys.h"
 
-enum class EventType {
-    kInvalid = 0,
-    kLostFocus,
-    kGainedFocus,
-    kKeyPressed,
-    kKeyReleased,
-    kMouseWheelScrolled,
-    kMouseButtonPressed,
-    kMouseButtonReleased,
-    kMouseMoved,
-    kCount
+enum class EventType
+{
+    Invalid = 0,
+    LostFocus,
+    GainedFocus,
+    KeyPressed,
+    KeyReleased,
+    MouseWheelScrolled,
+    MouseButtonPressed,
+    MouseButtonReleased,
+    MouseMoved,
+    Count
 };
 
-struct Event {
-    struct SizeEvent {
-        std::int32_t width;
-        std::int32_t height;
+struct Event
+{
+    struct SizeEvent
+    {
+        std::int32_t Width;
+        std::int32_t Height;
     };
 
-    struct KeyEvent {
-        KeyCode code;
-        std::int32_t scancode;
-        bool alt_clicked : 1;
-        bool control_clicked : 1;
-        bool shift_clicked : 1;
-        bool system_clicked : 1;
+    struct KeyEvent
+    {
+        KeyCode Key;
+        std::int32_t Scancode;
+        bool bAltClicked : 1;
+        bool bControlClicked : 1;
+        bool bShiftClicked : 1;
+        bool bSystemClicked : 1;
     };
 
-    struct MouseMoveEvent {
-        glm::vec2 mouse_position;
-        glm::vec2 last_mouse_position;
+    struct MouseMoveEvent
+    {
+        glm::vec2 MousePosition;
+        glm::vec2 LastMousePosition;
     };
 
-    struct MouseButtonEvent {
-        MouseButton mouse_button;
-        glm::vec2 mouse_position;
+    struct MouseButtonEvent
+    {
+        MouseButton Button;
+        glm::vec2 MousePosition;
     };
 
-    struct MouseWheelEvent {
-        glm::vec2 delta;
+    struct MouseWheelEvent
+    {
+        glm::vec2 Delta;
     };
 
     // Member data
-    EventType type;
+    EventType Type;
 
-    union {
-        SizeEvent size;
-        KeyEvent key_event;
-        MouseMoveEvent mouse_move;
-        MouseButtonEvent mouse_button_state;
-        MouseWheelEvent mouse_wheel;
+    union
+    {
+        SizeEvent Size;
+        KeyEvent Key;
+        MouseMoveEvent MouseMove;
+        MouseButtonEvent MouseButton;
+        MouseWheelEvent MouseWheel;
     };
 
-    std::chrono::milliseconds time_from_game_start;
+    std::chrono::milliseconds Timestamp;
     Event();
 };

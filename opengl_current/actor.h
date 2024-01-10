@@ -7,39 +7,44 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <map>
 
-struct ActorTagComponent {
-    std::string name;
-    std::string tag{"Default"};
-    bool is_alive{true};
+struct ActorTagComponent
+{
+    std::string Name;
+    std::string Tag{"Default"};
+    bool bIsAlive{true};
 };
 
-struct TransformComponent {
-    entt::handle parent;
+struct TransformComponent
+{
+    entt::handle Parent;
 
     // Position in parent's space (World space, if parent unspecified)
-    glm::vec3 position{0, 0, 0};
+    glm::vec3 Position{0, 0, 0};
 
     // Rotation in parent's space (World space, if parent unspecified)
-    glm::quat rotation{glm::vec3{0, 0, 0}};
+    glm::quat Rotation{glm::vec3{0, 0, 0}};
 
-    glm::vec3 scale{1, 1, 1};
+    glm::vec3 Scale{1, 1, 1};
 
     glm::mat4 GetWorldTransformMatrix() const;
 
-    glm::mat4 CalculateRelativeTransform() const {
-        return glm::translate(glm::identity<glm::mat4>(), position) * glm::mat4_cast(rotation) * glm::scale(glm::identity<glm::mat4>(), scale);
+    glm::mat4 CalculateRelativeTransform() const
+    {
+        return glm::translate(glm::identity<glm::mat4>(), Position) * glm::mat4_cast(Rotation) * glm::scale(glm::identity<glm::mat4>(), Scale);
     }
 
-    void SetLocalEulerAngles(const glm::vec3& euler_angles) {
-        rotation = glm::quat{glm::radians(euler_angles)};
+    void SetLocalEulerAngles(const glm::vec3& eulerAngles)
+    {
+        Rotation = glm::quat{glm::radians(eulerAngles)};
     }
 
     glm::vec3 GetWorldPosition() const;
 };
 
-struct SceneHierarchyComponent {
-    entt::handle parent;
-    std::map<std::string, entt::handle> children;
+struct SceneHierarchyComponent
+{
+    entt::handle Parent;
+    std::map<std::string, entt::handle> Children;
 
     void RemoveChild(entt::handle handle);
     void AddChild(const entt::handle& self, entt::handle handle);
@@ -50,7 +55,8 @@ struct SceneHierarchyComponent {
 class Level;
 
 // Basic gameplay object. This class is copy constructible
-class Actor {
+class Actor
+{
     friend class Level;
 public:
     Actor();
@@ -58,23 +64,27 @@ public:
     Actor& operator=(const Actor&) = default;
 
     template <typename T>
-    T& GetComponent() {
-        return entity_handle_.get<T>();
+    T& GetComponent()
+    {
+        return m_EntityHandle.get<T>();
     }
 
     template <typename T>
-    const T& GetComponent() const {
-        return entity_handle_.get<T>();
+    const T& GetComponent() const
+    {
+        return m_EntityHandle.get<T>();
     }
 
     template <typename T, typename ...Args>
-    void AddComponent(Args&& ...args) {
-        entity_handle_.emplace<T>(std::forward<Args>(args)...);
+    void AddComponent(Args&& ...args)
+    {
+        m_EntityHandle.emplace<T>(std::forward<Args>(args)...);
     }
 
     template <typename T>
-    void RemoveComponent() {
-        entity_handle_.erase<T>();
+    void RemoveComponent()
+    {
+        m_EntityHandle.erase<T>();
     }
 
     const std::string& GetName() const;
@@ -83,19 +93,21 @@ public:
     void AddChild(const Actor& actor);
     void RemoveChild(const Actor& actor);
 
-    const Level* GetHomeLevel() const {
-        return home_level_;
+    const Level* GetHomeLevel() const
+    {
+        return m_HomeLevel;
     }
 
-    Level* GetHomeLevel() {
-        return home_level_;
+    Level* GetHomeLevel()
+    {
+        return m_HomeLevel;
     }
 
     void DestroyActor();
     bool IsAlive() const;
 
 private:
-    entt::handle entity_handle_;
-    Level* home_level_{nullptr};
+    entt::handle m_EntityHandle;
+    Level* m_HomeLevel{nullptr};
 };
 

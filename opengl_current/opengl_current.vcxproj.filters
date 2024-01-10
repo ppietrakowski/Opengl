@@ -311,9 +311,6 @@
     <ClInclude Include="vertex_buffer.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="buffer.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
     <ClInclude Include="duration.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
@@ -334,9 +331,6 @@
     </ClInclude>
     <ClInclude Include="level.h">
       <Filter>Header Files\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="animation_component.h">
-      <Filter>Header Files\renderer</Filter>
     </ClInclude>
     <ClInclude Include="instanced_mesh.h">
       <Filter>Header Files\renderer</Filter>

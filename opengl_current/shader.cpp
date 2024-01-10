@@ -9,11 +9,13 @@
 #include <fstream>
 #include <algorithm>
 
-std::shared_ptr<Shader> Shader::CreateFromSource(std::span<const std::string> sources) {
+std::shared_ptr<Shader> Shader::CreateFromSource(std::span<const std::string> sources)
+{
     std::shared_ptr<Shader> shader = nullptr;
 
-    switch (RendererAPI::GetApi()) {
-    case RendererAPI::kOpenGL:
+    switch (RendererAPI::GetApi())
+    {
+    case RendererAPI::OpenGL:
         shader = std::make_shared<OpenGlShader>();
         break;
     default:
@@ -24,74 +26,88 @@ std::shared_ptr<Shader> Shader::CreateFromSource(std::span<const std::string> so
     return shader;
 }
 
-void Shader::GenerateShaders(std::span<const std::string> sources) {
-    ASSERT(sources.size() < ShaderIndex::kCount);
-    std::array<std::string_view, ShaderIndex::kCount> srcs;
+void Shader::GenerateShaders(std::span<const std::string> sources)
+{
+    ASSERT(sources.size() < ShaderIndex::Count);
+    std::array<std::string_view, ShaderIndex::Count> srcs;
     std::uint32_t index = 0;
 
-    for (const std::string& src : sources) {
+    for (const std::string& src : sources)
+    {
         srcs[index++] = src;
     }
 
     GenerateShaders(std::span<std::string_view>{srcs.begin(), index});
 }
 
-std::uint32_t ShaderSourceBuilder::GetLastShaderIndex() const {
-    for (auto it = shader_sources_.rbegin(); it != shader_sources_.rend(); ++it) {
-        if (it->empty()) {
-            return static_cast<std::uint32_t>(std::distance(shader_sources_.rbegin(), it));
+std::uint32_t ShaderSourceBuilder::GetLastShaderIndex() const
+{
+    for (auto it = m_ShaderSources.rbegin(); it != m_ShaderSources.rend(); ++it)
+    {
+        if (it->empty())
+        {
+            return static_cast<std::uint32_t>(std::distance(m_ShaderSources.rbegin(), it));
         }
     }
 
-    return ShaderIndex::kCount;
+    return ShaderIndex::Count;
 }
 
-std::shared_ptr<Shader> ShaderSourceBuilder::Build() {
+std::shared_ptr<Shader> ShaderSourceBuilder::Build()
+{
     std::uint32_t index = GetLastShaderIndex();
-    return Shader::CreateFromSource(std::span<const std::string>{shader_sources_.begin(), index});
+    return Shader::CreateFromSource(std::span<const std::string>{m_ShaderSources.begin(), index});
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::SetVertexShaderSource(const std::string& source) {
-    shader_sources_[ShaderIndex::kVertex] = source;
+ShaderSourceBuilder& ShaderSourceBuilder::SetVertexShaderSource(const std::string& source)
+{
+    m_ShaderSources[ShaderIndex::Vertex] = source;
     return *this;
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::LoadVertexShaderSource(const std::filesystem::path& file_path) {
-    shader_sources_[ShaderIndex::kVertex] = LoadFileContent(file_path);
+ShaderSourceBuilder& ShaderSourceBuilder::LoadVertexShaderSource(const std::filesystem::path& filePath)
+{
+    m_ShaderSources[ShaderIndex::Vertex] = LoadFileContent(filePath);
     return *this;
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::SetFragmentShaderSource(const std::string& source) {
-    shader_sources_[ShaderIndex::kFragment] = source;
+ShaderSourceBuilder& ShaderSourceBuilder::SetFragmentShaderSource(const std::string& source)
+{
+    m_ShaderSources[ShaderIndex::Fragment] = source;
     return *this;
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::LoadFragmentShaderSource(const std::filesystem::path& file_path) {
-    shader_sources_[ShaderIndex::kFragment] = LoadFileContent(file_path);
+ShaderSourceBuilder& ShaderSourceBuilder::LoadFragmentShaderSource(const std::filesystem::path& filePath)
+{
+    m_ShaderSources[ShaderIndex::Fragment] = LoadFileContent(filePath);
     return *this;
 }
 
 
-ShaderSourceBuilder& ShaderSourceBuilder::SetGeometryShaderSource(const std::string& source) {
-    shader_sources_[ShaderIndex::kGeometry] = source;
+ShaderSourceBuilder& ShaderSourceBuilder::SetGeometryShaderSource(const std::string& source)
+{
+    m_ShaderSources[ShaderIndex::Geometry] = source;
     return *this;
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::LoadGeometryShaderSource(const std::filesystem::path& file_path) {
-    shader_sources_[ShaderIndex::kGeometry] = LoadFileContent(file_path);
+ShaderSourceBuilder& ShaderSourceBuilder::LoadGeometryShaderSource(const std::filesystem::path& filePath)
+{
+    m_ShaderSources[ShaderIndex::Geometry] = LoadFileContent(filePath);
     return *this;
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::SetTesselationShaderSource(const std::string& control_shader_source,
-    const std::string& evaluate_shader_source) {
-    shader_sources_[ShaderIndex::kTesselationControlShader] = control_shader_source;
-    shader_sources_[ShaderIndex::kTesselationEvaluateShader] = evaluate_shader_source;
+ShaderSourceBuilder& ShaderSourceBuilder::SetTesselationShaderSource(const std::string& controlShaderSource,
+    const std::string& evaluateShaderSource)
+{
+    m_ShaderSources[ShaderIndex::TesselationControlShader] = controlShaderSource;
+    m_ShaderSources[ShaderIndex::TesselationEvaluateShader] = evaluateShaderSource;
     return *this;
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::LoadGeometryShaderSource(const std::filesystem::path& control_shader_path,
-    const std::filesystem::path& evaluate_shader_source) {
-    shader_sources_[ShaderIndex::kTesselationControlShader] = LoadFileContent(control_shader_path);
-    shader_sources_[ShaderIndex::kTesselationEvaluateShader] = LoadFileContent(evaluate_shader_source);
+ShaderSourceBuilder& ShaderSourceBuilder::LoadGeometryShaderSource(const std::filesystem::path& controlShaderPath,
+    const std::filesystem::path& evaluateShaderPath)
+{
+    m_ShaderSources[ShaderIndex::TesselationControlShader] = LoadFileContent(controlShaderPath);
+    m_ShaderSources[ShaderIndex::TesselationEvaluateShader] = LoadFileContent(evaluateShaderPath);
     return *this;
 }

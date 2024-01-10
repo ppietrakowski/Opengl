@@ -4,9 +4,11 @@
 #include "error_macros.h"
 #include "renderer_api.h"
 
-std::shared_ptr<VertexArray> VertexArray::Create() {
-    switch (RendererAPI::GetApi()) {
-    case RendererAPI::kOpenGL:
+std::shared_ptr<VertexArray> VertexArray::Create()
+{
+    switch (RendererAPI::GetApi())
+    {
+    case RendererAPI::OpenGL:
         return std::make_shared<OpenGlVertexArray>();
     }
 

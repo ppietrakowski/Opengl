@@ -2,7 +2,8 @@
 
 #include "material_parameter.h"
 
-class Material {
+class Material
+{
 public:
     Material(const std::shared_ptr<Shader>& shader);
 
@@ -31,31 +32,34 @@ public:
     void SetupRenderState() const;
     void SetShaderUniforms() const;
 
-    Shader& GetShader() const {
-        return *shader_;
+    Shader& GetShader() const
+    {
+        return *m_Shader;
     }
 
 public:
 
-    bool use_wireframe : 1{ false };
-    bool cull_faces : 1{ true };
-    bool transparent : 1{ false };
+    bool bUseWireframe : 1{ false };
+    bool bCullFaces : 1{ true };
+    bool bTransparent : 1{ false };
 
 private:
-    std::shared_ptr<Shader> shader_;
-    std::unordered_map<std::string, MaterialParam> material_params_;
-    std::uint32_t num_texture_units_{0};
+    std::shared_ptr<Shader> m_Shader;
+    std::unordered_map<std::string, MaterialParam> m_MaterialParams;
+    std::uint32_t m_NumTextureUnits{0};
 
 private:
     void TryAddNewProperty(const UniformInfo& info);
     void AddNewProperty(const UniformInfo& info);
 
-    MaterialParam& GetParam(const char* name) {
-        return material_params_.at(name);
+    MaterialParam& GetParam(const char* name)
+    {
+        return m_MaterialParams.at(name);
     }
 
-    const MaterialParam& GetParam(const char* name) const {
-        return material_params_.at(name);
+    const MaterialParam& GetParam(const char* name) const
+    {
+        return m_MaterialParams.at(name);
     }
 };
 

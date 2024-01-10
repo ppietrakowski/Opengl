@@ -3,7 +3,8 @@
 #include <GL/glew.h>
 #include "shader.h"
 
-class OpenGlShader : public Shader {
+class OpenGlShader : public Shader
+{
 public:
     OpenGlShader();
     ~OpenGlShader();
@@ -31,17 +32,17 @@ public:
     glm::vec4 GetUniformVec4(const char* name) const override;
 
     std::vector<UniformInfo> GetUniformInfos() const override;
-    void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, std::uint32_t start_texture_unit) override;
+    void SetSamplerUniform(const char* uniformName, const std::shared_ptr<Texture>& textures, std::uint32_t startTextureUnit) override;
 
     void GenerateShaders(std::span<std::string_view> sources) override;
 
 private:
-    GLuint shader_program_{0};
-    mutable std::unordered_map<std::string, GLint> uniform_name_to_location_;
+    GLuint m_ShaderProgram{0};
+    mutable std::unordered_map<std::string, GLint> m_UniformNameToLocation;
 
 private:
 
-    GLint GetUniformLocation(const char* uniform_name) const;
-    void AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, GLint location) const;
+    GLint GetUniformLocation(const char* uniformName) const;
+    void AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, GLint location) const;
 };
 

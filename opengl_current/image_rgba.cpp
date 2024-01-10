@@ -3,39 +3,46 @@
 #include <algorithm>
 #include <cstring>
 
-ImageRgba::ImageRgba(std::uint8_t* image, std::int32_t width, std::int32_t height, void(*deleter)(std::uint8_t*)) :
-    image_data_{image},
-    width_{width},
-    height_{height},
-    deleter_{deleter} {
+ImageRgba::ImageRgba(std::uint8_t* image, std::int32_t Width, std::int32_t height, void(*deleter)(std::uint8_t*)) :
+    m_ImageData{image},
+    m_Width{Width},
+    m_Height{height},
+    m_Deleter{deleter}
+{
 }
 
-ImageRgba::ImageRgba(ImageRgba&& image) noexcept {
+ImageRgba::ImageRgba(ImageRgba&& image) noexcept
+{
     *this = std::move(image);
 }
 
-ImageRgba& ImageRgba::operator=(ImageRgba&& image) noexcept {
-    image_data_ = image.image_data_;
-    width_ = image.width_;
-    height_ = image.height_;
-    deleter_ = image.deleter_;
+ImageRgba& ImageRgba::operator=(ImageRgba&& image) noexcept
+{
+    m_ImageData = image.m_ImageData;
+    m_Width = image.m_Width;
+    m_Height = image.m_Height;
+    m_Deleter = image.m_Deleter;
     memset(&image, 0, sizeof(image));
 
     return *this;
 }
 
-ImageRgba::~ImageRgba() {
-    deleter_(image_data_);
+ImageRgba::~ImageRgba()
+{
+    m_Deleter(m_ImageData);
 }
 
-const std::uint8_t* ImageRgba::GetRawImageData() const {
-    return image_data_;
+const std::uint8_t* ImageRgba::GetRawImageData() const
+{
+    return m_ImageData;
 }
 
-std::int32_t ImageRgba::GetWidth() const {
-    return width_;
+std::int32_t ImageRgba::GetWidth() const
+{
+    return m_Width;
 }
 
-std::int32_t ImageRgba::GetHeight() const {
-    return height_;
+std::int32_t ImageRgba::GetHeight() const
+{
+    return m_Height;
 }

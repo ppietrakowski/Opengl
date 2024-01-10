@@ -3,30 +3,31 @@
 #include "renderer_api.h"
 #include <GL/glew.h>
 
-class OpenGlRenderApi : public RendererAPI {
+class OpenGlRenderApi : public RendererAPI
+{
 public:
     OpenGlRenderApi();
 
 private:
     void Clear() override;
-    void SetClearColor(const RgbaColor& clear_color) override;
-    void DrawIndexed(const IndexedDrawData& draw_data) override;
+    void SetClearColor(const RgbaColor& clearColor) override;
+    void DrawIndexed(const IndexedDrawData& drawData) override;
 
-    void SetWireframe(bool wireframe_enabled) override;
+    void SetWireframe(bool bWireframeEnabled) override;
     bool IsWireframeEnabled() override;
-    void SetCullFace(bool cull_face) override;
+    void SetCullFace(bool bCullFace) override;
 
     bool DoesCullFaces() override;
-    void SetBlendingEnabled(bool blending_enabled) override;
-    void SetLineWidth(float line_width) override;
+    void SetBlendingEnabled(bool bBlendingEnabled) override;
+    void SetLineWidth(float lineWidth) override;
 
     void ClearBufferBindings_Debug() override;
     void SetViewport(std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height) override;
 
 private:
-    bool cull_enabled_ = false;
-    bool wireframe_enabled_ = false;
-    bool blending_enabled_ = false;
-    RgbaColor clear_color_;
+    bool m_bCullEnabled = false;
+    bool m_bWireframeEnabled = false;
+    bool m_bBlendingEnabled = false;
+    RgbaColor m_ClearColor;
 };
 
