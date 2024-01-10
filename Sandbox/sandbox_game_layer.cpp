@@ -9,7 +9,8 @@
 
 SandboxGameLayer::SandboxGameLayer() :
     camera_rotation_{glm::vec3{0, 0, 0}},
-    camera_position_{0.0f, 0.0f, 0.0f} {
+    camera_position_{0.0f, 0.0f, 0.0f}
+{
     default_shader_ = ResourceManager::GetShader("shaders/default.shd");
     debug_shader_ = ResourceManager::GetShader("shaders/unshaded.shd");
     auto skeletal_shader = ResourceManager::GetShader("shaders/skeletal_default.shd");
@@ -48,14 +49,15 @@ SandboxGameLayer::SandboxGameLayer() :
     debug_material_->bUseWireframe = true;
     current_material_ = default_material_;
     ELOG_INFO(LOG_GLOBAL, "Loading postac.obj");
-    static_mesh_ = ResourceManager::GetStaticMesh("postac.obj");
+    static_mesh_ = ResourceManager::GetStaticMesh("cube.obj");
     static_mesh_->MainMaterial = default_material_;
 
     uint32_t i = 0;
 
     std::shared_ptr<Material> material = test_skeletal_mesh_->MainMaterial;
 
-    for (const auto& path : test_skeletal_mesh_->Textures) {
+    for (const auto& path : test_skeletal_mesh_->Textures)
+    {
         std::string name = "diffuse" + std::to_string(i + 1);
         material->SetTextureProperty(name.c_str(), ResourceManager::GetTexture2D(path));
         ++i;
@@ -66,7 +68,8 @@ SandboxGameLayer::SandboxGameLayer() :
     std::vector<std::string> animations = std::move(test_skeletal_mesh_->GetAnimationNames());
     RenderCommand::SetClearColor(RgbaColor{50, 30, 170});
 
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 2; ++i)
+    {
         skeletal_mesh_actor_ = level_.CreateActor("SkeletalMesh" + std::to_string(i));
         skeletal_mesh_actor_.AddComponent<SkeletalMeshComponent>(test_skeletal_mesh_);
         skeletal_mesh_actor_.GetComponent<TransformComponent>().Scale = glm::vec3{0.01f, 0.01f, 0.01f};
@@ -80,33 +83,50 @@ SandboxGameLayer::SandboxGameLayer() :
     bbox_min_ = test_skeletal_mesh_->GetBboxMin();
     bbox_max_ = test_skeletal_mesh_->GetBboxMax();
     instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_);
+
+    for (int i = 0; i < 1000; ++i)
+    {
+        for (int j = 0; j < 200; ++j)
+        {
+            Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
+            instanced_mesh_->QueueDraw(transform, 0);
+            Renderer::DrawDebugBox(instanced_mesh_->GetMesh().GetBBoxMin(), instanced_mesh_->GetMesh().GetBBoxMax(), transform);
+        }
+    }
 }
 
-void SandboxGameLayer::Update(Duration delta_time) {
+void SandboxGameLayer::Update(Duration delta_time)
+{
     float dt = delta_time.GetSeconds();
 
-    if (Input::IsKeyPressed(Keys::kW)) {
+    if (Input::IsKeyPressed(Keys::W))
+    {
         glm::vec3 world_forward = glm::vec3{0, 0, -1};
         glm::vec3 forward = camera_rotation_ * world_forward * dt * move_speed_;
         camera_position_ += forward;
-    } else if (Input::IsKeyPressed(Keys::kS)) {
+    } else if (Input::IsKeyPressed(Keys::S))
+    {
         glm::vec3 world_backward = glm::vec3{0, 0, 1};
         glm::vec3 backward = camera_rotation_ * world_backward * dt * move_speed_;
         camera_position_ += backward;
     }
 
-    if (Input::IsKeyPressed(Keys::kE)) {
+    if (Input::IsKeyPressed(Keys::E))
+    {
         camera_yaw_ -= yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
-    } else if (Input::IsKeyPressed(Keys::kQ)) {
+    } else if (Input::IsKeyPressed(Keys::Q))
+    {
         camera_yaw_ += yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
     }
 
-    if (Input::IsKeyPressed(Keys::kY)) {
+    if (Input::IsKeyPressed(Keys::Y))
+    {
         glm::vec3 world_up = glm::vec3{0, 1, 0};
         camera_position_ += ascend_speed_ * world_up * dt;
-    } else if (Input::IsKeyPressed(Keys::kH)) {
+    } else if (Input::IsKeyPressed(Keys::H))
+    {
         glm::vec3 world_down = glm::vec3{0, -1, 0};
         camera_position_ += ascend_speed_ * world_down * dt;
     }
@@ -115,16 +135,11 @@ void SandboxGameLayer::Update(Duration delta_time) {
     level_.BroadcastUpdate(delta_time);
 }
 
-void SandboxGameLayer::Render(Duration delta_time) {
+void SandboxGameLayer::Render(Duration delta_time)
+{
     Renderer::BeginScene(glm::inverse(glm::translate(camera_position_) * glm::mat4_cast(camera_rotation_)), camera_position_, camera_rotation_);
     current_used_shader_->Use();
     current_used_shader_->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
-
-    for (int i = 0; i < 100; ++i) {
-        Transform transform{glm::vec3{5.0f * i, 2.0f, 1.0f}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
-        instanced_mesh_->QueueDraw(transform, 0);
-        Renderer::DrawDebugBox(instanced_mesh_->GetMesh().GetBBoxMin(), instanced_mesh_->GetMesh().GetBBoxMax(), transform);
-    }
 
     instanced_mesh_->Draw(glm::identity<glm::mat4>(), *static_mesh_->MainMaterial);
     debug_shader_->Use();
@@ -139,18 +154,22 @@ void SandboxGameLayer::Render(Duration delta_time) {
     Renderer::EndScene();
 }
 
-bool SandboxGameLayer::OnEvent(const Event& event) {
-    if (event.Type == EventType::MouseMoved) {
+bool SandboxGameLayer::OnEvent(const Event& event)
+{
+    if (event.Type == EventType::MouseMoved)
+    {
         glm::vec2 delta = event.MouseMove.MousePosition - event.MouseMove.LastMousePosition;
         float dt = last_delta_seconds_.GetSeconds();
 
         camera_yaw_ -= yaw_rotation_rate_ * delta.x * dt;
         camera_pitch_ -= pitch_rotation_rate_ * delta.y * dt;
 
-        if (camera_pitch_ < -89) {
+        if (camera_pitch_ < -89)
+        {
             camera_pitch_ = -89;
         }
-        if (camera_pitch_ > 89) {
+        if (camera_pitch_ > 89)
+        {
             camera_pitch_ = 89;
         }
 
@@ -158,18 +177,24 @@ bool SandboxGameLayer::OnEvent(const Event& event) {
         return true;
     }
 
-    if (event.Type == EventType::MouseButtonPressed) {
+    if (event.Type == EventType::MouseButtonPressed)
+    {
         DO_ONCE([this]() {
             Actor actor = level_.FindActor("StaticMeshActor");
             actor.DestroyActor();
+
+            instanced_mesh_->RemoveInstance(5);
         }
         );
     }
 
-    if (event.Type == EventType::KeyPressed && event.Key.Key == Keys::kP) {
-        if (current_material_.get() == debug_material_.get()) {
+    if (event.Type == EventType::KeyPressed && event.Key.Key == Keys::P)
+    {
+        if (current_material_.get() == debug_material_.get())
+        {
             current_material_ = default_material_;
-        } else {
+        } else
+        {
             current_material_ = debug_material_;
         }
     }
@@ -177,13 +202,16 @@ bool SandboxGameLayer::OnEvent(const Event& event) {
     return false;
 }
 
-void SandboxGameLayer::OnImguiFrame() {
+void SandboxGameLayer::OnImguiFrame()
+{
     static std::int32_t last_framerate = 0;
     static std::int32_t num_frame{0};
 
-    if (num_frame == 2) {
+    if (num_frame == 2)
+    {
         last_framerate = (last_framerate + static_cast<std::int32_t>(1000 / last_delta_seconds_.GetMilliseconds())) / 2;
-    } else {
+    } else
+    {
         num_frame++;
     }
 

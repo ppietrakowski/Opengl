@@ -1,5 +1,6 @@
 #include "actor.h"
 #include "level.h"
+#include "error_macros.h"
 
 glm::mat4 TransformComponent::GetWorldTransformMatrix() const
 {

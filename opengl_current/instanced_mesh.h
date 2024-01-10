@@ -16,6 +16,9 @@ public:
     const StaticMesh& GetMesh() const {
         return *m_StaticMesh;
     }
+
+    void RemoveInstance(std::int32_t index);
+
 private: 
     std::vector<StaticMeshVertex> m_BaseVertices;
     std::vector<std::uint32_t> m_BaseIndices;

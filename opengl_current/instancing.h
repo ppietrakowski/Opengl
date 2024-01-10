@@ -15,7 +15,6 @@
 
 constexpr std::uint32_t StartNumInstances = 16;
 
-
 /* Just does bind and unbind within scope */
 struct DebugVertexArrayScope
 {
@@ -54,6 +53,15 @@ struct InstanceInfo
     }
 };
 
+struct Instance
+{
+    std::int32_t StartVertex;
+    std::int32_t EndVertex;
+
+    std::int32_t StartIndex;
+    std::int32_t EndIndex;
+};
+
 template <typename VerticesType>
 class InstanceBase
 {
@@ -71,62 +79,86 @@ public:
         ASSERT(maxNumVertices >= 0);
         ASSERT(maxNumIndices >= 0);
 
+        // resize buffers instead just of reserve, because further on
+        // vertices are added using setting value at index instead of emplace_back or push_back
         m_Vertices.resize(maxNumVertices);
         m_Indices.resize(maxNumIndices);
 
         ELOG_VERBOSE(LOG_RENDERER, "Rebuilding buffers for instancing (vertex buffer size=%u vertices, max num indices=%u)", m_Vertices.capacity() * sizeof(VerticesType), m_Indices.capacity());
+        
+        // rebuild vertex and index buffers to match new size
         m_VertexArray = VertexArray::Create();
         m_VertexArray->AddDynamicVertexBuffer(static_cast<std::int32_t>(m_Vertices.capacity() * sizeof(VerticesType)), m_Attribute);
         m_VertexArray->SetIndexBuffer(IndexBuffer::CreateEmpty(static_cast<std::int32_t>(m_Indices.capacity())));
+        m_bBuffersDirty = true;
     }
 
     void Draw(const glm::mat4& transform, Material& material, RenderPrimitive primitive = RenderPrimitive::Triangles)
     {
-
         DebugVertexArrayScope bind_array_scope{*m_VertexArray};
-        auto buffer = m_VertexArray->GetVertexBufferAt(0);
-        auto index_buffer = m_VertexArray->GetIndexBuffer();
-
-        buffer->UpdateVertices(m_Vertices.data(), m_IndicesStartIndex * sizeof(VerticesType));
-        index_buffer->UpdateIndices(m_Indices.data(), m_CurrentIndex);
+        UpdateBuffers();
 
         Renderer::Submit(material, m_CurrentIndex, *m_VertexArray, transform, primitive);
+
+        if (m_bClearPostDraw)
+        {
+            Clear();
+        }
+    }
+
+    void Clear()
+    {
+        // just reset indices start index and num indices
         m_IndicesStartIndex = 0;
         m_CurrentIndex = 0;
     }
 
-    template <typename ...Args>
-    void QueueDraw(const InstanceInfo<VerticesType>& instanceInfo, Args&& ...args)
+    void RemoveInstance(std::int32_t startVertex, std::int32_t endVertex)
     {
-        if ((m_IndicesStartIndex + instanceInfo.GetNumVertices() >= m_Vertices.capacity()) ||
-            (m_CurrentIndex + instanceInfo.BaseIndices.size() >= m_Indices.capacity()))
+        for (std::int32_t i = startVertex; i < endVertex; ++i)
         {
-            std::int32_t newVerticesSize = static_cast<std::int32_t>(m_Vertices.capacity() + m_Vertices.capacity() / 2);
-            std::int32_t newIndicesSize = static_cast<std::int32_t>(m_Indices.capacity() + m_Indices.capacity() / 2);
-
-            if (newVerticesSize < m_Vertices.size() + instanceInfo.GetNumVertices())
-            {
-                newVerticesSize = static_cast<std::int32_t>(m_Vertices.size() + instanceInfo.GetNumVertices() + 1);
-            }
-
-            if (newIndicesSize < m_Indices.size() + instanceInfo.BaseIndices.size())
-            {
-                newIndicesSize = static_cast<std::int32_t>(m_Indices.size() + instanceInfo.BaseIndices.size() + 1);
-            }
-
-            ResizeBuffers(newVerticesSize, newIndicesSize);
+            m_Vertices[i] = VerticesType{};
         }
 
-        for (std::uint32_t index : instanceInfo.BaseIndices)
+        m_bBuffersDirty = true;
+    }
+
+    template <typename ...Args>
+    Instance QueueDraw(const InstanceInfo<VerticesType>& instanceInfo, Args&& ...args)
+    {
+        if (ShouldExpand(instanceInfo))
         {
-            m_Indices[m_CurrentIndex++] = index + m_IndicesStartIndex;
+            Expand(instanceInfo);
         }
 
-        glm::mat4 transform = instanceInfo.CalculateTransformMatrix();
-        for (const VerticesType& vertex : instanceInfo.BaseVertices)
-        {
-            m_Vertices[m_IndicesStartIndex++] = InstanceCreator<VerticesType>::CreateInstanceFrom(vertex, transform, std::forward<Args>(args)...);
-        }
+        Instance instance{};
+        instance.StartIndex = m_CurrentIndex;
+        instance.StartVertex = m_IndicesStartIndex;
+
+        UpdateIndices(instanceInfo);
+        UpdateVertices(instanceInfo);
+
+        instance.EndIndex = m_CurrentIndex;
+        instance.EndVertex = m_IndicesStartIndex;
+        m_bBuffersDirty = true;
+
+        return instance;
+    }
+
+    template <typename ...Args>
+    void UpdateInstance(std::int32_t vertexIndex, const VerticesType& vertex, const Transform& worldTransform, Args&& ...args)
+    {
+        m_Vertices[vertexIndex] = InstanceCreator<VerticesType>::CreateInstanceFrom(vertex, worldTransform, std::forward<Args>(args)...);
+    }
+
+    void EnableClearPostDraw()
+    {
+        m_bClearPostDraw = true;
+    }
+
+    void DisableClearPostDraw()
+    {
+        m_bClearPostDraw = false;
     }
 
 private:
@@ -135,6 +167,71 @@ private:
     std::shared_ptr<VertexArray> m_VertexArray;
     std::int32_t m_IndicesStartIndex{0};
     std::int32_t m_CurrentIndex{0};
-
     std::vector<VertexAttribute> m_Attribute;
+
+    // if not set, the clear method is not invoked automaticely
+    bool m_bClearPostDraw : 1{true};
+    
+    // flag used for check is need to update buffers
+    bool m_bBuffersDirty : 1{false};
+
+private:
+    void UpdateBuffers()
+    {
+        if (m_bBuffersDirty)
+        {
+            std::shared_ptr<VertexBuffer> buffer = m_VertexArray->GetVertexBufferAt(0);
+            std::shared_ptr<IndexBuffer> indexBuffer = m_VertexArray->GetIndexBuffer();
+
+            buffer->UpdateVertices(m_Vertices.data(), m_IndicesStartIndex * sizeof(VerticesType));
+            indexBuffer->UpdateIndices(m_Indices.data(), m_CurrentIndex);
+            m_bBuffersDirty = false;
+        }
+    }
+
+    bool ShouldExpand(const InstanceInfo<VerticesType>& instanceInfo) const
+    {
+        return (m_IndicesStartIndex + instanceInfo.GetNumVertices() >= m_Vertices.capacity()) ||
+            (m_CurrentIndex + instanceInfo.BaseIndices.size() >= m_Indices.capacity());
+    }
+    
+    void Expand(const InstanceInfo<VerticesType>& instanceInfo)
+    {
+        std::int32_t newVerticesSize = static_cast<std::int32_t>(m_Vertices.capacity() + m_Vertices.capacity() / 2);
+        std::int32_t newIndicesSize = static_cast<std::int32_t>(m_Indices.capacity() + m_Indices.capacity() / 2);
+
+        bool bHasEnoughVerticesCapacity = newVerticesSize >= m_Vertices.size() + instanceInfo.GetNumVertices();
+
+        if (!bHasEnoughVerticesCapacity)
+        {
+            newVerticesSize = static_cast<std::int32_t>(m_Vertices.size() + instanceInfo.GetNumVertices() + 1);
+        }
+
+        bool bHasEnoughIndicesCapacity = newIndicesSize >= m_Indices.size() + instanceInfo.BaseIndices.size();
+
+        if (bHasEnoughIndicesCapacity)
+        {
+            newIndicesSize = static_cast<std::int32_t>(m_Indices.size() + instanceInfo.BaseIndices.size() + 1);
+        }
+
+        ResizeBuffers(newVerticesSize, newIndicesSize);
+    }
+
+    void UpdateIndices(const InstanceInfo<VerticesType>& instanceInfo)
+    {
+        for (std::uint32_t index : instanceInfo.BaseIndices)
+        {
+            // set though indexing is faster than emplace_back so use it
+            m_Indices[m_CurrentIndex++] = index + m_IndicesStartIndex;
+        }
+    }
+
+    void UpdateVertices(const InstanceInfo<VerticesType>& instanceInfo)
+    {
+        glm::mat4 transform = instanceInfo.CalculateTransformMatrix();
+        for (const VerticesType& vertex : instanceInfo.BaseVertices)
+        {
+            m_Vertices[m_IndicesStartIndex++] = InstanceCreator<VerticesType>::CreateInstanceFrom(vertex, transform, std::forward<Args>(args)...);
+        }
+    }
 };

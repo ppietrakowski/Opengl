@@ -1,6 +1,7 @@
 #include "level.h"
 #include "static_mesh_component.h"
 #include "skeletal_mesh_component.h"
+#include "resouce_manager.h"
 
 #include <future>
 

@@ -12,6 +12,7 @@ InstancedMesh::InstancedMesh(const std::shared_ptr<StaticMesh>& staticMesh) :
     m_BaseIndices{staticMesh->Indices},
     m_StaticMesh{staticMesh}
 {
+    m_InstanceDraw.DisableClearPostDraw();
 }
 
 void InstancedMesh::Draw(const glm::mat4& transform, Material& material)
@@ -21,11 +22,13 @@ void InstancedMesh::Draw(const glm::mat4& transform, Material& material)
 
 void InstancedMesh::QueueDraw(const Transform& transform, std::int32_t textureId)
 {
-    // prevent instancing something that's not visible
-    if (!Renderer::IsVisibleToCamera(transform.Position, m_StaticMesh->GetBBoxMin(), m_StaticMesh->GetBBoxMax()))
-    {
-        return;
-    }
-
     m_InstanceDraw.QueueDraw(InstanceInfo<StaticMeshVertex>{m_BaseVertices, m_BaseIndices, transform}, textureId);
+}
+
+void InstancedMesh::RemoveInstance(std::int32_t index)
+{
+    std::int32_t startVertexIndex = static_cast<std::int32_t>(index * m_BaseVertices.size());
+    std::int32_t endVertexIndex = static_cast<std::int32_t>(index * m_BaseVertices.size() + m_BaseVertices.size());
+
+    m_InstanceDraw.RemoveInstance(startVertexIndex, endVertexIndex);
 }

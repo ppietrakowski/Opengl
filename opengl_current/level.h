@@ -2,7 +2,8 @@
 
 #include "Actor.h"
 #include "duration.h"
-#include "resouce_manager.h"
+
+class ResourceManagerImpl;
 
 class Level
 {
