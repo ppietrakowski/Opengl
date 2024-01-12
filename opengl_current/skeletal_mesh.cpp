@@ -92,7 +92,7 @@ bool SkeletonMeshVertex::AddBoneData(std::int32_t boneId, float weight)
 SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material) :
     MainMaterial{material},
     m_NumBones{0},
-    m_VertexArray{VertexArray::Create()}
+    m_VertexArray{std::make_shared<VertexArray>()}
 {
     // maps bone name to boneID
     std::unordered_map<std::string, std::int32_t> boneNameToIndex;
@@ -207,9 +207,9 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     m_Animations[DefaultAnimationName].Duration = 10;
 
     m_RootBone.AssignHierarchy(scene->mRootNode, bonesInfo);
-    m_VertexArray->AddVertexBuffer<SkeletonMeshVertex>(vertices, SkeletonMeshVertex::DataFormat);
-    m_VertexArray->SetIndexBuffer(IndexBuffer::Create(indices.data(), static_cast<uint32_t>(indices.size())));
-
+    m_VertexArray->AddVertexBuffer(std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(SkeletonMeshVertex)), SkeletonMeshVertex::DataFormat);
+    m_VertexArray->SetIndexBuffer(std::make_shared<IndexBuffer>(indices.data(), static_cast<uint32_t>(indices.size())));
+        
     // find global transform for converting from bone space back to local space
     m_GlobalInverseTransform = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
 
@@ -322,10 +322,10 @@ std::shared_ptr<Texture2D> SkeletalMesh::LoadTexturesFromMaterial(const aiScene*
             if (is_compressed)
             {
                 ResourceManager::AddTexture2D(texturePath.C_Str(),
-                    Texture2D::CreateFromImage(LoadRgbaImageFromMemory(texture->pcData, texture->mWidth)));
+                    std::make_shared<Texture2D>(LoadRgbaImageFromMemory(texture->pcData, texture->mWidth)));
             } else
             {
-                ResourceManager::AddTexture2D(texturePath.C_Str(), Texture2D::CreateFromImage(
+                ResourceManager::AddTexture2D(texturePath.C_Str(), std::make_shared<Texture2D>(
                     LoadRgbaImageFromMemory(texture->pcData, texture->mWidth * texture->mHeight)));
             }
 

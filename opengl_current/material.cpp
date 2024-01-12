@@ -12,7 +12,7 @@ Material::Material(const std::shared_ptr<Shader>& shader) :
     m_Shader{shader}
 {
     // retrieve all uniforms information from shader
-    std::vector<UniformInfo> uniformsInfo = std::move(shader->GetUniformInfos());
+    std::vector<UniformInfo> uniformsInfo = std::move(shader->GetUniformsInfo());
 
     for (const UniformInfo& info : uniformsInfo)
     {

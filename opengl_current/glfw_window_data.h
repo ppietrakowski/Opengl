@@ -1,8 +1,10 @@
 #pragma once
 
-#include "window.h"
+#include "event.h"
 #include <glm/glm.hpp>
 #include <functional>
+
+using EventCallback = std::function<void(const Event&)>;
 
 struct GlfwWindowData
 {

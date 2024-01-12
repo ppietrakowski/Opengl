@@ -46,6 +46,6 @@ public:
     static RenderStats GetRenderStats();
 
 private:
-    static RendererAPI* s_RendererApi;
+    static RendererApi s_RendererApi;
 };
 

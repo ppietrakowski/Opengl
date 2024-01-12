@@ -10,7 +10,7 @@ Game::Game(const WindowSettings& settings) :
     m_ImguiContext{nullptr}
 {
     Logging::Initialize();
-    m_Window = Window::Create(settings);
+    m_Window = std::make_unique<Window>(settings);
     m_GraphicsContext = m_Window->GetContext();
 
     // initialize subsystems

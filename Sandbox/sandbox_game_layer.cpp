@@ -85,9 +85,9 @@ SandboxGameLayer::SandboxGameLayer() :
     bbox_max_ = test_skeletal_mesh_->GetBboxMax();
     instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_);
 
-    for (std::int32_t i = 0; i < 10; ++i)
+    for (std::int32_t i = 0; i < 1000; ++i)
     {
-        for (std::int32_t j = 0; j < 20; ++j)
+        for (std::int32_t j = 0; j < 200; ++j)
         {
             Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
             instanced_mesh_->AddInstance(transform, 0);

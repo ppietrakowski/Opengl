@@ -1,27 +1,49 @@
 #include "index_buffer.h"
 
+#include <GL/glew.h>
+
 #include "error_macros.h"
 #include "renderer_api.h"
-#include "opengl_index_buffer.h"
 
-std::shared_ptr<IndexBuffer> IndexBuffer::Create(const std::uint32_t* data, std::int32_t numIndices, bool bDynamic)
+
+IndexBuffer::IndexBuffer(const std::uint32_t* data, std::int32_t numIndices, bool bDynamic) :
+    m_NumIndices{numIndices}
 {
-    switch (RendererAPI::GetApi())
-    {
-    case RendererAPI::OpenGL:
-        return std::make_shared<OpenGlIndexBuffer>(data, numIndices, bDynamic);
-    }
+    GLenum bufferUsage = bDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
-    ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
+    glBindVertexArray(0);
+
+    glGenBuffers(1, &m_RendererId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(std::uint32_t), data, bufferUsage);
 }
 
-std::shared_ptr<IndexBuffer> IndexBuffer::CreateEmpty(std::int32_t totalnumIndices)
+IndexBuffer::IndexBuffer(std::int32_t totalNumIndices) :
+    IndexBuffer{nullptr, totalNumIndices, true}
 {
-    switch (RendererAPI::GetApi())
-    {
-    case RendererAPI::OpenGL:
-        return std::make_shared<OpenGlIndexBuffer>(totalnumIndices);
-    }
+}
 
-    ERR_FAIL_MSG_V("Invalid RendererAPI type", nullptr);
+IndexBuffer::~IndexBuffer()
+{
+    glDeleteBuffers(1, &m_RendererId);
+}
+
+void IndexBuffer::Bind() const
+{
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
+}
+
+void IndexBuffer::Unbind() const
+{
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void IndexBuffer::UpdateIndices(const uint32_t* data, std::int32_t offset, std::int32_t size)
+{
+    ERR_FAIL_EXPECTED_TRUE_MSG(size <= m_NumIndices, "Size over declared is causing memory allocation -> may occur memory leak");
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
+    std::int32_t sizeBytes = size * sizeof(std::uint32_t);
+
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, sizeBytes, data);
 }

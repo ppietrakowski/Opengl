@@ -47,7 +47,7 @@ static void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::ve
 
 StaticMesh::StaticMesh(const std::filesystem::path& filePath, const std::shared_ptr<Material>& material) :
     MainMaterial{material},
-    m_VertexArray{VertexArray::Create()}
+    m_VertexArray{std::make_shared<VertexArray>()}
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(filePath.string(), AssimpImportFlags);
@@ -104,10 +104,10 @@ StaticMesh::StaticMesh(const std::filesystem::path& filePath, const std::shared_
         totalIndices += mesh->mNumFaces * 3;
     }
 
-    std::shared_ptr<IndexBuffer> indexBuffer = IndexBuffer::Create(Indices.data(),
+    std::shared_ptr<IndexBuffer> indexBuffer = std::make_shared<IndexBuffer>(Indices.data(),
         static_cast<std::int32_t>(Indices.size()));
 
-    m_VertexArray->AddVertexBuffer<StaticMeshVertex>(Vertices, StaticMeshVertex::DataFormat);
+    m_VertexArray->AddVertexBuffer(std::make_shared<VertexBuffer>(Vertices.data(), Vertices.size() * sizeof(StaticMeshVertex)), StaticMeshVertex::DataFormat);
     m_VertexArray->SetIndexBuffer(indexBuffer);
 
     m_NumTriangles = static_cast<std::int32_t>(Indices.size()) / 3;

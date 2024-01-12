@@ -131,8 +131,10 @@ void Level::UpdateSkeletalMeshesAnimation(Duration duration)
 {
     auto skeletalMeshView = m_Registry.view<SkeletalMeshComponent>();
 
+    float seconds = duration.GetSeconds();
+
     for (auto&& [entity, skeletalMesh] : skeletalMeshView.each())
     {
-        skeletalMesh.UpdateAnimation(duration.GetSeconds());
+        skeletalMesh.UpdateAnimation(seconds);
     }
 }

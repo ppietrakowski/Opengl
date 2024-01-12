@@ -218,8 +218,7 @@
     <ClCompile Include="error_macros.cpp" />
     <ClCompile Include="event.cpp" />
     <ClCompile Include="game.cpp" />
-    <ClCompile Include="glfw_input.cpp" />
-    <ClCompile Include="glfw_window.cpp" />
+    <ClCompile Include="graphics_context.cpp" />
     <ClCompile Include="image_rgba.cpp" />
     <ClCompile Include="Imgui\imgui.cpp" />
     <ClCompile Include="Imgui\imgui_demo.cpp" />
@@ -235,13 +234,6 @@
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="material.cpp" />
     <ClCompile Include="material_parameter.cpp" />
-    <ClCompile Include="opengl_index_buffer.cpp" />
-    <ClCompile Include="opengl_graphics_context.cpp" />
-    <ClCompile Include="opengl_render_api.cpp" />
-    <ClCompile Include="opengl_shader.cpp" />
-    <ClCompile Include="opengl_texture.cpp" />
-    <ClCompile Include="opengl_vertex_array.cpp" />
-    <ClCompile Include="opengl_vertex_buffer.cpp" />
     <ClCompile Include="player_controller.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="renderer_api.cpp" />
@@ -268,8 +260,6 @@
     <ClInclude Include="event.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="game_layer.h" />
-    <ClInclude Include="glfw_input.h" />
-    <ClInclude Include="glfw_window.h" />
     <ClInclude Include="glfw_window_data.h" />
     <ClInclude Include="graphics_context.h" />
     <ClInclude Include="image_rgba.h" />
@@ -291,13 +281,6 @@
     <ClInclude Include="logging.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="material_parameter.h" />
-    <ClInclude Include="opengl_index_buffer.h" />
-    <ClInclude Include="opengl_graphics_context.h" />
-    <ClInclude Include="opengl_render_api.h" />
-    <ClInclude Include="opengl_shader.h" />
-    <ClInclude Include="opengl_texture.h" />
-    <ClInclude Include="opengl_vertex_array.h" />
-    <ClInclude Include="opengl_vertex_buffer.h" />
     <ClInclude Include="player_controller.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="renderer_api.h" />

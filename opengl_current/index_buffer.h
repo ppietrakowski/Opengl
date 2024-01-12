@@ -10,20 +10,38 @@
 class IndexBuffer
 {
 public:
-    static std::shared_ptr<IndexBuffer> Create(const std::uint32_t* data,
+    IndexBuffer(const std::uint32_t* data,
         std::int32_t numIndices, bool bDynamic = false);
-
-    static std::shared_ptr<IndexBuffer> CreateEmpty(std::int32_t totalnumIndices);
-    virtual ~IndexBuffer() = default;
+    IndexBuffer(std::int32_t totalNumIndices);
+    ~IndexBuffer();
 
 public:
-    virtual void Bind() const = 0;
-    virtual void Unbind() const = 0;
-    virtual std::int32_t GetNumIndices() const = 0;
+    void Bind() const;
+    void Unbind() const;
+    std::int32_t GetNumIndices() const;
 
-    virtual void UpdateIndices(const std::uint32_t* data, std::int32_t offset, std::int32_t size) = 0;
-    void UpdateIndices(const std::uint32_t* data, std::int32_t size)
-    {
-        UpdateIndices(data, 0, size);
-    }
+    void UpdateIndices(const std::uint32_t* data, std::int32_t offset, std::int32_t size);
+    void UpdateIndices(const std::uint32_t* data, std::int32_t size);
+
+    std::uint32_t GetOpenGlIdentifier() const;
+
+private:
+    std::uint32_t m_RendererId;
+    std::int32_t m_NumIndices;
 };
+
+
+FORCE_INLINE std::int32_t IndexBuffer::GetNumIndices() const
+{
+    return m_NumIndices;
+}
+
+FORCE_INLINE void IndexBuffer::UpdateIndices(const std::uint32_t* data, std::int32_t size)
+{
+    UpdateIndices(data, 0, size);
+}
+
+FORCE_INLINE std::uint32_t IndexBuffer::GetOpenGlIdentifier() const
+{
+    return m_RendererId;
+}

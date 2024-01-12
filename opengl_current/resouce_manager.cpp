@@ -156,7 +156,7 @@ std::shared_ptr<Shader> ResourceManagerImpl::LoadShader(const std::string& fileP
 
     ASSERT(shaderSources.size() < ShaderIndex::Count);
 
-    std::shared_ptr<Shader> shader = Shader::CreateFromSource(shaderSources);
+    std::shared_ptr<Shader> shader = std::make_shared<Shader>(shaderSources);
     m_Shaders[filePath] = shader;
     return shader;
 }
@@ -175,7 +175,7 @@ std::shared_ptr<Texture2D> ResourceManagerImpl::GetTexture2D(const std::string& 
 
 std::shared_ptr<Texture2D> ResourceManagerImpl::LoadTexture2D(const std::string& filePath)
 {
-    std::shared_ptr<Texture2D> texture = Texture2D::LoadFromFile(filePath);
+    std::shared_ptr<Texture2D> texture = std::make_shared<Texture2D>(filePath);
     m_Textures2D[filePath] = texture;
 
     return texture;

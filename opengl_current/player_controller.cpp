@@ -3,8 +3,8 @@
 
 float KeyAxis::GetAxisValue() const
 {
-    float value = Input::IsKeyPressed(Key) ? 1 : 0;
-    value -= Input::IsKeyPressed(ReverseKey) ? 1 : 0;
+    float value = Input::IsKeyPressed(Key) ? 1.0f : 0.0f;
+    value -= Input::IsKeyPressed(ReverseKey) ? 1.0f : 0.0f;
     return value;
 }
 

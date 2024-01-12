@@ -8,6 +8,9 @@
 
 #include "event.h"
 #include "graphics_context.h"
+#include "glfw_window_data.h"
+
+struct GLFWwindow;
 
 struct WindowSettings
 {
@@ -16,37 +19,46 @@ struct WindowSettings
     std::string Title;
 };
 
-using EventCallback = std::function<void(const Event&)>;
+class Input;
 
 class Window
 {
 public:
-    virtual ~Window() = default;
+    Window(const WindowSettings& settings);
+    ~Window();
 
-    virtual void Update() = 0;
+public:
 
-    virtual std::int32_t GetWidth() const = 0;
-    virtual std::int32_t GetHeight() const = 0;
+    void Update();
 
-    virtual glm::ivec2 GetWindowPosition() const = 0;
+    std::int32_t GetWidth() const;
+    std::int32_t GetHeight() const;
 
-    virtual glm::vec2 GetMousePosition() const = 0;
-    virtual glm::vec2 GetLastMousePosition() const = 0;
+    glm::ivec2 GetWindowPosition() const;
 
-    virtual bool IsOpen() const = 0;
+    glm::vec2 GetMousePosition() const;
+    glm::vec2 GetLastMousePosition() const;
 
-    // Window attributes
-    virtual void SetEventCallback(const EventCallback& callback) = 0;
-    virtual void EnableVSync() = 0;
-    virtual void DisableVSync() = 0;
-    virtual bool IsVSyncEnabled() const = 0;
+    bool IsOpen() const;
 
-    virtual void* GetWindowNativeHandle() const = 0;
-    virtual GraphicsContext* GetContext() const = 0;
+    void SetEventCallback(const EventCallback& callback);
+    void EnableVSync();
+    void DisableVSync();
+    bool IsVSyncEnabled() const;
 
-    virtual void Close() = 0;
-    virtual void SetMouseVisible(bool bMouseVisible) = 0;
+    void* GetWindowNativeHandle() const;
+    GraphicsContext* GetContext() const;
 
-    static std::unique_ptr<Window> Create(const WindowSettings& windowSettings);
+    void Close();
+    void SetMouseVisible(bool bMouseVisible);
+
+private:
+    GLFWwindow* m_Window;
+    Input* m_Input;
+    GraphicsContext* m_GraphicsContext;
+    GlfwWindowData m_WindowData;
+
+private:
+    void BindWindowCallbacks();
 };
 

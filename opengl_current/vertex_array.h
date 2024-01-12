@@ -3,6 +3,7 @@
 #include "vertex_buffer.h"
 #include "index_buffer.h"
 
+#include <cstdint>
 #include <memory>
 
 enum class PrimitiveVertexType : std::int8_t
@@ -19,40 +20,33 @@ struct VertexAttribute
     PrimitiveVertexType VertexType : 3;
 };
 
+using AttributesView = std::span<const VertexAttribute>;
+
 class VertexArray
 {
 public:
-    static std::shared_ptr<VertexArray> Create();
-    virtual ~VertexArray() = default;
+    VertexArray();
+    ~VertexArray();
 
 public:
-    virtual void Bind() const = 0;
-    virtual void Unbind() const = 0;
+    void Bind() const;
+    void Unbind() const;
 
-    virtual void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer) = 0;
+    void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer);
 
-    virtual std::int32_t GetNumIndices() const = 0;
+    std::int32_t GetNumIndices() const;
 
-    virtual std::shared_ptr<VertexBuffer> GetVertexBufferAt(std::int32_t index) = 0;
-    virtual std::shared_ptr<IndexBuffer> GetIndexBuffer() = 0;
+    std::shared_ptr<VertexBuffer> GetVertexBufferAt(std::int32_t index);
+    std::shared_ptr<IndexBuffer> GetIndexBuffer();
 
-    template <typename T>
-    void AddVertexBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes)
-    {
-        AddBufferInternal(VertexBuffer::Create(data.data(), static_cast<std::int32_t>(data.size_bytes())), attributes);
-    }
+    void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer, AttributesView attributes);
+    std::uint32_t GetOpenGlIdentifier() const;
 
-    template <typename T>
-    void AddDynamicVertexBuffer(std::span<const T> data, std::span<const VertexAttribute> attributes)
-    {
-        AddBufferInternal(VertexBuffer::Create(data.data(), static_cast<std::int32_t>(data.size_bytes()), true), attributes);
-    }
+private:
+    std::uint32_t m_RendererId;
+    std::vector<std::shared_ptr<VertexBuffer>> m_VertexBuffers;
+    std::shared_ptr<IndexBuffer> m_IndexBuffer;
 
-    void AddDynamicVertexBuffer(std::int32_t max_size, std::span<const VertexAttribute> attributes)
-    {
-        AddBufferInternal(VertexBuffer::CreateEmpty(max_size), attributes);
-    }
-
-protected:
-    virtual void AddBufferInternal(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::span<const VertexAttribute> attributes) = 0;
+private:
+    void AddBufferInternal(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::span<const VertexAttribute> attributes);
 };

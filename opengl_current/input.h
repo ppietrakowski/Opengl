@@ -1,13 +1,17 @@
 #pragma once
 
 #include "Keys.h"
+#include "glfw_window_data.h"
+
 #include <glm/glm.hpp>
+
+struct GLFWwindow;
 
 class Input
 {
 public:
-    Input();
-    virtual ~Input() = default;
+    Input(GLFWwindow* window);
+    ~Input() = default;
 
 public:
 
@@ -18,11 +22,17 @@ public:
     static float GetMouseX();
     static float GetMouseY();
 
+    void Update(const GlfwWindowData& windowData);
+
 private:
     static Input* s_Instance;
 
-    virtual bool IsKeyPressedImpl(KeyCode key) = 0;
-    virtual bool IsMouseButtonPressedImpl(MouseButton button) = 0;
-    virtual glm::vec2 GetMousePositionImpl() = 0;
+private:
+    GLFWwindow* m_Window;
+    glm::vec2 m_MousePosition;
+
+    bool IsKeyPressedImpl(KeyCode key);
+    bool IsMouseButtonPressedImpl(MouseButton button);
+    glm::vec2 GetMousePositionImpl() const;
 };
 

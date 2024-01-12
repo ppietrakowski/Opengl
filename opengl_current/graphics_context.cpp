@@ -1,8 +1,14 @@
-#include "opengl_graphics_context.h"
-
+#include "graphics_context.h"
 #include "error_macros.h"
 
-OpenGlGraphicsContext::OpenGlGraphicsContext(GLFWwindow* contextWindow) :
+#include <GL/glew.h>
+
+#include "Imgui/imgui_impl_glfw.h"
+#include "Imgui/imgui_impl_opengl3.h"
+
+#include <GLFW/glfw3.h>
+
+GraphicsContext::GraphicsContext(GLFWwindow* contextWindow) :
     m_Window{contextWindow}
 {
     glfwMakeContextCurrent(m_Window);
@@ -11,31 +17,31 @@ OpenGlGraphicsContext::OpenGlGraphicsContext(GLFWwindow* contextWindow) :
     CRASH_EXPECTED_TRUE_MSG(errorCode == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(errorCode)));
 }
 
-void OpenGlGraphicsContext::InitializeForImGui()
+void GraphicsContext::InitializeForImGui()
 {
     ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
-    const char* glsl_version = "#version 430 core";
-    ImGui_ImplOpenGL3_Init(glsl_version);
+    const char* glslVersion = "#version 430 core";
+    ImGui_ImplOpenGL3_Init(glslVersion);
 }
 
-void OpenGlGraphicsContext::DeinitializeImGui()
+void GraphicsContext::DeinitializeImGui()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 }
 
-void OpenGlGraphicsContext::ImGuiBeginFrame()
+void GraphicsContext::ImGuiBeginFrame()
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
 }
 
-void OpenGlGraphicsContext::ImGuiDrawFrame()
+void GraphicsContext::ImGuiDrawFrame()
 {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void OpenGlGraphicsContext::UpdateImGuiViewport()
+void GraphicsContext::UpdateImGuiViewport()
 {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -49,12 +55,12 @@ void OpenGlGraphicsContext::UpdateImGuiViewport()
     }
 }
 
-void OpenGlGraphicsContext::SwapBuffers()
+void GraphicsContext::SwapBuffers()
 {
     glfwSwapBuffers(m_Window);
 }
 
-void OpenGlGraphicsContext::SetVsync(bool bVsyncEnabled)
+void GraphicsContext::SetVsync(bool bVsyncEnabled)
 {
     glfwSwapInterval(bVsyncEnabled ? 1 : 0);
 }

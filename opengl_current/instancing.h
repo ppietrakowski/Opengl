@@ -87,9 +87,9 @@ public:
         ELOG_VERBOSE(LOG_RENDERER, "Rebuilding buffers for instancing (vertex buffer size=%u vertices, max num indices=%u)", m_Vertices.capacity() * sizeof(VerticesType), m_Indices.capacity());
 
         // rebuild vertex and index buffers to match new size
-        m_VertexArray = VertexArray::Create();
-        m_VertexArray->AddDynamicVertexBuffer(static_cast<std::int32_t>(m_Vertices.capacity() * sizeof(VerticesType)), m_Attribute);
-        m_VertexArray->SetIndexBuffer(IndexBuffer::CreateEmpty(static_cast<std::int32_t>(m_Indices.capacity())));
+        m_VertexArray = std::make_shared<VertexArray>();
+        m_VertexArray->AddVertexBuffer(std::make_shared<VertexBuffer>(static_cast<std::int32_t>(m_Vertices.capacity() * sizeof(VerticesType))), m_Attribute);
+        m_VertexArray->SetIndexBuffer(std::make_shared<IndexBuffer>(static_cast<std::int32_t>(m_Indices.capacity())));
         m_bBuffersDirty = true;
     }
 

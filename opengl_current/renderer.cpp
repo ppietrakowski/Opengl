@@ -40,7 +40,7 @@ void Renderer::Initialize()
     std::int32_t colorsWidth = 4;
     std::int32_t colorsHeight = 4;
 
-    s_DefaultTexture = Texture2D::Create(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::Rgb});
+    s_DefaultTexture = std::make_shared<Texture2D>(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::Rgb});
     RenderCommand::Initialize();
 
     s_DebugBatch = new DebugRenderBatch();

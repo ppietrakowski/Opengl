@@ -10,21 +10,38 @@
 class VertexBuffer
 {
 public:
-    static std::shared_ptr<VertexBuffer> Create(const void* data, std::int32_t sizeBytes, bool bDynamic = false);
-    static std::shared_ptr<VertexBuffer> CreateEmpty(std::int32_t maxSizeBytes);
-    virtual ~VertexBuffer() = default;
+    VertexBuffer(const void* data, std::int32_t sizeBytes, bool bDynamic = false);
+    VertexBuffer(std::int32_t maxSizeBytes);
+    ~VertexBuffer();
 
 public:
 
-    virtual void Bind() const = 0;
-    virtual void Unbind() const = 0;
+    void Bind() const;
+    void Unbind() const;
 
-    virtual void UpdateVertices(const void* buffer, std::int32_t offset, std::int32_t size) = 0;
+    void UpdateVertices(const void* buffer, std::int32_t offset, std::int32_t size);
 
-    void UpdateVertices(const void* buffer, std::int32_t size)
-    {
-        UpdateVertices(buffer, 0, size);
-    }
+    void UpdateVertices(const void* buffer, std::int32_t size);
 
-    virtual std::int32_t GetVerticesSizeBytes() const = 0;
+    std::int32_t GetVerticesSizeBytes() const;
+    std::uint32_t GetOpenGlIdentifier() const;
+
+private:
+    std::uint32_t m_RendererId;
+    std::int32_t m_BufferSize;
 };
+
+FORCE_INLINE void VertexBuffer::UpdateVertices(const void* buffer, std::int32_t size)
+{
+    UpdateVertices(buffer, 0, size);
+}
+
+FORCE_INLINE std::int32_t VertexBuffer::GetVerticesSizeBytes() const
+{
+    return m_BufferSize;
+}
+
+FORCE_INLINE std::uint32_t VertexBuffer::GetOpenGlIdentifier() const
+{
+    return m_RendererId;
+}

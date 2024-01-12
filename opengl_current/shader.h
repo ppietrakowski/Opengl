@@ -99,37 +99,44 @@ static constexpr std::int32_t MinTextureUnits = 16;
 
 class Shader
 {
-    friend class Shader;
-    friend class ShaderSourceBuilder;
 public:
-    static std::shared_ptr<Shader> CreateFromSource(std::span<const std::string> sources);
-    virtual ~Shader() = default;
+    Shader(std::span<const std::string> sources);
+    ~Shader();
 
 public:
-    virtual void Use() const = 0;
-    virtual void StopUsing() const = 0;
+    void Use() const;
+    void StopUsing() const;
 
-    virtual void SetUniform(const char* name, std::int32_t value) = 0;
-    virtual void SetUniform(const char* name, float value) = 0;
-    virtual void SetUniform(const char* name, glm::vec2 value) = 0;
-    virtual void SetUniform(const char* name, const glm::vec3& value) = 0;
-    virtual void SetUniform(const char* name, const glm::vec4& value) = 0;
+    void SetUniform(const char* name, std::int32_t value);
+    void SetUniform(const char* name, float value);
+    void SetUniform(const char* name, glm::vec2 value);
+    void SetUniform(const char* name, const glm::vec3& value);
+    void SetUniform(const char* name, const glm::vec4& value);
 
-    virtual void SetUniform(const char* name, const glm::mat4& value) = 0;
-    virtual void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, std::uint32_t count) = 0;
-    virtual void SetUniform(const char* name, const glm::mat3& value) = 0;
+    void SetUniform(const char* name, const glm::mat4& value);
+    void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, std::uint32_t count);
+    void SetUniform(const char* name, const glm::mat3& value);
 
-    virtual int GetUniformInt(const char* name) const = 0;
+    int GetUniformInt(const char* name) const;
 
-    virtual float GetUniformFloat(const char* name) const = 0;
-    virtual glm::vec2 GetUniformVec2(const char* name) const = 0;
-    virtual glm::vec3 GetUniformVec3(const char* name) const = 0;
-    virtual glm::vec4 GetUniformVec4(const char* name) const = 0;
+    float GetUniformFloat(const char* name) const;
+    glm::vec2 GetUniformVec2(const char* name) const;
+    glm::vec3 GetUniformVec3(const char* name) const;
+    glm::vec4 GetUniformVec4(const char* name) const;
+                                                    ;
+    std::vector<UniformInfo> GetUniformsInfo() const;
+    void SetSamplerUniform(const char* uniformName, const std::shared_ptr<Texture>& textures, std::uint32_t startTextureUnit = 0);
 
-    virtual std::vector<UniformInfo> GetUniformInfos() const = 0;
-    virtual void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, std::uint32_t startTextureUnit = 0) = 0;
+private:
+    std::uint32_t m_ShaderProgram{0};
+    mutable std::unordered_map<std::string, int> m_UniformNameToLocation;
 
-protected:
-    virtual void GenerateShaders(std::span<std::string_view> sources) = 0;
+private:
+    Shader() = default;
+
+    void GenerateShaders(std::span<std::string_view> sources);
     void GenerateShaders(std::span<const std::string> sources);
+
+    int GetUniformLocation(const char* uniformName) const;
+    void AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, int location) const;
 };

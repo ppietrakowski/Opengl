@@ -52,43 +52,37 @@ inline bool operator!=(const RgbaColor& a, const RgbaColor& b)
     return a.Red != b.Red || a.Green != b.Green || a.Blue != b.Blue || a.Alpha != b.Alpha;
 }
 
-class RendererAPI
+class RendererApi
 {
 public:
-    enum ApiType
-    {
-        Unknown,
-        OpenGL
-    };
+    RendererApi() = default;
+    ~RendererApi() = default;
 
-public:
-    virtual ~RendererAPI() = default;
+    void Initialize();
 
-    virtual void Clear() = 0;
-    virtual void SetClearColor(const RgbaColor& clearColor) = 0;
-    virtual void DrawTriangles(const VertexArray& vertexArray, std::int32_t numIndices) = 0;
-    virtual void DrawTrianglesAdjancency(const VertexArray& vertexArray, std::int32_t numIndices) = 0;
-    virtual void DrawLines(const VertexArray& vertexArray, std::int32_t numIndices) = 0;
-    virtual void DrawPoints(const VertexArray& vertexArray, std::int32_t numIndices) = 0;
+    void Clear();
+    void SetClearColor(const RgbaColor& clearColor);
+    void DrawTriangles(const VertexArray& vertexArray, std::int32_t numIndices);
+    void DrawTrianglesAdjancency(const VertexArray& vertexArray, std::int32_t numIndices);
+    void DrawLines(const VertexArray& vertexArray, std::int32_t numIndices) ;
+    void DrawPoints(const VertexArray& vertexArray, std::int32_t numIndices);
 
-    virtual void SetWireframe(bool bWireframeEnabled) = 0;
-    virtual bool IsWireframeEnabled() = 0;
+    void SetWireframe(bool bWireframeEnabled);
+    bool IsWireframeEnabled();
 
-    virtual void SetCullFace(bool bCullFace) = 0;
-    virtual bool DoesCullFaces() = 0;
+    void SetCullFace(bool bCullFace);
+    bool DoesCullFaces();
 
-    virtual void SetBlendingEnabled(bool bBlendingEnabled) = 0;
-    virtual void SetLineWidth(float lineWidth) = 0;
+    void SetBlendingEnabled(bool bBlendingEnabled);
+    void SetLineWidth(float lineWidth);
 
-    virtual void ClearBufferBindings_Debug() = 0;
-    virtual void SetViewport(std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height) = 0;
-
-    inline static ApiType GetApi()
-    {
-        return s_RendererApiType;
-    }
+    void ClearBufferBindings_Debug();
+    void SetViewport(std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height);
 
 private:
-    static ApiType s_RendererApiType;
+    bool m_bCullEnabled      : 1 = false;
+    bool m_bWireframeEnabled : 1 = false;
+    bool m_bBlendingEnabled  : 1 = false;
+    RgbaColor m_ClearColor{0, 0, 0, 255};
 };
 

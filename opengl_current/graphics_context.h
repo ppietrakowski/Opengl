@@ -1,17 +1,24 @@
 #pragma once
 
+struct GLFWwindow;
+
 class GraphicsContext
 {
 public:
-    virtual ~GraphicsContext() = default;
+    GraphicsContext(GLFWwindow* contextWindow);
+    ~GraphicsContext() = default;
 
-    virtual void InitializeForImGui() = 0;
-    virtual void DeinitializeImGui() = 0;
-    virtual void ImGuiBeginFrame() = 0;
-    virtual void ImGuiDrawFrame() = 0;
-    virtual void UpdateImGuiViewport() = 0;
-    virtual void SwapBuffers() = 0;
+public:
+    void InitializeForImGui();
+    void DeinitializeImGui();
+    void ImGuiBeginFrame();
+    void ImGuiDrawFrame();
+    void UpdateImGuiViewport();
+    void SwapBuffers();
 
-    virtual void SetVsync(bool bVsyncEnabled) = 0;
+    void SetVsync(bool bVsyncEnabled);
+
+private:
+    GLFWwindow* m_Window;
 };
 
