@@ -1,5 +1,6 @@
 #pragma once
 
+#include "transform.h"
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -16,40 +17,29 @@ struct ActorTagComponent
 
 struct TransformComponent
 {
-    entt::handle Parent;
+    TransformComponent() = default;
+    TransformComponent(const TransformComponent&) = default;
+    TransformComponent& operator=(const TransformComponent&) = default;
 
-    // Position in parent's space (World space, if parent unspecified)
     glm::vec3 Position{0, 0, 0};
-
-    // Rotation in parent's space (World space, if parent unspecified)
     glm::quat Rotation{glm::vec3{0, 0, 0}};
-
     glm::vec3 Scale{1, 1, 1};
 
     glm::mat4 GetWorldTransformMatrix() const;
+   
+    void Translate(const glm::vec3& pos);
 
-    glm::mat4 CalculateRelativeTransform() const
-    {
-        return glm::translate(glm::identity<glm::mat4>(), Position) * glm::mat4_cast(Rotation) * glm::scale(glm::identity<glm::mat4>(), Scale);
-    }
+    void SetEulerAngles(const glm::vec3& eulerAngles);
+    void SetEulerAngles(float pitch, float yaw, float roll);
 
-    void SetLocalEulerAngles(const glm::vec3& eulerAngles)
-    {
-        Rotation = glm::quat{glm::radians(eulerAngles)};
-    }
+    void AddEulerAngles(const glm::vec3& eulerAngles);
+    glm::vec3 GetEulerAngles() const;
 
-    glm::vec3 GetWorldPosition() const;
-};
+    glm::vec3 GetForwardVector() const;
+    glm::vec3 GetRightVector() const;
+    glm::vec3 GetUpVector() const;
 
-struct SceneHierarchyComponent
-{
-    entt::handle Parent;
-    std::map<std::string, entt::handle> Children;
-
-    void RemoveChild(entt::handle handle);
-    void AddChild(const entt::handle& self, entt::handle handle);
-
-    void InvalidateState();
+    Transform GetAsTransform() const;
 };
 
 class Level;
@@ -90,9 +80,6 @@ public:
     const std::string& GetName() const;
     void SetName(const std::string& name);
 
-    void AddChild(const Actor& actor);
-    void RemoveChild(const Actor& actor);
-
     const Level* GetHomeLevel() const
     {
         return m_HomeLevel;
@@ -111,3 +98,54 @@ private:
     Level* m_HomeLevel{nullptr};
 };
 
+FORCE_INLINE void TransformComponent::Translate(const glm::vec3& pos)
+{
+    Position += pos;
+}
+
+FORCE_INLINE void TransformComponent::SetEulerAngles(const glm::vec3& eulerAngles)
+{
+    Rotation = glm::quat{glm::radians(eulerAngles)};
+}
+
+FORCE_INLINE void TransformComponent::SetEulerAngles(float pitch, float yaw, float roll)
+{
+    Rotation = glm::quat{glm::radians(glm::vec3{pitch, yaw, roll})};
+}
+
+FORCE_INLINE void TransformComponent::AddEulerAngles(const glm::vec3& eulerAngles)
+{
+    Rotation *= glm::quat{glm::vec3{eulerAngles}};
+}
+
+FORCE_INLINE glm::mat4 TransformComponent::GetWorldTransformMatrix() const
+{
+    return glm::translate(glm::identity<glm::mat4>(), Position) *
+        glm::mat4_cast(Rotation) *
+        glm::scale(glm::identity<glm::mat4>(), Scale);
+}
+
+FORCE_INLINE glm::vec3 TransformComponent::GetEulerAngles() const
+{
+    return glm::degrees(glm::eulerAngles(Rotation));
+}
+
+FORCE_INLINE glm::vec3 TransformComponent::GetForwardVector() const
+{
+    return glm::normalize(Rotation * glm::vec3{0, 0, -1});
+}
+
+FORCE_INLINE glm::vec3 TransformComponent::GetRightVector() const
+{
+    return glm::normalize(Rotation * glm::vec3{1, 0, 0});
+}
+
+FORCE_INLINE glm::vec3 TransformComponent::GetUpVector() const
+{
+    return glm::normalize(Rotation * glm::vec3{0, 1, 0});
+}
+
+FORCE_INLINE Transform TransformComponent::GetAsTransform() const
+{
+    return Transform{Position, Rotation, Scale};
+}

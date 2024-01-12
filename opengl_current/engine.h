@@ -20,3 +20,4 @@
 #include "static_mesh_component.h"
 #include "instanced_mesh.h"
 #include "resouce_manager.h"
+#include "player_controller.h"

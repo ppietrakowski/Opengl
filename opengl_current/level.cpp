@@ -2,6 +2,7 @@
 #include "static_mesh_component.h"
 #include "skeletal_mesh_component.h"
 #include "resouce_manager.h"
+#include "player_controller.h"
 
 #include <future>
 
@@ -21,15 +22,7 @@ Actor Level::CreateActor(const std::string& name)
 
     actor.m_HomeLevel = this;
     actor.m_EntityHandle = entt::handle{m_Registry, m_Registry.create()};
-    actor.AddComponent<SceneHierarchyComponent>();
     actor.AddComponent<TransformComponent>();
-
-    SceneHierarchyComponent& sceneHierarchy = actor.GetComponent<SceneHierarchyComponent>();
-    sceneHierarchy.Parent = entt::handle{m_Registry, entt::null};
-
-    auto& transform = actor.GetComponent<TransformComponent>();
-    transform.Parent = entt::handle{m_Registry, entt::null};
-
     actor.AddComponent<ActorTagComponent>();
 
     auto& tag = actor.GetComponent<ActorTagComponent>();
@@ -106,6 +99,14 @@ void Level::BroadcastUpdate(Duration duration)
     auto skeletalAnimationUpdateTask = std::async(std::launch::async, [this](Duration duration) {
         UpdateSkeletalMeshesAnimation(duration);
     }, duration);
+
+
+    auto playerControllerView = m_Registry.view<PlayerController>();
+
+    for (auto&& [entity, playerController] : playerControllerView.each())
+    {
+        playerController.Update();
+    }
 
     skeletalAnimationUpdateTask.wait();
 }

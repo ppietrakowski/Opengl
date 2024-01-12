@@ -2,57 +2,7 @@
 #include "level.h"
 #include "error_macros.h"
 
-glm::mat4 TransformComponent::GetWorldTransformMatrix() const
-{
-    entt::handle parentTraverseIt = Parent;
-
-    glm::mat4 worldTransform = CalculateRelativeTransform();
-
-    while (parentTraverseIt.valid())
-    {
-        // accumulate all parent transforms
-        const TransformComponent& parentTransform = parentTraverseIt.get<TransformComponent>();
-        worldTransform = parentTransform.CalculateRelativeTransform() * worldTransform;
-        parentTraverseIt = parentTransform.Parent;
-    }
-
-    return worldTransform;
-}
-
-glm::vec3 TransformComponent::GetWorldPosition() const
-{
-    return GetWorldTransformMatrix() * glm::vec4{Position, 1};
-}
-
-void SceneHierarchyComponent::RemoveChild(entt::handle handle)
-{
-    const ActorTagComponent& tagComponent = handle.get<ActorTagComponent>();
-    auto it = Children.find(tagComponent.Name);
-    ASSERT(it != Children.end());
-
-    it->second.get<TransformComponent>().Parent = entt::handle{};
-    Children.erase(it);
-}
-
-void SceneHierarchyComponent::AddChild(const entt::handle& self, entt::handle handle)
-{
-    const ActorTagComponent& tagComponent = handle.get<ActorTagComponent>();
-    Children[tagComponent.Name] = handle;
-    handle.get<TransformComponent>().Parent = self;
-}
-
-void SceneHierarchyComponent::InvalidateState()
-{
-    auto predicate = [](const std::pair<const std::string, entt::handle>& a) { return !a.second.valid(); };
-
-    auto it = std::find_if(Children.begin(), Children.end(), predicate);
-
-    while (it != Children.end())
-    {
-        Children.erase(it);
-        it = std::find_if(Children.begin(), Children.end(), predicate);
-    }
-}
+#include <glm/gtx/matrix_decompose.hpp>
 
 const std::string& Actor::GetName() const
 {
@@ -66,26 +16,8 @@ void Actor::SetName(const std::string& name)
     tagComponent.Name = name;
 }
 
-void Actor::AddChild(const Actor& actor)
-{
-    auto& hierarchy = GetComponent<SceneHierarchyComponent>();
-    hierarchy.AddChild(m_EntityHandle, actor.m_EntityHandle);
-}
-
-void Actor::RemoveChild(const Actor& actor)
-{
-    auto& hierarchy = GetComponent<SceneHierarchyComponent>();
-    hierarchy.RemoveChild(actor.m_EntityHandle);
-}
-
 void Actor::DestroyActor()
 {
-    auto& sceneHierarchy = GetComponent<SceneHierarchyComponent>();
-    for (auto& [name, actor] : sceneHierarchy.Children)
-    {
-        m_HomeLevel->RemoveActor(name);
-    }
-
     m_HomeLevel->RemoveActor(GetName());
 }
 

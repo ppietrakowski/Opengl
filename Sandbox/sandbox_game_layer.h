@@ -37,6 +37,8 @@ private:
     std::shared_ptr<Material> current_material_;
     std::shared_ptr<InstancedMesh> instanced_mesh_;
 
+    Actor m_Player;
+
     float camera_yaw_ = 0.0f;
     float camera_pitch_ = 0.0f;
 
@@ -53,5 +55,10 @@ private:
 
     Level level_;
     Actor skeletal_mesh_actor_;
+
+private:
+    void MoveForward(Actor& player, float axisValue);
+    void MoveRight(Actor& player, float axisValue);
+    void RotateCamera(Actor& player, glm::vec2 mouseMoveDelta);
 };
 

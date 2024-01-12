@@ -242,6 +242,7 @@
     <ClCompile Include="opengl_texture.cpp" />
     <ClCompile Include="opengl_vertex_array.cpp" />
     <ClCompile Include="opengl_vertex_buffer.cpp" />
+    <ClCompile Include="player_controller.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="renderer_api.cpp" />
     <ClCompile Include="render_command.cpp" />
@@ -297,6 +298,7 @@
     <ClInclude Include="opengl_texture.h" />
     <ClInclude Include="opengl_vertex_array.h" />
     <ClInclude Include="opengl_vertex_buffer.h" />
+    <ClInclude Include="player_controller.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="renderer_api.h" />
     <ClInclude Include="render_command.h" />

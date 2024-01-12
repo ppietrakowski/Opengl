@@ -1,5 +1,6 @@
 #include "sandbox_game_layer.h"
 
+#include <functional>
 #include "renderer.h"
 #include "Imgui/imgui.h"
 #include "error_macros.h"
@@ -52,15 +53,15 @@ SandboxGameLayer::SandboxGameLayer() :
     static_mesh_ = ResourceManager::GetStaticMesh("cube.obj");
     static_mesh_->MainMaterial = default_material_;
 
-    uint32_t i = 0;
 
     std::shared_ptr<Material> material = test_skeletal_mesh_->MainMaterial;
+    std::uint32_t textureIndex = 0;
 
     for (const auto& path : test_skeletal_mesh_->Textures)
     {
-        std::string name = "diffuse" + std::to_string(i + 1);
+        std::string name = "diffuse" + std::to_string(textureIndex + 1);
         material->SetTextureProperty(name.c_str(), ResourceManager::GetTexture2D(path));
-        ++i;
+        ++textureIndex;
     }
 
     camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
@@ -68,7 +69,7 @@ SandboxGameLayer::SandboxGameLayer() :
     std::vector<std::string> animations = std::move(test_skeletal_mesh_->GetAnimationNames());
     RenderCommand::SetClearColor(RgbaColor{50, 30, 170});
 
-    for (int i = 0; i < 2; ++i)
+    for (std::int32_t i = 0; i < 2; ++i)
     {
         skeletal_mesh_actor_ = level_.CreateActor("SkeletalMesh" + std::to_string(i));
         skeletal_mesh_actor_.AddComponent<SkeletalMeshComponent>(test_skeletal_mesh_);
@@ -78,38 +79,34 @@ SandboxGameLayer::SandboxGameLayer() :
 
     Actor static_mesh_actor = level_.CreateActor("StaticMeshActor");
     static_mesh_actor.AddComponent<StaticMeshComponent>(static_mesh_);
-    static_mesh_actor.GetComponent<TransformComponent>().SetLocalEulerAngles(glm::vec3{0, 90, 0});
+    static_mesh_actor.GetComponent<TransformComponent>().SetEulerAngles(glm::vec3{0, 90, 0});
 
     bbox_min_ = test_skeletal_mesh_->GetBboxMin();
     bbox_max_ = test_skeletal_mesh_->GetBboxMax();
     instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_);
 
-    for (int i = 0; i < 1000; ++i)
+    for (std::int32_t i = 0; i < 10; ++i)
     {
-        for (int j = 0; j < 200; ++j)
+        for (std::int32_t j = 0; j < 20; ++j)
         {
             Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
-            instanced_mesh_->QueueDraw(transform, 0);
+            instanced_mesh_->AddInstance(transform, 0);
             Renderer::DrawDebugBox(instanced_mesh_->GetMesh().GetBBoxMin(), instanced_mesh_->GetMesh().GetBBoxMax(), transform);
         }
     }
+
+    m_Player = level_.CreateActor("Player");
+    m_Player.AddComponent<PlayerController>(m_Player);
+
+    PlayerController& controller = m_Player.GetComponent<PlayerController>();
+    controller.BindForwardCallback(std::bind(&SandboxGameLayer::MoveForward, this, std::placeholders::_1, std::placeholders::_2));
+    controller.BindRightCallback(std::bind(&SandboxGameLayer::MoveRight, this, std::placeholders::_1, std::placeholders::_2));
+    controller.BindMouseMoveCallback(std::bind(&SandboxGameLayer::RotateCamera, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void SandboxGameLayer::Update(Duration delta_time)
 {
     float dt = delta_time.GetSeconds();
-
-    if (Input::IsKeyPressed(Keys::W))
-    {
-        glm::vec3 world_forward = glm::vec3{0, 0, -1};
-        glm::vec3 forward = camera_rotation_ * world_forward * dt * move_speed_;
-        camera_position_ += forward;
-    } else if (Input::IsKeyPressed(Keys::S))
-    {
-        glm::vec3 world_backward = glm::vec3{0, 0, 1};
-        glm::vec3 backward = camera_rotation_ * world_backward * dt * move_speed_;
-        camera_position_ += backward;
-    }
 
     if (Input::IsKeyPressed(Keys::E))
     {
@@ -137,7 +134,9 @@ void SandboxGameLayer::Update(Duration delta_time)
 
 void SandboxGameLayer::Render(Duration delta_time)
 {
-    Renderer::BeginScene(glm::inverse(glm::translate(camera_position_) * glm::mat4_cast(camera_rotation_)), camera_position_, camera_rotation_);
+    Transform cameraTransform = m_Player.GetComponent<TransformComponent>().GetAsTransform();
+
+    Renderer::BeginScene(glm::inverse(glm::translate(cameraTransform.Position) * glm::mat4_cast(cameraTransform.Rotation)), cameraTransform.Position, cameraTransform.Rotation);
     current_used_shader_->Use();
     current_used_shader_->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
 
@@ -156,27 +155,6 @@ void SandboxGameLayer::Render(Duration delta_time)
 
 bool SandboxGameLayer::OnEvent(const Event& event)
 {
-    if (event.Type == EventType::MouseMoved)
-    {
-        glm::vec2 delta = event.MouseMove.MousePosition - event.MouseMove.LastMousePosition;
-        float dt = last_delta_seconds_.GetSeconds();
-
-        camera_yaw_ -= yaw_rotation_rate_ * delta.x * dt;
-        camera_pitch_ -= pitch_rotation_rate_ * delta.y * dt;
-
-        if (camera_pitch_ < -89)
-        {
-            camera_pitch_ = -89;
-        }
-        if (camera_pitch_ > 89)
-        {
-            camera_pitch_ = 89;
-        }
-
-        camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
-        return true;
-    }
-
     if (event.Type == EventType::MouseButtonPressed)
     {
         DO_ONCE([this]() {
@@ -224,4 +202,39 @@ void SandboxGameLayer::OnImguiFrame()
     ImGui::Text("Frame time: %.2f ms", last_delta_seconds_.GetMilliseconds());
     ImGui::Text("Drawcalls: %u", stats.NumDrawcalls);
     ImGui::End();
+}
+
+void SandboxGameLayer::MoveForward(Actor& player, float axisValue)
+{
+    TransformComponent& transform = player.GetComponent<TransformComponent>();
+    glm::vec3 forward = axisValue * transform.GetForwardVector() * last_delta_seconds_.GetSeconds() * move_speed_;
+    transform.Translate(forward);
+}
+
+void SandboxGameLayer::MoveRight(Actor& player, float axisValue)
+{
+    TransformComponent& transform = player.GetComponent<TransformComponent>();
+    glm::vec3 right = axisValue * transform.GetRightVector() * last_delta_seconds_.GetSeconds() * move_speed_;
+    transform.Translate(right);
+}
+
+void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouseMoveDelta)
+{
+    float dt = last_delta_seconds_.GetSeconds();
+
+    TransformComponent& transform = player.GetComponent<TransformComponent>();
+
+    camera_yaw_ -= yaw_rotation_rate_ * mouseMoveDelta.x * dt;
+    camera_pitch_ -= pitch_rotation_rate_ * mouseMoveDelta.y * dt;
+
+    if (camera_pitch_ < -89)
+    {
+        camera_pitch_ = -89;
+    }
+    if (camera_pitch_ > 89)
+    {
+        camera_pitch_ = 89;
+    }
+
+    transform.SetEulerAngles(camera_pitch_, camera_yaw_, 0.0f);
 }

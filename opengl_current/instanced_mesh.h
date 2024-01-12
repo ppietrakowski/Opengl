@@ -12,7 +12,8 @@ public:
 
     void Draw(const glm::mat4& transform, Material& material);
 
-    void QueueDraw(const Transform& transform, std::int32_t textureId);
+    // Adds new mesh instance. Returns index of newly created instance
+    std::int32_t AddInstance(const Transform& transform, std::int32_t textureId);
 
     const StaticMesh& GetMesh() const
     {
@@ -21,10 +22,16 @@ public:
 
     void RemoveInstance(std::int32_t index);
 
+    std::int32_t GetSize() const
+    {
+        return m_NumInstances;
+    }
+
 private:
     std::vector<StaticMeshVertex> m_BaseVertices;
     std::vector<std::uint32_t> m_BaseIndices;
     InstanceBase<StaticMeshVertex> m_InstanceDraw;
     std::shared_ptr<StaticMesh> m_StaticMesh;
+    std::int32_t m_NumInstances{0};
 };
 
