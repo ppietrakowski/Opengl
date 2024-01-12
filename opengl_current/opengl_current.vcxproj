@@ -230,6 +230,7 @@
     <ClCompile Include="index_buffer.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="instanced_mesh.cpp" />
+    <ClCompile Include="instanced_mesh_component.cpp" />
     <ClCompile Include="level.cpp" />
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="material.cpp" />
@@ -275,6 +276,7 @@
     <ClInclude Include="index_buffer.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="instanced_mesh.h" />
+    <ClInclude Include="instanced_mesh_component.h" />
     <ClInclude Include="instancing.h" />
     <ClInclude Include="keys.h" />
     <ClInclude Include="level.h" />

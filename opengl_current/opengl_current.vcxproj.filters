@@ -150,6 +150,9 @@
     <ClCompile Include="graphics_context.cpp">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="instanced_mesh_component.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Imgui\imconfig.h">
@@ -292,6 +295,9 @@
     </ClInclude>
     <ClInclude Include="glfw_window_data.h">
       <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="instanced_mesh_component.h">
+      <Filter>Header Files\scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

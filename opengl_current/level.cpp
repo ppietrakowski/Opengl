@@ -1,6 +1,7 @@
 #include "level.h"
 #include "static_mesh_component.h"
 #include "skeletal_mesh_component.h"
+#include "instanced_mesh_component.h"
 #include "resouce_manager.h"
 #include "player_controller.h"
 
@@ -124,6 +125,12 @@ void Level::BroadcastRender(Duration duration)
     for (auto&& [entity, transform, skeletalMesh] : skeletalMeshView.each())
     {
         skeletalMesh.Draw(transform.GetWorldTransformMatrix());
+    }
+
+    auto instancedMeshComponent = m_Registry.view<TransformComponent, InstancedMeshComponent>();
+    for (auto&& [entity, transform, staticMesh] : instancedMeshComponent.each())
+    {
+        staticMesh.Draw(transform.GetWorldTransformMatrix());
     }
 }
 

@@ -85,13 +85,18 @@ SandboxGameLayer::SandboxGameLayer() :
     bbox_max_ = test_skeletal_mesh_->GetBboxMax();
     instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_);
 
-    for (std::int32_t i = 0; i < 1000; ++i)
+
+    Actor instanceMesh = level_.CreateActor("InstancedMesh");
+    instanceMesh.AddComponent<InstancedMeshComponent>(static_mesh_);
+
+    InstancedMeshComponent& instancedMesh = instanceMesh.GetComponent<InstancedMeshComponent>();
+
+    for (std::int32_t i = 0; i < 10; ++i)
     {
-        for (std::int32_t j = 0; j < 200; ++j)
+        for (std::int32_t j = 0; j < 10; ++j)
         {
             Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
-            instanced_mesh_->AddInstance(transform, 0);
-            Renderer::DrawDebugBox(instanced_mesh_->GetMesh().GetBBoxMin(), instanced_mesh_->GetMesh().GetBBoxMax(), transform);
+            instancedMesh.AddInstance(transform);
         }
     }
 
@@ -140,7 +145,6 @@ void SandboxGameLayer::Render(Duration delta_time)
     current_used_shader_->Use();
     current_used_shader_->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
 
-    instanced_mesh_->Draw(glm::identity<glm::mat4>(), *static_mesh_->MainMaterial);
     debug_shader_->Use();
     debug_shader_->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
     Renderer::DrawDebugBox(static_mesh_->GetBBoxMin(), static_mesh_->GetBBoxMax(), Transform{static_mesh_position_, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}}, glm::vec4{1, 0, 0, 1});
@@ -161,7 +165,8 @@ bool SandboxGameLayer::OnEvent(const Event& event)
             Actor actor = level_.FindActor("StaticMeshActor");
             actor.DestroyActor();
 
-            instanced_mesh_->RemoveInstance(5);
+            Actor instancedMesh = level_.FindActor("InstancedMesh");
+            instancedMesh.GetComponent<InstancedMeshComponent>().RemoveInstance(5);
         }
         );
     }

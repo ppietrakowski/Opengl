@@ -207,8 +207,8 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     m_Animations[DefaultAnimationName].Duration = 10;
 
     m_RootBone.AssignHierarchy(scene->mRootNode, bonesInfo);
-    m_VertexArray->AddVertexBuffer(std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(SkeletonMeshVertex)), SkeletonMeshVertex::DataFormat);
-    m_VertexArray->SetIndexBuffer(std::make_shared<IndexBuffer>(indices.data(), static_cast<uint32_t>(indices.size())));
+    m_VertexArray->AddVertexBuffer(std::make_shared<VertexBuffer>(vertices.data(), (std::int32_t)vertices.size() * sizeof(SkeletonMeshVertex)), SkeletonMeshVertex::DataFormat);
+    m_VertexArray->SetIndexBuffer(std::make_shared<IndexBuffer>(indices.data(), static_cast<int32_t>(indices.size())));
         
     // find global transform for converting from bone space back to local space
     m_GlobalInverseTransform = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
