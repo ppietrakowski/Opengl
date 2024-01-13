@@ -1,6 +1,8 @@
 #include "vertex_buffer.h"
 #include "error_macros.h"
 
+#include "render_command.h"
+
 #include <GL/glew.h>
 
 VertexBuffer::VertexBuffer(const void* data, std::int32_t sizeBytes, bool bDynamic) :
@@ -11,6 +13,8 @@ VertexBuffer::VertexBuffer(const void* data, std::int32_t sizeBytes, bool bDynam
     glGenBuffers(1, &m_RendererId);
     glBindBuffer(GL_ARRAY_BUFFER, m_RendererId);
     glBufferData(GL_ARRAY_BUFFER, sizeBytes, data, bufferUsage);
+
+    RenderCommand::NotifyVertexBufferCreated(sizeBytes);
 }
 
 VertexBuffer::VertexBuffer(std::int32_t maxSizeBytes) :
@@ -21,6 +25,7 @@ VertexBuffer::VertexBuffer(std::int32_t maxSizeBytes) :
 VertexBuffer::~VertexBuffer()
 {
     glDeleteBuffers(1, &m_RendererId);
+    RenderCommand::NotifyVertexBufferDestroyed(m_BufferSize);
 }
 
 void VertexBuffer::Bind() const

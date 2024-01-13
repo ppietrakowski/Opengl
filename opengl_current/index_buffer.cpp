@@ -1,4 +1,5 @@
 #include "index_buffer.h"
+#include "render_command.h"
 
 #include <GL/glew.h>
 
@@ -16,6 +17,8 @@ IndexBuffer::IndexBuffer(const std::uint32_t* data, std::int32_t numIndices, boo
     glGenBuffers(1, &m_RendererId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(std::uint32_t), data, bufferUsage);
+
+    RenderCommand::NotifyIndexBufferCreated(numIndices * sizeof(std::uint32_t));
 }
 
 IndexBuffer::IndexBuffer(std::int32_t totalNumIndices) :
@@ -25,6 +28,7 @@ IndexBuffer::IndexBuffer(std::int32_t totalNumIndices) :
 
 IndexBuffer::~IndexBuffer()
 {
+    RenderCommand::NotifyIndexBufferDestroyed(m_NumIndices * sizeof(std::uint32_t));
     glDeleteBuffers(1, &m_RendererId);
 }
 

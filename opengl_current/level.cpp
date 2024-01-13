@@ -29,25 +29,13 @@ Actor Level::CreateActor(const std::string& name)
     auto& tag = actor.GetComponent<ActorTagComponent>();
     tag.Name = name;
 
-    m_Actors.emplace_back(actor);
-
-    std::sort(m_Actors.begin(), m_Actors.end(),
-        [](const Actor& a, const Actor& b) {
-        return std::less<std::string>()(a.GetName(), b.GetName());
-    });
-
+    m_Actors[name] = actor;
     return actor;
 }
 
 Actor Level::FindActor(const std::string& name) const
 {
-    auto it = std::lower_bound(m_Actors.begin(), m_Actors.end(),
-        name, [](const Actor& actor, const std::string& name) {
-        return actor.GetName() < name;
-    });
-
-    CRASH_EXPECTED_TRUE(it != m_Actors.end());
-    return *it;
+    return m_Actors.at(name);
 }
 
 std::vector<Actor> Level::FindActorsWithTag(const std::string& tag) const
@@ -71,22 +59,19 @@ std::vector<Actor> Level::FindActorsWithTag(const std::string& tag) const
 
 void Level::RemoveActor(const std::string& name)
 {
-    auto it = std::lower_bound(m_Actors.begin(), m_Actors.end(),
-        name, [](const Actor& actor, const std::string& name) {
-        return actor.GetName() < name;
-    });
+    auto it = m_Actors.find(name);
 
     if (it == m_Actors.end())
     {
         return;
     }
 
-    Actor actor = *it;
+    Actor actor = it->second;
 
     auto& tag = actor.GetComponent<ActorTagComponent>();
     tag.bIsAlive = false;
 
-    m_Registry.destroy(actor.m_EntityHandle.entity());
+    actor.m_EntityHandle.destroy();
     m_Actors.erase(it);
 }
 

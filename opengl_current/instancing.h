@@ -174,7 +174,8 @@ public:
     template <typename ...Args>
     void UpdateInstance(std::int32_t vertexIndex, const VerticesType& vertex, const Transform& worldTransform, Args&& ...args)
     {
-        m_Vertices[vertexIndex] = InstanceCreator<VerticesType>::CreateInstanceFrom(vertex, worldTransform, std::forward<Args>(args)...);
+        m_Vertices[vertexIndex] = InstanceCreator<VerticesType>::CreateInstanceFrom(vertex, worldTransform.CalculateTransformMatrix(), std::forward<Args>(args)...);
+        m_bBuffersDirty = true;
     }
 
     void EnableClearPostDraw()

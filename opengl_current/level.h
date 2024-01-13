@@ -21,9 +21,26 @@ public:
     void BroadcastUpdate(Duration duration);
     void BroadcastRender(Duration duration);
 
+
+    auto begin()
+    {
+        return m_Actors.begin();
+    }
+
+    auto end()
+    {
+        return m_Actors.end();
+    }
+
+    template <typename ...Args>
+    auto View()
+    {
+        return m_Registry.view<Args...>();
+    }
+
 private:
     entt::registry m_Registry;
-    std::vector<Actor> m_Actors;
+    std::map<std::string, Actor> m_Actors;
     std::shared_ptr<ResourceManagerImpl> m_ResourceManager;
 
 private:

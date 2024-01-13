@@ -93,6 +93,16 @@ public:
     void DestroyActor();
     bool IsAlive() const;
 
+    bool operator==(const Actor& other) const
+    {
+        return m_EntityHandle.entity() == other.m_EntityHandle.entity();
+    }
+
+    bool operator!=(const Actor& other) const
+    {
+        return m_EntityHandle.entity() != other.m_EntityHandle.entity();
+    }
+
 private:
     entt::handle m_EntityHandle;
     Level* m_HomeLevel{nullptr};

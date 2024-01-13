@@ -118,3 +118,22 @@ RenderStats RenderCommand::GetRenderStats()
     return s_RenderStats;
 }
 
+void RenderCommand::NotifyIndexBufferCreated(std::int32_t bufferSize)
+{
+    s_RenderStats.NumIndexBufferMemoryAllocated += bufferSize;
+}
+
+void RenderCommand::NotifyIndexBufferDestroyed(std::int32_t bufferSize)
+{
+    s_RenderStats.NumIndexBufferMemoryAllocated -= bufferSize;
+}
+
+void RenderCommand::NotifyVertexBufferCreated(std::int32_t bufferSize)
+{
+    s_RenderStats.NumVertexBufferMemoryAllocated += bufferSize;
+}
+
+void RenderCommand::NotifyVertexBufferDestroyed(std::int32_t bufferSize)
+{
+    s_RenderStats.NumVertexBufferMemoryAllocated -= bufferSize;
+}

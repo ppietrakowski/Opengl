@@ -85,7 +85,6 @@ SandboxGameLayer::SandboxGameLayer() :
     bbox_max_ = test_skeletal_mesh_->GetBboxMax();
     instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_);
 
-
     Actor instanceMesh = level_.CreateActor("InstancedMesh");
     instanceMesh.AddComponent<InstancedMeshComponent>(static_mesh_);
 
@@ -117,7 +116,8 @@ void SandboxGameLayer::Update(Duration delta_time)
     {
         camera_yaw_ -= yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
-    } else if (Input::IsKeyPressed(Keys::Q))
+    }
+    else if (Input::IsKeyPressed(Keys::Q))
     {
         camera_yaw_ += yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
@@ -127,7 +127,8 @@ void SandboxGameLayer::Update(Duration delta_time)
     {
         glm::vec3 world_up = glm::vec3{0, 1, 0};
         camera_position_ += ascend_speed_ * world_up * dt;
-    } else if (Input::IsKeyPressed(Keys::H))
+    }
+    else if (Input::IsKeyPressed(Keys::H))
     {
         glm::vec3 world_down = glm::vec3{0, -1, 0};
         camera_position_ += ascend_speed_ * world_down * dt;
@@ -161,14 +162,6 @@ bool SandboxGameLayer::OnEvent(const Event& event)
 {
     if (event.Type == EventType::MouseButtonPressed)
     {
-        DO_ONCE([this]() {
-            Actor actor = level_.FindActor("StaticMeshActor");
-            actor.DestroyActor();
-
-            Actor instancedMesh = level_.FindActor("InstancedMesh");
-            instancedMesh.GetComponent<InstancedMeshComponent>().RemoveInstance(5);
-        }
-        );
     }
 
     if (event.Type == EventType::KeyPressed && event.Key.Key == Keys::P)
@@ -176,7 +169,8 @@ bool SandboxGameLayer::OnEvent(const Event& event)
         if (current_material_.get() == debug_material_.get())
         {
             current_material_ = default_material_;
-        } else
+        }
+        else
         {
             current_material_ = debug_material_;
         }
@@ -193,7 +187,8 @@ void SandboxGameLayer::OnImguiFrame()
     if (num_frame == 2)
     {
         last_framerate = (last_framerate + static_cast<std::int32_t>(1000 / last_delta_seconds_.GetMilliseconds())) / 2;
-    } else
+    }
+    else
     {
         num_frame++;
     }
@@ -205,8 +200,67 @@ void SandboxGameLayer::OnImguiFrame()
 
     ImGui::Text("Fps: %i", last_framerate);
     ImGui::Text("Frame time: %.2f ms", last_delta_seconds_.GetMilliseconds());
-    ImGui::Text("Drawcalls: %u", stats.NumDrawcalls);
+    ImGui::Text("Drawcalls: %i", stats.NumDrawcalls);
+    ImGui::Text("NumIndicesMemoryAllocated: %i bytes", stats.NumIndexBufferMemoryAllocated);
+    ImGui::Text("NumVerticesMemoryAllocated: %i bytes", stats.NumVertexBufferMemoryAllocated);
     ImGui::End();
+
+    Actor actorToRemove = m_Player;
+
+    ImGui::Begin("Hierarchy");
+    for (auto& [name, actor] : level_)
+    {
+        ImGui::Button(name.c_str());
+        ImGui::SameLine();
+
+        ImGui::PushID(name.c_str());
+        if (ImGui::Button("X"))
+        {
+            actorToRemove = actor;
+        }
+        ImGui::PopID();
+
+        ImGui::NextColumn();
+    }
+
+    ImGui::End();
+
+    ImGui::Begin("InstancedMesh");
+    auto view = level_.View<InstancedMeshComponent, ActorTagComponent>();
+    for (auto&& [entity, instancedMeshComponent, tag] : view.each())
+    {
+        std::int32_t i = 0;
+        glm::vec3 v;
+
+        for (const Transform& transform : instancedMeshComponent.Instance->GetTransforms())
+        {
+            Transform copy = transform;
+            ImGui::Text("%i", i++);
+            ImGui::Text("Transform ");
+
+            ImGui::PushID(i);
+            bool bUpdateBuffer = ImGui::DragFloat3("Position", &copy.Position[0], 0.5f);
+            v = glm::degrees(glm::eulerAngles(transform.Rotation));
+            bUpdateBuffer = bUpdateBuffer || ImGui::DragFloat3("Rotation", &v[0], 0.5f);
+            
+            bUpdateBuffer = bUpdateBuffer || ImGui::DragFloat3("Scale", &copy.Scale[0], 0.5f);
+
+            if (bUpdateBuffer)
+            {
+                copy.Rotation = glm::quat{glm::radians(v)};
+                instancedMeshComponent.Instance->UpdateInstance(i - 1, copy);
+            }
+
+            ImGui::PopID();
+        }
+    }
+
+    ImGui::End();
+
+    if (actorToRemove != m_Player)
+    {
+        actorToRemove.DestroyActor();
+    }
 }
 
 void SandboxGameLayer::MoveForward(Actor& player, float axisValue)

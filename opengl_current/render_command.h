@@ -7,6 +7,8 @@ struct RenderStats
 {
     std::int32_t NumDrawcalls{0};
     std::int64_t DeltaFrameNanoseconds{0};
+    std::int32_t NumIndexBufferMemoryAllocated{0};
+    std::int32_t NumVertexBufferMemoryAllocated{0};
 };
 
 class RenderCommand
@@ -44,6 +46,12 @@ public:
     static void SetViewport(std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height);
 
     static RenderStats GetRenderStats();
+
+    static void NotifyIndexBufferCreated(std::int32_t bufferSize);
+    static void NotifyIndexBufferDestroyed(std::int32_t bufferSize);
+
+    static void NotifyVertexBufferCreated(std::int32_t bufferSize);
+    static void NotifyVertexBufferDestroyed(std::int32_t bufferSize);
 
 private:
     static RendererApi s_RendererApi;
