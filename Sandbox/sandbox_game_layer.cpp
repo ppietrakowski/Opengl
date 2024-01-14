@@ -8,9 +8,10 @@
 
 #include <glm/gtx/matrix_decompose.hpp>
 
-SandboxGameLayer::SandboxGameLayer() :
+SandboxGameLayer::SandboxGameLayer(Game* game) :
     camera_rotation_{glm::vec3{0, 0, 0}},
-    camera_position_{0.0f, 0.0f, 0.0f}
+    camera_position_{0.0f, 0.0f, 0.0f},
+    m_Game(game)
 {
     default_shader_ = ResourceManager::GetShader("shaders/default.shd");
     debug_shader_ = ResourceManager::GetShader("shaders/unshaded.shd");
@@ -239,16 +240,36 @@ void SandboxGameLayer::OnImguiFrame()
             ImGui::Text("Transform ");
 
             ImGui::PushID(i);
-            bool bUpdateBuffer = ImGui::DragFloat3("Position", &copy.Position[0], 0.5f);
-            v = glm::degrees(glm::eulerAngles(transform.Rotation));
-            bUpdateBuffer = bUpdateBuffer || ImGui::DragFloat3("Rotation", &v[0], 0.5f);
+            bool bUpdateBuffer = false;
             
-            bUpdateBuffer = bUpdateBuffer || ImGui::DragFloat3("Scale", &copy.Scale[0], 0.5f);
+            if (ImGui::DragFloat3("Position", &copy.Position[0], 0.5f, 0.0f, 0.0f, "%.3f"))
+            {
+                m_Game->SetMouseVisible(false);
+                bUpdateBuffer = true;
+            }
+
+            v = glm::degrees(glm::eulerAngles(transform.Rotation));
+            
+            if (ImGui::DragFloat3("Rotation", &v[0], 0.5f))
+            {
+                m_Game->SetMouseVisible(false);
+                bUpdateBuffer = true;
+            }
+            
+            if (ImGui::DragFloat3("Scale", &copy.Scale[0], 0.5f))
+            {
+                m_Game->SetMouseVisible(false);
+                bUpdateBuffer = true;
+            }
 
             if (bUpdateBuffer)
             {
                 copy.Rotation = glm::quat{glm::radians(v)};
                 instancedMeshComponent.Instance->UpdateInstance(i - 1, copy);
+            }
+            else
+            {
+                m_Game->SetMouseVisible(true);
             }
 
             ImGui::PopID();

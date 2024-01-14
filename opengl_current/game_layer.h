@@ -8,10 +8,10 @@
 #include <chrono>
 
 
-class ILayer
+class Layer
 {
 public:
-    virtual ~ILayer() = default;
+    virtual ~Layer() = default;
 
 public:
     virtual void Update(Duration deltaTime) = 0;

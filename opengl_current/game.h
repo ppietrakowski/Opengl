@@ -29,14 +29,14 @@ public:
 
     void SetMouseVisible(bool bMouseVisible);
 
-    void AddLayer(std::unique_ptr<ILayer>&& gameLayer);
+    void AddLayer(std::unique_ptr<Layer>&& gameLayer);
     void RemoveLayer(std::type_index index);
 
 private:
     std::unique_ptr<Window> m_Window;
     GraphicsContext* m_GraphicsContext;
     ImGuiContext* m_ImguiContext;
-    std::vector<std::unique_ptr<ILayer>> m_Layers;
+    std::vector<std::unique_ptr<Layer>> m_Layers;
 
 private:
     bool InitializeImGui();

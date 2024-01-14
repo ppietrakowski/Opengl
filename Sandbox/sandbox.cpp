@@ -4,7 +4,7 @@ int main()
 {
     Game game(WindowSettings{1280, 720, "Game"});
 
-    game.AddLayer(std::make_unique<SandboxGameLayer>());
+    game.AddLayer(std::make_unique<SandboxGameLayer>(&game));
     game.Run();
 
     return EXIT_SUCCESS;

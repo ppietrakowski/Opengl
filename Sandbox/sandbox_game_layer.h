@@ -5,10 +5,10 @@
 
 #include "level.h"
 
-class SandboxGameLayer : public ILayer
+class SandboxGameLayer : public Layer
 {
 public:
-    SandboxGameLayer();
+    SandboxGameLayer(Game *game);
 
     // Inherited via IGameLayer
     void Update(Duration delta_time) override;
@@ -56,6 +56,7 @@ private:
 
     Level level_;
     Actor skeletal_mesh_actor_;
+    Game* m_Game{nullptr};
 
 private:
     void MoveForward(Actor& player, float axisValue);
