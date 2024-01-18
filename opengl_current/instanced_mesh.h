@@ -6,8 +6,6 @@
 
 #include "uniform_buffer.h"
 
-#include <list>
-
 constexpr std::uint32_t kNumInstancesTransform = 400;
 
 // struct representing same transforms as there are in shader
@@ -19,17 +17,17 @@ struct InstancingTransforms
 // Buffer for storing transform inside uniform buffer so it's faster to access
 struct InstancingTransformBuffer
 {
-    UniformBuffer uniform_buffer;
+    std::shared_ptr<UniformBuffer> uniform_buffer;
     std::size_t num_transforms_occupied{0};
 
     InstancingTransformBuffer():
-        uniform_buffer(sizeof(InstancingTransforms))
+        uniform_buffer(std::make_shared<UniformBuffer>(sizeof(InstancingTransforms)))
     {
     }
 
     void AddTransform(const glm::mat4& transform)
     {
-        uniform_buffer.UpdateBuffer(glm::value_ptr(transform), 
+        uniform_buffer->UpdateBuffer(glm::value_ptr(transform), 
             sizeof(transform), num_transforms_occupied * sizeof(transform));
         num_transforms_occupied++;
     }
@@ -42,7 +40,7 @@ struct InstancingTransformBuffer
     // Updates transform at relative index (from start of this buffer)
     void UpdateTransform(const glm::mat4& transform, std::int32_t relative_index)
     {
-        uniform_buffer.UpdateBuffer(glm::value_ptr(transform), sizeof(transform), relative_index * sizeof(transform));
+        uniform_buffer->UpdateBuffer(glm::value_ptr(transform), sizeof(transform), relative_index * sizeof(transform));
     }
 };
 
@@ -78,7 +76,7 @@ private:
     std::shared_ptr<Material> material_;
 
     std::shared_ptr<VertexArray> vertex_array_;
-    std::list<InstancingTransformBuffer> transform_buffers_;
+    std::vector<InstancingTransformBuffer> transform_buffers_;
 
     // used for recycling indices when removing instances
     std::vector<std::int32_t> free_instance_indices_;

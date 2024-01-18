@@ -16,9 +16,8 @@ void InstancedMesh::Draw(const glm::mat4& transform)
 {
     for (InstancingTransformBuffer& transform_buffer : transform_buffers_)
     {
-        material_->GetShader().BindUniformBuffer(0, transform_buffer.uniform_buffer);
-        
-        Renderer::SubmitMeshInstanced(InstancingSubmission{material_.get(), static_mesh_->vertex_array_.get(), &transform_buffer.uniform_buffer, transform_buffer.num_transforms_occupied, transform});
+        material_->GetShader().BindUniformBuffer(0, *transform_buffer.uniform_buffer);
+        Renderer::SubmitMeshInstanced(InstancingSubmission{material_.get(), static_mesh_->vertex_array_.get(), transform_buffer.uniform_buffer.get(), transform_buffer.num_transforms_occupied, transform});
     }
 }
 
