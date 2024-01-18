@@ -26,7 +26,8 @@ std::int32_t InstancedMesh::AddInstance(const Transform& transform, std::int32_t
     auto it = transform_buffers_.begin();
     std::int32_t id = num_instances_;
 
-    if (!free_instance_indices_.empty())
+    bool recycled_indices = !free_instance_indices_.empty();
+    if (recycled_indices)
     {
         id = free_instance_indices_.back();
         free_instance_indices_.pop_back();
@@ -49,7 +50,15 @@ std::int32_t InstancedMesh::AddInstance(const Transform& transform, std::int32_t
         it = transform_buffers_.end() - 1;
     }
 
-    it->AddTransform(transform.CalculateTransformMatrix());
+    if (recycled_indices)
+    {
+        it->UpdateTransform(transform.CalculateTransformMatrix(), id);
+    }
+    else
+    {
+        it->AddTransform(transform.CalculateTransformMatrix());
+    }
+
     return num_instances_++;
 }
 
