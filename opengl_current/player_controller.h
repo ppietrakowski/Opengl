@@ -5,6 +5,7 @@
 #include "keys.h"
 #include "actor.h"
 
+// Axis simulated by keys
 struct KeyAxis
 {
     KeyCode key;

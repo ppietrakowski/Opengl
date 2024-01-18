@@ -5,6 +5,8 @@
 
 struct SkeletalMeshComponent
 {
+    // Calculated bone transforms, send to shader during draw.
+    // Cannot use there UniformBuffer because animations are updated in seperate thread
     std::vector<glm::mat4> bone_transforms;
     std::string animation_name{kDefaultAnimationName};
     std::shared_ptr<SkeletalMesh> skeletal_mesh;
