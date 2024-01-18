@@ -5,7 +5,7 @@ struct GLFWwindow;
 class GraphicsContext
 {
 public:
-    GraphicsContext(GLFWwindow* contextWindow);
+    GraphicsContext(GLFWwindow* context_window);
     ~GraphicsContext() = default;
 
 public:
@@ -16,9 +16,9 @@ public:
     void UpdateImGuiViewport();
     void SwapBuffers();
 
-    void SetVsync(bool bVsyncEnabled);
+    void SetVsync(bool vsync_enabled);
 
 private:
-    GLFWwindow* m_Window;
+    GLFWwindow* window_;
 };
 

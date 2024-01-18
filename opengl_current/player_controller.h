@@ -7,8 +7,8 @@
 
 struct KeyAxis
 {
-    KeyCode Key;
-    KeyCode ReverseKey;
+    KeyCode key;
+    KeyCode reverse_key;
 
     float GetAxisValue() const;
 };
@@ -20,30 +20,30 @@ public:
     PlayerController(const PlayerController&) = default;
     PlayerController& operator=(const PlayerController&) = default;
 
-    void BindFireCallback(const std::function<void(Actor& actor)>& fireCallback);
-    void BindForwardCallback(const std::function<void(Actor& actor, float)>& forwardCallback);
-    void BindRightCallback(const std::function<void(Actor& actor, float)>& rightCallback);
+    void BindFireCallback(const std::function<void(Actor& actor)>& fire_callback);
+    void BindForwardCallback(const std::function<void(Actor& actor, float)>& forward_callback);
+    void BindRightCallback(const std::function<void(Actor& actor, float)>& right_callback);
 
-    void BindMouseMoveCallback(const std::function<void(Actor& actor, glm::vec2 delta)>& mouseMove);
+    void BindMouseMoveCallback(const std::function<void(Actor& actor, glm::vec2 delta)>& mouse_move);
 
     void Update();
 
     const Actor& GetActor() const
     {
-        return m_PlayerActor;
+        return player_actor_;
     }
 
 private:
-    std::function<void(Actor& actor)> m_FireCallback;
-    std::function<void(Actor& actor, float axisValue)> m_ForwardCallback;
-    std::function<void(Actor& actor, float axisValue)> m_RightCallback;
-    std::function<void(Actor& actor, glm::vec2 delta)> m_MouseMoveCallback;
+    std::function<void(Actor& actor)> fire_callback_;
+    std::function<void(Actor& actor, float axisValue)> forward_callback_;
+    std::function<void(Actor& actor, float axisValue)> right_callback_;
+    std::function<void(Actor& actor, glm::vec2 delta)> mouse_move_;
 
-    bool m_bFireButtonLastState{false};
-    KeyAxis m_ForwardAxis{Keys::W, Keys::S};
-    KeyAxis m_RightAxis{Keys::D, Keys::A};
+    bool fire_button_last_state_{false};
+    KeyAxis forward_axis_{Keys::kW, Keys::kS};
+    KeyAxis right_axis_{Keys::kD, Keys::kA};
 
-    glm::vec2 m_LastMousePosition{0.0f, 0.0f};
+    glm::vec2 last_mouse_position_{0.0f, 0.0f};
 
-    Actor m_PlayerActor;
+    Actor player_actor_;
 };

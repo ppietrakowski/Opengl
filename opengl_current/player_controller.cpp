@@ -3,71 +3,71 @@
 
 float KeyAxis::GetAxisValue() const
 {
-    float value = Input::IsKeyPressed(Key) ? 1.0f : 0.0f;
-    value -= Input::IsKeyPressed(ReverseKey) ? 1.0f : 0.0f;
+    float value = Input::IsKeyPressed(key) ? 1.0f : 0.0f;
+    value -= Input::IsKeyPressed(reverse_key) ? 1.0f : 0.0f;
     return value;
 }
 
 PlayerController::PlayerController(const Actor& actor) :
-    m_PlayerActor{actor}
+    player_actor_{actor}
 {
-    m_LastMousePosition = Input::GetMousePosition();
+    last_mouse_position_ = Input::GetMousePosition();
 }
 
-void PlayerController::BindFireCallback(const std::function<void(Actor& actor)>& fireCallback)
+void PlayerController::BindFireCallback(const std::function<void(Actor& actor)>& fire_callback)
 {
-    m_FireCallback = fireCallback;
+    fire_callback_ = fire_callback;
 }
 
-void PlayerController::BindForwardCallback(const std::function<void(Actor& actor, float)>& forwardCallback)
+void PlayerController::BindForwardCallback(const std::function<void(Actor& actor, float)>& forward_callback)
 {
-    m_ForwardCallback = forwardCallback;
+    forward_callback_ = forward_callback;
 }
 
-void PlayerController::BindRightCallback(const std::function<void(Actor& actor, float)>& rightCallback)
+void PlayerController::BindRightCallback(const std::function<void(Actor& actor, float)>& right_callback)
 {
-    m_RightCallback = rightCallback;
+    right_callback_ = right_callback;
 }
 
-void PlayerController::BindMouseMoveCallback(const std::function<void(Actor& actor, glm::vec2 delta)>& mouseMove)
+void PlayerController::BindMouseMoveCallback(const std::function<void(Actor& actor, glm::vec2 delta)>& mouse_move)
 {
-    m_MouseMoveCallback = mouseMove;
+    mouse_move_ = mouse_move;
 }
 
 void PlayerController::Update()
 {
-    bool newFireButtonState = Input::IsMouseButtonPressed(Mouse::ButtonLeft);
+    bool new_fire_button_state = Input::IsMouseButtonPressed(Mouse::kButtonLeft);
 
-    if (newFireButtonState != m_bFireButtonLastState && !m_bFireButtonLastState)
+    if (new_fire_button_state != fire_button_last_state_ && !fire_button_last_state_)
     {
-        if (m_FireCallback)
+        if (fire_callback_)
         {
-            m_FireCallback(m_PlayerActor);
+            fire_callback_(player_actor_);
         }
 
-        m_bFireButtonLastState = newFireButtonState;
+        fire_button_last_state_ = new_fire_button_state;
     }
     
-    float forwardValue = m_ForwardAxis.GetAxisValue();
+    float forward_value = forward_axis_.GetAxisValue();
 
-    if (forwardValue != 0)
+    if (forward_value != 0)
     {
-        m_ForwardCallback(m_PlayerActor, forwardValue);
+        forward_callback_(player_actor_, forward_value);
     }
 
-    float rightValue = m_RightAxis.GetAxisValue();
+    float right_value = right_axis_.GetAxisValue();
 
-    if (rightValue != 0)
+    if (right_value != 0)
     {
-        m_RightCallback(m_PlayerActor, rightValue);
+        right_callback_(player_actor_, right_value);
     }
 
-    glm::vec2 mousePosition = Input::GetMousePosition();
+    glm::vec2 mouse_position = Input::GetMousePosition();
 
-    if (m_MouseMoveCallback)
+    if (mouse_move_)
     {
-        m_MouseMoveCallback(m_PlayerActor, mousePosition - m_LastMousePosition);
+        mouse_move_(player_actor_, mouse_position - last_mouse_position_);
     }
 
-    m_LastMousePosition = mousePosition;
+    last_mouse_position_ = mouse_position;
 }

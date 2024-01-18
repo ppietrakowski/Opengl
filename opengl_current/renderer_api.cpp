@@ -9,48 +9,48 @@ void RendererApi::Initialize()
 
 void RendererApi::Clear()
 {
-    constexpr GLenum ClearFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
-    glClear(ClearFlags);
+    constexpr GLenum kClearFlags = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+    glClear(kClearFlags);
 }
 
-void RendererApi::SetClearColor(const RgbaColor& clearColor)
+void RendererApi::SetClearColor(const RgbaColor& clear_color)
 {
-    if (m_ClearColor != clearColor)
+    if (clear_color_ != clear_color)
     {
-        glClearColor(clearColor.Red / 255.0f, clearColor.Green / 255.0f, clearColor.Blue / 255.0f, clearColor.Alpha / 255.0f);
-        m_ClearColor = clearColor;
+        glClearColor(clear_color.red / 255.0f, clear_color.green / 255.0f, clear_color.blue / 255.0f, clear_color.alpha / 255.0f);
+        clear_color_ = clear_color;
     }
 }
 
-void RendererApi::DrawTriangles(const VertexArray& vertexArray, std::int32_t numIndices)
+void RendererApi::DrawTriangles(const VertexArray& vertex_array, std::int32_t num_indices)
 {
-    vertexArray.Bind();
-    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, nullptr);
+    vertex_array.Bind();
+    glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_INT, nullptr);
 }
 
-void RendererApi::DrawTrianglesAdjancency(const VertexArray& vertexArray, std::int32_t numIndices)
+void RendererApi::DrawTrianglesAdjancency(const VertexArray& vertex_array, std::int32_t num_indices)
 {
-    vertexArray.Bind();
-    glDrawElements(GL_TRIANGLES_ADJACENCY, numIndices, GL_UNSIGNED_INT, nullptr);
+    vertex_array.Bind();
+    glDrawElements(GL_TRIANGLES_ADJACENCY, num_indices, GL_UNSIGNED_INT, nullptr);
 }
 
-void RendererApi::DrawLines(const VertexArray& vertexArray, std::int32_t numIndices)
+void RendererApi::DrawLines(const VertexArray& vertex_array, std::int32_t num_indices)
 {
-    vertexArray.Bind();
-    glDrawElements(GL_LINES, numIndices, GL_UNSIGNED_INT, nullptr);
+    vertex_array.Bind();
+    glDrawElements(GL_LINES, num_indices, GL_UNSIGNED_INT, nullptr);
 }
 
-void RendererApi::DrawPoints(const VertexArray& vertexArray, std::int32_t numIndices)
+void RendererApi::DrawPoints(const VertexArray& vertex_array, std::int32_t num_indices)
 {
-    vertexArray.Bind();
-    glDrawElements(GL_POINTS, numIndices, GL_UNSIGNED_INT, nullptr);
+    vertex_array.Bind();
+    glDrawElements(GL_POINTS, num_indices, GL_UNSIGNED_INT, nullptr);
 }
 
-void RendererApi::SetWireframe(bool bWireframeEnabled)
+void RendererApi::SetWireframe(bool wireframe_enabled)
 {
-    if (m_bWireframeEnabled != bWireframeEnabled)
+    if (wireframe_enabled_ != wireframe_enabled)
     {
-        if (bWireframeEnabled)
+        if (wireframe_enabled)
         {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
@@ -59,39 +59,39 @@ void RendererApi::SetWireframe(bool bWireframeEnabled)
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
-        m_bWireframeEnabled = bWireframeEnabled;
+        wireframe_enabled_ = wireframe_enabled;
     }
 }
 
-bool RendererApi::IsWireframeEnabled()
+bool RendererApi::IsWireframeEnabled() const
 {
-    return m_bWireframeEnabled;
+    return wireframe_enabled_;
 }
 
-void RendererApi::SetCullFace(bool bCullFace)
+void RendererApi::SetCullFace(bool cull_faces)
 {
-    if (bCullFace && !DoesCullFaces())
+    if (cull_faces && !DoesCullFaces())
     {
         glEnable(GL_CULL_FACE);
         glFrontFace(GL_CCW);
         glCullFace(GL_BACK);
     }
-    else if (!bCullFace)
+    else if (!cull_faces)
     {
         glDisable(GL_CULL_FACE);
     }
 
-    m_bCullEnabled = bCullFace;
+    cull_enabled_ = cull_faces;
 }
 
-bool RendererApi::DoesCullFaces()
+bool RendererApi::DoesCullFaces() const
 {
-    return m_bCullEnabled;
+    return cull_enabled_;
 }
 
-void RendererApi::SetBlendingEnabled(bool bBlendingEnabled)
+void RendererApi::SetBlendingEnabled(bool blending_enabled)
 {
-    if (bBlendingEnabled && !bBlendingEnabled)
+    if (blending_enabled && !blending_enabled)
     {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -101,7 +101,7 @@ void RendererApi::SetBlendingEnabled(bool bBlendingEnabled)
         glDisable(GL_BLEND);
     }
 
-    bBlendingEnabled = bBlendingEnabled;
+    blending_enabled = blending_enabled;
 }
 
 void RendererApi::SetLineWidth(float lineWidth)
@@ -120,4 +120,10 @@ void RendererApi::SetViewport(std::int32_t x, std::int32_t y, std::int32_t width
 {
     glViewport(x, y, width, height);
     glScissor(x, y, width, height);
+}
+
+void RendererApi::DrawTrianglesInstanced(const VertexArray& vertex_array, size_t num_instances)
+{
+    vertex_array.Bind();
+    glDrawElementsInstanced(GL_TRIANGLES, vertex_array.GetNumIndices(), GL_UNSIGNED_INT, nullptr, (GLsizei)num_instances);
 }

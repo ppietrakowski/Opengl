@@ -4,11 +4,11 @@
 
 struct StaticMeshComponent
 {
-    std::shared_ptr<StaticMesh> UsedStaticMesh;
+    std::shared_ptr<StaticMesh> static_mesh;
 
     StaticMeshComponent() = default;
     StaticMeshComponent(const std::shared_ptr<StaticMesh>& mesh);
 
-    void Draw(const glm::mat4& worldTransform) const;
+    void Draw(const glm::mat4& world_transform) const;
 };
 

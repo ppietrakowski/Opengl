@@ -64,5 +64,11 @@
     <None Include="shaders\debug.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="shaders\instanced.shd">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\instanced.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

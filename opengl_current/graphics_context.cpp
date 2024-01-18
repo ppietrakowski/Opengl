@@ -8,20 +8,21 @@
 
 #include <GLFW/glfw3.h>
 
-GraphicsContext::GraphicsContext(GLFWwindow* contextWindow) :
-    m_Window{contextWindow}
+GraphicsContext::GraphicsContext(GLFWwindow* context_window) :
+    window_{context_window}
 {
-    glfwMakeContextCurrent(m_Window);
+    glfwMakeContextCurrent(window_);
     glfwSwapInterval(1);
-    GLenum errorCode = glewInit();
-    CRASH_EXPECTED_TRUE_MSG(errorCode == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(errorCode)));
+    GLenum error_code = glewInit();
+    CRASH_EXPECTED_TRUE_MSG(error_code == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(error_code)));
 }
+
+constexpr const char* kGlslVersion = "#version 430 core";
 
 void GraphicsContext::InitializeForImGui()
 {
-    ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
-    const char* glslVersion = "#version 430 core";
-    ImGui_ImplOpenGL3_Init(glslVersion);
+    ImGui_ImplGlfw_InitForOpenGL(window_, true);
+    ImGui_ImplOpenGL3_Init(kGlslVersion);
 }
 
 void GraphicsContext::DeinitializeImGui()
@@ -57,10 +58,10 @@ void GraphicsContext::UpdateImGuiViewport()
 
 void GraphicsContext::SwapBuffers()
 {
-    glfwSwapBuffers(m_Window);
+    glfwSwapBuffers(window_);
 }
 
-void GraphicsContext::SetVsync(bool bVsyncEnabled)
+void GraphicsContext::SetVsync(bool vsync_enabled)
 {
-    glfwSwapInterval(bVsyncEnabled ? 1 : 0);
+    glfwSwapInterval(vsync_enabled ? 1 : 0);
 }

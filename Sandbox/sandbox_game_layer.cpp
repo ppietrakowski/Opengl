@@ -11,7 +11,7 @@
 SandboxGameLayer::SandboxGameLayer(Game* game) :
     camera_rotation_{glm::vec3{0, 0, 0}},
     camera_position_{0.0f, 0.0f, 0.0f},
-    m_Game(game)
+    game_(game)
 {
     default_shader_ = ResourceManager::GetShader("shaders/default.shd");
     debug_shader_ = ResourceManager::GetShader("shaders/unshaded.shd");
@@ -20,7 +20,7 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     ResourceManager::CreateMaterial("shaders/default.shd", "default");
 
     test_skeletal_mesh_ = ResourceManager::GetSkeletalMesh("untitled.fbx");
-    test_skeletal_mesh_->MainMaterial = ResourceManager::CreateMaterial("shaders/skeletal_default.shd", "skeletal1");
+    test_skeletal_mesh_->main_material = ResourceManager::CreateMaterial("shaders/skeletal_default.shd", "skeletal1");
     current_used_shader_ = default_shader_;
     current_used_shader_->Use();
     current_used_shader_->SetUniform("u_light_color", glm::vec3{1, 1, 1});
@@ -48,21 +48,20 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     default_material_->SetVector3Property("ambient", glm::vec3{0.01f, 0.01f, 0.01f});
     default_material_->SetVector3Property("specular", glm::vec3{0.797357, 0.723991, 0.208006});
     default_material_->SetFloatProperty("shininess", 87.2f);
-    debug_material_->bUseWireframe = true;
+    debug_material_->use_wireframe = true;
     current_material_ = default_material_;
     ELOG_INFO(LOG_GLOBAL, "Loading postac.obj");
     static_mesh_ = ResourceManager::GetStaticMesh("cube.obj");
-    static_mesh_->MainMaterial = default_material_;
+    static_mesh_->main_material = default_material_;
 
+    std::shared_ptr<Material> material = test_skeletal_mesh_->main_material;
+    std::uint32_t texture_unit = 0;
 
-    std::shared_ptr<Material> material = test_skeletal_mesh_->MainMaterial;
-    std::uint32_t textureIndex = 0;
-
-    for (const auto& path : test_skeletal_mesh_->Textures)
+    for (const auto& path : test_skeletal_mesh_->texture_paths)
     {
-        std::string name = "diffuse" + std::to_string(textureIndex + 1);
+        std::string name = "diffuse" + std::to_string(texture_unit + 1);
         material->SetTextureProperty(name.c_str(), ResourceManager::GetTexture2D(path));
-        ++textureIndex;
+        ++texture_unit;
     }
 
     camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
@@ -74,8 +73,8 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     {
         skeletal_mesh_actor_ = level_.CreateActor("SkeletalMesh" + std::to_string(i));
         skeletal_mesh_actor_.AddComponent<SkeletalMeshComponent>(test_skeletal_mesh_);
-        skeletal_mesh_actor_.GetComponent<TransformComponent>().Scale = glm::vec3{0.01f, 0.01f, 0.01f};
-        skeletal_mesh_actor_.GetComponent<TransformComponent>().Position = glm::vec3{0, -2 * i - 2, -i - 1};
+        skeletal_mesh_actor_.GetComponent<TransformComponent>().scale = glm::vec3{0.01f, 0.01f, 0.01f};
+        skeletal_mesh_actor_.GetComponent<TransformComponent>().position = glm::vec3{0, -2 * i - 2, -i - 1};
     }
 
     Actor static_mesh_actor = level_.CreateActor("StaticMeshActor");
@@ -84,26 +83,39 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
 
     bbox_min_ = test_skeletal_mesh_->GetBboxMin();
     bbox_max_ = test_skeletal_mesh_->GetBboxMax();
-    instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_);
 
-    Actor instanceMesh = level_.CreateActor("InstancedMesh");
-    instanceMesh.AddComponent<InstancedMeshComponent>(static_mesh_);
+    auto shader = ResourceManager::GetShader("shaders/instanced.shd");
+    shader->Use();
+    shader->SetUniform("u_light_pos", glm::vec3{0, 0, 0});
+    shader->SetUniform("u_light_color", glm::vec3{1, 1, 1});
 
-    InstancedMeshComponent& instancedMesh = instanceMesh.GetComponent<InstancedMeshComponent>();
+    auto mat = ResourceManager::CreateMaterial("shaders/instanced.shd", "instanced");
+    
+    mat->SetVector3Property("diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
+    mat->SetVector3Property("ambient", glm::vec3{0.01f, 0.01f, 0.01f});
+    mat->SetVector3Property("specular", glm::vec3{0.797357, 0.723991, 0.208006});
+    mat->SetFloatProperty("shininess", 87.2f);
+    instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_, ResourceManager::GetMaterial("instanced"));
+
+    Actor instance_mesh = level_.CreateActor("InstancedMesh");
+
+    instance_mesh.AddComponent<InstancedMeshComponent>(static_mesh_, ResourceManager::GetMaterial("instanced"));
+
+    InstancedMeshComponent& instanced_mesh = instance_mesh.GetComponent<InstancedMeshComponent>();
 
     for (std::int32_t i = 0; i < 10; ++i)
     {
-        for (std::int32_t j = 0; j < 10; ++j)
+        for (std::int32_t j = 0; j < 400; ++j)
         {
             Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
-            instancedMesh.AddInstance(transform);
+            instanced_mesh.AddInstance(transform);
         }
     }
 
-    m_Player = level_.CreateActor("Player");
-    m_Player.AddComponent<PlayerController>(m_Player);
+    player_ = level_.CreateActor("Player");
+    player_.AddComponent<PlayerController>(player_);
 
-    PlayerController& controller = m_Player.GetComponent<PlayerController>();
+    PlayerController& controller = player_.GetComponent<PlayerController>();
     controller.BindForwardCallback(std::bind(&SandboxGameLayer::MoveForward, this, std::placeholders::_1, std::placeholders::_2));
     controller.BindRightCallback(std::bind(&SandboxGameLayer::MoveRight, this, std::placeholders::_1, std::placeholders::_2));
     controller.BindMouseMoveCallback(std::bind(&SandboxGameLayer::RotateCamera, this, std::placeholders::_1, std::placeholders::_2));
@@ -113,23 +125,23 @@ void SandboxGameLayer::Update(Duration delta_time)
 {
     float dt = delta_time.GetSeconds();
 
-    if (Input::IsKeyPressed(Keys::E))
+    if (Input::IsKeyPressed(Keys::kE))
     {
         camera_yaw_ -= yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
     }
-    else if (Input::IsKeyPressed(Keys::Q))
+    else if (Input::IsKeyPressed(Keys::kQ))
     {
         camera_yaw_ += yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
     }
 
-    if (Input::IsKeyPressed(Keys::Y))
+    if (Input::IsKeyPressed(Keys::kY))
     {
         glm::vec3 world_up = glm::vec3{0, 1, 0};
         camera_position_ += ascend_speed_ * world_up * dt;
     }
-    else if (Input::IsKeyPressed(Keys::H))
+    else if (Input::IsKeyPressed(Keys::kH))
     {
         glm::vec3 world_down = glm::vec3{0, -1, 0};
         camera_position_ += ascend_speed_ * world_down * dt;
@@ -141,9 +153,8 @@ void SandboxGameLayer::Update(Duration delta_time)
 
 void SandboxGameLayer::Render(Duration delta_time)
 {
-    Transform cameraTransform = m_Player.GetComponent<TransformComponent>().GetAsTransform();
-
-    Renderer::BeginScene(glm::inverse(glm::translate(cameraTransform.Position) * glm::mat4_cast(cameraTransform.Rotation)), cameraTransform.Position, cameraTransform.Rotation);
+    Transform camera_transform = player_.GetComponent<TransformComponent>().GetAsTransform();
+    Renderer::BeginScene(camera_transform.position, camera_transform.rotation);
     current_used_shader_->Use();
     current_used_shader_->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
 
@@ -161,22 +172,6 @@ void SandboxGameLayer::Render(Duration delta_time)
 
 bool SandboxGameLayer::OnEvent(const Event& event)
 {
-    if (event.Type == EventType::MouseButtonPressed)
-    {
-    }
-
-    if (event.Type == EventType::KeyPressed && event.Key.Key == Keys::P)
-    {
-        if (current_material_.get() == debug_material_.get())
-        {
-            current_material_ = default_material_;
-        }
-        else
-        {
-            current_material_ = debug_material_;
-        }
-    }
-
     return false;
 }
 
@@ -201,12 +196,14 @@ void SandboxGameLayer::OnImguiFrame()
 
     ImGui::Text("Fps: %i", last_framerate);
     ImGui::Text("Frame time: %.2f ms", last_delta_seconds_.GetMilliseconds());
-    ImGui::Text("Drawcalls: %i", stats.NumDrawcalls);
-    ImGui::Text("NumIndicesMemoryAllocated: %i bytes", stats.NumIndexBufferMemoryAllocated);
-    ImGui::Text("NumVerticesMemoryAllocated: %i bytes", stats.NumVertexBufferMemoryAllocated);
+    ImGui::Text("Drawcalls: %i", stats.num_drawcalls);
+    ImGui::Text("NumIndicesMemoryAllocated: %i bytes", stats.index_bufer_memory_allocation);
+    ImGui::Text("NumVerticesMemoryAllocated: %i bytes", stats.vertex_buffer_memory_allocation);
+    ImGui::Text("NumBytesUniformBuffer: %i bytes", (int)UniformBuffer::num_bytes_allocated);
+    ImGui::Text("NumTextureMemoryUsage: %i bytes", (int)Texture2D::num_texture_vram_used);
     ImGui::End();
 
-    Actor actorToRemove = m_Player;
+    Actor actor_to_remove = player_;
 
     ImGui::Begin("Hierarchy");
     for (auto& [name, actor] : level_)
@@ -217,7 +214,7 @@ void SandboxGameLayer::OnImguiFrame()
         ImGui::PushID(name.c_str());
         if (ImGui::Button("X"))
         {
-            actorToRemove = actor;
+            actor_to_remove = actor;
         }
         ImGui::PopID();
 
@@ -226,86 +223,34 @@ void SandboxGameLayer::OnImguiFrame()
 
     ImGui::End();
 
-    ImGui::Begin("InstancedMesh");
-    auto view = level_.View<InstancedMeshComponent, ActorTagComponent>();
-    for (auto&& [entity, instancedMeshComponent, tag] : view.each())
+    if (actor_to_remove != player_)
     {
-        std::int32_t i = 0;
-        glm::vec3 v;
-
-        for (const Transform& transform : instancedMeshComponent.Instance->GetTransforms())
-        {
-            Transform copy = transform;
-            ImGui::Text("%i", i++);
-            ImGui::Text("Transform ");
-
-            ImGui::PushID(i);
-            bool bUpdateBuffer = false;
-            
-            if (ImGui::DragFloat3("Position", &copy.Position[0], 0.5f, 0.0f, 0.0f, "%.3f"))
-            {
-                m_Game->SetMouseVisible(false);
-                bUpdateBuffer = true;
-            }
-
-            v = glm::degrees(glm::eulerAngles(transform.Rotation));
-            
-            if (ImGui::DragFloat3("Rotation", &v[0], 0.5f))
-            {
-                m_Game->SetMouseVisible(false);
-                bUpdateBuffer = true;
-            }
-            
-            if (ImGui::DragFloat3("Scale", &copy.Scale[0], 0.5f))
-            {
-                m_Game->SetMouseVisible(false);
-                bUpdateBuffer = true;
-            }
-
-            if (bUpdateBuffer)
-            {
-                copy.Rotation = glm::quat{glm::radians(v)};
-                instancedMeshComponent.Instance->UpdateInstance(i - 1, copy);
-            }
-            else
-            {
-                m_Game->SetMouseVisible(true);
-            }
-
-            ImGui::PopID();
-        }
-    }
-
-    ImGui::End();
-
-    if (actorToRemove != m_Player)
-    {
-        actorToRemove.DestroyActor();
+        actor_to_remove.DestroyActor();
     }
 }
 
-void SandboxGameLayer::MoveForward(Actor& player, float axisValue)
+void SandboxGameLayer::MoveForward(Actor& player, float axis_value)
 {
     TransformComponent& transform = player.GetComponent<TransformComponent>();
-    glm::vec3 forward = axisValue * transform.GetForwardVector() * last_delta_seconds_.GetSeconds() * move_speed_;
+    glm::vec3 forward = axis_value * transform.GetForwardVector() * last_delta_seconds_.GetSeconds() * move_speed_;
     transform.Translate(forward);
 }
 
-void SandboxGameLayer::MoveRight(Actor& player, float axisValue)
+void SandboxGameLayer::MoveRight(Actor& player, float axis_value)
 {
     TransformComponent& transform = player.GetComponent<TransformComponent>();
-    glm::vec3 right = axisValue * transform.GetRightVector() * last_delta_seconds_.GetSeconds() * move_speed_;
+    glm::vec3 right = axis_value * transform.GetRightVector() * last_delta_seconds_.GetSeconds() * move_speed_;
     transform.Translate(right);
 }
 
-void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouseMoveDelta)
+void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouse_move_delta)
 {
     float dt = last_delta_seconds_.GetSeconds();
 
     TransformComponent& transform = player.GetComponent<TransformComponent>();
 
-    camera_yaw_ -= yaw_rotation_rate_ * mouseMoveDelta.x * dt;
-    camera_pitch_ -= pitch_rotation_rate_ * mouseMoveDelta.y * dt;
+    camera_yaw_ -= yaw_rotation_rate_ * mouse_move_delta.x * dt;
+    camera_pitch_ -= pitch_rotation_rate_ * mouse_move_delta.y * dt;
 
     if (camera_pitch_ < -89)
     {

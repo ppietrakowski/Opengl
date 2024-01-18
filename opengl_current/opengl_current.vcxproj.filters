@@ -153,6 +153,9 @@
     <ClCompile Include="instanced_mesh_component.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
+    <ClCompile Include="uniform_buffer.cpp">
+      <Filter>Source Files\renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Imgui\imconfig.h">
@@ -284,9 +287,6 @@
     <ClInclude Include="instanced_mesh.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="instancing.h">
-      <Filter>Header Files\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="transform.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
@@ -298,6 +298,12 @@
     </ClInclude>
     <ClInclude Include="instanced_mesh_component.h">
       <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="uniform_buffer.h">
+      <Filter>Header Files\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="batching.h">
+      <Filter>Header Files\renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

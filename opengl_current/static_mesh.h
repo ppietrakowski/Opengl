@@ -3,27 +3,27 @@
 #include "shader.h"
 #include "vertex_array.h"
 #include "material.h"
-#include "instancing.h"
+#include "batching.h"
 
 #include <filesystem>
 #include <memory>
 
 struct StaticMeshVertex
 {
-    glm::vec3 Position{0, 0,0};
-    glm::vec3 Normal{0, 0, 0};
-    glm::vec2 TextureCoords{0, 0};
-    std::int32_t TextureId{0};
+    glm::vec3 position{0, 0,0};
+    glm::vec3 normal{0, 0, 0};
+    glm::vec2 texture_coords{0, 0};
+    std::int32_t texture_id{0};
 
-    static inline constexpr VertexAttribute DataFormat[4] = {{3, PrimitiveVertexType::Float},
-        {3, PrimitiveVertexType::Float}, {2, PrimitiveVertexType::Float}, {1, PrimitiveVertexType::Int}};
+    static inline constexpr VertexAttribute kDataFormat[4] = {{3, PrimitiveVertexType::kFloat},
+        {3, PrimitiveVertexType::kFloat}, {2, PrimitiveVertexType::kFloat}, {1, PrimitiveVertexType::kInt}};
 
     StaticMeshVertex() = default;
-    StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& textureCoords, std::int32_t textureId) :
-        Position{position},
-        Normal{normal},
-        TextureCoords{textureCoords},
-        TextureId{textureId}
+    StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& texture_coords, std::int32_t texture_id) :
+        position{position},
+        normal{normal},
+        texture_coords{texture_coords},
+        texture_id{texture_id}
     {
     }
 
@@ -32,27 +32,29 @@ struct StaticMeshVertex
 };
 
 template<>
-struct InstanceCreator<StaticMeshVertex>
+struct BatchVertexCreator<StaticMeshVertex>
 {
-    static StaticMeshVertex CreateInstanceFrom(const StaticMeshVertex& vertex, const glm::mat4& transform, std::int32_t textureId)
+    static StaticMeshVertex CreateInstanceFrom(const StaticMeshVertex& vertex, const glm::mat4& transform, std::int32_t texture_id)
     {
         StaticMeshVertex v{vertex};
         glm::mat3 normal_matrix = transform;
-        v.Position = transform * glm::vec4{v.Position,1};
-        v.Normal = normal_matrix * v.Normal;
-        v.TextureId = textureId;
+        v.position = transform * glm::vec4{v.position,1};
+        v.normal = normal_matrix * v.normal;
+        v.texture_id = texture_id;
         return v;
     }
 };
 
 class StaticMesh
 {
+    friend class InstancedMesh;
+
 public:
     StaticMesh(const std::filesystem::path& file_path, const std::shared_ptr<Material>& material);
 
 public:
     void Render(const glm::mat4& transform) const;
-    void Render(const Material& overrideMaterial, const glm::mat4& transform) const;
+    void Render(const Material& override_naterial, const glm::mat4& transform) const;
 
     std::int32_t GetNumPolygons() const;
     std::int32_t GetNumTriangles() const;
@@ -62,39 +64,39 @@ public:
 
     std::string_view GetName() const
     {
-        return m_MeshName;
+        return mesh_name_;
     }
 
-    std::vector<std::string> TexturePaths;
-    std::shared_ptr<Material> MainMaterial;
-    std::vector<StaticMeshVertex> Vertices;
-    std::vector<std::uint32_t> Indices;
+    std::vector<std::string> texture_paths;
+    std::shared_ptr<Material> main_material;
+    std::vector<StaticMeshVertex> vertices;
+    std::vector<std::uint32_t> indices;
 
 private:
-    std::shared_ptr<VertexArray> m_VertexArray;
-    std::int32_t m_NumTriangles;
+    std::shared_ptr<VertexArray> vertex_array_;
+    std::int32_t num_triangles_;
 
-    glm::vec3 m_BboxMin;
-    glm::vec3 m_BboxMax;
-    std::string m_MeshName;
+    glm::vec3 bbox_min_;
+    glm::vec3 bbox_max_;
+    std::string mesh_name_;
 };
 
-inline const glm::vec3& StaticMesh::GetBBoxMin() const
+FORCE_INLINE const glm::vec3& StaticMesh::GetBBoxMin() const
 {
-    return m_BboxMin;
+    return bbox_min_;
 }
 
-inline const glm::vec3& StaticMesh::GetBBoxMax() const
+FORCE_INLINE const glm::vec3& StaticMesh::GetBBoxMax() const
 {
-    return m_BboxMax;
+    return bbox_max_;
 }
 
-inline std::int32_t StaticMesh::GetNumPolygons() const
+FORCE_INLINE std::int32_t StaticMesh::GetNumPolygons() const
 {
-    return m_NumTriangles;
+    return num_triangles_;
 }
 
-inline std::int32_t StaticMesh::GetNumTriangles() const
+FORCE_INLINE std::int32_t StaticMesh::GetNumTriangles() const
 {
-    return m_NumTriangles;
+    return num_triangles_;
 }

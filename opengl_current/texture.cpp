@@ -23,9 +23,9 @@ inline static GLenum ConvertTextureFormatToGL(const TextureFormat format)
 {
     switch (format)
     {
-    case TextureFormat::Rgb:
+    case TextureFormat::kRgb:
         return GL_RGB;
-    case TextureFormat::Rgba:
+    case TextureFormat::kRgba:
         return GL_RGBA;
     default:
         break;
@@ -34,130 +34,148 @@ inline static GLenum ConvertTextureFormatToGL(const TextureFormat format)
     return 0x7fffff;
 }
 
-Texture2D::Texture2D(const std::filesystem::path& filePath)
+Texture2D::Texture2D(const std::filesystem::path& file_path)
 {
     // Flip the image vertically if needed
     stbi_set_flip_vertically_on_load(1);
 
-    std::string path = filePath.string();
-    stbi_image_data_t imageData = stbi_load_from_filepath(path.c_str(), STBI_rgb_alpha);
+    std::string path = file_path.string();
+    stbi_image_data_t image_data = stbi_load_from_filepath(path.c_str(), STBI_rgb_alpha);
 
-    if (imageData.data == nullptr)
+    if (image_data.data == nullptr)
     {
         throw std::runtime_error{"Failed to load texture " + path};
     }
 
-    m_Width = imageData.width;
-    m_Height = imageData.height;
-    m_GlFormat = imageData.num_channels == 3 ? GL_RGB : GL_RGBA;
+    width_ = image_data.width;
+    heigth_ = image_data.height;
+    gl_format_ = image_data.num_channels == 3 ? GL_RGB : GL_RGBA;
 
-    GenerateTexture2D(imageData.data);
+    GenerateTexture2D(image_data.data);
 
-    STBI_FREE(imageData.data);
+    STBI_FREE(image_data.data);
 }
 
 Texture2D::Texture2D(const void* data, const TextureSpecification& specification) :
-    m_Width{specification.Width},
-    m_Height{specification.Height},
-    m_GlFormat(specification.Format == TextureFormat::Rgb ? GL_RGB : GL_RGBA)
+    width_{specification.width},
+    heigth_{specification.height},
+    gl_format_(specification.texture_format == TextureFormat::kRgb ? GL_RGB : GL_RGBA)
 {
     GenerateTexture2D(data);
 }
 
 Texture2D::Texture2D(const ImageRgba& image) :
-    Texture2D{image.GetRawImageData(), TextureSpecification{image.GetWidth(), image.GetHeight(), TextureFormat::Rgba}}
+    Texture2D{image.GetRawImageData(), TextureSpecification{image.GetWidth(), image.GetHeight(), TextureFormat::kRgba}}
 {
 }
 
 Texture2D::Texture2D(const TextureSpecification& specification) :
-    m_Width{specification.Width},
-    m_Height{specification.Height},
-    m_GlFormat(specification.Format == TextureFormat::Rgb ? GL_RGB : GL_RGBA)
+    width_{specification.width},
+    heigth_{specification.height},
+    gl_format_(specification.texture_format == TextureFormat::kRgb ? GL_RGB : GL_RGBA)
 {
     GenerateTexture2D(nullptr);
 }
 
 Texture2D::~Texture2D()
 {
-    glDeleteTextures(1, &m_RendererId);
+    int num_components = 3;
+
+    if (GetGlFormat() == GL_RGBA)
+    {
+        num_components = 4;
+    }
+
+    num_texture_vram_used -= width_ * heigth_ * num_components;
+    glDeleteTextures(1, &renderer_id_);
 }
 
 std::int32_t Texture2D::GetWidth() const
 {
-    return m_Width;
+    return width_;
 }
 
 std::int32_t Texture2D::GetHeight() const
 {
-    return m_Height;
+    return heigth_;
 }
 
-void Texture2D::Bind(std::uint32_t textureUnit) const
+void Texture2D::Bind(std::uint32_t texture_unit) const
 {
-    glBindTextureUnit(textureUnit, m_RendererId);
+    glBindTextureUnit(texture_unit, renderer_id_);
 }
 
-void Texture2D::Unbind(std::uint32_t textureUnit)
+void Texture2D::Unbind(std::uint32_t texture_unit)
 {
-    glBindTextureUnit(textureUnit, 0);
+    glBindTextureUnit(texture_unit, 0);
 }
 
 bool Texture2D::GotMinimaps() const
 {
-    return m_bHasMipmaps;
+    return has_mipmaps_;
 }
 
 void Texture2D::GenerateMipmaps()
 {
-    glGenerateMipmap(m_RendererId);
-    m_bHasMipmaps = true;
+    glGenerateMipmap(renderer_id_);
+    has_mipmaps_ = true;
 }
 
 TextureFormat Texture2D::GetTextureFormat() const
 {
-    return m_GlFormat == GL_RGB ? TextureFormat::Rgb : TextureFormat::Rgba;
+    return gl_format_ == GL_RGB ? TextureFormat::kRgb : TextureFormat::kRgba;
 }
 
 void Texture2D::SetData(const void* data, const TextureSpecification& specification, glm::ivec2 offset)
 {
-    ERR_FAIL_EXPECTED_TRUE(specification.Width < GetWidth() && specification.Height < GetHeight());
-    ERR_FAIL_EXPECTED_TRUE(specification.Width < GetWidth() && specification.Height < GetHeight());
+    ERR_FAIL_EXPECTED_TRUE(specification.width < GetWidth() && specification.height < GetHeight());
+    ERR_FAIL_EXPECTED_TRUE(specification.width < GetWidth() && specification.height < GetHeight());
 
-    glTextureSubImage2D(m_RendererId, 0, offset.x, offset.y,
-        specification.Width, specification.Height, ConvertTextureFormatToGL(specification.Format), GL_UNSIGNED_BYTE, data);
+    glTextureSubImage2D(renderer_id_, 0, offset.x, offset.y,
+        specification.width, specification.height, ConvertTextureFormatToGL(specification.texture_format), GL_UNSIGNED_BYTE, data);
 }
 
 uint32_t Texture2D::GetGlFormat() const
 {
-    return m_GlFormat;
+    return gl_format_;
 }
 
 void Texture2D::GenerateTexture2D(const void* data)
 {
-    glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererId);
-    glBindTextureUnit(0, m_RendererId); // Binding to texture unit 0 by default
+    glCreateTextures(GL_TEXTURE_2D, 1, &renderer_id_);
+    glBindTextureUnit(0, renderer_id_); // Binding to texture unit 0 by default
 
     SetStandardTextureOptions();
 
-    glTextureStorage2D(m_RendererId, 1, GetGlFormat() == GL_RGB ? GL_RGB8 : GL_RGBA8, m_Width, m_Height);
+    glTextureStorage2D(renderer_id_, 1, GetGlFormat() == GL_RGB ? GL_RGB8 : GL_RGBA8, width_, heigth_);
 
     if (data != nullptr)
     {
-        glTextureSubImage2D(m_RendererId, 0, 0, 0, m_Width, m_Height, GetGlFormat(), GL_UNSIGNED_BYTE, data);
+        glTextureSubImage2D(renderer_id_, 0, 0, 0, width_, heigth_, GetGlFormat(), GL_UNSIGNED_BYTE, data);
+    
+        int num_components = 3;
+
+        if (GetGlFormat() == GL_RGBA)
+        {
+            num_components = 4;
+        }
+
+        num_texture_vram_used += width_ * heigth_ * num_components;
     }
+
 }
 
 void Texture2D::SetStandardTextureOptions()
 {
     // Set texture wrapping and filtering options
-    glTextureParameteri(m_RendererId, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTextureParameteri(m_RendererId, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTextureParameteri(m_RendererId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTextureParameteri(m_RendererId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(renderer_id_, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(renderer_id_, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTextureParameteri(renderer_id_, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(renderer_id_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 ImageRgba LoadRgbaImageFromMemory(const void* data, std::int32_t length)
 {
-    stbi_image_data_t imageData = stbi_load_from_memory_rgba(reinterpret_cast<const std::uint8_t*>(data), length);
-    return ImageRgba{imageData.data, imageData.width, imageData.height, &StbiDeleter};
+    stbi_image_data_t image_data = stbi_load_from_memory_rgba(reinterpret_cast<const std::uint8_t*>(data), length);
+    return ImageRgba{image_data.data, image_data.width, image_data.height, &StbiDeleter};
 }

@@ -40,69 +40,68 @@ namespace
 
     struct GLTypeToUniformType
     {
-        GLenum OpenGlUniformType;
-        UniformType Type;
+        GLenum gl_uniform_type;
+        UniformType uniform_type;
     };
 
     /* Wraps shader object with RAII object */
     struct ShaderObject
     {
-        GLuint ShaderObj = 0;
-        GLuint Program = 0;
+        GLuint shader_object = 0;
+        GLuint attached_program = 0;
 
         ShaderObject() = default;
         ShaderObject(GLuint object) :
-            ShaderObj{object}
+            shader_object{object}
         {
         }
 
-        ShaderObject(ShaderObject&& tempObject) noexcept
+        ShaderObject(ShaderObject&& temp_object) noexcept
         {
-            *this = std::move(tempObject);
+            *this = std::move(temp_object);
         }
 
-        ShaderObject& operator=(ShaderObject&& tempObject) noexcept
+        ShaderObject& operator=(ShaderObject&& temp_object) noexcept
         {
-            ShaderObj = tempObject.ShaderObj;
-            Program = tempObject.Program;
-            tempObject.ShaderObj = 0;
-            tempObject.Program = 0;
+            shader_object = temp_object.shader_object;
+            attached_program = temp_object.attached_program;
+            temp_object.shader_object = 0;
+            temp_object.attached_program = 0;
             return *this;
         }
 
         ~ShaderObject()
         {
-            if (Program != 0)
+            if (attached_program != 0)
             {
-                glDetachShader(Program, ShaderObj);
+                glDetachShader(attached_program, shader_object);
             }
-            else if (ShaderObj != 0)
+            else if (shader_object != 0)
             {
-                glDeleteShader(ShaderObj);
+                glDeleteShader(shader_object);
             }
         }
 
         void AttachShaderToProgram(GLuint program)
         {
-            Program = program;
-            glAttachShader(program, ShaderObj);
+            attached_program = program;
+            glAttachShader(program, shader_object);
         }
 
         bool IsValid() const
         {
-            return ShaderObj != 0;
+            return shader_object != 0;
         }
     };
 
     void ThrowShaderCompilationError(GLuint shader, GLenum type)
     {
-        std::vector<char> log;
-        std::int32_t logLength;
+        std::int32_t log_length;
 
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
 
-        log.resize(logLength);
-        glGetShaderInfoLog(shader, logLength, &logLength, log.data());
+        std::vector<char> log(log_length, 0);
+        glGetShaderInfoLog(shader, log_length, &log_length, log.data());
 
         std::string msg;
 
@@ -115,37 +114,34 @@ namespace
         throw ShaderCompilationFailedException(msg.c_str());
     }
 
-    ShaderObject TryCompileShader(const char* shaderSource, std::int32_t length, GLenum type)
+    ShaderObject TryCompileShader(const char* shader_source, std::int32_t length, GLenum type)
     {
-        GLuint shaderObject = glCreateShader(type);
+        GLuint shader_object = glCreateShader(type);
 
-        glShaderSource(shaderObject, 1, &shaderSource, &length);
-        glCompileShader(shaderObject);
+        glShaderSource(shader_object, 1, &shader_source, &length);
+        glCompileShader(shader_object);
 
-        std::int32_t bCompiledSuccesfully;
+        std::int32_t compiled_succesfully;
 
-        glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &bCompiledSuccesfully);
+        glGetShaderiv(shader_object, GL_COMPILE_STATUS, &compiled_succesfully);
 
-        if (bCompiledSuccesfully == GL_FALSE)
+        if (compiled_succesfully == GL_FALSE)
         {
-            ThrowShaderCompilationError(shaderObject, type);
+            ThrowShaderCompilationError(shader_object, type);
         }
 
-        return ShaderObject{shaderObject};
+        return ShaderObject{shader_object};
     }
 
     void ThrowLinkingError(GLuint program)
     {
-        std::vector<char> log;
 
-        std::int32_t logLength;
+        std::int32_t log_length;
 
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
 
-        log.resize(logLength + 1);
-        log[logLength] = 0;
-
-        glGetProgramInfoLog(program, logLength, &logLength, log.data());
+        std::vector<char> log(log_length, 0);
+        glGetProgramInfoLog(program, log_length, &log_length, log.data());
 
         std::string msg;
         msg += "linking failure: ";
@@ -160,72 +156,72 @@ namespace
 std::shared_ptr<Shader> ShaderSourceBuilder::Build()
 {
     std::uint32_t index = GetLastShaderIndex();
-    return std::make_shared<Shader>(std::span<const std::string>{m_ShaderSources.begin(), index});
+    return std::make_shared<Shader>(std::span<const std::string>{shader_sources_.begin(), index});
 }
 
 ShaderSourceBuilder& ShaderSourceBuilder::SetVertexShaderSource(const std::string& source)
 {
-    m_ShaderSources[ShaderIndex::Vertex] = source;
+    shader_sources_[ShaderIndex::kVertex] = source;
     return *this;
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::LoadVertexShaderSource(const std::filesystem::path& filePath)
+ShaderSourceBuilder& ShaderSourceBuilder::LoadVertexShaderSource(const std::filesystem::path& file_path)
 {
-    m_ShaderSources[ShaderIndex::Vertex] = LoadFileContent(filePath);
+    shader_sources_[ShaderIndex::kVertex] = LoadFileContent(file_path);
     return *this;
 }
 
 ShaderSourceBuilder& ShaderSourceBuilder::SetFragmentShaderSource(const std::string& source)
 {
-    m_ShaderSources[ShaderIndex::Fragment] = source;
+    shader_sources_[ShaderIndex::kFragment] = source;
     return *this;
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::LoadFragmentShaderSource(const std::filesystem::path& filePath)
+ShaderSourceBuilder& ShaderSourceBuilder::LoadFragmentShaderSource(const std::filesystem::path& file_path)
 {
-    m_ShaderSources[ShaderIndex::Fragment] = LoadFileContent(filePath);
+    shader_sources_[ShaderIndex::kFragment] = LoadFileContent(file_path);
     return *this;
 }
 
 ShaderSourceBuilder& ShaderSourceBuilder::SetGeometryShaderSource(const std::string& source)
 {
-    m_ShaderSources[ShaderIndex::Geometry] = source;
+    shader_sources_[ShaderIndex::kGeometry] = source;
     return *this;
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::LoadGeometryShaderSource(const std::filesystem::path& filePath)
+ShaderSourceBuilder& ShaderSourceBuilder::LoadGeometryShaderSource(const std::filesystem::path& file_path)
 {
-    m_ShaderSources[ShaderIndex::Geometry] = LoadFileContent(filePath);
+    shader_sources_[ShaderIndex::kGeometry] = LoadFileContent(file_path);
     return *this;
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::SetTesselationShaderSource(const std::string& controlShaderSource,
-    const std::string& evaluateShaderSource)
+ShaderSourceBuilder& ShaderSourceBuilder::SetTesselationShaderSource(const std::string& control_shader_source,
+    const std::string& evaluate_shader_source)
 {
-    m_ShaderSources[ShaderIndex::TesselationControlShader] = controlShaderSource;
-    m_ShaderSources[ShaderIndex::TesselationEvaluateShader] = evaluateShaderSource;
+    shader_sources_[ShaderIndex::kTesselationControlShader] = control_shader_source;
+    shader_sources_[ShaderIndex::kTesselationEvaluateShader] = evaluate_shader_source;
     return *this;
 }
 
-ShaderSourceBuilder& ShaderSourceBuilder::LoadGeometryShaderSource(const std::filesystem::path& controlShaderPath,
-    const std::filesystem::path& evaluateShaderPath)
+ShaderSourceBuilder& ShaderSourceBuilder::LoadGeometryShaderSource(const std::filesystem::path& control_shader_path,
+    const std::filesystem::path& evaluate_shader_path)
 {
-    m_ShaderSources[ShaderIndex::TesselationControlShader] = LoadFileContent(controlShaderPath);
-    m_ShaderSources[ShaderIndex::TesselationEvaluateShader] = LoadFileContent(evaluateShaderPath);
+    shader_sources_[ShaderIndex::kTesselationControlShader] = LoadFileContent(control_shader_path);
+    shader_sources_[ShaderIndex::kTesselationEvaluateShader] = LoadFileContent(evaluate_shader_path);
     return *this;
 }
 
 std::uint32_t ShaderSourceBuilder::GetLastShaderIndex() const
 {
-    for (auto it = m_ShaderSources.rbegin(); it != m_ShaderSources.rend(); ++it)
+    for (auto it = shader_sources_.rbegin(); it != shader_sources_.rend(); ++it)
     {
         if (it->empty())
         {
-            return static_cast<std::uint32_t>(std::distance(m_ShaderSources.rbegin(), it));
+            return static_cast<std::uint32_t>(std::distance(shader_sources_.rbegin(), it));
         }
     }
 
-    return ShaderIndex::Count;
+    return ShaderIndex::kCount;
 }
 
 Shader::Shader(std::span<const std::string> sources)
@@ -235,12 +231,12 @@ Shader::Shader(std::span<const std::string> sources)
 
 Shader::~Shader()
 {
-    glDeleteProgram(m_ShaderProgram);
+    glDeleteProgram(shader_program_);
 }
 
 void Shader::Use() const
 {
-    glUseProgram(m_ShaderProgram);
+    glUseProgram(shader_program_);
 }
 
 void Shader::StopUsing() const
@@ -278,9 +274,9 @@ void Shader::SetUniform(const char* name, const glm::mat4& value)
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void Shader::SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, std::uint32_t count)
+void Shader::SetUniformMat4Array(const char* name, std::span<const glm::mat4> values)
 {
-    glUniformMatrix4fv(GetUniformLocation(name), static_cast<GLsizei>(count), GL_FALSE, glm::value_ptr(values[0]));
+    glUniformMatrix4fv(GetUniformLocation(name), static_cast<GLsizei>(values.size()), GL_FALSE, glm::value_ptr(values[0]));
 }
 
 void Shader::SetUniform(const char* name, const glm::mat3& value)
@@ -291,98 +287,118 @@ void Shader::SetUniform(const char* name, const glm::mat3& value)
 std::int32_t Shader::GetUniformInt(const char* name) const
 {
     std::int32_t value = 0;
-    glGetUniformiv(m_ShaderProgram, GetUniformLocation(name), &value);
+    glGetUniformiv(shader_program_, GetUniformLocation(name), &value);
     return value;
 }
 
 float Shader::GetUniformFloat(const char* name) const
 {
     glm::vec4 value;
-    glGetUniformfv(m_ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
+    glGetUniformfv(shader_program_, GetUniformLocation(name), glm::value_ptr(value));
     return value[0];
 }
 
 glm::vec2 Shader::GetUniformVec2(const char* name) const
 {
     glm::vec4 value;
-    glGetUniformfv(m_ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
+    glGetUniformfv(shader_program_, GetUniformLocation(name), glm::value_ptr(value));
     return value;
 }
 
 glm::vec3 Shader::GetUniformVec3(const char* name) const
 {
     glm::vec4 value;
-    glGetUniformfv(m_ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
+    glGetUniformfv(shader_program_, GetUniformLocation(name), glm::value_ptr(value));
     return value;
 }
 
 glm::vec4 Shader::GetUniformVec4(const char* name) const
 {
     glm::vec4 value;
-    glGetUniformfv(m_ShaderProgram, GetUniformLocation(name), glm::value_ptr(value));
+    glGetUniformfv(shader_program_, GetUniformLocation(name), glm::value_ptr(value));
     return value;
 }
 
 std::vector<UniformInfo> Shader::GetUniformsInfo() const
 {
-    GLint numUniforms;
+    GLint num_uniforms;
 
-    glGetProgramiv(m_ShaderProgram, GL_ACTIVE_UNIFORMS, &numUniforms);
-    std::vector<UniformInfo> uniformsInfo;
-    uniformsInfo.reserve(numUniforms);
+    glGetProgramiv(shader_program_, GL_ACTIVE_UNIFORMS, &num_uniforms);
+    std::vector<UniformInfo> uniforms_info;
+    uniforms_info.reserve(num_uniforms);
 
-    for (GLint i = 0; i < numUniforms; i++)
+    for (GLint i = 0; i < num_uniforms; i++)
     {
-        AddNewUniformInfo(uniformsInfo, i);
+        AddNewUniformInfo(uniforms_info, i);
     }
 
-    return uniformsInfo;
+    return uniforms_info;
 }
 
-void Shader::SetSamplerUniform(const char* uniformName, const std::shared_ptr<Texture>& textures, uint32_t startTextureUnit)
+void Shader::SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, uint32_t start_texture_unit)
 {
-    ASSERT(startTextureUnit < MinTextureUnits);
-    glUniform1i(GetUniformLocation(uniformName), static_cast<GLint>(startTextureUnit));
+    ASSERT(start_texture_unit < kMinTextureUnits);
+    glUniform1i(GetUniformLocation(uniform_name), static_cast<GLint>(start_texture_unit));
 }
 
+void Shader::BindUniformBuffer(std::int32_t block_index, const UniformBuffer& buffer)
+{
+    buffer.Bind(block_index);
+    glUniformBlockBinding(shader_program_, block_index, block_index);
+}
+
+int Shader::GetUniformBlockIndex(const std::string& name) const
+{
+    auto it = uniform_name_to_location_.find(name);
+
+    if (it == uniform_name_to_location_.end())
+    {
+        GLint location = glGetUniformBlockIndex(shader_program_, name.c_str());
+        uniform_name_to_location_[name] = location;
+        return location;
+    }
+
+    return it->second;
+
+}
 
 void Shader::GenerateShaders(std::span<std::string_view> sources)
 {
-    GLenum types[ShaderIndex::Count] = {GL_VERTEX_SHADER,
+    GLenum types[ShaderIndex::kCount] = {GL_VERTEX_SHADER,
         GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER};
 
-    std::size_t shaderIndex = 0;
-    std::array<ShaderObject, ShaderIndex::Count> shaders;
+    std::size_t shader_index = 0;
+    std::array<ShaderObject, ShaderIndex::kCount> shaders;
 
     for (const std::string_view& source : sources)
     {
-        shaders[shaderIndex] = TryCompileShader(source.data(), static_cast<std::int32_t>(source.length()), types[shaderIndex]);
-        shaderIndex++;
+        shaders[shader_index] = TryCompileShader(source.data(), static_cast<std::int32_t>(source.length()), types[shader_index]);
+        shader_index++;
     }
 
-    m_ShaderProgram = glCreateProgram();
+    shader_program_ = glCreateProgram();
 
-    for (std::size_t i = 0; i < shaderIndex; ++i)
+    for (std::size_t i = 0; i < shader_index; ++i)
     {
-        shaders[i].AttachShaderToProgram(m_ShaderProgram);
+        shaders[i].AttachShaderToProgram(shader_program_);
     }
 
-    glLinkProgram(m_ShaderProgram);
+    glLinkProgram(shader_program_);
 
-    std::int32_t linkedSuccesfully;
+    std::int32_t linked_succesfully;
 
-    glGetProgramiv(m_ShaderProgram, GL_LINK_STATUS, &linkedSuccesfully);
+    glGetProgramiv(shader_program_, GL_LINK_STATUS, &linked_succesfully);
 
-    if (linkedSuccesfully == GL_FALSE)
+    if (linked_succesfully == GL_FALSE)
     {
-        ThrowLinkingError(m_ShaderProgram);
+        ThrowLinkingError(shader_program_);
     }
 }
 
 void Shader::GenerateShaders(std::span<const std::string> sources)
 {
-    ASSERT(sources.size() < ShaderIndex::Count);
-    std::array<std::string_view, ShaderIndex::Count> srcs;
+    ASSERT(sources.size() < ShaderIndex::kCount);
+    std::array<std::string_view, ShaderIndex::kCount> srcs;
     std::uint32_t index = 0;
 
     for (const std::string& src : sources)
@@ -393,14 +409,14 @@ void Shader::GenerateShaders(std::span<const std::string> sources)
     GenerateShaders(std::span<std::string_view>{srcs.begin(), index});
 }
 
-GLint Shader::GetUniformLocation(const char* uniformName) const
+GLint Shader::GetUniformLocation(const char* uniform_name) const
 {
-    auto it = m_UniformNameToLocation.find(uniformName);
+    auto it = uniform_name_to_location_.find(uniform_name);
 
-    if (it == m_UniformNameToLocation.end())
+    if (it == uniform_name_to_location_.end())
     {
-        GLint location = glGetUniformLocation(m_ShaderProgram, uniformName);
-        m_UniformNameToLocation[uniformName] = location;
+        GLint location = glGetUniformLocation(shader_program_, uniform_name);
+        uniform_name_to_location_[uniform_name] = location;
 
         return location;
     }
@@ -410,34 +426,34 @@ GLint Shader::GetUniformLocation(const char* uniformName) const
 
 void Shader::AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, int location) const
 {
-    const std::int32_t MaxNameLength = 96;
-    const GLTypeToUniformType GLTypesToUniformTypes[] =
+    const std::int32_t kMaxNameLength = 96;
+    const GLTypeToUniformType kGLTypesToUniformTypes[] =
     {
-        {GL_FLOAT, UniformType::Float},
-        {GL_INT, UniformType::Int},
-        {GL_FLOAT_VEC2, UniformType::Vec2},
-        {GL_FLOAT_VEC3, UniformType::Vec3},
-        {GL_FLOAT_VEC4, UniformType::Vec4},
-        {GL_FLOAT_MAT4, UniformType::Mat4x4},
-        {GL_FLOAT_MAT3, UniformType::Mat3x3},
-        {GL_BOOL, UniformType::Boolean},
-        {GL_INT_VEC2, UniformType::Ivec2},
-        {GL_INT_VEC3, UniformType::Ivec3},
-        {GL_SAMPLER_2D, UniformType::Sampler2D},
+        {GL_FLOAT, UniformType::kFloat},
+        {GL_INT, UniformType::kInt},
+        {GL_FLOAT_VEC2, UniformType::kVec2},
+        {GL_FLOAT_VEC3, UniformType::kVec3},
+        {GL_FLOAT_VEC4, UniformType::kVec4},
+        {GL_FLOAT_MAT4, UniformType::kMat4x4},
+        {GL_FLOAT_MAT3, UniformType::kMat3x3},
+        {GL_BOOL, UniformType::kBoolean},
+        {GL_INT_VEC2, UniformType::kIvec2},
+        {GL_INT_VEC3, UniformType::kIvec3},
+        {GL_SAMPLER_2D, UniformType::kSampler2D},
     };
 
-    GLchar name[MaxNameLength]; // variable name in GLSL
-    GLsizei nameLength; // name length
+    GLchar name[kMaxNameLength]; // variable name in GLSL
+    GLsizei name_len; // name length
     GLint size; // size of the variable
     GLenum type; // type of the variable (float, vec3 or mat4, etc)
 
-    glGetActiveUniform(m_ShaderProgram, static_cast<GLuint>(location), MaxNameLength, &nameLength, &size, &type, name);
-    auto it = std::find_if(std::begin(GLTypesToUniformTypes), std::end(GLTypesToUniformTypes),
-        [&](const GLTypeToUniformType& t) { return t.OpenGlUniformType == type; });
+    glGetActiveUniform(shader_program_, static_cast<GLuint>(location), kMaxNameLength, &name_len, &size, &type, name);
+    auto it = std::find_if(std::begin(kGLTypesToUniformTypes), std::end(kGLTypesToUniformTypes),
+        [&](const GLTypeToUniformType& t) { return t.gl_uniform_type == type; });
 
-    if (it != std::end(GLTypesToUniformTypes))
+    if (it != std::end(kGLTypesToUniformTypes))
     {
-        outUniformsInfo.emplace_back(UniformInfo{it->Type, name, location, static_cast<std::int32_t>(size)});
+        outUniformsInfo.emplace_back(UniformInfo{it->uniform_type, name, location, static_cast<std::int32_t>(size)});
     }
 }
 

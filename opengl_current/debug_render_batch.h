@@ -2,18 +2,20 @@
 
 #include "vertex_array.h"
 #include "shader.h"
-#include "instancing.h"
+#include "batching.h"
 #include <glm/glm.hpp>
+
 
 struct DebugVertex
 {
     glm::vec3 Position;
-    glm::vec4 Color{0, 0, 0, 1};
+
+    // Packed color to minimize size of updated data
+    RgbaColor Color;
 };
 
-
 template<>
-struct InstanceCreator<DebugVertex>
+struct BatchVertexCreator<DebugVertex>
 {
     static DebugVertex CreateInstanceFrom(const DebugVertex& vertex, const glm::mat4& transform)
     {
@@ -29,10 +31,9 @@ public:
     DebugRenderBatch();
 
     void FlushDraw(Material& material);
-    void AddBoxInstance(glm::vec3 boxMin, glm::vec3 boxMax, const Transform& transform);
-    void AddBoxInstance(glm::vec3 boxMin, glm::vec3 boxMax, const Transform& transform, const glm::vec4& color);
+    void AddBoxInstance(glm::vec3 box_min, glm::vec3 box_max, const Transform& transform, const glm::vec4& color);
 
 private:
-    InstanceBase<DebugVertex> m_InstanceDraw;
+    BatchBase<DebugVertex> batch_base_;
 };
 

@@ -3,14 +3,14 @@
 
 #include <chrono>
 
-static RenderStats s_RenderStats;
+static RenderStats render_stats_;
 static std::chrono::nanoseconds s_StartTimestamp = std::chrono::nanoseconds::zero();
-RendererApi RenderCommand::s_RendererApi{};
+RendererApi RenderCommand::renderer_api_{};
 static bool s_bRenderCommandInitialized = false;
 
 void RenderCommand::Initialize()
 {
-    s_RendererApi.Initialize();
+    renderer_api_.Initialize();
     s_bRenderCommandInitialized = true;
 }
 
@@ -22,118 +22,124 @@ void RenderCommand::Quit()
 void RenderCommand::ClearBufferBindings_Debug()
 {
     ASSERT(s_bRenderCommandInitialized);
-    s_RendererApi.ClearBufferBindings_Debug();
+    renderer_api_.ClearBufferBindings_Debug();
 }
 
-void RenderCommand::DrawTriangles(const VertexArray& vertexArray, std::int32_t numIndices)
+void RenderCommand::DrawTriangles(const VertexArray& vertex_array, std::int32_t num_indices)
 {
     ASSERT(s_bRenderCommandInitialized);
-    s_RendererApi.DrawTriangles(vertexArray, numIndices);
-    s_RenderStats.NumDrawcalls++;
+    renderer_api_.DrawTriangles(vertex_array, num_indices);
+    render_stats_.num_drawcalls++;
 }
 
-void RenderCommand::DrawTrianglesAdjancency(const VertexArray& vertexArray, std::int32_t numIndices)
-{
-    ASSERT(s_bRenderCommandInitialized);
-
-    s_RendererApi.DrawTrianglesAdjancency(vertexArray, numIndices);
-    s_RenderStats.NumDrawcalls++;
-}
-void RenderCommand::DrawLines(const VertexArray& vertexArray, std::int32_t numIndices)
+void RenderCommand::DrawTrianglesAdjancency(const VertexArray& vertex_array, std::int32_t num_indices)
 {
     ASSERT(s_bRenderCommandInitialized);
 
-    s_RendererApi.DrawLines(vertexArray, numIndices);
-    s_RenderStats.NumDrawcalls++;
+    renderer_api_.DrawTrianglesAdjancency(vertex_array, num_indices);
+    render_stats_.num_drawcalls++;
 }
-void RenderCommand::DrawPoints(const VertexArray& vertexArray, std::int32_t numIndices)
+void RenderCommand::DrawLines(const VertexArray& vertex_array, std::int32_t num_indices)
 {
     ASSERT(s_bRenderCommandInitialized);
 
-    s_RendererApi.DrawPoints(vertexArray, numIndices);
-    s_RenderStats.NumDrawcalls++;
+    renderer_api_.DrawLines(vertex_array, num_indices);
+    render_stats_.num_drawcalls++;
+}
+void RenderCommand::DrawPoints(const VertexArray& vertex_array, std::int32_t num_indices)
+{
+    ASSERT(s_bRenderCommandInitialized);
+
+    renderer_api_.DrawPoints(vertex_array, num_indices);
+    render_stats_.num_drawcalls++;
 }
 
 void RenderCommand::BeginScene()
 {
     ASSERT(s_bRenderCommandInitialized);
 
-    s_RenderStats.NumDrawcalls = 0;
+    render_stats_.num_drawcalls = 0;
 }
 
 void RenderCommand::EndScene()
 {
     auto now = std::chrono::system_clock::now().time_since_epoch();
-    s_RenderStats.DeltaFrameNanoseconds = (now - s_StartTimestamp).count();
+    render_stats_.delta_frame_time = (now - s_StartTimestamp).count();
     s_StartTimestamp = now;
 }
 
-void RenderCommand::SetClearColor(const RgbaColor& clearColor)
+void RenderCommand::SetClearColor(const RgbaColor& clear_color)
 {
-    s_RendererApi.SetClearColor(clearColor);
+    renderer_api_.SetClearColor(clear_color);
 }
 
 void RenderCommand::Clear()
 {
-    s_RendererApi.Clear();
+    renderer_api_.Clear();
 }
 
-void RenderCommand::SetWireframe(bool bWireframeEnabled)
+void RenderCommand::SetWireframe(bool wireframe_enabled)
 {
-    s_RendererApi.SetWireframe(bWireframeEnabled);
+    renderer_api_.SetWireframe(wireframe_enabled);
 }
 
 bool RenderCommand::IsWireframeEnabled()
 {
-    return s_RendererApi.IsWireframeEnabled();
+    return renderer_api_.IsWireframeEnabled();
 }
 
-void RenderCommand::SetCullFace(bool bCullFace)
+void RenderCommand::SetCullFace(bool cull_faces)
 {
-    s_RendererApi.SetCullFace(bCullFace);
+    renderer_api_.SetCullFace(cull_faces);
 }
 
 bool RenderCommand::DoesCullFaces()
 {
-    return s_RendererApi.DoesCullFaces();
+    return renderer_api_.DoesCullFaces();
 }
 
-void RenderCommand::SetBlendingEnabled(bool bBlendingEnabled)
+void RenderCommand::SetBlendingEnabled(bool blending_enabled)
 {
-    s_RendererApi.SetBlendingEnabled(bBlendingEnabled);
+    renderer_api_.SetBlendingEnabled(blending_enabled);
 }
 
 void RenderCommand::SetLineWidth(float lineWidth)
 {
-    s_RendererApi.SetLineWidth(lineWidth);
+    renderer_api_.SetLineWidth(lineWidth);
 }
 
 void RenderCommand::SetViewport(std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height)
 {
-    s_RendererApi.SetViewport(x, y, width, height);
+    renderer_api_.SetViewport(x, y, width, height);
 }
 
 RenderStats RenderCommand::GetRenderStats()
 {
-    return s_RenderStats;
+    return render_stats_;
 }
 
-void RenderCommand::NotifyIndexBufferCreated(std::int32_t bufferSize)
+void RenderCommand::NotifyIndexBufferCreated(std::int32_t buffer_size)
 {
-    s_RenderStats.NumIndexBufferMemoryAllocated += bufferSize;
+    render_stats_.index_bufer_memory_allocation += buffer_size;
 }
 
-void RenderCommand::NotifyIndexBufferDestroyed(std::int32_t bufferSize)
+void RenderCommand::NotifyIndexBufferDestroyed(std::int32_t buffer_size)
 {
-    s_RenderStats.NumIndexBufferMemoryAllocated -= bufferSize;
+    render_stats_.index_bufer_memory_allocation -= buffer_size;
 }
 
-void RenderCommand::NotifyVertexBufferCreated(std::int32_t bufferSize)
+void RenderCommand::NotifyVertexBufferCreated(std::int32_t buffer_size)
 {
-    s_RenderStats.NumVertexBufferMemoryAllocated += bufferSize;
+    render_stats_.vertex_buffer_memory_allocation += buffer_size;
 }
 
-void RenderCommand::NotifyVertexBufferDestroyed(std::int32_t bufferSize)
+void RenderCommand::NotifyVertexBufferDestroyed(std::int32_t buffer_size)
 {
-    s_RenderStats.NumVertexBufferMemoryAllocated -= bufferSize;
+    render_stats_.vertex_buffer_memory_allocation -= buffer_size;
+}
+
+void RenderCommand::DrawTrianglesInstanced(const VertexArray& vertex_array, size_t num_instances)
+{
+    renderer_api_.DrawTrianglesInstanced(vertex_array, num_instances);
+    render_stats_.num_drawcalls++;
 }

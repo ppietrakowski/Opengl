@@ -246,6 +246,7 @@
     <ClCompile Include="static_mesh.cpp" />
     <ClCompile Include="static_mesh_component.cpp" />
     <ClCompile Include="texture.cpp" />
+    <ClCompile Include="uniform_buffer.cpp" />
     <ClCompile Include="vertex_buffer.cpp" />
     <ClCompile Include="vertex_array.cpp" />
     <ClCompile Include="window.cpp" />
@@ -253,6 +254,7 @@
   <ItemGroup>
     <ClInclude Include="actor.h" />
     <ClInclude Include="assimp_utils.h" />
+    <ClInclude Include="batching.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="debug_render_batch.h" />
     <ClInclude Include="duration.h" />
@@ -277,7 +279,6 @@
     <ClInclude Include="input.h" />
     <ClInclude Include="instanced_mesh.h" />
     <ClInclude Include="instanced_mesh_component.h" />
-    <ClInclude Include="instancing.h" />
     <ClInclude Include="keys.h" />
     <ClInclude Include="level.h" />
     <ClInclude Include="logging.h" />
@@ -296,6 +297,7 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="transform.h" />
+    <ClInclude Include="uniform_buffer.h" />
     <ClInclude Include="vertex_array.h" />
     <ClInclude Include="vertex_buffer.h" />
     <ClInclude Include="window.h" />

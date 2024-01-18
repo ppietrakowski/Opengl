@@ -15,14 +15,14 @@
 
 enum class MaterialParamType : std::int8_t
 {
-    Unknown = 0,
-    Int,
-    Float,
-    Vec2,
-    Vec3,
-    Vec4,
-    Sampler2D,
-    NumMaterialParamsType
+    kUnknown = 0,
+    kInt,
+    kFloat,
+    kVec2,
+    kVec3,
+    kVec4,
+    kSampler2D,
+    kNumMaterialParamsType
 };
 
 class Parameter
@@ -66,9 +66,9 @@ template <typename T>
 class PrimitiveParameter : public Parameter
 {
 public:
-    PrimitiveParameter(std::string uniformName, T value) :
-        m_UniformName{uniformName},
-        m_Value{value}
+    PrimitiveParameter(std::string uniform_name, T value) :
+        uniform_name_{uniform_name},
+        value_{value}
     {
     }
 
@@ -77,31 +77,31 @@ public:
 
     void SetValue(T value) override
     {
-        m_Value = value;
+        value_ = value;
     }
 
     void SetUniform(Shader& shader) const override
     {
-        shader.SetUniform(m_UniformName.c_str(), m_Value);
+        shader.SetUniform(uniform_name_.c_str(), value_);
     }
 
     std::any GetValue() const override
     {
-        return m_Value;
+        return value_;
     }
 
 private:
-    std::string m_UniformName;
-    T m_Value;
+    std::string uniform_name_;
+    T value_;
 };
 
 class TextureParameter : public Parameter
 {
 public:
-    TextureParameter(std::string uniformName, std::shared_ptr<Texture> value, std::uint32_t textureUnit) :
-        m_UniformName{uniformName},
-        m_Texture{value},
-        m_TextureUnit{textureUnit}
+    TextureParameter(std::string uniform_name, std::shared_ptr<Texture> value, std::uint32_t texture_unit) :
+        uniform_name_{uniform_name},
+        texture_{value},
+        texture_unit_{texture_unit}
     {
     }
 
@@ -111,13 +111,13 @@ public:
     void SetUniform(Shader& shader) const override;
     std::any GetValue() const
     {
-        return m_Texture;
+        return texture_;
     }
 
 private:
-    std::string m_UniformName;
-    std::shared_ptr<Texture> m_Texture;
-    std::uint32_t m_TextureUnit;
+    std::string uniform_name_;
+    std::shared_ptr<Texture> texture_;
+    std::uint32_t texture_unit_;
 };
 
 class UnknownParameter : public Parameter
@@ -142,12 +142,12 @@ class MaterialParam
 public:
     MaterialParam() = default;
     MaterialParam(const MaterialParam&) = default;
-    MaterialParam(const char* uniformName, std::int32_t value);
-    MaterialParam(const char* uniformName, float value);
-    MaterialParam(const char* uniformName, glm::vec2 value);
-    MaterialParam(const char* uniformName, glm::vec3 value);
-    MaterialParam(const char* uniformName, glm::vec4 value);
-    MaterialParam(const char* uniformName, std::shared_ptr<Texture> value, std::uint32_t textureUnit);
+    MaterialParam(const char* uniform_name, std::int32_t value);
+    MaterialParam(const char* uniform_name, float value);
+    MaterialParam(const char* uniform_name, glm::vec2 value);
+    MaterialParam(const char* uniform_name, glm::vec3 value);
+    MaterialParam(const char* uniform_name, glm::vec4 value);
+    MaterialParam(const char* uniform_name, std::shared_ptr<Texture> value, std::uint32_t textureUnit);
 
     MaterialParam& operator=(const MaterialParam&) = default;
     void SetUniform(Shader& shader) const;
@@ -168,7 +168,7 @@ public:
     void SetTexture(const std::shared_ptr<Texture>& value);
 
 private:
-    ParamVariant m_Parameter{UnknownParameter{}};
-    Parameter* (*m_Getter)(const ParamVariant& value);
-    MaterialParamType m_ParamType{MaterialParamType::Unknown};
+    ParamVariant parameter_{UnknownParameter{}};
+    Parameter* (*getter_)(const ParamVariant& value);
+    MaterialParamType param_type_{MaterialParamType::kUnknown};
 };

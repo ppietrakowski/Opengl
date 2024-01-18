@@ -3,20 +3,20 @@
 #include "renderer.h"
 
 SkeletalMeshComponent::SkeletalMeshComponent(const std::shared_ptr<SkeletalMesh>& mesh) :
-    UsedSkeletalMesh{mesh}
+    skeletal_mesh{mesh}
 {
     std::vector<std::string> animations = mesh->GetAnimationNames();
-    AnimationName = animations.back();
-    BoneTransforms.resize(mesh->GetNumBones(), glm::identity<glm::mat4>());
+    animation_name = animations.back();
+    bone_transforms.resize(mesh->GetNumBones(), glm::identity<glm::mat4>());
 }
 
-void SkeletalMeshComponent::UpdateAnimation(float deltaSeconds)
+void SkeletalMeshComponent::UpdateAnimation(float delta_seconds, const Transform& transform)
 {
-    AnimationTime += deltaSeconds;
-    UsedSkeletalMesh->GetAnimationFrames(AnimationTime, AnimationName, BoneTransforms);
+    animation_time += delta_seconds;
+    skeletal_mesh->GetAnimationFrames(animation_time, animation_name, bone_transforms);
 }
 
-void SkeletalMeshComponent::Draw(const glm::mat4& worldTransform)
+void SkeletalMeshComponent::Draw(const glm::mat4& world_transform) const
 {
-    UsedSkeletalMesh->Draw(BoneTransforms, worldTransform);
+    skeletal_mesh->Draw(bone_transforms, world_transform);
 }

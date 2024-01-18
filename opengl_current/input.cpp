@@ -2,60 +2,60 @@
 
 #include <GLFW/glfw3.h>
 
-Input* Input::s_Instance = nullptr;
+Input* Input::instance_ = nullptr;
 
 Input::Input(GLFWwindow* window) :
-    m_Window{window}
+    window_{window}
 {
     double x, y;
     glfwGetCursorPos(window, &x, &y);
-    m_MousePosition = {(float)x, (float)y};
-    s_Instance = this;
+    mouse_position_ = {(float)x, (float)y};
+    instance_ = this;
 }
 
 bool Input::IsKeyPressedImpl(KeyCode key)
 {
-    std::int32_t state = glfwGetKey(m_Window, static_cast<std::int32_t>(key));
+    std::int32_t state = glfwGetKey(window_, static_cast<std::int32_t>(key));
     return state == GLFW_PRESS;
 }
 
 bool Input::IsMouseButtonPressedImpl(MouseButton button)
 {
-    std::int32_t state = glfwGetMouseButton(m_Window, static_cast<std::int32_t>(button));
+    std::int32_t state = glfwGetMouseButton(window_, static_cast<std::int32_t>(button));
     return state == GLFW_PRESS;
 }
 
 glm::vec2 Input::GetMousePositionImpl() const
 {
-    return m_MousePosition;
+    return mouse_position_;
 }
 
-void Input::Update(const GlfwWindowData& windowData)
+void Input::Update(const GlfwWindowData& window_data)
 {
-    m_MousePosition = windowData.MousePosition;
+    mouse_position_ = window_data.mouse_position;
 }
 
 bool Input::IsKeyPressed(KeyCode key)
 {
-    return s_Instance->IsKeyPressedImpl(key);
+    return instance_->IsKeyPressedImpl(key);
 }
 
 bool Input::IsMouseButtonPressed(MouseButton button)
 {
-    return s_Instance->IsMouseButtonPressedImpl(button);
+    return instance_->IsMouseButtonPressedImpl(button);
 }
 
 glm::vec2 Input::GetMousePosition()
 {
-    return s_Instance->GetMousePositionImpl();
+    return instance_->GetMousePositionImpl();
 }
 
 float Input::GetMouseX()
 {
-    return s_Instance->GetMousePositionImpl().x;
+    return instance_->GetMousePositionImpl().x;
 }
 
 float Input::GetMouseY()
 {
-    return s_Instance->GetMousePositionImpl().y;
+    return instance_->GetMousePositionImpl().y;
 }

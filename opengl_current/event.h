@@ -8,65 +8,65 @@
 
 enum class EventType
 {
-    Invalid = 0,
-    LostFocus,
-    GainedFocus,
-    KeyPressed,
-    KeyReleased,
-    MouseWheelScrolled,
-    MouseButtonPressed,
-    MouseButtonReleased,
-    MouseMoved,
-    Count
+    kInvalid = 0,
+    kLostFocus,
+    kGainedFocus,
+    kKeyPressed,
+    kKeyReleased,
+    kMouseWheelScrolled,
+    kMouseButtonPressed,
+    kMouseButtonReleased,
+    kMouseMoved,
+    kCount
 };
 
 struct Event
 {
     struct SizeEvent
     {
-        std::int32_t Width;
-        std::int32_t Height;
+        std::int32_t width;
+        std::int32_t height;
     };
 
     struct KeyEvent
     {
-        KeyCode Key;
-        std::int32_t Scancode;
-        bool bAltClicked : 1;
-        bool bControlClicked : 1;
-        bool bShiftClicked : 1;
-        bool bSystemClicked : 1;
+        KeyCode key;
+        std::int32_t scancode;
+        bool alt_clicked : 1;
+        bool control_clicked : 1;
+        bool shift_clicked : 1;
+        bool system_clicked : 1;
     };
 
     struct MouseMoveEvent
     {
-        glm::vec2 MousePosition;
-        glm::vec2 LastMousePosition;
+        glm::vec2 mouse_position;
+        glm::vec2 last_mouse_position;
     };
 
     struct MouseButtonEvent
     {
-        MouseButton Button;
-        glm::vec2 MousePosition;
+        MouseButton button;
+        glm::vec2 mouse_position;
     };
 
     struct MouseWheelEvent
     {
-        glm::vec2 Delta;
+        glm::vec2 delta;
     };
 
     // Member data
-    EventType Type;
+    EventType type;
 
     union
     {
-        SizeEvent Size;
-        KeyEvent Key;
-        MouseMoveEvent MouseMove;
-        MouseButtonEvent MouseButton;
-        MouseWheelEvent MouseWheel;
+        SizeEvent size;
+        KeyEvent key;
+        MouseMoveEvent mouse_move;
+        MouseButtonEvent mouse_button;
+        MouseWheelEvent mouse_wheel;
     };
 
-    std::chrono::milliseconds Timestamp;
+    std::chrono::milliseconds timestamp;
     Event();
 };

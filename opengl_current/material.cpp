@@ -9,12 +9,12 @@ namespace
 }
 
 Material::Material(const std::shared_ptr<Shader>& shader) :
-    m_Shader{shader}
+    shader_{shader}
 {
     // retrieve all uniforms information from shader
-    std::vector<UniformInfo> uniformsInfo = std::move(shader->GetUniformsInfo());
+    std::vector<UniformInfo> uniforms_info = std::move(shader->GetUniformsInfo());
 
-    for (const UniformInfo& info : uniformsInfo)
+    for (const UniformInfo& info : uniforms_info)
     {
         TryAddNewProperty(info);
     }
@@ -82,9 +82,9 @@ void Material::SetTextureProperty(const char* name, const std::shared_ptr<Textur
 
 void Material::TryAddNewProperty(const UniformInfo& info)
 {
-    bool bIsMaterialUniform = ContainsString(info.Name, MaterialTag.data());
+    bool is_material_uniform = ContainsString(info.name, MaterialTag.data());
 
-    if (bIsMaterialUniform)
+    if (is_material_uniform)
     {
         AddNewProperty(info);
     }
@@ -92,42 +92,42 @@ void Material::TryAddNewProperty(const UniformInfo& info)
 
 void Material::AddNewProperty(const UniformInfo& info)
 {
-    switch (info.Type)
+    switch (info.uniform_type)
     {
-    case UniformType::Vec4:
+    case UniformType::kVec4:
     {
-        m_MaterialParams.try_emplace(info.Name.substr(MaterialTag.length()),
-            info.Name.c_str(), glm::vec4{0, 0, 0, 1});
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+            info.name.c_str(), glm::vec4{0, 0, 0, 1});
         break;
     }
-    case UniformType::Vec3:
+    case UniformType::kVec3:
     {
-        m_MaterialParams.try_emplace(info.Name.substr(MaterialTag.length()),
-            info.Name.c_str(), glm::vec3{0, 0, 0});
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+            info.name.c_str(), glm::vec3{0, 0, 0});
         break;
     }
-    case UniformType::Vec2:
+    case UniformType::kVec2:
     {
-        m_MaterialParams.try_emplace(info.Name.substr(MaterialTag.length()),
-            info.Name.c_str(), glm::vec2{0, 0});
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+            info.name.c_str(), glm::vec2{0, 0});
         break;
     }
-    case UniformType::Float:
+    case UniformType::kFloat:
     {
-        m_MaterialParams.try_emplace(info.Name.substr(MaterialTag.length()),
-            info.Name.c_str(), 0.0f);
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+            info.name.c_str(), 0.0f);
         break;
     }
-    case UniformType::Int:
+    case UniformType::kInt:
     {
-        m_MaterialParams.try_emplace(info.Name.substr(MaterialTag.length()),
-            info.Name.c_str(), 0);
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+            info.name.c_str(), 0);
         break;
     }
-    case UniformType::Sampler2D:
+    case UniformType::kSampler2D:
     {
-        MaterialParam param{info.Name.c_str(), Renderer::GetDefaultTexture(), m_NumTextureUnits++};
-        m_MaterialParams.try_emplace(info.Name.substr(MaterialTag.length()), param);
+        MaterialParam param{info.name.c_str(), Renderer::GetDefaultTexture(), num_texture_units_++};
+        material_params_.try_emplace(info.name.substr(MaterialTag.length()), param);
         break;
     }
     }
@@ -135,15 +135,15 @@ void Material::AddNewProperty(const UniformInfo& info)
 
 void Material::SetupRenderState() const
 {
-    RenderCommand::SetWireframe(bUseWireframe);
-    RenderCommand::SetCullFace(bCullFaces);
+    RenderCommand::SetWireframe(use_wireframe);
+    RenderCommand::SetCullFace(cull_faces);
 }
 
 void Material::SetShaderUniforms() const
 {
     Shader& shader = GetShader();
 
-    for (auto& [name, param] : m_MaterialParams)
+    for (auto& [name, param] : material_params_)
     {
         param.SetUniform(shader);
     }

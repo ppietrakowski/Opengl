@@ -14,42 +14,44 @@
 
 #include <array>
 
+#include "uniform_buffer.h"
+
 enum class UniformType
 {
-    Undefined,
-    Vec4,
-    Vec3,
-    Vec2,
-    Float,
-    Int,
-    Ivec2,
-    Ivec3,
-    Mat4x4,
-    Mat3x3,
-    Boolean,
-    Sampler2D,
+    kUndefined,
+    kVec4,
+    kVec3,
+    kVec2,
+    kFloat,
+    kInt,
+    kIvec2,
+    kIvec3,
+    kMat4x4,
+    kMat3x3,
+    kBoolean,
+    kSampler2D,
 };
 
 struct UniformInfo
 {
-    UniformType Type;
-    std::string Name;
-    std::int32_t Location;
-    int32_t NumTextures{0};
+    UniformType uniform_type;
+    std::string name;
+    std::int32_t location;
+    int32_t array_size{1};
 };
 
 struct ShaderCompilationFailedException : public std::runtime_error
 {
-    ShaderCompilationFailedException(const char* errorMessage) :
-        std::runtime_error{errorMessage}
+    ShaderCompilationFailedException(const char* error_message) :
+        std::runtime_error{error_message}
     {
     }
 };
 
 struct ShaderProgramLinkingFailedException : public std::runtime_error
 {
-    ShaderProgramLinkingFailedException(const char* errorMessage) :
-        std::runtime_error{errorMessage}
+    ShaderProgramLinkingFailedException(const char* error_message) :
+        std::runtime_error{error_message}
     {
     }
 };
@@ -58,12 +60,12 @@ struct ShaderIndex
 {
     enum IndexType
     {
-        Vertex = 0,
-        Fragment,
-        Geometry,
-        TesselationControlShader,
-        TesselationEvaluateShader,
-        Count
+        kVertex = 0,
+        kFragment,
+        kGeometry,
+        kTesselationControlShader,
+        kTesselationEvaluateShader,
+        kCount
     };
 };
 
@@ -75,19 +77,19 @@ public:
     std::shared_ptr<Shader> Build();
 
     ShaderSourceBuilder& SetVertexShaderSource(const std::string& source);
-    ShaderSourceBuilder& LoadVertexShaderSource(const std::filesystem::path& filePath);
+    ShaderSourceBuilder& LoadVertexShaderSource(const std::filesystem::path& file_path);
 
     ShaderSourceBuilder& SetFragmentShaderSource(const std::string& source);
-    ShaderSourceBuilder& LoadFragmentShaderSource(const std::filesystem::path& filePath);
+    ShaderSourceBuilder& LoadFragmentShaderSource(const std::filesystem::path& file_path);
 
     ShaderSourceBuilder& SetGeometryShaderSource(const std::string& source);
-    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& filePath);
+    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& file_path);
 
-    ShaderSourceBuilder& SetTesselationShaderSource(const std::string& controlShaderSource, const std::string& evaluateShaderSource);
-    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& controlShaderPath, const std::filesystem::path& evaluateShaderPath);
+    ShaderSourceBuilder& SetTesselationShaderSource(const std::string& control_shader_source, const std::string& evaluate_shader_source);
+    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& control_shader_path, const std::filesystem::path& evaluate_shader_path);
 
 private:
-    std::array<std::string, ShaderIndex::Count> m_ShaderSources;
+    std::array<std::string, ShaderIndex::kCount> shader_sources_;
 
     std::uint32_t GetLastShaderIndex() const;
 };
@@ -95,7 +97,7 @@ private:
 
 class Texture;
 
-static constexpr std::int32_t MinTextureUnits = 16;
+static constexpr std::int32_t kMinTextureUnits = 16;
 
 class Shader
 {
@@ -114,7 +116,7 @@ public:
     void SetUniform(const char* name, const glm::vec4& value);
 
     void SetUniform(const char* name, const glm::mat4& value);
-    void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values, std::uint32_t count);
+    void SetUniformMat4Array(const char* name, std::span<const glm::mat4> values);
     void SetUniform(const char* name, const glm::mat3& value);
 
     int GetUniformInt(const char* name) const;
@@ -125,11 +127,14 @@ public:
     glm::vec4 GetUniformVec4(const char* name) const;
                                                     ;
     std::vector<UniformInfo> GetUniformsInfo() const;
-    void SetSamplerUniform(const char* uniformName, const std::shared_ptr<Texture>& textures, std::uint32_t startTextureUnit = 0);
+    void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, std::uint32_t start_texture_unit = 0);
+
+    void BindUniformBuffer(std::int32_t block_index, const UniformBuffer& buffer);
+    int GetUniformBlockIndex(const std::string& name) const;
 
 private:
-    std::uint32_t m_ShaderProgram{0};
-    mutable std::unordered_map<std::string, int> m_UniformNameToLocation;
+    std::uint32_t shader_program_{0};
+    mutable std::unordered_map<std::string, int> uniform_name_to_location_;
 
 private:
     Shader() = default;
@@ -137,6 +142,6 @@ private:
     void GenerateShaders(std::span<std::string_view> sources);
     void GenerateShaders(std::span<const std::string> sources);
 
-    int GetUniformLocation(const char* uniformName) const;
-    void AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, int location) const;
+    int GetUniformLocation(const char* uniform_name) const;
+    void AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, int location) const;
 };

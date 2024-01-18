@@ -21,27 +21,27 @@ public:
     void BroadcastUpdate(Duration duration);
     void BroadcastRender(Duration duration);
 
-
     auto begin()
     {
-        return m_Actors.begin();
+        return actors_.begin();
     }
 
     auto end()
     {
-        return m_Actors.end();
+        return actors_.end();
     }
 
     template <typename ...Args>
     auto View()
     {
-        return m_Registry.view<Args...>();
+        return registry_.view<Args...>();
     }
 
 private:
-    entt::registry m_Registry;
-    std::map<std::string, Actor> m_Actors;
-    std::shared_ptr<ResourceManagerImpl> m_ResourceManager;
+    entt::registry registry_;
+    std::map<std::string, Actor> actors_;
+    std::shared_ptr<ResourceManagerImpl> resource_manager_;
+    size_t num_frames_{0};
 
 private:
     void UpdateSkeletalMeshesAnimation(Duration duration);
@@ -49,8 +49,8 @@ private:
     Actor ConstructFromEntity(entt::entity entity) const
     {
         Actor a{};
-        a.m_EntityHandle = entt::handle{const_cast<entt::registry&>(m_Registry), entity};
-        a.m_HomeLevel = const_cast<Level*>(this);
+        a.entity_handle_ = entt::handle{const_cast<entt::registry&>(registry_), entity};
+        a.home_level_ = const_cast<Level*>(this);
         return a;
     }
 };

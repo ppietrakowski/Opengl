@@ -8,16 +8,16 @@
 
 enum class PrimitiveVertexType : std::int8_t
 {
-    Int,
-    UnsignedInt,
-    Float,
-    MaxPrimitiveVertexType
+    kInt,
+    kUnsignedInt,
+    kFloat,
+    kMaxPrimitiveVertexType
 };
 
 struct VertexAttribute
 {
-    std::int8_t NumComponents : 5;
-    PrimitiveVertexType VertexType : 3;
+    std::int8_t num_components : 5;
+    PrimitiveVertexType vertex_type : 3;
 };
 
 using AttributesView = std::span<const VertexAttribute>;
@@ -32,21 +32,24 @@ public:
     void Bind() const;
     void Unbind() const;
 
-    void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer);
+    void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& index_buffer);
 
     std::int32_t GetNumIndices() const;
 
     std::shared_ptr<VertexBuffer> GetVertexBufferAt(std::int32_t index);
     std::shared_ptr<IndexBuffer> GetIndexBuffer();
 
-    void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer, AttributesView attributes);
+    void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertex_buffer, AttributesView attributes);
     std::uint32_t GetOpenGlIdentifier() const;
 
-private:
-    std::uint32_t m_RendererId;
-    std::vector<std::shared_ptr<VertexBuffer>> m_VertexBuffers;
-    std::shared_ptr<IndexBuffer> m_IndexBuffer;
+    AttributesView GetAttributes() const
+    {
+        return attributes_;
+    }
 
 private:
-    void AddBufferInternal(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::span<const VertexAttribute> attributes);
+    std::uint32_t renderer_id_;
+    std::vector<std::shared_ptr<VertexBuffer>> vertex_buffers_;
+    std::shared_ptr<IndexBuffer> index_buffer_;
+    std::vector<VertexAttribute> attributes_;
 };

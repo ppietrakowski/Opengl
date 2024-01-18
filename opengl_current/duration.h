@@ -17,17 +17,17 @@ public:
     using milliseconds_duration_t = std::chrono::duration<float, std::milli>;
 
     Duration() :
-        m_DurationTime{duration_t::zero()}
+        duration_time_{duration_t::zero()}
     {
     }
 
     Duration(duration_t duration) :
-        m_DurationTime{duration}
+        duration_time_{duration}
     {
     }
 
     Duration(std::chrono::nanoseconds duration) :
-        m_DurationTime{std::chrono::duration_cast<duration_t>(duration)}
+        duration_time_{std::chrono::duration_cast<duration_t>(duration)}
     {
     }
 
@@ -36,51 +36,51 @@ public:
 
     float GetSeconds() const
     {
-        return std::chrono::duration_cast<seconds_duration_t>(m_DurationTime).count();
+        return std::chrono::duration_cast<seconds_duration_t>(duration_time_).count();
     }
 
     float GetMilliseconds() const
     {
-        return std::chrono::duration_cast<milliseconds_duration_t>(m_DurationTime).count();
+        return std::chrono::duration_cast<milliseconds_duration_t>(duration_time_).count();
     }
 
     std::uint64_t GetNanoSeconds() const
     {
-        return m_DurationTime.count();
+        return duration_time_.count();
     }
 
     bool IsNonZero() const
     {
-        return m_DurationTime != duration_t::zero();
+        return duration_time_ != duration_t::zero();
     }
 
     bool IsZero() const
     {
-        return m_DurationTime == duration_t::zero();
+        return duration_time_ == duration_t::zero();
     }
 
 private:
-    duration_t m_DurationTime;
+    duration_t duration_time_;
 };
 
 inline Duration operator+(const Duration& a, const Duration& b)
 {
-    return a.m_DurationTime + b.m_DurationTime;
+    return a.duration_time_ + b.duration_time_;
 }
 
 inline Duration operator-(const Duration& a, const Duration& b)
 {
-    return a.m_DurationTime - b.m_DurationTime;
+    return a.duration_time_ - b.duration_time_;
 }
 
 inline Duration operator*(const Duration& a, const Duration& b)
 {
-    return a.m_DurationTime * b.m_DurationTime;
+    return a.duration_time_ * b.duration_time_;
 }
 
 inline Duration operator/(const Duration& a, const Duration& b)
 {
-    return Duration::duration_t{a.m_DurationTime / b.m_DurationTime};
+    return Duration::duration_t{a.duration_time_ / b.duration_time_};
 }
 
 inline Duration& operator+=(Duration& a, const Duration& b)
@@ -97,5 +97,5 @@ inline Duration& operator-=(Duration& a, const Duration& b)
 
 inline Duration operator/(const Duration& a, std::uint64_t scalar)
 {
-    return Duration::duration_t{a.m_DurationTime / scalar};
+    return Duration::duration_t{a.duration_time_ / scalar};
 }

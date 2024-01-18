@@ -5,32 +5,32 @@
 
 #include <GL/glew.h>
 
-VertexBuffer::VertexBuffer(const void* data, std::int32_t sizeBytes, bool bDynamic) :
-    m_BufferSize{sizeBytes}
+VertexBuffer::VertexBuffer(const void* data, std::int32_t size_bytes, bool dynamic) :
+    buffer_size_{size_bytes}
 {
-    GLenum bufferUsage = bDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+    GLenum bufferUsage = dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
-    glGenBuffers(1, &m_RendererId);
-    glBindBuffer(GL_ARRAY_BUFFER, m_RendererId);
-    glBufferData(GL_ARRAY_BUFFER, sizeBytes, data, bufferUsage);
+    glGenBuffers(1, &renderer_id_);
+    glBindBuffer(GL_ARRAY_BUFFER, renderer_id_);
+    glBufferData(GL_ARRAY_BUFFER, size_bytes, data, bufferUsage);
 
-    RenderCommand::NotifyVertexBufferCreated(sizeBytes);
+    RenderCommand::NotifyVertexBufferCreated(size_bytes);
 }
 
-VertexBuffer::VertexBuffer(std::int32_t maxSizeBytes) :
-    VertexBuffer{nullptr, maxSizeBytes, true}
+VertexBuffer::VertexBuffer(std::int32_t max_size_bytes) :
+    VertexBuffer{nullptr, max_size_bytes, true}
 {
 }
 
 VertexBuffer::~VertexBuffer()
 {
-    glDeleteBuffers(1, &m_RendererId);
-    RenderCommand::NotifyVertexBufferDestroyed(m_BufferSize);
+    glDeleteBuffers(1, &renderer_id_);
+    RenderCommand::NotifyVertexBufferDestroyed(buffer_size_);
 }
 
 void VertexBuffer::Bind() const
 {
-    glBindBuffer(GL_ARRAY_BUFFER, m_RendererId);
+    glBindBuffer(GL_ARRAY_BUFFER, renderer_id_);
 }
 
 void VertexBuffer::Unbind() const
@@ -40,6 +40,6 @@ void VertexBuffer::Unbind() const
 
 void VertexBuffer::UpdateVertices(const void* buffer, std::int32_t offset, std::int32_t size)
 {
-    glBindBuffer(GL_ARRAY_BUFFER, m_RendererId);
+    glBindBuffer(GL_ARRAY_BUFFER, renderer_id_);
     glBufferSubData(GL_ARRAY_BUFFER, static_cast<GLintptr>(offset), static_cast<GLintptr>(size), buffer);
 }

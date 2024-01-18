@@ -7,34 +7,34 @@
 #include "renderer_api.h"
 
 
-IndexBuffer::IndexBuffer(const std::uint32_t* data, std::int32_t numIndices, bool bDynamic) :
-    m_NumIndices{numIndices}
+IndexBuffer::IndexBuffer(const std::uint32_t* data, std::int32_t num_indices, bool dynamic) :
+    num_indices_{num_indices}
 {
-    GLenum bufferUsage = bDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+    GLenum buffer_usage = dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
     glBindVertexArray(0);
 
-    glGenBuffers(1, &m_RendererId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(std::uint32_t), data, bufferUsage);
+    glGenBuffers(1, &renderer_id_);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer_id_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_indices * sizeof(std::uint32_t), data, buffer_usage);
 
-    RenderCommand::NotifyIndexBufferCreated(numIndices * sizeof(std::uint32_t));
+    RenderCommand::NotifyIndexBufferCreated(num_indices * sizeof(std::uint32_t));
 }
 
-IndexBuffer::IndexBuffer(std::int32_t totalNumIndices) :
-    IndexBuffer{nullptr, totalNumIndices, true}
+IndexBuffer::IndexBuffer(std::int32_t max_num_indices) :
+    IndexBuffer{nullptr, max_num_indices, true}
 {
 }
 
 IndexBuffer::~IndexBuffer()
 {
-    RenderCommand::NotifyIndexBufferDestroyed(m_NumIndices * sizeof(std::uint32_t));
-    glDeleteBuffers(1, &m_RendererId);
+    RenderCommand::NotifyIndexBufferDestroyed(num_indices_ * sizeof(std::uint32_t));
+    glDeleteBuffers(1, &renderer_id_);
 }
 
 void IndexBuffer::Bind() const
 {
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer_id_);
 }
 
 void IndexBuffer::Unbind() const
@@ -44,10 +44,10 @@ void IndexBuffer::Unbind() const
 
 void IndexBuffer::UpdateIndices(const uint32_t* data, std::int32_t offset, std::int32_t size)
 {
-    ERR_FAIL_EXPECTED_TRUE_MSG(size <= m_NumIndices, "Size over declared is causing memory allocation -> may occur memory leak");
+    ERR_FAIL_EXPECTED_TRUE_MSG(size <= num_indices_, "Size over declared is causing memory allocation -> may occur memory leak");
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
-    std::int32_t sizeBytes = size * sizeof(std::uint32_t);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer_id_);
+    std::int32_t size_bytes = size * sizeof(std::uint32_t);
 
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, sizeBytes, data);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size_bytes, data);
 }

@@ -19,186 +19,186 @@ Window::Window(const WindowSettings& settings)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    m_Window = glfwCreateWindow(settings.Width, settings.Height, settings.Title.c_str(), nullptr, nullptr);
-    CRASH_EXPECTED_NOT_NULL(m_Window);
+    window_ = glfwCreateWindow(settings.width, settings.height, settings.title.c_str(), nullptr, nullptr);
+    CRASH_EXPECTED_NOT_NULL(window_);
 
     // fill window data
     glm::dvec2 mousePosition;
-    glfwGetCursorPos(m_Window, &mousePosition.x, &mousePosition.y);
-    m_WindowData.MousePosition = mousePosition;
-    m_WindowData.LastMousePosition = m_WindowData.MousePosition;
+    glfwGetCursorPos(window_, &mousePosition.x, &mousePosition.y);
+    window_data_.mouse_position = mousePosition;
+    window_data_.last_mouse_position = window_data_.mouse_position;
 
-    glfwGetWindowPos(m_Window, &m_WindowData.WindowPosition.x, &m_WindowData.WindowPosition.y);
-    glfwGetWindowSize(m_Window, &m_WindowData.WindowSize.x, &m_WindowData.WindowSize.y);
+    glfwGetWindowPos(window_, &window_data_.window_position.x, &window_data_.window_position.y);
+    glfwGetWindowSize(window_, &window_data_.window_size.x, &window_data_.window_size.y);
 
     BindWindowCallbacks();
-    m_GraphicsContext = new GraphicsContext(m_Window);
-    m_Input = new Input(m_Window);
+    graphics_context_ = new GraphicsContext(window_);
+    input_ = new Input(window_);
 }
 
 Window::~Window()
 {
-    delete m_Input;
-    delete m_GraphicsContext;
-    glfwDestroyWindow(m_Window);
+    delete input_;
+    delete graphics_context_;
+    glfwDestroyWindow(window_);
 }
 
 void Window::Update()
 {
     glfwPollEvents();
-    m_GraphicsContext->SwapBuffers();
-    m_Input->Update(m_WindowData);
+    graphics_context_->SwapBuffers();
+    input_->Update(window_data_);
 }
 
 std::int32_t Window::GetWidth() const
 {
-    return m_WindowData.WindowSize.x;
+    return window_data_.window_size.x;
 }
 
 std::int32_t Window::GetHeight() const
 {
-    return m_WindowData.WindowSize.y;
+    return window_data_.window_size.y;
 }
 
 glm::ivec2 Window::GetWindowPosition() const
 {
-    return m_WindowData.WindowPosition;
+    return window_data_.window_position;
 }
 
 glm::vec2 Window::GetMousePosition() const
 {
-    return m_WindowData.MousePosition;
+    return window_data_.mouse_position;
 }
 
 glm::vec2 Window::GetLastMousePosition() const
 {
-    return m_WindowData.LastMousePosition;
+    return window_data_.last_mouse_position;
 }
 
 bool Window::IsOpen() const
 {
-    return m_WindowData.bGameRunning;
+    return window_data_.game_running;
 }
 
 void Window::SetEventCallback(const EventCallback& callback)
 {
-    m_WindowData.Callback = callback;
+    window_data_.event_callback = callback;
 }
 
 void Window::EnableVSync()
 {
-    m_WindowData.bVsyncEnabled = true;
-    m_GraphicsContext->SetVsync(true);
+    window_data_.vsync_enabled = true;
+    graphics_context_->SetVsync(true);
 }
 
 void Window::DisableVSync()
 {
-    m_WindowData.bVsyncEnabled = false;
-    m_GraphicsContext->SetVsync(false);
+    window_data_.vsync_enabled = false;
+    graphics_context_->SetVsync(false);
 }
 
 bool Window::IsVSyncEnabled() const
 {
-    return m_WindowData.bVsyncEnabled;
+    return window_data_.vsync_enabled;
 }
 
 void* Window::GetWindowNativeHandle() const
 {
-    return m_Window;
+    return window_;
 }
 
 GraphicsContext* Window::GetContext() const
 {
-    return m_GraphicsContext;
+    return graphics_context_;
 }
 
 void Window::Close()
 {
-    glfwSetWindowShouldClose(m_Window, GL_TRUE);
-    m_WindowData.bGameRunning = false;
+    glfwSetWindowShouldClose(window_, GL_TRUE);
+    window_data_.game_running = false;
 }
 
-void Window::SetMouseVisible(bool bMouseVisible)
+void Window::SetMouseVisible(bool mouse_visible)
 {
-    if (bMouseVisible)
+    if (mouse_visible)
     {
-        glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
     else
     {
-        glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
 
 void Window::BindWindowCallbacks()
 {
-    glfwSetWindowUserPointer(m_Window, &m_WindowData);
+    glfwSetWindowUserPointer(window_, &window_data_);
 
-    glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
-        windowData->LastMousePosition = windowData->MousePosition;
-        windowData->MousePosition = glm::vec2{xpos, ypos};
+    glfwSetCursorPosCallback(window_, [](GLFWwindow* window, double xpos, double ypos) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        window_data->last_mouse_position = window_data->mouse_position;
+        window_data->mouse_position = glm::vec2{xpos, ypos};
 
-        if (windowData->Callback)
+        if (window_data->event_callback)
         {
             Event evt{};
-            evt.Type = EventType::MouseMoved;
-            evt.MouseMove.MousePosition = windowData->MousePosition;
-            evt.MouseMove.LastMousePosition = windowData->LastMousePosition;
-            windowData->Callback(evt);
+            evt.type = EventType::kMouseMoved;
+            evt.mouse_move.mouse_position = window_data->mouse_position;
+            evt.mouse_move.last_mouse_position = window_data->last_mouse_position;
+            window_data->event_callback(evt);
         }
     });
 
-    glfwSetKeyCallback(m_Window, [](GLFWwindow* window, std::int32_t key, std::int32_t scancode, std::int32_t action, std::int32_t mods) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetKeyCallback(window_, [](GLFWwindow* window, std::int32_t key, std::int32_t scancode, std::int32_t action, std::int32_t mods) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (windowData->Callback)
+        if (window_data->event_callback)
         {
             Event event{};
-            event.Type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EventType::KeyPressed : EventType::KeyReleased;
-            event.Key = {(KeyCode)key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER)};
+            event.type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EventType::kKeyPressed : EventType::kKeyReleased;
+            event.key = {(KeyCode)key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER)};
 
-            windowData->Callback(event);
+            window_data->event_callback(event);
         }
     });
 
-    glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, std::int32_t button, std::int32_t action, std::int32_t mods) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetMouseButtonCallback(window_, [](GLFWwindow* window, std::int32_t button, std::int32_t action, std::int32_t mods) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (windowData->Callback)
+        if (window_data->event_callback)
         {
             Event event{};
-            event.Type = (action == GLFW_PRESS) ? EventType::MouseButtonPressed : EventType::MouseButtonReleased;
-            event.MouseButton = {(MouseButton)button, windowData->MousePosition};
-            windowData->Callback(event);
+            event.type = (action == GLFW_PRESS) ? EventType::kMouseButtonPressed : EventType::kMouseButtonReleased;
+            event.mouse_button = {(MouseButton)button, window_data->mouse_position};
+            window_data->event_callback(event);
         }
     });
 
-    glfwSetWindowFocusCallback(m_Window, [](GLFWwindow* window, std::int32_t focused) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetWindowFocusCallback(window_, [](GLFWwindow* window, std::int32_t focused) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (windowData->Callback)
+        if (window_data->event_callback)
         {
             Event event{};
-            event.Type = (focused == GL_TRUE) ? EventType::GainedFocus : EventType::LostFocus;
-            windowData->Callback(event);
+            event.type = (focused == GL_TRUE) ? EventType::kGainedFocus : EventType::kLostFocus;
+            window_data->event_callback(event);
         }
     });
 
-    glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+    glfwSetScrollCallback(window_, [](GLFWwindow* window, double xoffset, double yoffset) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (windowData->Callback)
+        if (window_data->event_callback)
         {
             Event event{};
-            event.Type = EventType::MouseWheelScrolled;
-            event.MouseWheel.Delta = {xoffset, yoffset};
-            windowData->Callback(event);
+            event.type = EventType::kMouseWheelScrolled;
+            event.mouse_wheel.delta = {xoffset, yoffset};
+            window_data->event_callback(event);
         }
     });
 
-    glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
-        windowData->bGameRunning = false;
+    glfwSetWindowCloseCallback(window_, [](GLFWwindow* window) {
+        GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        window_data->game_running = false;
     });
 }

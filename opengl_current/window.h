@@ -14,9 +14,9 @@ struct GLFWwindow;
 
 struct WindowSettings
 {
-    std::int32_t Width;
-    std::int32_t Height;
-    std::string Title;
+    std::int32_t width;
+    std::int32_t height;
+    std::string title;
 };
 
 class Input;
@@ -50,13 +50,13 @@ public:
     GraphicsContext* GetContext() const;
 
     void Close();
-    void SetMouseVisible(bool bMouseVisible);
+    void SetMouseVisible(bool mouse_visible);
 
 private:
-    GLFWwindow* m_Window;
-    Input* m_Input;
-    GraphicsContext* m_GraphicsContext;
-    GlfwWindowData m_WindowData;
+    GLFWwindow* window_;
+    Input* input_;
+    GraphicsContext* graphics_context_;
+    GlfwWindowData window_data_;
 
 private:
     void BindWindowCallbacks();

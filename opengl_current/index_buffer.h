@@ -11,8 +11,8 @@ class IndexBuffer
 {
 public:
     IndexBuffer(const std::uint32_t* data,
-        std::int32_t numIndices, bool bDynamic = false);
-    IndexBuffer(std::int32_t totalNumIndices);
+        std::int32_t num_indices, bool dynamic = false);
+    IndexBuffer(std::int32_t max_num_indices);
     ~IndexBuffer();
 
 public:
@@ -26,14 +26,14 @@ public:
     std::uint32_t GetOpenGlIdentifier() const;
 
 private:
-    std::uint32_t m_RendererId;
-    std::int32_t m_NumIndices;
+    std::uint32_t renderer_id_;
+    std::int32_t num_indices_;
 };
 
 
 FORCE_INLINE std::int32_t IndexBuffer::GetNumIndices() const
 {
-    return m_NumIndices;
+    return num_indices_;
 }
 
 FORCE_INLINE void IndexBuffer::UpdateIndices(const std::uint32_t* data, std::int32_t size)
@@ -43,5 +43,5 @@ FORCE_INLINE void IndexBuffer::UpdateIndices(const std::uint32_t* data, std::int
 
 FORCE_INLINE std::uint32_t IndexBuffer::GetOpenGlIdentifier() const
 {
-    return m_RendererId;
+    return renderer_id_;
 }

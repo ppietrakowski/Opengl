@@ -10,8 +10,8 @@
 class VertexBuffer
 {
 public:
-    VertexBuffer(const void* data, std::int32_t sizeBytes, bool bDynamic = false);
-    VertexBuffer(std::int32_t maxSizeBytes);
+    VertexBuffer(const void* data, std::int32_t size_bytes, bool dynamic = false);
+    VertexBuffer(std::int32_t max_size_bytes);
     ~VertexBuffer();
 
 public:
@@ -27,8 +27,8 @@ public:
     std::uint32_t GetOpenGlIdentifier() const;
 
 private:
-    std::uint32_t m_RendererId;
-    std::int32_t m_BufferSize;
+    std::uint32_t renderer_id_;
+    std::int32_t buffer_size_;
 };
 
 FORCE_INLINE void VertexBuffer::UpdateVertices(const void* buffer, std::int32_t size)
@@ -38,10 +38,10 @@ FORCE_INLINE void VertexBuffer::UpdateVertices(const void* buffer, std::int32_t 
 
 FORCE_INLINE std::int32_t VertexBuffer::GetVerticesSizeBytes() const
 {
-    return m_BufferSize;
+    return buffer_size_;
 }
 
 FORCE_INLINE std::uint32_t VertexBuffer::GetOpenGlIdentifier() const
 {
-    return m_RendererId;
+    return renderer_id_;
 }

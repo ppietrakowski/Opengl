@@ -1,0 +1,2 @@
+VertexShader=instanced.vert
+FragmentShader=default.frag

@@ -211,6 +211,8 @@
     <None Include="shaders\default.frag" />
     <None Include="shaders\default.shd" />
     <None Include="shaders\default.vert" />
+    <None Include="shaders\instanced.shd" />
+    <None Include="shaders\instanced.vert" />
     <None Include="shaders\skeletal_default.shd" />
     <None Include="shaders\skeleton.frag" />
     <None Include="shaders\skeleton.vert" />

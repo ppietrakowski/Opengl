@@ -22,15 +22,16 @@ public:
     static float GetMouseX();
     static float GetMouseY();
 
-    void Update(const GlfwWindowData& windowData);
+    void Update(const GlfwWindowData& window_data);
 
 private:
-    static Input* s_Instance;
+    static Input* instance_;
 
 private:
-    GLFWwindow* m_Window;
-    glm::vec2 m_MousePosition;
+    GLFWwindow* window_;
+    glm::vec2 mouse_position_;
 
+private:
     bool IsKeyPressedImpl(KeyCode key);
     bool IsMouseButtonPressedImpl(MouseButton button);
     glm::vec2 GetMousePositionImpl() const;

@@ -27,16 +27,16 @@ public:
     bool IsRunning() const;
     void Quit();
 
-    void SetMouseVisible(bool bMouseVisible);
+    void SetMouseVisible(bool mouse_visible);
 
-    void AddLayer(std::unique_ptr<Layer>&& gameLayer);
+    void AddLayer(std::unique_ptr<Layer>&& game_layer);
     void RemoveLayer(std::type_index index);
 
 private:
-    std::unique_ptr<Window> m_Window;
-    GraphicsContext* m_GraphicsContext;
-    ImGuiContext* m_ImguiContext;
-    std::vector<std::unique_ptr<Layer>> m_Layers;
+    std::unique_ptr<Window> window_;
+    GraphicsContext* graphics_context_;
+    ImGuiContext* imgui_context_;
+    std::vector<std::unique_ptr<Layer>> layers_;
 
 private:
     bool InitializeImGui();
