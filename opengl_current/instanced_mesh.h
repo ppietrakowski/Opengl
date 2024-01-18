@@ -76,6 +76,8 @@ private:
     std::shared_ptr<Material> material_;
 
     std::shared_ptr<VertexArray> vertex_array_;
+
+    // transform buffers splitted into objects that can handle max 400 meshes
     std::vector<InstancingTransformBuffer> transform_buffers_;
 
     // used for recycling indices when removing instances

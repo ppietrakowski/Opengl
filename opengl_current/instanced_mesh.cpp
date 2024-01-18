@@ -46,8 +46,7 @@ std::int32_t InstancedMesh::AddInstance(const Transform& transform, std::int32_t
         transform_buffers_.emplace_back();
         
         // update iterator to point to new buffer
-        it = transform_buffers_.begin();
-        std::advance(it, transform_buffers_.size() - 1);
+        it = transform_buffers_.end() - 1;
     }
 
     it->AddTransform(transform.CalculateTransformMatrix());
