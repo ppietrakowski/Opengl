@@ -100,7 +100,13 @@ void Level::BroadcastRender(Duration duration)
 
     for (auto&& [entity, transform, staticMesh] : static_mesh_view.each())
     {
-        staticMesh.Draw(transform.GetWorldTransformMatrix());
+        AddNewStaticMesh(staticMesh.mesh_name, transform.GetAsTransform());
+    }
+
+    for (auto& [name, mesh] : instanced_mesh_)
+    {
+        mesh->Draw(glm::mat4{1.0f});
+        mesh->Clear();
     }
 
     auto skeletal_mesh_view = registry_.view<TransformComponent, SkeletalMeshComponent>();
@@ -113,6 +119,24 @@ void Level::BroadcastRender(Duration duration)
     for (auto&& [entity, transform, staticMesh] : instanced_mesh_component.each())
     {
         staticMesh.Draw(transform.GetWorldTransformMatrix());
+    }
+}
+
+void Level::AddNewStaticMesh(const std::string& mesh_name, const Transform& transform)
+{
+    auto it = instanced_mesh_.find(mesh_name);
+
+    if (it == instanced_mesh_.end())
+    {
+        it = instanced_mesh_.try_emplace(mesh_name, std::make_shared<InstancedMesh>(ResourceManager::GetStaticMesh(mesh_name),
+            ResourceManager::GetMaterial("instanced"))).first;
+    }
+
+    auto& mesh = it->second->GetMesh();
+
+    if (Renderer::IsVisibleToCamera(transform.position, mesh.GetBBoxMin(), mesh.GetBBoxMax()))
+    {
+        it->second->AddInstance(transform, 0);
     }
 }
 
