@@ -78,7 +78,7 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     }
 
     Actor static_mesh_actor = level_.CreateActor("StaticMeshActor");
-    static_mesh_actor.AddComponent<StaticMeshComponent>(static_mesh_);
+    static_mesh_actor.AddComponent<StaticMeshComponent>("cube.obj");
     static_mesh_actor.GetComponent<TransformComponent>().SetEulerAngles(glm::vec3{0, 90, 0});
 
     bbox_min_ = test_skeletal_mesh_->GetBboxMin();

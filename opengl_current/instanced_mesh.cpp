@@ -97,6 +97,10 @@ void InstancedMesh::UpdateInstance(std::int32_t index, const Transform& new_tran
 
 void InstancedMesh::Clear()
 {
-    transform_buffers_.clear();
+    for (InstancingTransformBuffer& transform_buffer : transform_buffers_)
+    {
+        transform_buffer.Clear();
+    }
+
     num_instances_ = 0;
 }

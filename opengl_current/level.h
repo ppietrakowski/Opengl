@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Actor.h"
+#include "actor.h"
 #include "duration.h"
+
+#include "instanced_mesh.h"
 
 class ResourceManagerImpl;
 
@@ -37,11 +39,15 @@ public:
         return registry_.view<Args...>();
     }
 
+    void AddNewStaticMesh(const std::string& mesh_name, const Transform& transform);
+
 private:
     entt::registry registry_;
     std::map<std::string, Actor> actors_;
     std::shared_ptr<ResourceManagerImpl> resource_manager_;
     size_t num_frames_{0};
+
+    std::unordered_map<std::string, std::shared_ptr<InstancedMesh>> instanced_mesh_;
 
 private:
     void UpdateSkeletalMeshesAnimation(Duration duration);
