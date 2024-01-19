@@ -70,10 +70,6 @@ public:
         const VertexArray& vertex_array,
         const glm::mat4& transform = glm::mat4{1.0f});
 
-    static void SubmitTriangles(const Material& material,
-        const VertexArray& vertex_array,
-        const glm::mat4& transform = glm::mat4{1.0f});
-
     static void SubmitLines(const Material& material,
         std::int32_t num_indices,
         const VertexArray& vertex_array,
@@ -92,8 +88,7 @@ public:
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();
 
-    static void DrawDebugBox(glm::vec3 box_min, glm::vec3 box_max, const Transform& transform);
-    static void DrawDebugBox(glm::vec3 box_min, glm::vec3 box_max, const Transform& transform, const glm::vec4& color);
+    static void DrawDebugBox(glm::vec3 box_min, glm::vec3 box_max, const Transform& transform, const glm::vec4& color = glm::vec4{0, 0, 0, 1});
     static void FlushDrawDebug(Material& shader);
 
     static bool IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_min, glm::vec3 bbox_max);

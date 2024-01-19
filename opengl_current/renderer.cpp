@@ -82,11 +82,6 @@ void Renderer::SubmitTriangles(const Material& material, std::int32_t num_indice
     RenderCommand::DrawTriangles(vertex_array, num_indices);
 }
 
-void Renderer::SubmitTriangles(const Material& material, const VertexArray& vertex_array, const glm::mat4& transform)
-{
-    SubmitTriangles(material, vertex_array.GetNumIndices(), vertex_array, transform);
-}
-
 void Renderer::SubmitLines(const Material& material, std::int32_t num_indices, const VertexArray& vertex_array, const glm::mat4& transform)
 {
     ASSERT(num_indices <= vertex_array.GetNumIndices());
@@ -136,11 +131,6 @@ void Renderer::SubmitMeshInstanced(const InstancingSubmission& instance_submissi
     UploadUniforms(shader, instance_submission.transform);
 
     RenderCommand::DrawTrianglesInstanced(*instance_submission.vertex_array, instance_submission.num_instances);
-}
-
-void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform)
-{
-    debug_batch_->AddBoxInstance(boxmin, boxmax, transform, glm::vec4{0, 0, 0, 1});
 }
 
 void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform, const glm::vec4& color)

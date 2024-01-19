@@ -118,11 +118,11 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
 
 void StaticMesh::Render(const glm::mat4& transform) const
 {
-    Renderer::SubmitTriangles(*main_material, *vertex_array_, transform);
+    Renderer::SubmitTriangles(*main_material, vertex_array_->GetNumIndices(), *vertex_array_, transform);
 }
 
 void StaticMesh::Render(const Material& override_material, const glm::mat4& transform) const
 {
-    Renderer::SubmitTriangles(override_material, *vertex_array_, transform);
+    Renderer::SubmitTriangles(override_material, vertex_array_->GetNumIndices(), *vertex_array_, transform);
 }
 
