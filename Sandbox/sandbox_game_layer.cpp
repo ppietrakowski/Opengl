@@ -103,9 +103,9 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
 
     InstancedMeshComponent& instanced_mesh = instance_mesh.GetComponent<InstancedMeshComponent>();
 
-    for (std::int32_t i = 0; i < 10; ++i)
+    for (int i = 0; i < 10; ++i)
     {
-        for (std::int32_t j = 0; j < 400; ++j)
+        for (int j = 0; j < 400; ++j)
         {
             Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
             instanced_mesh.AddInstance(transform);
@@ -125,23 +125,23 @@ void SandboxGameLayer::Update(Duration delta_time)
 {
     float dt = delta_time.GetSeconds();
 
-    if (Input::IsKeyPressed(Keys::kE))
+    if (Input::IsKeyPressed(GLFW_KEY_E))
     {
         camera_yaw_ -= yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
     }
-    else if (Input::IsKeyPressed(Keys::kQ))
+    else if (Input::IsKeyPressed(GLFW_KEY_Q))
     {
         camera_yaw_ += yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
     }
 
-    if (Input::IsKeyPressed(Keys::kY))
+    if (Input::IsKeyPressed(GLFW_KEY_Y))
     {
         glm::vec3 world_up = glm::vec3{0, 1, 0};
         camera_position_ += ascend_speed_ * world_up * dt;
     }
-    else if (Input::IsKeyPressed(Keys::kH))
+    else if (Input::IsKeyPressed(GLFW_KEY_H))
     {
         glm::vec3 world_down = glm::vec3{0, -1, 0};
         camera_position_ += ascend_speed_ * world_down * dt;
@@ -177,12 +177,12 @@ bool SandboxGameLayer::OnEvent(const Event& event)
 
 void SandboxGameLayer::OnImguiFrame()
 {
-    static std::int32_t last_framerate = 0;
-    static std::int32_t num_frame{0};
+    static int last_framerate = 0;
+    static int num_frame{0};
 
     if (num_frame == 2)
     {
-        last_framerate = (last_framerate + static_cast<std::int32_t>(1000 / last_delta_seconds_.GetMilliseconds())) / 2;
+        last_framerate = (last_framerate + static_cast<int>(1000 / last_delta_seconds_.GetMilliseconds())) / 2;
     }
     else
     {

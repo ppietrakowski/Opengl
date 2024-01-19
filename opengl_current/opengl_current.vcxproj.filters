@@ -209,9 +209,6 @@
     <ClInclude Include="input.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="keys.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
     <ClInclude Include="window.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>

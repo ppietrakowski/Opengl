@@ -30,7 +30,7 @@ void UniformBuffer::UpdateBuffer(const void* data, size_t size_bytes, size_t off
     glBufferSubData(GL_UNIFORM_BUFFER, (GLsizeiptr)offset, (GLsizeiptr)size_bytes, data);
 }
 
-void UniformBuffer::Bind(std::int32_t binding_id) const
+void UniformBuffer::Bind(int binding_id) const
 {
     glBindBufferBase(GL_UNIFORM_BUFFER, binding_id, renderer_id_);
 }

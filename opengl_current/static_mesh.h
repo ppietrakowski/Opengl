@@ -13,13 +13,13 @@ struct StaticMeshVertex
     glm::vec3 position{0, 0,0};
     glm::vec3 normal{0, 0, 0};
     glm::vec2 texture_coords{0, 0};
-    std::int32_t texture_id{0};
+    int texture_id{0};
 
     static inline constexpr VertexAttribute kDataFormat[4] = {{3, PrimitiveVertexType::kFloat},
         {3, PrimitiveVertexType::kFloat}, {2, PrimitiveVertexType::kFloat}, {1, PrimitiveVertexType::kInt}};
 
     StaticMeshVertex() = default;
-    StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& texture_coords, std::int32_t texture_id) :
+    StaticMeshVertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& texture_coords, int texture_id) :
         position{position},
         normal{normal},
         texture_coords{texture_coords},
@@ -34,7 +34,7 @@ struct StaticMeshVertex
 template<>
 struct BatchVertexCreator<StaticMeshVertex>
 {
-    static StaticMeshVertex CreateInstanceFrom(const StaticMeshVertex& vertex, const glm::mat4& transform, std::int32_t texture_id)
+    static StaticMeshVertex CreateInstanceFrom(const StaticMeshVertex& vertex, const glm::mat4& transform, int texture_id)
     {
         StaticMeshVertex v{vertex};
         glm::mat3 normal_matrix = transform;
@@ -56,8 +56,8 @@ public:
     void Render(const glm::mat4& transform) const;
     void Render(const Material& override_naterial, const glm::mat4& transform) const;
 
-    std::int32_t GetNumPolygons() const;
-    std::int32_t GetNumTriangles() const;
+    int GetNumPolygons() const;
+    int GetNumTriangles() const;
 
     const glm::vec3& GetBBoxMin() const;
     const glm::vec3& GetBBoxMax() const;
@@ -70,11 +70,11 @@ public:
     std::vector<std::string> texture_paths;
     std::shared_ptr<Material> main_material;
     std::vector<StaticMeshVertex> vertices;
-    std::vector<std::uint32_t> indices;
+    std::vector<uint32_t> indices;
 
 private:
     std::shared_ptr<VertexArray> vertex_array_;
-    std::int32_t num_triangles_;
+    int num_triangles_;
 
     glm::vec3 bbox_min_;
     glm::vec3 bbox_max_;
@@ -91,12 +91,12 @@ FORCE_INLINE const glm::vec3& StaticMesh::GetBBoxMax() const
     return bbox_max_;
 }
 
-FORCE_INLINE std::int32_t StaticMesh::GetNumPolygons() const
+FORCE_INLINE int StaticMesh::GetNumPolygons() const
 {
     return num_triangles_;
 }
 
-FORCE_INLINE std::int32_t StaticMesh::GetNumTriangles() const
+FORCE_INLINE int StaticMesh::GetNumTriangles() const
 {
     return num_triangles_;
 }

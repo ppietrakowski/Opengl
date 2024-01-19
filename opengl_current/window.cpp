@@ -29,7 +29,10 @@ Window::Window(const WindowSettings& settings)
     window_data_.last_mouse_position = window_data_.mouse_position;
 
     glfwGetWindowPos(window_, &window_data_.window_position.x, &window_data_.window_position.y);
-    glfwGetWindowSize(window_, &window_data_.window_size.x, &window_data_.window_size.y);
+
+    glm::ivec2 window_size{0, 0};
+    glfwGetWindowSize(window_, &window_size.x, &window_size.y);
+    window_data_.window_size = window_size;
 
     BindWindowCallbacks();
     graphics_context_ = new GraphicsContext(window_);
@@ -50,12 +53,12 @@ void Window::Update()
     input_->Update(window_data_);
 }
 
-std::int32_t Window::GetWidth() const
+uint32_t Window::GetWidth() const
 {
     return window_data_.window_size.x;
 }
 
-std::int32_t Window::GetHeight() const
+uint32_t Window::GetHeight() const
 {
     return window_data_.window_size.y;
 }
@@ -149,7 +152,7 @@ void Window::BindWindowCallbacks()
         }
     });
 
-    glfwSetKeyCallback(window_, [](GLFWwindow* window, std::int32_t key, std::int32_t scancode, std::int32_t action, std::int32_t mods) {
+    glfwSetKeyCallback(window_, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
         GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
         if (window_data->event_callback)
@@ -162,7 +165,7 @@ void Window::BindWindowCallbacks()
         }
     });
 
-    glfwSetMouseButtonCallback(window_, [](GLFWwindow* window, std::int32_t button, std::int32_t action, std::int32_t mods) {
+    glfwSetMouseButtonCallback(window_, [](GLFWwindow* window, int button, int action, int mods) {
         GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
         if (window_data->event_callback)
@@ -174,7 +177,7 @@ void Window::BindWindowCallbacks()
         }
     });
 
-    glfwSetWindowFocusCallback(window_, [](GLFWwindow* window, std::int32_t focused) {
+    glfwSetWindowFocusCallback(window_, [](GLFWwindow* window, int focused) {
         GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
         if (window_data->event_callback)

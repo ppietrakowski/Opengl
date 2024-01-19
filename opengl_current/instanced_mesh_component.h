@@ -17,7 +17,7 @@ struct InstancedMeshComponent
         instanced_mesh->AddInstance(transform, 0);
     }
 
-    void RemoveInstance(std::int32_t index) const
+    void RemoveInstance(int index) const
     {
         instanced_mesh->RemoveInstance(index);
     }

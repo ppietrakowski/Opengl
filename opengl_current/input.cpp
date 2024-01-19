@@ -15,13 +15,13 @@ Input::Input(GLFWwindow* window) :
 
 bool Input::IsKeyPressedImpl(KeyCode key)
 {
-    std::int32_t state = glfwGetKey(window_, static_cast<std::int32_t>(key));
+    int state = glfwGetKey(window_, key);
     return state == GLFW_PRESS;
 }
 
 bool Input::IsMouseButtonPressedImpl(MouseButton button)
 {
-    std::int32_t state = glfwGetMouseButton(window_, static_cast<std::int32_t>(button));
+    int state = glfwGetMouseButton(window_, button);
     return state == GLFW_PRESS;
 }
 

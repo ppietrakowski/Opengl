@@ -20,6 +20,8 @@ struct Transform
 
     FORCE_INLINE glm::mat4 CalculateTransformMatrix() const
     {
-        return glm::translate(glm::identity<glm::mat4>(), position) * glm::mat4_cast(rotation) * glm::scale(glm::identity<glm::mat4>(), scale);
+        return glm::translate(glm::identity<glm::mat4>(), position) *
+            glm::mat4_cast(rotation) * 
+            glm::scale(glm::identity<glm::mat4>(), scale);
     }
 };

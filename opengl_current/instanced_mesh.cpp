@@ -17,14 +17,15 @@ void InstancedMesh::Draw(const glm::mat4& transform)
     for (InstancingTransformBuffer& transform_buffer : transform_buffers_)
     {
         material_->GetShader().BindUniformBuffer(0, *transform_buffer.uniform_buffer);
-        Renderer::SubmitMeshInstanced(InstancingSubmission{material_.get(), static_mesh_->vertex_array_.get(), transform_buffer.uniform_buffer.get(), transform_buffer.num_transforms_occupied, transform});
+        Renderer::SubmitMeshInstanced(SubmitCommandArgs{material_.get(), 0, static_mesh_->vertex_array_.get(), transform}, 
+            *transform_buffer.uniform_buffer, transform_buffer.num_transforms_occupied);
     }
 }
 
-std::int32_t InstancedMesh::AddInstance(const Transform& transform, std::int32_t textureId)
+int InstancedMesh::AddInstance(const Transform& transform, int texture_id)
 {
     auto it = transform_buffers_.begin();
-    std::int32_t id = num_instances_;
+    int id = num_instances_;
 
     bool recycled_indices = !free_instance_indices_.empty();
     if (recycled_indices)
@@ -62,7 +63,7 @@ std::int32_t InstancedMesh::AddInstance(const Transform& transform, std::int32_t
     return num_instances_++;
 }
 
-void InstancedMesh::RemoveInstance(std::int32_t index)
+void InstancedMesh::RemoveInstance(int index)
 {
     num_instances_--;
     ASSERT(num_instances_ >= 0);
@@ -75,10 +76,10 @@ void InstancedMesh::RemoveInstance(std::int32_t index)
     UpdateInstance(index, transform);
 }
 
-void InstancedMesh::UpdateInstance(std::int32_t index, const Transform& new_transform)
+void InstancedMesh::UpdateInstance(int index, const Transform& new_transform)
 {
     auto it = transform_buffers_.begin();
-    std::int32_t id = index;
+    int id = index;
     
     // find relative index and coresponding uniform buffer
     while (id >= kNumInstancesTransform)

@@ -48,7 +48,7 @@ public:
 
 std::string FormatString(const char* format, ...);
 
-using LogDeviceID = std::int16_t;
+using LogDeviceID = int16_t;
 
 class Logging
 {
@@ -67,7 +67,7 @@ public:
     static void EnableStdLogging();
 
 private:
-    static std::int32_t ignored_log_levels_;
+    static int ignored_log_levels_;
 
 private:
     static void SortLogDeviceIDs();

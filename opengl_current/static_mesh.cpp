@@ -57,15 +57,15 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
         throw std::runtime_error{importer.GetErrorString()};
     }
 
-    std::int32_t total_vertices = 0;
-    std::int32_t total_indices = 0;
+    int total_vertices = 0;
+    int total_indices = 0;
 
     vertices.reserve(scene->mMeshes[0]->mNumVertices);
 
-    std::int32_t start_num_indices = scene->mMeshes[0]->mNumFaces * 3;
+    int start_num_indices = scene->mMeshes[0]->mNumFaces * 3;
     indices.reserve(start_num_indices);
 
-    for (std::uint32_t i = 0; i < scene->mNumMaterials; ++i)
+    for (uint32_t i = 0; i < scene->mNumMaterials; ++i)
     {
         aiString texture_path;
 
@@ -76,11 +76,11 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
         }
     }
 
-    for (std::uint32_t i = 0; i < scene->mNumMeshes; ++i)
+    for (uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
         const aiMesh* mesh = scene->mMeshes[i];
 
-        for (std::uint32_t j = 0; j < mesh->mNumVertices; ++j)
+        for (uint32_t j = 0; j < mesh->mNumVertices; ++j)
         {
             const aiVector3D& pos = mesh->mVertices[j];
             const aiVector3D& normal = mesh->mNormals[j];
@@ -89,12 +89,12 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
             vertices.emplace_back(ToGlm(pos), ToGlm(normal), ToGlm(texture_coords), 0);
         }
 
-        for (std::uint32_t j = 0; j < mesh->mNumFaces; ++j)
+        for (uint32_t j = 0; j < mesh->mNumFaces; ++j)
         {
             const aiFace& face = mesh->mFaces[j];
             ASSERT(face.mNumIndices == 3);
 
-            for (std::uint32_t k = 0; k < face.mNumIndices; ++k)
+            for (uint32_t k = 0; k < face.mNumIndices; ++k)
             {
                 indices.emplace_back(face.mIndices[k] + total_indices);
             }
@@ -105,12 +105,12 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
     }
 
     std::shared_ptr<IndexBuffer> index_buffer = std::make_shared<IndexBuffer>(indices.data(),
-        static_cast<std::int32_t>(indices.size()));
+        static_cast<int>(indices.size()));
 
-    vertex_array_->AddVertexBuffer(std::make_shared<VertexBuffer>(vertices.data(), static_cast<std::int32_t>(vertices.size() * sizeof(StaticMeshVertex))), StaticMeshVertex::kDataFormat);
+    vertex_array_->AddVertexBuffer(std::make_shared<VertexBuffer>(vertices.data(), static_cast<int>(vertices.size() * sizeof(StaticMeshVertex))), StaticMeshVertex::kDataFormat);
     vertex_array_->SetIndexBuffer(index_buffer);
 
-    num_triangles_ = static_cast<std::int32_t>(indices.size()) / 3;
+    num_triangles_ = static_cast<int>(indices.size()) / 3;
     mesh_name_ = scene->mName.C_Str();
     FindAabCollision(vertices, bbox_min_, bbox_max_);
 }
@@ -118,11 +118,11 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
 
 void StaticMesh::Render(const glm::mat4& transform) const
 {
-    Renderer::SubmitTriangles(*main_material, vertex_array_->GetNumIndices(), *vertex_array_, transform);
+    Renderer::SubmitTriangles(SubmitCommandArgs{main_material.get(), vertex_array_->GetNumIndices(), vertex_array_.get(), transform});
 }
 
 void StaticMesh::Render(const Material& override_material, const glm::mat4& transform) const
 {
-    Renderer::SubmitTriangles(override_material, vertex_array_->GetNumIndices(), *vertex_array_, transform);
+    Renderer::SubmitTriangles(SubmitCommandArgs{&override_material, vertex_array_->GetNumIndices(), vertex_array_.get(), transform});
 }
 

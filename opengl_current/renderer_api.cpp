@@ -1,4 +1,5 @@
 #include "renderer_api.h"
+#include "error_macros.h"
 
 #include <GL/glew.h>
 
@@ -22,26 +23,34 @@ void RendererApi::SetClearColor(const RgbaColor& clear_color)
     }
 }
 
-void RendererApi::DrawTriangles(const VertexArray& vertex_array, std::int32_t num_indices)
+void RendererApi::DrawTriangles(const VertexArray& vertex_array, int num_indices)
 {
+    ASSERT(num_indices >= 0);
+
     vertex_array.Bind();
     glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_INT, nullptr);
 }
 
-void RendererApi::DrawTrianglesAdjancency(const VertexArray& vertex_array, std::int32_t num_indices)
+void RendererApi::DrawTrianglesAdjancency(const VertexArray& vertex_array, int num_indices)
 {
+    ASSERT(num_indices >= 0);
+
     vertex_array.Bind();
     glDrawElements(GL_TRIANGLES_ADJACENCY, num_indices, GL_UNSIGNED_INT, nullptr);
 }
 
-void RendererApi::DrawLines(const VertexArray& vertex_array, std::int32_t num_indices)
+void RendererApi::DrawLines(const VertexArray& vertex_array, int num_indices)
 {
+    ASSERT(num_indices >= 0);
+
     vertex_array.Bind();
     glDrawElements(GL_LINES, num_indices, GL_UNSIGNED_INT, nullptr);
 }
 
-void RendererApi::DrawPoints(const VertexArray& vertex_array, std::int32_t num_indices)
+void RendererApi::DrawPoints(const VertexArray& vertex_array, int num_indices)
 {
+    ASSERT(num_indices >= 0);
+
     vertex_array.Bind();
     glDrawElements(GL_POINTS, num_indices, GL_UNSIGNED_INT, nullptr);
 }
@@ -116,14 +125,17 @@ void RendererApi::ClearBufferBindings_Debug()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void RendererApi::SetViewport(std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height)
+void RendererApi::SetViewport(int x, int y, int width, int height)
 {
     glViewport(x, y, width, height);
     glScissor(x, y, width, height);
 }
 
-void RendererApi::DrawTrianglesInstanced(const VertexArray& vertex_array, size_t num_instances)
+void RendererApi::DrawTrianglesInstanced(const VertexArray& vertex_array, int num_instances)
 {
+    ASSERT(num_instances >= 0);
+
     vertex_array.Bind();
-    glDrawElementsInstanced(GL_TRIANGLES, vertex_array.GetNumIndices(), GL_UNSIGNED_INT, nullptr, (GLsizei)num_instances);
+    glDrawElementsInstanced(GL_TRIANGLES, vertex_array.GetNumIndices(),
+        GL_UNSIGNED_INT, nullptr, num_instances);
 }

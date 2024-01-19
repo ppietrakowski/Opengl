@@ -8,19 +8,20 @@
 #include <span>
 #include <glm/glm.hpp>
 
-#define CONVERT_FLOAT_TO_COMPONENT(FloatComponent) static_cast<std::uint8_t>((FloatComponent) * 255.0f)
+#define CONVERT_FLOAT_TO_COMPONENT(FloatComponent) static_cast<uint8_t>((FloatComponent) * 255.0f)
+
 struct RgbaColor
 {
-    std::uint8_t red;
-    std::uint8_t green;
-    std::uint8_t blue;
-    std::uint8_t alpha;
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+    uint8_t alpha;
 
     RgbaColor() = default;
     RgbaColor(const RgbaColor&) = default;
     RgbaColor& operator=(const RgbaColor&) = default;
 
-    constexpr RgbaColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha = 255) :
+    constexpr RgbaColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255) :
         red{red},
         green{green},
         blue{blue},
@@ -37,18 +38,20 @@ struct RgbaColor
     }
 };
 
+#undef CONVERT_FLOAT_TO_COMPONENT
+
 
 struct RgbColor
 {
-    std::uint8_t red;
-    std::uint8_t green;
-    std::uint8_t blue;
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
 
     RgbColor() = default;
     RgbColor(const RgbColor&) = default;
     RgbColor& operator=(const RgbColor&) = default;
 
-    constexpr RgbColor(std::uint8_t red, std::uint8_t green, std::uint8_t blue) :
+    constexpr RgbColor(uint8_t red, uint8_t green, uint8_t blue) :
         red{red},
         green{green},
         blue{blue}
@@ -76,10 +79,10 @@ public:
 
     void Clear();
     void SetClearColor(const RgbaColor& clear_color);
-    void DrawTriangles(const VertexArray& vertex_array, std::int32_t num_indices);
-    void DrawTrianglesAdjancency(const VertexArray& vertex_array, std::int32_t num_indices);
-    void DrawLines(const VertexArray& vertex_array, std::int32_t num_indices) ;
-    void DrawPoints(const VertexArray& vertex_array, std::int32_t num_indices);
+    void DrawTriangles(const VertexArray& vertex_array, int num_indices);
+    void DrawTrianglesAdjancency(const VertexArray& vertex_array, int num_indices);
+    void DrawLines(const VertexArray& vertex_array, int num_indices) ;
+    void DrawPoints(const VertexArray& vertex_array, int num_indices);
 
     void SetWireframe(bool wireframe_enabled);
     bool IsWireframeEnabled() const;
@@ -91,9 +94,9 @@ public:
     void SetLineWidth(float lineWidth);
 
     void ClearBufferBindings_Debug();
-    void SetViewport(std::int32_t x, std::int32_t y, std::int32_t width, std::int32_t height);
+    void SetViewport(int x, int y, int width, int height);
 
-    void DrawTrianglesInstanced(const VertexArray& vertex_array, size_t size);
+    void DrawTrianglesInstanced(const VertexArray& vertex_array, int num_instances);
 
 private:
     bool cull_enabled_      : 1 = false;

@@ -19,7 +19,7 @@
 
 #include <chrono>
 
-inline constexpr std::int32_t kNumBonesPerVertex = 4;
+inline constexpr int kNumBonesPerVertex = 4;
 static constexpr const char* kDefaultAnimationName = "TPose";
 
 struct SkeletonMeshVertex
@@ -27,9 +27,9 @@ struct SkeletonMeshVertex
     glm::vec3 position{0, 0,0};
     glm::vec3 normal{0, 0, 0};
     glm::vec2 texture_coords{0, 0};
-    std::int32_t bone_ids[kNumBonesPerVertex] = {0, 0, 0, 0};
+    int bone_ids[kNumBonesPerVertex] = {0, 0, 0, 0};
     float bone_weights[kNumBonesPerVertex] = {0, 0, 0, 0};
-    std::uint32_t texture_id{0};
+    uint32_t texture_id{0};
 
     static inline constexpr VertexAttribute kDataFormat[6] = {
         { 3, PrimitiveVertexType::kFloat },
@@ -45,7 +45,7 @@ struct SkeletonMeshVertex
     SkeletonMeshVertex(const SkeletonMeshVertex&) = default;
     SkeletonMeshVertex& operator=(const SkeletonMeshVertex&) = default;
 
-    bool AddBoneData(std::int32_t bone_id, float weight);
+    bool AddBoneData(int bone_id, float weight);
 };
 
 template <typename T>
@@ -78,13 +78,13 @@ private:
     std::vector<QuatProperty> rotation_keys_;
 
     template <typename T>
-    std::int32_t GetIndex(float animation_time, const std::vector<KeyProperty<T>>& timestamps) const;
+    size_t GetIndex(float animation_time, const std::vector<KeyProperty<T>>& timestamps) const;
 };
 
 
 struct BoneInfo
 {
-    std::int32_t bone_transform_index;
+    int bone_transform_index;
 
     /* Matrix that convert vertex to bone space */
     glm::mat4 offset_matrix;
@@ -92,7 +92,7 @@ struct BoneInfo
     BoneInfo() = default;
     BoneInfo(const BoneInfo&) = default;
     BoneInfo& operator=(const BoneInfo&) = default;
-    BoneInfo(std::int32_t bone_transform_index, const glm::mat4& offset_matrix) :
+    BoneInfo(int bone_transform_index, const glm::mat4& offset_matrix) :
         bone_transform_index{bone_transform_index},
         offset_matrix{offset_matrix}
     {
@@ -106,7 +106,7 @@ struct Bone
     std::vector<Bone> children;
 
     /* Index in bone_transform_ array */
-    std::int32_t bone_transform_index{0};
+    int bone_transform_index{0};
 
     /* Relative transformation to it's parent */
     glm::mat4 relative_transform_matrix{glm::identity<glm::mat4>()};
@@ -171,7 +171,7 @@ public:
         return main_material;
     }
 
-    std::int32_t GetNumBones() const
+    uint32_t GetNumBones() const
     {
         return num_bones_;
     }
@@ -185,7 +185,7 @@ private:
     std::unordered_map<std::string, SkeletalAnimation> animations_;
     glm::mat4 global_inverse_transform_;
 
-    std::int32_t num_bones_;
+    uint32_t num_bones_;
 
     glm::vec3 bbox_min_;
     glm::vec3 bbox_max_;
@@ -193,8 +193,8 @@ private:
 private:
     void UpdateAnimation(const std::string& animation_name, float elapsed_time, std::vector<glm::mat4>& transforms) const;
     void CalculateTransform(const BoneAnimationUpdateSpecs& update_specs, std::vector<glm::mat4>& transforms, const glm::mat4& parent_transform = glm::identity<glm::mat4>()) const;
-    std::shared_ptr<Texture2D> LoadTexturesFromMaterial(const aiScene* scene, std::int32_t material_index);
-    void LoadAnimation(const aiScene* scene, std::int32_t animation_index);
+    std::shared_ptr<Texture2D> LoadTexturesFromMaterial(const aiScene* scene, int material_index);
+    void LoadAnimation(const aiScene* scene, int animation_index);
 
     void Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& world_transform);
 };
@@ -207,8 +207,8 @@ inline glm::vec3 BoneAnimationTrack::Interpolate(float animation_time) const
         return position_keys_[0].property;
     } else if (!position_keys_.empty())
     {
-        std::int32_t pos_index = GetIndex(animation_time, position_keys_);
-        std::int32_t next_pos_index = pos_index + 1;
+        size_t pos_index = GetIndex(animation_time, position_keys_);
+        size_t next_pos_index = pos_index + 1;
 
         float delta_time = position_keys_[next_pos_index].timestamp - position_keys_[pos_index].timestamp;
         float factor = (animation_time - position_keys_[pos_index].timestamp) / delta_time;
@@ -231,8 +231,8 @@ inline glm::quat BoneAnimationTrack::Interpolate(float animation_time) const
     } else if (!rotation_keys_.empty())
     {
         // find time range based on animation_time
-        std::int32_t rot_index = GetIndex(animation_time, rotation_keys_);
-        std::int32_t next_rot_index = rot_index + 1;
+        size_t rot_index = GetIndex(animation_time, rotation_keys_);
+        size_t next_rot_index = rot_index + 1;
 
         float delta_time = rotation_keys_[next_rot_index].timestamp - rotation_keys_[rot_index].timestamp;
         float factor = (animation_time - rotation_keys_[rot_index].timestamp) / delta_time;
@@ -245,7 +245,7 @@ inline glm::quat BoneAnimationTrack::Interpolate(float animation_time) const
 
 
 template <typename T>
-inline std::int32_t BoneAnimationTrack::GetIndex(float animation_time, const std::vector<KeyProperty<T>>& keys) const
+inline size_t BoneAnimationTrack::GetIndex(float animation_time, const std::vector<KeyProperty<T>>& keys) const
 {
     ASSERT(keys.size() > 0 && "Called BoneAnimationTrack::GetIndex with track without keys");
 
@@ -260,8 +260,7 @@ inline std::int32_t BoneAnimationTrack::GetIndex(float animation_time, const std
         return keys.size() > 2 ? static_cast<uint32_t>(keys.size() - 2) : 0;
     }
 
-    std::int32_t left_side_range = static_cast<std::int32_t>(std::distance(keys.begin(), it));
-    ASSERT(left_side_range >= 0);
+    size_t left_side_range = static_cast<size_t>(std::distance(keys.begin(), it));
 
     if (left_side_range != 0)
     {

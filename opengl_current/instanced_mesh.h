@@ -6,7 +6,7 @@
 
 #include "uniform_buffer.h"
 
-constexpr std::uint32_t kNumInstancesTransform = 400;
+constexpr uint32_t kNumInstancesTransform = 400;
 
 // struct representing same transforms as there are in shader
 struct InstancingTransforms
@@ -18,7 +18,7 @@ struct InstancingTransforms
 struct InstancingTransformBuffer
 {
     std::shared_ptr<UniformBuffer> uniform_buffer;
-    std::size_t num_transforms_occupied{0};
+    int num_transforms_occupied{0};
 
     InstancingTransformBuffer():
         uniform_buffer(std::make_shared<UniformBuffer>(sizeof(InstancingTransforms)))
@@ -38,7 +38,7 @@ struct InstancingTransformBuffer
     }
 
     // Updates transform at relative index (from start of this buffer)
-    void UpdateTransform(const glm::mat4& transform, std::int32_t relative_index)
+    void UpdateTransform(const glm::mat4& transform, int relative_index) const
     {
         uniform_buffer->UpdateBuffer(glm::value_ptr(transform), sizeof(transform), relative_index * sizeof(transform));
     }
@@ -52,27 +52,27 @@ public:
     void Draw(const glm::mat4& transform);
 
     // Adds new mesh instance. Returns index of newly created instance
-    std::int32_t AddInstance(const Transform& transform, std::int32_t texture_id);
+    int AddInstance(const Transform& transform, int texture_id);
 
     const StaticMesh& GetMesh() const
     {
         return *static_mesh_;
     }
 
-    void RemoveInstance(std::int32_t index);
+    void RemoveInstance(int index);
 
-    std::int32_t GetSize() const
+    int GetSize() const
     {
         return num_instances_;
     }
 
-    void UpdateInstance(std::int32_t index, const Transform& new_transform);
+    void UpdateInstance(int index, const Transform& new_transform);
 
     void Clear();
 
 private:
     std::shared_ptr<StaticMesh> static_mesh_;
-    std::int32_t num_instances_{0};
+    int num_instances_{0};
     std::shared_ptr<Material> material_;
 
     std::shared_ptr<VertexArray> vertex_array_;
@@ -81,6 +81,6 @@ private:
     std::vector<InstancingTransformBuffer> transform_buffers_;
 
     // used for recycling indices when removing instances
-    std::vector<std::int32_t> free_instance_indices_;
+    std::vector<int> free_instance_indices_;
 };
 

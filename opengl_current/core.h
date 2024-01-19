@@ -7,8 +7,8 @@
 
 #include <filesystem>
 
-#define ARRAY_NUM_ELEMENTS(Array) static_cast<std::int32_t>(sizeof(Array) / sizeof(Array[0]))
-#define STD_ARRAY_NUM_ELEMENTS(Array) static_cast<std::int32_t>(Array.size())
+#define ARRAY_NUM_ELEMENTS(Array) static_cast<int>(sizeof(Array) / sizeof(Array[0]))
+#define STD_ARRAY_NUM_ELEMENTS(Array) static_cast<int>(Array.size())
 
 #ifdef _MSC_VER
 #define FORCE_INLINE __forceinline
@@ -19,7 +19,7 @@
 template <typename CharType>
 FORCE_INLINE bool ContainsString(const std::basic_string<CharType>& str, const CharType* s)
 {
-    std::size_t pos = str.find(s);
+    size_t pos = str.find(s);
     return pos != std::basic_string<CharType>::npos;
 }
 

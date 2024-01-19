@@ -11,8 +11,8 @@ public:
     Material& operator=(const Material&) = default;
 
 public:
-    std::int32_t GetIntProperty(const char* name) const;
-    void SetIntProperty(const char* name, std::int32_t value);
+    int GetIntProperty(const char* name) const;
+    void SetIntProperty(const char* name, int value);
 
     float GetFloatProperty(const char* name) const;
     void SetFloatProperty(const char* name, float value);
@@ -46,7 +46,7 @@ public:
 private:
     std::shared_ptr<Shader> shader_;
     std::unordered_map<std::string, MaterialParam> material_params_;
-    std::uint32_t num_texture_units_{0};
+    uint32_t num_texture_units_{0};
 
 private:
     void TryAddNewProperty(const UniformInfo& info);

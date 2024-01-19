@@ -5,7 +5,7 @@
 
 namespace
 {
-    constexpr std::string_view MaterialTag = "u_material.";
+    constexpr std::string_view kMaterialTag = "u_material.";
 }
 
 Material::Material(const std::shared_ptr<Shader>& shader) :
@@ -20,12 +20,12 @@ Material::Material(const std::shared_ptr<Shader>& shader) :
     }
 }
 
-std::int32_t Material::GetIntProperty(const char* name) const
+int Material::GetIntProperty(const char* name) const
 {
     return GetParam(name).GetInt();
 }
 
-void Material::SetIntProperty(const char* name, std::int32_t value)
+void Material::SetIntProperty(const char* name, int value)
 {
     GetParam(name).SetInt(value);
 }
@@ -82,7 +82,7 @@ void Material::SetTextureProperty(const char* name, const std::shared_ptr<Textur
 
 void Material::TryAddNewProperty(const UniformInfo& info)
 {
-    bool is_material_uniform = ContainsString(info.name, MaterialTag.data());
+    bool is_material_uniform = ContainsString(info.name, kMaterialTag.data());
 
     if (is_material_uniform)
     {
@@ -96,38 +96,38 @@ void Material::AddNewProperty(const UniformInfo& info)
     {
     case UniformType::kVec4:
     {
-        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+        material_params_.try_emplace(info.name.substr(kMaterialTag.length()),
             info.name.c_str(), glm::vec4{0, 0, 0, 1});
         break;
     }
     case UniformType::kVec3:
     {
-        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+        material_params_.try_emplace(info.name.substr(kMaterialTag.length()),
             info.name.c_str(), glm::vec3{0, 0, 0});
         break;
     }
     case UniformType::kVec2:
     {
-        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+        material_params_.try_emplace(info.name.substr(kMaterialTag.length()),
             info.name.c_str(), glm::vec2{0, 0});
         break;
     }
     case UniformType::kFloat:
     {
-        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+        material_params_.try_emplace(info.name.substr(kMaterialTag.length()),
             info.name.c_str(), 0.0f);
         break;
     }
     case UniformType::kInt:
     {
-        material_params_.try_emplace(info.name.substr(MaterialTag.length()),
+        material_params_.try_emplace(info.name.substr(kMaterialTag.length()),
             info.name.c_str(), 0);
         break;
     }
     case UniformType::kSampler2D:
     {
         MaterialParam param{info.name.c_str(), Renderer::GetDefaultTexture(), num_texture_units_++};
-        material_params_.try_emplace(info.name.substr(MaterialTag.length()), param);
+        material_params_.try_emplace(info.name.substr(kMaterialTag.length()), param);
         break;
     }
     }

@@ -10,20 +10,20 @@ inline void DefaultImageDataDeleter(uint8_t* data)
 class ImageRgba
 {
 public:
-    ImageRgba(std::uint8_t* image, std::int32_t width, std::int32_t height, void (*deleter)(std::uint8_t*) = &DefaultImageDataDeleter);
+    ImageRgba(uint8_t* image, int width, int height, void (*deleter)(uint8_t*) = &DefaultImageDataDeleter);
 
     ImageRgba(ImageRgba&& image) noexcept;
     ImageRgba& operator=(ImageRgba&& image) noexcept;
     ~ImageRgba();
 
-    const std::uint8_t* GetRawImageData() const;
+    const uint8_t* GetRawImageData() const;
 
-    std::int32_t GetWidth() const;
-    std::int32_t GetHeight() const;
+    int GetWidth() const;
+    int GetHeight() const;
 
 private:
-    std::uint8_t* image_data_;
-    std::int32_t width_;
-    std::int32_t height_;
-    void (*deleter_)(std::uint8_t*);
+    uint8_t* image_data_;
+    int width_;
+    int height_;
+    void (*deleter_)(uint8_t*);
 };

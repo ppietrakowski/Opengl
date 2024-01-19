@@ -12,7 +12,7 @@ IMPLEMENT_LOG_CATEGORY(RENDERER);
 IMPLEMENT_LOG_CATEGORY(ASSET_LOADING);
 IMPLEMENT_LOG_CATEGORY(GLOBAL);
 
-std::int32_t Logging::ignored_log_levels_ = 0;
+int Logging::ignored_log_levels_ = 0;
 
 struct Device
 {
@@ -74,12 +74,12 @@ void Logging::Initialize()
 
 void Logging::IgnoreLogLevel(LogLevel level)
 {
-    ignored_log_levels_ = ignored_log_levels_ | static_cast<std::int32_t>(level);
+    ignored_log_levels_ = ignored_log_levels_ | static_cast<int>(level);
 }
 
 void Logging::StopIgnoringLogLevel(LogLevel level)
 {
-    ignored_log_levels_ = ignored_log_levels_ & (~static_cast<int32_t>(level));
+    ignored_log_levels_ = ignored_log_levels_ & (~static_cast<int>(level));
 }
 
 void Logging::Quit()
@@ -143,7 +143,7 @@ std::string FormatString(const char* format, ...)
     va_list list;
 
     va_start(list, format);
-    std::int32_t buffer_length = vsnprintf(buffer.data(), buffer.size(), format, list);
+    int buffer_length = vsnprintf(buffer.data(), buffer.size(), format, list);
     va_end(list);
 
     if (buffer_length < 0)

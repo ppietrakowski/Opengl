@@ -5,8 +5,8 @@
 std::vector<std::string> SplitString(const std::string& string, std::string_view delimiter)
 {
     std::vector<std::string> tokens;
-    std::size_t start_offset = 0;
-    std::size_t delimiter_pos = string.find(delimiter, start_offset);
+    size_t start_offset = 0;
+    size_t delimiter_pos = string.find(delimiter, start_offset);
 
     while (delimiter_pos != std::string::npos)
     {

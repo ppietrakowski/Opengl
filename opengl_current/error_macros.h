@@ -7,7 +7,7 @@
 struct SourceLocation
 {
     const char* file_name;
-    std::uint32_t line;
+    int line;
     const char* function_name;
 };
 
@@ -47,7 +47,7 @@ void PrintError(const SourceLocation* location, const char* message);
 
 #define CURRENT_SOURCE_LOCATION                                       \
     SourceLocation {                                                                 \
-        __FILE__, static_cast<std::uint32_t>(__LINE__), FUNCTION_SIGNATURE \
+        __FILE__, __LINE__, FUNCTION_SIGNATURE \
     }
 
 #define ERR_FAIL()                                            \

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstring>
 
-ImageRgba::ImageRgba(std::uint8_t* image, std::int32_t width, std::int32_t height, void(*deleter)(std::uint8_t*)) :
+ImageRgba::ImageRgba(uint8_t* image, int width, int height, void(*deleter)(uint8_t*)) :
     image_data_{image},
     width_{width},
     height_{height},
@@ -32,17 +32,17 @@ ImageRgba::~ImageRgba()
     deleter_(image_data_);
 }
 
-const std::uint8_t* ImageRgba::GetRawImageData() const
+const uint8_t* ImageRgba::GetRawImageData() const
 {
     return image_data_;
 }
 
-std::int32_t ImageRgba::GetWidth() const
+int ImageRgba::GetWidth() const
 {
     return width_;
 }
 
-std::int32_t ImageRgba::GetHeight() const
+int ImageRgba::GetHeight() const
 {
     return height_;
 }

@@ -18,7 +18,7 @@ struct CameraProjection
     float z_near{0.1f};
     float z_far{1000.0f};
 
-    CameraProjection(std::int32_t width, std::int32_t height, float fov = 45.0f, float z_near = 0.1f, float z_far = 1000.0f) :
+    CameraProjection(uint32_t width, uint32_t height, float fov = 45.0f, float z_near = 0.1f, float z_far = 1000.0f) :
         width((float)width),
         height((float)height),
         fov(fov),
@@ -33,13 +33,12 @@ struct CameraProjection
     CameraProjection& operator=(const CameraProjection&) = default;
 };
 
-struct InstancingSubmission
+struct SubmitCommandArgs
 {
-    const Material* material{nullptr};
-    const VertexArray* vertex_array{nullptr};
-    const UniformBuffer* transform_buffer{nullptr};
-    std::size_t num_instances{0};
-    glm::mat4 transform{1.0f};
+    const Material* material;
+    int num_indices{0};
+    const VertexArray* vertex_array;
+    glm::mat4 transform = glm::mat4{1.0f};
 
     Shader& GetShader() const
     {
@@ -65,26 +64,13 @@ public:
     static void BeginScene(glm::vec3 camera_pos, glm::quat camera_rotation);
     static void EndScene();
 
-    static void SubmitTriangles(const Material& material,
-        std::int32_t num_indices,
-        const VertexArray& vertex_array,
-        const glm::mat4& transform = glm::mat4{1.0f});
+    static void SubmitTriangles(const SubmitCommandArgs& submit_args);
+    static void SubmitLines(const SubmitCommandArgs& submit_args);
+    static void SubmitPoints(const SubmitCommandArgs& submit_args);
 
-    static void SubmitLines(const Material& material,
-        std::int32_t num_indices,
-        const VertexArray& vertex_array,
-        const glm::mat4& transform = glm::mat4{1.0f});
+    static void SubmitSkeleton(const SubmitCommandArgs& submit_args, std::span<const glm::mat4> transforms);
 
-    static void SubmitPoints(const Material& material,
-        std::int32_t num_indices,
-        const VertexArray& vertex_array,
-        const glm::mat4& transform = glm::mat4{1.0f});
-
-    static void SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms,
-        const VertexArray& vertex_array,
-        const glm::mat4& transform = glm::mat4{1.0f});
-
-    static void SubmitMeshInstanced(const InstancingSubmission& instance_submission);
+    static void SubmitMeshInstanced(const SubmitCommandArgs& submit_args, const UniformBuffer& transform_buffer, int num_instances);
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();
 

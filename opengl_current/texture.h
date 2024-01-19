@@ -18,8 +18,8 @@ enum class TextureFormat
 
 struct TextureSpecification
 {
-    std::int32_t width;
-    std::int32_t height;
+    int width;
+    int height;
     TextureFormat texture_format;
 };
 
@@ -29,12 +29,12 @@ public:
     virtual ~Texture() = default;
 
 public:
-    virtual std::int32_t GetWidth() const = 0;
-    virtual std::int32_t GetHeight() const = 0;
+    virtual int GetWidth() const = 0;
+    virtual int GetHeight() const = 0;
 
     virtual void SetData(const void* data, const TextureSpecification& specification, glm::ivec2 offset = {0, 0}) = 0;
-    virtual void Bind(std::uint32_t texture_unit) const = 0;
-    virtual void Unbind(std::uint32_t texture_unit) = 0;
+    virtual void Bind(uint32_t texture_unit) const = 0;
+    virtual void Unbind(uint32_t texture_unit) = 0;
 
     virtual bool GotMinimaps() const = 0;
     virtual void GenerateMipmaps() = 0;
@@ -56,21 +56,21 @@ public:
     std::int32_t GetHeight() const override;
 
     void SetData(const void* data, const TextureSpecification& specification, glm::ivec2 offset = {0, 0}) override;
-    void Bind(std::uint32_t texture_unit) const override;
-    void Unbind(std::uint32_t texture_unit) override;
+    void Bind(uint32_t texture_unit) const override;
+    void Unbind(uint32_t texture_unit) override;
 
     bool GotMinimaps() const override;
     void GenerateMipmaps() override;
 
     TextureFormat GetTextureFormat() const override;
 
-    static inline std::size_t num_texture_vram_used = 0;
+    static inline size_t num_texture_vram_used = 0;
 
 private:
-    std::uint32_t renderer_id_;
-    std::int32_t width_;
-    std::int32_t heigth_;
-    std::uint32_t gl_format_;
+    uint32_t renderer_id_;
+    int width_;
+    int heigth_;
+    uint32_t gl_format_;
     bool has_mipmaps_ : 1{false};
 
 private:
@@ -79,4 +79,4 @@ private:
     uint32_t GetGlFormat() const;
 };
 
-ImageRgba LoadRgbaImageFromMemory(const void* data, std::int32_t length);
+ImageRgba LoadRgbaImageFromMemory(const void* data, int length);

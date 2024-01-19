@@ -13,7 +13,7 @@
 #include <variant>
 #include <any>
 
-enum class MaterialParamType : std::int8_t
+enum class MaterialParamType : int8_t
 {
     kUnknown = 0,
     kInt,
@@ -30,7 +30,7 @@ class Parameter
 public:
     virtual ~Parameter() = default;
 
-    virtual void SetValue(std::int32_t value)
+    virtual void SetValue(int value)
     {
     }
 
@@ -98,7 +98,7 @@ private:
 class TextureParameter : public Parameter
 {
 public:
-    TextureParameter(std::string uniform_name, std::shared_ptr<Texture> value, std::uint32_t texture_unit) :
+    TextureParameter(std::string uniform_name, std::shared_ptr<Texture> value, uint32_t texture_unit) :
         uniform_name_{uniform_name},
         texture_{value},
         texture_unit_{texture_unit}
@@ -117,7 +117,7 @@ public:
 private:
     std::string uniform_name_;
     std::shared_ptr<Texture> texture_;
-    std::uint32_t texture_unit_;
+    uint32_t texture_unit_;
 };
 
 class UnknownParameter : public Parameter
@@ -127,7 +127,7 @@ class UnknownParameter : public Parameter
 };
 
 using ParamVariant = std::variant<TextureParameter,
-    PrimitiveParameter<std::int32_t>,
+    PrimitiveParameter<int>,
     PrimitiveParameter<float>,
     PrimitiveParameter<glm::vec2>,
     PrimitiveParameter<glm::vec3>,
@@ -142,17 +142,17 @@ class MaterialParam
 public:
     MaterialParam() = default;
     MaterialParam(const MaterialParam&) = default;
-    MaterialParam(const char* uniform_name, std::int32_t value);
+    MaterialParam(const char* uniform_name, int value);
     MaterialParam(const char* uniform_name, float value);
     MaterialParam(const char* uniform_name, glm::vec2 value);
     MaterialParam(const char* uniform_name, glm::vec3 value);
     MaterialParam(const char* uniform_name, glm::vec4 value);
-    MaterialParam(const char* uniform_name, std::shared_ptr<Texture> value, std::uint32_t textureUnit);
+    MaterialParam(const char* uniform_name, std::shared_ptr<Texture> value, uint32_t textureUnit);
 
     MaterialParam& operator=(const MaterialParam&) = default;
     void SetUniform(Shader& shader) const;
 
-    std::int32_t GetInt() const;
+    int GetInt() const;
     float GetFloat() const;
     glm::vec2 GetVector2() const;
     glm::vec3 GetVector3() const;
@@ -160,7 +160,7 @@ public:
 
     std::shared_ptr<Texture> GetTexture() const;
 
-    void SetInt(std::int32_t value);
+    void SetInt(int value);
     void SetFloat(float value);
     void SetVector2(glm::vec2 value);
     void SetVector3(glm::vec3 value);

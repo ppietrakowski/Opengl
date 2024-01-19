@@ -4,12 +4,12 @@
 
 #include <cstring>
 
-MaterialParam::MaterialParam(const char* uniform_name, std::int32_t value) :
+MaterialParam::MaterialParam(const char* uniform_name, int value) :
     parameter_{PrimitiveParameter<std::int32_t>{uniform_name, value}}
 {
     param_type_ = MaterialParamType::kInt;
     getter_ = [](const ParamVariant& value) -> Parameter* {
-        return const_cast<PrimitiveParameter<std::int32_t>*>(&std::get<PrimitiveParameter<std::int32_t>>(value));
+        return const_cast<PrimitiveParameter<int>*>(&std::get<PrimitiveParameter<int>>(value));
     };
 }
 
@@ -49,7 +49,7 @@ MaterialParam::MaterialParam(const char* uniform_name, glm::vec4 value) :
     };
 }
 
-MaterialParam::MaterialParam(const char* uniform_name, std::shared_ptr<Texture> value, std::uint32_t texture_unit) :
+MaterialParam::MaterialParam(const char* uniform_name, std::shared_ptr<Texture> value, uint32_t texture_unit) :
     parameter_{TextureParameter{uniform_name, value, texture_unit}}
 {
     param_type_ = MaterialParamType::kSampler2D;
@@ -62,9 +62,9 @@ void MaterialParam::SetUniform(Shader& shader) const
     getter_(parameter_)->SetUniform(shader);
 }
 
-std::int32_t MaterialParam::GetInt() const
+int MaterialParam::GetInt() const
 {
-    return std::any_cast<std::int32_t>(getter_(parameter_)->GetValue());
+    return std::any_cast<int>(getter_(parameter_)->GetValue());
 }
 
 float MaterialParam::GetFloat() const
@@ -92,7 +92,7 @@ std::shared_ptr<Texture> MaterialParam::GetTexture() const
     return std::any_cast<std::shared_ptr<Texture>>(getter_(parameter_)->GetValue());
 }
 
-void MaterialParam::SetInt(std::int32_t value)
+void MaterialParam::SetInt(int value)
 {
     getter_(parameter_)->SetValue(value);
 }

@@ -279,7 +279,6 @@
     <ClInclude Include="input.h" />
     <ClInclude Include="instanced_mesh.h" />
     <ClInclude Include="instanced_mesh_component.h" />
-    <ClInclude Include="keys.h" />
     <ClInclude Include="level.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="material.h" />

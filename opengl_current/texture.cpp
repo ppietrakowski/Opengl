@@ -14,7 +14,7 @@ extern "C" {
 #include "stb_image.h"
 }
 
-static void StbiDeleter(std::uint8_t* bytes)
+static void StbiDeleter(uint8_t* bytes)
 {
     stbi_image_free(bytes);
 }
@@ -100,12 +100,12 @@ std::int32_t Texture2D::GetHeight() const
     return heigth_;
 }
 
-void Texture2D::Bind(std::uint32_t texture_unit) const
+void Texture2D::Bind(uint32_t texture_unit) const
 {
     glBindTextureUnit(texture_unit, renderer_id_);
 }
 
-void Texture2D::Unbind(std::uint32_t texture_unit)
+void Texture2D::Unbind(uint32_t texture_unit)
 {
     glBindTextureUnit(texture_unit, 0);
 }
@@ -174,8 +174,8 @@ void Texture2D::SetStandardTextureOptions()
     glTextureParameteri(renderer_id_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-ImageRgba LoadRgbaImageFromMemory(const void* data, std::int32_t length)
+ImageRgba LoadRgbaImageFromMemory(const void* data, int length)
 {
-    stbi_image_data_t image_data = stbi_load_from_memory_rgba(reinterpret_cast<const std::uint8_t*>(data), length);
+    stbi_image_data_t image_data = stbi_load_from_memory_rgba(reinterpret_cast<const uint8_t*>(data), length);
     return ImageRgba{image_data.data, image_data.width, image_data.height, &StbiDeleter};
 }

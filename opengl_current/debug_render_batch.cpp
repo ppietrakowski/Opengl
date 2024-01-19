@@ -3,7 +3,7 @@
 #include <array>
 
 // Predefined box indices (base for offsets for box batching)
-static const std::array<std::uint32_t, 24> kBaseBoxIndices =
+static const std::array<uint32_t, 24> kBaseBoxIndices =
 {
     0u, 1, 1, 2, 2, 3, 3, 0,
     4, 5, 5, 6, 6, 7, 7, 4,

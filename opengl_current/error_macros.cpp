@@ -10,10 +10,10 @@
 #include <Windows.h>
 #endif
 
-constexpr std::int32_t kMaxErrorHandlers = 5;
+constexpr size_t kMaxErrorHandlers = 5;
 
 static std::array<ErrorHandler, kMaxErrorHandlers> error_handlers_;
-static std::int32_t num_error_handlers_ = 0;
+static size_t num_error_handlers_ = 0;
 
 void AddErrorHandler(const ErrorHandler& handler)
 {
@@ -54,7 +54,7 @@ void PrintError(const SourceLocation* location, const char* message)
 #endif
 
     ErrorHandlerInfo info{*location,  message};
-    for (std::int32_t i = 0; i < num_error_handlers_; ++i)
+    for (size_t i = 0; i < num_error_handlers_; ++i)
     {
         const ErrorHandler& error_handler = error_handlers_[i];
         error_handler.Invoke(info);

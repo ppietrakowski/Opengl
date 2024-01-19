@@ -39,8 +39,8 @@ void Renderer::Initialize()
         {kMagenta, kMagenta, kBlack, kBlack}
     };
 
-    std::int32_t colors_width = 4;
-    std::int32_t color_height = 4;
+    int colors_width = 4;
+    int color_height = 4;
 
     default_texture_ = std::make_shared<Texture2D>(colors, TextureSpecification{colors_width, color_height, TextureFormat::kRgb});
     RenderCommand::Initialize();
@@ -69,68 +69,64 @@ void Renderer::EndScene()
     RenderCommand::EndScene();
 }
 
-void Renderer::SubmitTriangles(const Material& material, std::int32_t num_indices, const VertexArray& vertex_array, const glm::mat4& transform)
+void Renderer::SubmitTriangles(const SubmitCommandArgs& submit_args)
 {
-    ASSERT(num_indices <= vertex_array.GetNumIndices());
+    ASSERT(submit_args.num_indices <= submit_args.vertex_array->GetNumIndices());
 
-    Shader& shader = material.GetShader();
+    Shader& shader = submit_args.GetShader();
     shader.Use();
-    material.SetupRenderState();
-    material.SetShaderUniforms();
+    submit_args.SetupShader();
 
-    UploadUniforms(shader, transform);
-    RenderCommand::DrawTriangles(vertex_array, num_indices);
+    UploadUniforms(shader, submit_args.transform);
+    RenderCommand::DrawTriangles(*submit_args.vertex_array, submit_args.num_indices);
 }
 
-void Renderer::SubmitLines(const Material& material, std::int32_t num_indices, const VertexArray& vertex_array, const glm::mat4& transform)
+void Renderer::SubmitLines(const SubmitCommandArgs& submit_args)
 {
-    ASSERT(num_indices <= vertex_array.GetNumIndices());
+    ASSERT(submit_args.num_indices <= submit_args.vertex_array->GetNumIndices());
 
-    Shader& shader = material.GetShader();
+    Shader& shader = submit_args.GetShader();
     shader.Use();
-    material.SetupRenderState();
-    material.SetShaderUniforms();
+    submit_args.SetupShader();
 
-    UploadUniforms(shader, transform);
-    RenderCommand::DrawLines(vertex_array, num_indices);
+    UploadUniforms(shader, submit_args.transform);
+    RenderCommand::DrawLines(*submit_args.vertex_array, submit_args.num_indices);
 }
 
-void Renderer::SubmitPoints(const Material& material, std::int32_t num_indices, const VertexArray& vertex_array, const glm::mat4& transform)
+void Renderer::SubmitPoints(const SubmitCommandArgs& submit_args)
 {
-    ASSERT(num_indices <= vertex_array.GetNumIndices());
+    ASSERT(submit_args.num_indices <= submit_args.vertex_array->GetNumIndices());
 
-    Shader& shader = material.GetShader();
+    Shader& shader = submit_args.GetShader();
     shader.Use();
-    material.SetupRenderState();
-    material.SetShaderUniforms();
+    submit_args.SetupShader();
 
-    UploadUniforms(shader, transform);
-    RenderCommand::DrawPoints(vertex_array, num_indices);
+    UploadUniforms(shader, submit_args.transform);
+    RenderCommand::DrawPoints(*submit_args.vertex_array, submit_args.num_indices);
 }
 
-void Renderer::SubmitSkeleton(const Material& material, std::span<const glm::mat4> transforms, const VertexArray& vertex_array, const glm::mat4& transform)
+void Renderer::SubmitSkeleton(const SubmitCommandArgs& submit_args, std::span<const glm::mat4> transforms)
 {
-    Shader& shader = material.GetShader();
+    Shader& shader = submit_args.GetShader();
 
     shader.Use();
-    material.SetupRenderState();
-    material.SetShaderUniforms();
+    submit_args.SetupShader();
 
-    UploadUniforms(shader, transform);
+    UploadUniforms(shader, submit_args.transform);
     shader.SetUniformMat4Array("u_bone_transforms", transforms);
-    RenderCommand::DrawTriangles(vertex_array, vertex_array.GetNumIndices());
+    RenderCommand::DrawTriangles(*submit_args.vertex_array, submit_args.num_indices);
 }
 
-void Renderer::SubmitMeshInstanced(const InstancingSubmission& instance_submission)
+void Renderer::SubmitMeshInstanced(const SubmitCommandArgs& submit_args, const UniformBuffer& transform_buffer, int num_instances)
 {
-    Shader& shader = instance_submission.GetShader();
+    Shader& shader = submit_args.GetShader();
 
     shader.Use();
-    instance_submission.SetupShader();
-    shader.BindUniformBuffer(shader.GetUniformBlockIndex("Transforms"), *instance_submission.transform_buffer);
-    UploadUniforms(shader, instance_submission.transform);
+    submit_args.SetupShader();
+    shader.BindUniformBuffer(shader.GetUniformBlockIndex("Transforms"), transform_buffer);
+    UploadUniforms(shader, submit_args.transform);
 
-    RenderCommand::DrawTrianglesInstanced(*instance_submission.vertex_array, instance_submission.num_instances);
+    RenderCommand::DrawTrianglesInstanced(*submit_args.vertex_array, num_instances);
 }
 
 void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform, const glm::vec4& color)

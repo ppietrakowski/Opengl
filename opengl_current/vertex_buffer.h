@@ -10,8 +10,8 @@
 class VertexBuffer
 {
 public:
-    VertexBuffer(const void* data, std::int32_t size_bytes, bool dynamic = false);
-    VertexBuffer(std::int32_t max_size_bytes);
+    VertexBuffer(const void* data, int size_bytes, bool dynamic = false);
+    VertexBuffer(int max_size_bytes);
     ~VertexBuffer();
 
 public:
@@ -19,29 +19,29 @@ public:
     void Bind() const;
     void Unbind() const;
 
-    void UpdateVertices(const void* buffer, std::int32_t offset, std::int32_t size);
+    void UpdateVertices(const void* buffer, int offset, int size);
 
-    void UpdateVertices(const void* buffer, std::int32_t size);
+    void UpdateVertices(const void* buffer, int size);
 
-    std::int32_t GetVerticesSizeBytes() const;
-    std::uint32_t GetOpenGlIdentifier() const;
+    int GetVerticesSizeBytes() const;
+    uint32_t GetOpenGlIdentifier() const;
 
 private:
-    std::uint32_t renderer_id_;
-    std::int32_t buffer_size_;
+    uint32_t renderer_id_;
+    int buffer_size_;
 };
 
-FORCE_INLINE void VertexBuffer::UpdateVertices(const void* buffer, std::int32_t size)
+FORCE_INLINE void VertexBuffer::UpdateVertices(const void* buffer, int size)
 {
     UpdateVertices(buffer, 0, size);
 }
 
-FORCE_INLINE std::int32_t VertexBuffer::GetVerticesSizeBytes() const
+FORCE_INLINE int VertexBuffer::GetVerticesSizeBytes() const
 {
     return buffer_size_;
 }
 
-FORCE_INLINE std::uint32_t VertexBuffer::GetOpenGlIdentifier() const
+FORCE_INLINE uint32_t VertexBuffer::GetOpenGlIdentifier() const
 {
     return renderer_id_;
 }

@@ -13,7 +13,7 @@
 #include <execution>
 #include <algorithm>
 
-constexpr std::uint32_t kStartNumInstances = 16;
+constexpr uint32_t kStartNumInstances = 16;
 
 /* Just does bind and unbind within scope */
 struct DebugVertexArrayScope
@@ -39,12 +39,12 @@ template <typename T>
 struct BatchGeometryInfo
 {
     std::span<const T> base_vertices;
-    std::span<const std::uint32_t> base_indices;
+    std::span<const uint32_t> base_indices;
     Transform transform;
 
-    FORCE_INLINE std::int32_t GetNumVertices() const
+    FORCE_INLINE int GetNumVertices() const
     {
-        return static_cast<std::int32_t>(base_vertices.size());
+        return static_cast<int>(base_vertices.size());
     }
 
     FORCE_INLINE glm::mat4 CalculateTransformMatrix() const
@@ -55,11 +55,11 @@ struct BatchGeometryInfo
 
 struct BatchElement
 {
-    std::int32_t start_vertex;
-    std::int32_t end_vertex;
+    int start_vertex;
+    int end_vertex;
 
-    std::int32_t start_index;
-    std::int32_t end_index;
+    int start_index;
+    int end_index;
 };
 
 template <typename VerticesType>
@@ -74,7 +74,7 @@ public:
         ResizeBuffers(kStartNumInstances * 64, kStartNumInstances * 64);
     }
 
-    void ResizeBuffers(std::int32_t max_num_vertices, std::int32_t max_num_indices)
+    void ResizeBuffers(int max_num_vertices, int max_num_indices)
     {
         ASSERT(max_num_vertices >= 0);
         ASSERT(max_num_indices >= 0);
@@ -88,8 +88,8 @@ public:
 
         // rebuild vertex and index buffers to match new size
         vertex_array_ = std::make_shared<VertexArray>();
-        vertex_array_->AddVertexBuffer(std::make_shared<VertexBuffer>(static_cast<std::int32_t>(vertices_.capacity() * sizeof(VerticesType))), attributes_);
-        vertex_array_->SetIndexBuffer(std::make_shared<IndexBuffer>(static_cast<std::int32_t>(indices_.capacity())));
+        vertex_array_->AddVertexBuffer(std::make_shared<VertexBuffer>(static_cast<int>(vertices_.capacity() * sizeof(VerticesType))), attributes_);
+        vertex_array_->SetIndexBuffer(std::make_shared<IndexBuffer>(static_cast<int>(indices_.capacity())));
         buffers_dirty_ = true;
     }
 
@@ -98,7 +98,7 @@ public:
         DebugVertexArrayScope bind_array_scope{*vertex_array_};
         UpdateBuffers();
 
-        Renderer::SubmitTriangles(material, current_index_, *vertex_array_, transform);
+        Renderer::SubmitTriangles(SubmitCommandArgs{&material, current_index_, vertex_array_.get(), transform});
 
         if (clear_post_draw_)
         {
@@ -111,7 +111,7 @@ public:
         DebugVertexArrayScope bind_array_scope{*vertex_array_};
         UpdateBuffers();
 
-        Renderer::SubmitLines(material, current_index_, *vertex_array_, transform);
+        Renderer::SubmitLines(SubmitCommandArgs{&material, current_index_, vertex_array_.get(), transform});
 
         if (clear_post_draw_)
         {
@@ -124,7 +124,7 @@ public:
         DebugVertexArrayScope bind_array_scope{*vertex_array_};
         UpdateBuffers();
 
-        Renderer::SubmitPoints(material, current_index_, *vertex_array_, transform);
+        Renderer::SubmitPoints(SubmitCommandArgs{&material, current_index_, vertex_array_.get(), transform});
 
         if (clear_post_draw_)
         {
@@ -139,9 +139,9 @@ public:
         current_index_ = 0;
     }
 
-    void RemoveInstance(std::int32_t start_vertex, std::int32_t end_vertex)
+    void RemoveInstance(int start_vertex, int end_vertex)
     {
-        for (std::int32_t i = start_vertex; i < end_vertex; ++i)
+        for (int i = start_vertex; i < end_vertex; ++i)
         {
             vertices_[i] = VerticesType{};
         }
@@ -172,9 +172,9 @@ public:
     }
 
     template <typename ...Args>
-    void UpdateInstance(std::int32_t vertexIndex, const VerticesType& vertex, const Transform& worldTransform, Args&& ...args)
+    void UpdateInstance(int vertex_index, const VerticesType& vertex, const Transform& world_transform, Args&& ...args)
     {
-        vertices_[vertexIndex] = BatchVertexCreator<VerticesType>::CreateInstanceFrom(vertex, worldTransform.CalculateTransformMatrix(), std::forward<Args>(args)...);
+        vertices_[vertex_index] = BatchVertexCreator<VerticesType>::CreateInstanceFrom(vertex, world_transform.CalculateTransformMatrix(), std::forward<Args>(args)...);
         buffers_dirty_ = true;
     }
 
@@ -192,8 +192,8 @@ private:
     std::vector<VerticesType> vertices_;
     std::vector<std::uint32_t> indices_;
     std::shared_ptr<VertexArray> vertex_array_;
-    std::int32_t indices_start_index_{0};
-    std::int32_t current_index_{0};
+    int indices_start_index_{0};
+    int current_index_{0};
     std::vector<VertexAttribute> attributes_;
 
     // if not set, the clear method is not invoked automaticely
@@ -224,21 +224,21 @@ private:
 
     void Expand(const BatchGeometryInfo<VerticesType>& geometry_info)
     {
-        std::int32_t new_vertices_size = static_cast<std::int32_t>(vertices_.capacity() + vertices_.capacity() / 2);
-        std::int32_t new_indices_size = static_cast<std::int32_t>(indices_.capacity() + indices_.capacity() / 2);
+        int new_vertices_size = static_cast<int>(vertices_.capacity() + vertices_.capacity() / 2);
+        int new_indices_size = static_cast<int>(indices_.capacity() + indices_.capacity() / 2);
 
         bool has_enough_vertices_capacity = new_vertices_size >= vertices_.size() + geometry_info.GetNumVertices();
 
         if (!has_enough_vertices_capacity)
         {
-            new_vertices_size = static_cast<std::int32_t>(vertices_.size() + geometry_info.GetNumVertices() + 1);
+            new_vertices_size = static_cast<int>(vertices_.size() + geometry_info.GetNumVertices() + 1);
         }
 
         bool has_enough_indices_capacity = new_indices_size >= indices_.size() + geometry_info.base_indices.size();
 
         if (!has_enough_indices_capacity)
         {
-            new_indices_size = static_cast<std::int32_t>(indices_.size() + geometry_info.base_indices.size() + 1);
+            new_indices_size = static_cast<int>(indices_.size() + geometry_info.base_indices.size() + 1);
         }
 
         ResizeBuffers(new_vertices_size, new_indices_size);
@@ -246,7 +246,7 @@ private:
 
     void UpdateIndices(const BatchGeometryInfo<VerticesType>& geometry_info)
     {
-        for (std::uint32_t index : geometry_info.base_indices)
+        for (uint32_t index : geometry_info.base_indices)
         {
             // set though indexing is faster than emplace_back so use it
             indices_[current_index_++] = index + indices_start_index_;

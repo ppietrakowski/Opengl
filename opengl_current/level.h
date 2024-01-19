@@ -45,7 +45,6 @@ private:
     entt::registry registry_;
     std::map<std::string, Actor> actors_;
     std::shared_ptr<ResourceManagerImpl> resource_manager_;
-    size_t num_frames_{0};
 
     std::unordered_map<std::string, std::shared_ptr<InstancedMesh>> instanced_mesh_;
 

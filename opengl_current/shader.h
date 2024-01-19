@@ -36,8 +36,8 @@ struct UniformInfo
 {
     UniformType uniform_type;
     std::string name;
-    std::int32_t location;
-    int32_t array_size{1};
+    int location;
+    int array_size{1};
 };
 
 struct ShaderCompilationFailedException : public std::runtime_error
@@ -97,7 +97,7 @@ private:
 
 class Texture;
 
-static constexpr std::int32_t kMinTextureUnits = 16;
+static constexpr int kMinTextureUnits = 16;
 
 class Shader
 {
@@ -109,7 +109,7 @@ public:
     void Use() const;
     void StopUsing() const;
 
-    void SetUniform(const char* name, std::int32_t value);
+    void SetUniform(const char* name, int value);
     void SetUniform(const char* name, float value);
     void SetUniform(const char* name, glm::vec2 value);
     void SetUniform(const char* name, const glm::vec3& value);
@@ -127,13 +127,13 @@ public:
     glm::vec4 GetUniformVec4(const char* name) const;
                                                     ;
     std::vector<UniformInfo> GetUniformsInfo() const;
-    void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, std::uint32_t start_texture_unit = 0);
+    void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, uint32_t start_texture_unit = 0);
 
-    void BindUniformBuffer(std::int32_t block_index, const UniformBuffer& buffer);
+    void BindUniformBuffer(int block_index, const UniformBuffer& buffer);
     int GetUniformBlockIndex(const std::string& name) const;
 
 private:
-    std::uint32_t shader_program_{0};
+    uint32_t shader_program_{0};
     mutable std::unordered_map<std::string, int> uniform_name_to_location_;
 
 private:

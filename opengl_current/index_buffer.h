@@ -10,38 +10,38 @@
 class IndexBuffer
 {
 public:
-    IndexBuffer(const std::uint32_t* data,
-        std::int32_t num_indices, bool dynamic = false);
-    IndexBuffer(std::int32_t max_num_indices);
+    IndexBuffer(const uint32_t* data,
+        int num_indices, bool dynamic = false);
+    IndexBuffer(int max_num_indices);
     ~IndexBuffer();
 
 public:
     void Bind() const;
     void Unbind() const;
-    std::int32_t GetNumIndices() const;
+    int GetNumIndices() const;
 
-    void UpdateIndices(const std::uint32_t* data, std::int32_t offset, std::int32_t size);
-    void UpdateIndices(const std::uint32_t* data, std::int32_t size);
+    void UpdateIndices(const uint32_t* data, int offset, int size);
+    void UpdateIndices(const uint32_t* data, int size);
 
-    std::uint32_t GetOpenGlIdentifier() const;
+    uint32_t GetOpenGlIdentifier() const;
 
 private:
-    std::uint32_t renderer_id_;
-    std::int32_t num_indices_;
+    uint32_t renderer_id_;
+    int num_indices_;
 };
 
 
-FORCE_INLINE std::int32_t IndexBuffer::GetNumIndices() const
+FORCE_INLINE int IndexBuffer::GetNumIndices() const
 {
     return num_indices_;
 }
 
-FORCE_INLINE void IndexBuffer::UpdateIndices(const std::uint32_t* data, std::int32_t size)
+FORCE_INLINE void IndexBuffer::UpdateIndices(const uint32_t* data, int size)
 {
     UpdateIndices(data, 0, size);
 }
 
-FORCE_INLINE std::uint32_t IndexBuffer::GetOpenGlIdentifier() const
+FORCE_INLINE uint32_t IndexBuffer::GetOpenGlIdentifier() const
 {
     return renderer_id_;
 }

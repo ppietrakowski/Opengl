@@ -14,8 +14,8 @@ struct GLFWwindow;
 
 struct WindowSettings
 {
-    std::int32_t width;
-    std::int32_t height;
+    uint32_t width;
+    uint32_t height;
     std::string title;
 };
 
@@ -31,8 +31,8 @@ public:
 
     void Update();
 
-    std::int32_t GetWidth() const;
-    std::int32_t GetHeight() const;
+    uint32_t GetWidth() const;
+    uint32_t GetHeight() const;
 
     glm::ivec2 GetWindowPosition() const;
 

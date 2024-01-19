@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <memory>
 
-enum class PrimitiveVertexType : std::int8_t
+enum class PrimitiveVertexType : int8_t
 {
     kInt,
     kUnsignedInt,
@@ -16,7 +16,7 @@ enum class PrimitiveVertexType : std::int8_t
 
 struct VertexAttribute
 {
-    std::int8_t num_components : 5;
+    int8_t num_components : 5;
     PrimitiveVertexType vertex_type : 3;
 };
 
@@ -34,13 +34,13 @@ public:
 
     void SetIndexBuffer(const std::shared_ptr<IndexBuffer>& index_buffer);
 
-    std::int32_t GetNumIndices() const;
+    int GetNumIndices() const;
 
-    std::shared_ptr<VertexBuffer> GetVertexBufferAt(std::int32_t index);
+    std::shared_ptr<VertexBuffer> GetVertexBufferAt(int index);
     std::shared_ptr<IndexBuffer> GetIndexBuffer();
 
     void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertex_buffer, AttributesView attributes);
-    std::uint32_t GetOpenGlIdentifier() const;
+    uint32_t GetOpenGlIdentifier() const;
 
     AttributesView GetAttributes() const
     {
@@ -48,7 +48,7 @@ public:
     }
 
 private:
-    std::uint32_t renderer_id_;
+    uint32_t renderer_id_;
     std::vector<std::shared_ptr<VertexBuffer>> vertex_buffers_;
     std::shared_ptr<IndexBuffer> index_buffer_;
     std::vector<VertexAttribute> attributes_;

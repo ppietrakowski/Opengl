@@ -1,10 +1,13 @@
 #pragma once
 
+#include <GLFW/glfw3.h>
+
 #include <chrono>
 #include <cstdint>
 #include <glm/glm.hpp>
 
-#include "keys.h"
+using MouseButton = int;
+using KeyCode = int;
 
 enum class EventType
 {
@@ -24,14 +27,14 @@ struct Event
 {
     struct SizeEvent
     {
-        std::int32_t width;
-        std::int32_t height;
+        int width;
+        int height;
     };
 
     struct KeyEvent
     {
         KeyCode key;
-        std::int32_t scancode;
+        int scancode;
         bool alt_clicked : 1;
         bool control_clicked : 1;
         bool shift_clicked : 1;

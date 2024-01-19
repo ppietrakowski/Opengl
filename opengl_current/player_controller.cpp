@@ -36,7 +36,7 @@ void PlayerController::BindMouseMoveCallback(const std::function<void(Actor& act
 
 void PlayerController::Update()
 {
-    bool new_fire_button_state = Input::IsMouseButtonPressed(Mouse::kButtonLeft);
+    bool new_fire_button_state = Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT);
 
     if (new_fire_button_state != fire_button_last_state_ && !fire_button_last_state_)
     {
