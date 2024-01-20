@@ -3,8 +3,7 @@
 #include "skeletal_mesh.h"
 #include "transform.h"
 
-struct SkeletalMeshComponent
-{
+struct SkeletalMeshComponent {
     // Calculated bone transforms, send to shader during draw.
     // Cannot use there UniformBuffer because animations are updated in seperate thread
     std::vector<glm::mat4> bone_transforms;

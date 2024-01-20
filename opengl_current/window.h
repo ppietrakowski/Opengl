@@ -12,8 +12,7 @@
 
 struct GLFWwindow;
 
-struct WindowSettings
-{
+struct WindowSettings {
     uint32_t width;
     uint32_t height;
     std::string title;
@@ -21,8 +20,7 @@ struct WindowSettings
 
 class Input;
 
-class Window
-{
+class Window {
 public:
     Window(const WindowSettings& settings);
     ~Window();

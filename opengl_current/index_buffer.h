@@ -7,8 +7,7 @@
 
 #include "vertex_buffer.h"
 
-class IndexBuffer
-{
+class IndexBuffer {
 public:
     IndexBuffer(const uint32_t* data,
         int num_indices, bool dynamic = false);
@@ -31,17 +30,14 @@ private:
 };
 
 
-FORCE_INLINE int IndexBuffer::GetNumIndices() const
-{
+FORCE_INLINE int IndexBuffer::GetNumIndices() const {
     return num_indices_;
 }
 
-FORCE_INLINE void IndexBuffer::UpdateIndices(const uint32_t* data, int size)
-{
+FORCE_INLINE void IndexBuffer::UpdateIndices(const uint32_t* data, int size) {
     UpdateIndices(data, 0, size);
 }
 
-FORCE_INLINE uint32_t IndexBuffer::GetOpenGlIdentifier() const
-{
+FORCE_INLINE uint32_t IndexBuffer::GetOpenGlIdentifier() const {
     return renderer_id_;
 }

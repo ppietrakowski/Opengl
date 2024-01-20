@@ -8,8 +8,7 @@
 #include <chrono>
 
 
-class Layer
-{
+class Layer {
 public:
     virtual ~Layer() = default;
 

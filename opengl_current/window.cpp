@@ -6,8 +6,7 @@
 
 #include <GLFW/glfw3.h>
 
-Window::Window(const WindowSettings& settings)
-{
+Window::Window(const WindowSettings& settings) {
     glfwSetErrorCallback([](std::int32_t code, const char* description) {
         ELOG_ERROR(LOG_CORE, "Glfw error %i : %s", code, description);
     });
@@ -39,102 +38,82 @@ Window::Window(const WindowSettings& settings)
     input_ = new Input(window_);
 }
 
-Window::~Window()
-{
+Window::~Window() {
     delete input_;
     delete graphics_context_;
     glfwDestroyWindow(window_);
 }
 
-void Window::Update()
-{
+void Window::Update() {
     glfwPollEvents();
     graphics_context_->SwapBuffers();
     input_->Update(window_data_);
 }
 
-uint32_t Window::GetWidth() const
-{
+uint32_t Window::GetWidth() const {
     return window_data_.window_size.x;
 }
 
-uint32_t Window::GetHeight() const
-{
+uint32_t Window::GetHeight() const {
     return window_data_.window_size.y;
 }
 
-glm::ivec2 Window::GetWindowPosition() const
-{
+glm::ivec2 Window::GetWindowPosition() const {
     return window_data_.window_position;
 }
 
-glm::vec2 Window::GetMousePosition() const
-{
+glm::vec2 Window::GetMousePosition() const {
     return window_data_.mouse_position;
 }
 
-glm::vec2 Window::GetLastMousePosition() const
-{
+glm::vec2 Window::GetLastMousePosition() const {
     return window_data_.last_mouse_position;
 }
 
-bool Window::IsOpen() const
-{
+bool Window::IsOpen() const {
     return window_data_.game_running;
 }
 
-void Window::SetEventCallback(const EventCallback& callback)
-{
+void Window::SetEventCallback(const EventCallback& callback) {
     window_data_.event_callback = callback;
 }
 
-void Window::EnableVSync()
-{
+void Window::EnableVSync() {
     window_data_.vsync_enabled = true;
     graphics_context_->SetVsync(true);
 }
 
-void Window::DisableVSync()
-{
+void Window::DisableVSync() {
     window_data_.vsync_enabled = false;
     graphics_context_->SetVsync(false);
 }
 
-bool Window::IsVSyncEnabled() const
-{
+bool Window::IsVSyncEnabled() const {
     return window_data_.vsync_enabled;
 }
 
-void* Window::GetWindowNativeHandle() const
-{
+void* Window::GetWindowNativeHandle() const {
     return window_;
 }
 
-GraphicsContext* Window::GetContext() const
-{
+GraphicsContext* Window::GetContext() const {
     return graphics_context_;
 }
 
-void Window::Close()
-{
+void Window::Close() {
     glfwSetWindowShouldClose(window_, GL_TRUE);
     window_data_.game_running = false;
 }
 
-void Window::SetMouseVisible(bool mouse_visible)
-{
-    if (mouse_visible)
-    {
+void Window::SetMouseVisible(bool mouse_visible) {
+    if (mouse_visible) {
         glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
-    else
-    {
+    } else {
         glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
 
-void Window::BindWindowCallbacks()
-{
+void Window::BindWindowCallbacks() {
     glfwSetWindowUserPointer(window_, &window_data_);
 
     glfwSetCursorPosCallback(window_, [](GLFWwindow* window, double xpos, double ypos) {
@@ -142,8 +121,7 @@ void Window::BindWindowCallbacks()
         window_data->last_mouse_position = window_data->mouse_position;
         window_data->mouse_position = glm::vec2{xpos, ypos};
 
-        if (window_data->event_callback)
-        {
+        if (window_data->event_callback) {
             Event evt{};
             evt.type = EventType::kMouseMoved;
             evt.mouse_move.mouse_position = window_data->mouse_position;
@@ -155,8 +133,7 @@ void Window::BindWindowCallbacks()
     glfwSetKeyCallback(window_, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
         GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (window_data->event_callback)
-        {
+        if (window_data->event_callback) {
             Event event{};
             event.type = (action == GLFW_PRESS || action == GLFW_REPEAT) ? EventType::kKeyPressed : EventType::kKeyReleased;
             event.key = {(KeyCode)key, scancode, (bool)(mods & GLFW_MOD_ALT), (bool)(mods & GLFW_MOD_CONTROL), (bool)(mods & GLFW_MOD_SHIFT), (bool)(mods & GLFW_MOD_SUPER)};
@@ -168,8 +145,7 @@ void Window::BindWindowCallbacks()
     glfwSetMouseButtonCallback(window_, [](GLFWwindow* window, int button, int action, int mods) {
         GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (window_data->event_callback)
-        {
+        if (window_data->event_callback) {
             Event event{};
             event.type = (action == GLFW_PRESS) ? EventType::kMouseButtonPressed : EventType::kMouseButtonReleased;
             event.mouse_button = {(MouseButton)button, window_data->mouse_position};
@@ -180,8 +156,7 @@ void Window::BindWindowCallbacks()
     glfwSetWindowFocusCallback(window_, [](GLFWwindow* window, int focused) {
         GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (window_data->event_callback)
-        {
+        if (window_data->event_callback) {
             Event event{};
             event.type = (focused == GL_TRUE) ? EventType::kGainedFocus : EventType::kLostFocus;
             window_data->event_callback(event);
@@ -191,8 +166,7 @@ void Window::BindWindowCallbacks()
     glfwSetScrollCallback(window_, [](GLFWwindow* window, double xoffset, double yoffset) {
         GlfwWindowData* window_data = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
 
-        if (window_data->event_callback)
-        {
+        if (window_data->event_callback) {
             Event event{};
             event.type = EventType::kMouseWheelScrolled;
             event.mouse_wheel.delta = {xoffset, yoffset};

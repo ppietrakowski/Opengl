@@ -19,9 +19,6 @@
     <Filter Include="Source Files\Imgui">
       <UniqueIdentifier>{a5cfb949-f6c5-443c-8856-52fe60521b72}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\platform">
-      <UniqueIdentifier>{e3b8f3b9-58d5-48e0-80cc-7a9ee8efdd83}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\core">
       <UniqueIdentifier>{885b79e7-2740-4f14-9e5f-30fb5e75477e}</UniqueIdentifier>
     </Filter>
@@ -301,6 +298,15 @@
     </ClInclude>
     <ClInclude Include="batching.h">
       <Filter>Header Files\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="level_interface.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="actor_tag_component.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="transform_component.h">
+      <Filter>Header Files\scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

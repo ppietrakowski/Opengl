@@ -7,8 +7,7 @@
 
 class ResourceManagerImpl;
 
-class Level
-{
+class Level : public LevelInterface {
 public:
     Level();
     ~Level();
@@ -17,25 +16,22 @@ public:
     Actor FindActor(const std::string& name) const;
     std::vector<Actor> FindActorsWithTag(const std::string& tag) const;
 
-    void RemoveActor(const std::string& name);
+    void RemoveActor(const std::string& name) override;
 
     void StartupLevel();
     void BroadcastUpdate(Duration duration);
     void BroadcastRender(Duration duration);
 
-    auto begin()
-    {
+    auto begin() {
         return actors_.begin();
     }
 
-    auto end()
-    {
+    auto end() {
         return actors_.end();
     }
 
     template <typename ...Args>
-    auto View()
-    {
+    auto View() {
         return registry_.view<Args...>();
     }
 
@@ -51,12 +47,8 @@ private:
 private:
     void UpdateSkeletalMeshesAnimation(Duration duration);
 
-    Actor ConstructFromEntity(entt::entity entity) const
-    {
-        Actor a{};
-        a.entity_handle_ = entt::handle{const_cast<entt::registry&>(registry_), entity};
-        a.home_level_ = const_cast<Level*>(this);
-        return a;
+    Actor ConstructFromEntity(entt::entity entity) const {
+        return Actor{const_cast<Level*>(this), entt::handle{const_cast<entt::registry&>(registry_), entity}};
     }
 };
 

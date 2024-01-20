@@ -8,8 +8,7 @@
 
 
 IndexBuffer::IndexBuffer(const uint32_t* data, int num_indices, bool dynamic) :
-    num_indices_{num_indices}
-{
+    num_indices_{num_indices} {
     GLenum buffer_usage = dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
     glBindVertexArray(0);
@@ -22,28 +21,23 @@ IndexBuffer::IndexBuffer(const uint32_t* data, int num_indices, bool dynamic) :
 }
 
 IndexBuffer::IndexBuffer(int max_num_indices) :
-    IndexBuffer{nullptr, max_num_indices, true}
-{
+    IndexBuffer{nullptr, max_num_indices, true} {
 }
 
-IndexBuffer::~IndexBuffer()
-{
+IndexBuffer::~IndexBuffer() {
     RenderCommand::NotifyIndexBufferDestroyed(num_indices_ * sizeof(uint32_t));
     glDeleteBuffers(1, &renderer_id_);
 }
 
-void IndexBuffer::Bind() const
-{
+void IndexBuffer::Bind() const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer_id_);
 }
 
-void IndexBuffer::Unbind() const
-{
+void IndexBuffer::Unbind() const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void IndexBuffer::UpdateIndices(const uint32_t* data, int offset, int size)
-{
+void IndexBuffer::UpdateIndices(const uint32_t* data, int offset, int size) {
     ERR_FAIL_EXPECTED_TRUE_MSG(size <= num_indices_, "Size over declared is causing memory allocation -> may occur memory leak");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderer_id_);

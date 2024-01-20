@@ -11,20 +11,15 @@ static const std::array<uint32_t, 24> kBaseBoxIndices =
 };
 
 DebugRenderBatch::DebugRenderBatch() :
-    batch_base_{std::array{VertexAttribute{3, PrimitiveVertexType::kFloat}, VertexAttribute{1, PrimitiveVertexType::kUnsignedInt}}}
-{
+    batch_base_{std::array{VertexAttribute{3, PrimitiveVertexType::kFloat}, VertexAttribute{1, PrimitiveVertexType::kUnsignedInt}}} {
 }
 
-void DebugRenderBatch::FlushDraw(Material& material)
-{
+void DebugRenderBatch::FlushDraw(Material& material) {
     batch_base_.DrawLines(glm::mat4{1.0f}, material);
 }
 
-void DebugRenderBatch::AddBoxInstance(glm::vec3 box_min, glm::vec3 box_max, const Transform& transform, const glm::vec4& color)
-{
-
-    if (!Renderer::IsVisibleToCamera(transform.position, box_min, box_max))
-    {
+void DebugRenderBatch::AddBoxInstance(glm::vec3 box_min, glm::vec3 box_max, const Transform& transform, const glm::vec4& color) {
+    if (!Renderer::IsVisibleToCamera(transform.position, box_min, box_max)) {
         return;
     }
 
@@ -35,7 +30,7 @@ void DebugRenderBatch::AddBoxInstance(glm::vec3 box_min, glm::vec3 box_max, cons
         DebugVertex{glm::vec3{box_max[0], box_min[1], box_min[2]}, packed_color},
         DebugVertex{glm::vec3{box_max[0], box_max[1], box_min[2]}, packed_color},
         DebugVertex{glm::vec3{box_min[0], box_max[1], box_min[2]}, packed_color},
-                                                                
+
         DebugVertex{glm::vec3{box_min[0], box_min[1], box_max[2]}, packed_color},
         DebugVertex{glm::vec3{box_max[0], box_min[1], box_max[2]}, packed_color},
         DebugVertex{glm::vec3{box_max[0], box_max[1], box_max[2]}, packed_color},

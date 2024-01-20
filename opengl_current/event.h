@@ -9,8 +9,7 @@
 using MouseButton = int;
 using KeyCode = int;
 
-enum class EventType
-{
+enum class EventType {
     kInvalid = 0,
     kLostFocus,
     kGainedFocus,
@@ -23,16 +22,13 @@ enum class EventType
     kCount
 };
 
-struct Event
-{
-    struct SizeEvent
-    {
+struct Event {
+    struct SizeEvent {
         int width;
         int height;
     };
 
-    struct KeyEvent
-    {
+    struct KeyEvent {
         KeyCode key;
         int scancode;
         bool alt_clicked : 1;
@@ -41,28 +37,24 @@ struct Event
         bool system_clicked : 1;
     };
 
-    struct MouseMoveEvent
-    {
+    struct MouseMoveEvent {
         glm::vec2 mouse_position;
         glm::vec2 last_mouse_position;
     };
 
-    struct MouseButtonEvent
-    {
+    struct MouseButtonEvent {
         MouseButton button;
         glm::vec2 mouse_position;
     };
 
-    struct MouseWheelEvent
-    {
+    struct MouseWheelEvent {
         glm::vec2 delta;
     };
 
     // Member data
     EventType type;
 
-    union
-    {
+    union {
         SizeEvent size;
         KeyEvent key;
         MouseMoveEvent mouse_move;

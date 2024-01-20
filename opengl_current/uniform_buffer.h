@@ -2,14 +2,13 @@
 
 #include <cstdint>
 
-class UniformBuffer
-{
+class UniformBuffer {
 public:
-    UniformBuffer(size_t maxSize);
+    UniformBuffer(int max_size);
     ~UniformBuffer();
 
-    void UpdateBuffer(const void* data, size_t size_bytes);
-    void UpdateBuffer(const void* data, size_t size_bytes, size_t offset);
+    void UpdateBuffer(const void* data, int size_bytes);
+    void UpdateBuffer(const void* data, int size_bytes, int offset);
 
     void Bind(int binding_id) const;
 
@@ -17,5 +16,5 @@ public:
 
 private:
     uint32_t renderer_id_;
-    size_t max_size_;
+    int max_size_;
 };

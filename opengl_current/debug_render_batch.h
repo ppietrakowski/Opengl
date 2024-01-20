@@ -6,8 +6,7 @@
 #include <glm/glm.hpp>
 
 
-struct DebugVertex
-{
+struct DebugVertex {
     glm::vec3 Position;
 
     // Packed color to minimize size of updated data
@@ -15,18 +14,15 @@ struct DebugVertex
 };
 
 template<>
-struct BatchVertexCreator<DebugVertex>
-{
-    static DebugVertex CreateInstanceFrom(const DebugVertex& vertex, const glm::mat4& transform)
-    {
+struct BatchVertexCreator<DebugVertex> {
+    static DebugVertex CreateInstanceFrom(const DebugVertex& vertex, const glm::mat4& transform) {
         DebugVertex v{vertex};
         v.Position = transform * glm::vec4{v.Position,1};
         return v;
     }
 };
 
-class DebugRenderBatch
-{
+class DebugRenderBatch {
 public:
     DebugRenderBatch();
 

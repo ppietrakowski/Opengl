@@ -7,8 +7,7 @@
 
 #include "core.h"
 
-class VertexBuffer
-{
+class VertexBuffer {
 public:
     VertexBuffer(const void* data, int size_bytes, bool dynamic = false);
     VertexBuffer(int max_size_bytes);
@@ -31,17 +30,14 @@ private:
     int buffer_size_;
 };
 
-FORCE_INLINE void VertexBuffer::UpdateVertices(const void* buffer, int size)
-{
+FORCE_INLINE void VertexBuffer::UpdateVertices(const void* buffer, int size) {
     UpdateVertices(buffer, 0, size);
 }
 
-FORCE_INLINE int VertexBuffer::GetVerticesSizeBytes() const
-{
+FORCE_INLINE int VertexBuffer::GetVerticesSizeBytes() const {
     return buffer_size_;
 }
 
-FORCE_INLINE uint32_t VertexBuffer::GetOpenGlIdentifier() const
-{
+FORCE_INLINE uint32_t VertexBuffer::GetOpenGlIdentifier() const {
     return renderer_id_;
 }

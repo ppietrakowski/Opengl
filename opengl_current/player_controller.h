@@ -6,16 +6,14 @@
 #include "event.h"
 
 // Axis simulated by keys
-struct KeyAxis
-{
+struct KeyAxis {
     KeyCode key;
     KeyCode reverse_key;
 
     float GetAxisValue() const;
 };
 
-class PlayerController
-{
+class PlayerController {
 public:
     PlayerController(const Actor& actor);
     PlayerController(const PlayerController&) = default;
@@ -29,8 +27,7 @@ public:
 
     void Update();
 
-    const Actor& GetActor() const
-    {
+    const Actor& GetActor() const {
         return player_actor_;
     }
 

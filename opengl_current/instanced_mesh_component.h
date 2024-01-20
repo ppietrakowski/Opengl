@@ -3,22 +3,18 @@
 #include "instanced_mesh.h"
 #include "resouce_manager.h"
 
-struct InstancedMeshComponent
-{
+struct InstancedMeshComponent {
     std::shared_ptr<InstancedMesh> instanced_mesh;
 
     InstancedMeshComponent(const std::shared_ptr<StaticMesh>& mesh, const std::shared_ptr<Material>& material) :
-        instanced_mesh{std::make_shared<InstancedMesh>(mesh, material)}
-    {
+        instanced_mesh{std::make_shared<InstancedMesh>(mesh, material)} {
     }
 
-    void AddInstance(const Transform& transform) const
-    {
+    void AddInstance(const Transform& transform) const {
         instanced_mesh->AddInstance(transform, 0);
     }
 
-    void RemoveInstance(int index) const
-    {
+    void RemoveInstance(int index) const {
         instanced_mesh->RemoveInstance(index);
     }
 

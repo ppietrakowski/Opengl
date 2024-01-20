@@ -253,6 +253,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="actor.h" />
+    <ClInclude Include="actor_tag_component.h" />
     <ClInclude Include="assimp_utils.h" />
     <ClInclude Include="batching.h" />
     <ClInclude Include="core.h" />
@@ -280,6 +281,7 @@
     <ClInclude Include="instanced_mesh.h" />
     <ClInclude Include="instanced_mesh_component.h" />
     <ClInclude Include="level.h" />
+    <ClInclude Include="level_interface.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="material_parameter.h" />
@@ -296,6 +298,7 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="transform.h" />
+    <ClInclude Include="transform_component.h" />
     <ClInclude Include="uniform_buffer.h" />
     <ClInclude Include="vertex_array.h" />
     <ClInclude Include="vertex_buffer.h" />

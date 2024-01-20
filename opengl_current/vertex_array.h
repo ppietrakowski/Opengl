@@ -6,24 +6,21 @@
 #include <cstdint>
 #include <memory>
 
-enum class PrimitiveVertexType : int8_t
-{
+enum class PrimitiveVertexType : int8_t {
     kInt,
     kUnsignedInt,
     kFloat,
     kMaxPrimitiveVertexType
 };
 
-struct VertexAttribute
-{
+struct VertexAttribute {
     int8_t num_components : 5;
     PrimitiveVertexType vertex_type : 3;
 };
 
 using AttributesView = std::span<const VertexAttribute>;
 
-class VertexArray
-{
+class VertexArray {
 public:
     VertexArray();
     ~VertexArray();
@@ -42,10 +39,7 @@ public:
     void AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertex_buffer, AttributesView attributes);
     uint32_t GetOpenGlIdentifier() const;
 
-    AttributesView GetAttributes() const
-    {
-        return attributes_;
-    }
+    AttributesView GetAttributes() const;
 
 private:
     uint32_t renderer_id_;
@@ -53,3 +47,7 @@ private:
     std::shared_ptr<IndexBuffer> index_buffer_;
     std::vector<VertexAttribute> attributes_;
 };
+
+FORCE_INLINE AttributesView VertexArray::GetAttributes() const {
+    return attributes_;
+}

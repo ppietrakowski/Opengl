@@ -13,8 +13,7 @@
 #include <variant>
 #include <any>
 
-enum class MaterialParamType : int8_t
-{
+enum class MaterialParamType : int8_t {
     kUnknown = 0,
     kInt,
     kFloat,
@@ -25,37 +24,29 @@ enum class MaterialParamType : int8_t
     kNumMaterialParamsType
 };
 
-class Parameter
-{
+class Parameter {
 public:
     virtual ~Parameter() = default;
 
-    virtual void SetValue(int value)
-    {
+    virtual void SetValue(int value) {
     }
 
-    virtual void SetValue(float value)
-    {
+    virtual void SetValue(float value) {
     }
 
-    virtual void SetValue(glm::vec2 value)
-    {
+    virtual void SetValue(glm::vec2 value) {
     }
 
-    virtual void SetValue(glm::vec3 value)
-    {
+    virtual void SetValue(glm::vec3 value) {
     }
 
-    virtual void SetValue(glm::vec4 value)
-    {
+    virtual void SetValue(glm::vec4 value) {
     }
 
-    virtual void SetValue(std::shared_ptr<Texture> texture)
-    {
+    virtual void SetValue(std::shared_ptr<Texture> texture) {
     }
 
-    virtual std::any GetValue() const
-    {
+    virtual std::any GetValue() const {
         return nullptr;
     }
 
@@ -63,30 +54,25 @@ public:
 };
 
 template <typename T>
-class PrimitiveParameter : public Parameter
-{
+class PrimitiveParameter : public Parameter {
 public:
     PrimitiveParameter(std::string uniform_name, T value) :
         uniform_name_{uniform_name},
-        value_{value}
-    {
+        value_{value} {
     }
 
     PrimitiveParameter(const PrimitiveParameter<T>&) = default;
     PrimitiveParameter& operator=(const PrimitiveParameter<T>&) = default;
 
-    void SetValue(T value) override
-    {
+    void SetValue(T value) override {
         value_ = value;
     }
 
-    void SetUniform(Shader& shader) const override
-    {
+    void SetUniform(Shader& shader) const override {
         shader.SetUniform(uniform_name_.c_str(), value_);
     }
 
-    std::any GetValue() const override
-    {
+    std::any GetValue() const override {
         return value_;
     }
 
@@ -95,22 +81,19 @@ private:
     T value_;
 };
 
-class TextureParameter : public Parameter
-{
+class TextureParameter : public Parameter {
 public:
     TextureParameter(std::string uniform_name, std::shared_ptr<Texture> value, uint32_t texture_unit) :
         uniform_name_{uniform_name},
         texture_{value},
-        texture_unit_{texture_unit}
-    {
+        texture_unit_{texture_unit} {
     }
 
     TextureParameter(const TextureParameter&) = default;
     TextureParameter& operator=(const TextureParameter&) = default;
 
     void SetUniform(Shader& shader) const override;
-    std::any GetValue() const
-    {
+    std::any GetValue() const {
         return texture_;
     }
 
@@ -120,8 +103,7 @@ private:
     uint32_t texture_unit_;
 };
 
-class UnknownParameter : public Parameter
-{
+class UnknownParameter : public Parameter {
     // Inherited via Parameter
     void SetUniform(Shader& shader) const override;
 };
@@ -135,8 +117,7 @@ using ParamVariant = std::variant<TextureParameter,
     UnknownParameter
 >;
 
-class MaterialParam
-{
+class MaterialParam {
     friend class Material;
 
 public:

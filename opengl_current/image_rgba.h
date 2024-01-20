@@ -2,13 +2,11 @@
 
 #include <cstdint>
 
-inline void DefaultImageDataDeleter(uint8_t* data)
-{
+inline void DefaultImageDataDeleter(uint8_t* data) {
     delete[] data;
 }
 
-class ImageRgba
-{
+class ImageRgba {
 public:
     ImageRgba(uint8_t* image, int width, int height, void (*deleter)(uint8_t*) = &DefaultImageDataDeleter);
 

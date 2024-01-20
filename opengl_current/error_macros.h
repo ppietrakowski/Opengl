@@ -4,17 +4,10 @@
 #include <cstdint>
 #include <stdexcept>
 
-struct SourceLocation
-{
+struct SourceLocation {
     const char* file_name;
     int line;
     const char* function_name;
-};
-
-struct ErrorHandlerInfo
-{
-    SourceLocation source_location;
-    const char* error_message;
 };
 
 #ifdef _MSC_VER
@@ -29,20 +22,7 @@ struct ErrorHandlerInfo
 #define DEBUG_BREAK() __builtin_trap()
 #endif
 
-typedef void (*ErrorHandlerFn)(void* user_data, const ErrorHandlerInfo& info);
-
-struct ErrorHandler
-{
-    ErrorHandlerFn error_handler_func{nullptr};
-    void* user_data{nullptr};
-
-    void Invoke(const ErrorHandlerInfo& info) const;
-};
-
-void AddErrorHandler(const ErrorHandler& handler);
-void RemoveErrorHandler(const ErrorHandler& handler);
 void Crash(const SourceLocation* location, const char* description);
-
 void PrintError(const SourceLocation* location, const char* message);
 
 #define CURRENT_SOURCE_LOCATION                                       \

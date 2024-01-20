@@ -2,8 +2,7 @@
 
 #include "static_mesh.h"
 
-struct StaticMeshComponent
-{
+struct StaticMeshComponent {
     std::string mesh_name;
 
     StaticMeshComponent() = default;

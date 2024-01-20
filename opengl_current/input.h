@@ -6,8 +6,7 @@
 
 struct GLFWwindow;
 
-class Input
-{
+class Input {
 public:
     Input(GLFWwindow* window);
     ~Input() = default;

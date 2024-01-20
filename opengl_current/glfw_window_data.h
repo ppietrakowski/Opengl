@@ -6,8 +6,7 @@
 
 using EventCallback = std::function<void(const Event&)>;
 
-struct GlfwWindowData
-{
+struct GlfwWindowData {
     EventCallback event_callback;
     bool mouse_visible : 1{ true };
     glm::ivec2 window_position{0, 0};

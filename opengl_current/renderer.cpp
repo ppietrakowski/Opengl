@@ -18,8 +18,7 @@ std::shared_ptr<Texture2D> Renderer::default_texture_;
 
 static DebugRenderBatch* debug_batch_ = nullptr;
 
-void Renderer::Quit()
-{
+void Renderer::Quit() {
     delete debug_batch_;
     default_texture_.reset();
     RenderCommand::Quit();
@@ -28,8 +27,7 @@ void Renderer::Quit()
 static constexpr RgbColor kBlack{0, 0, 0};
 static constexpr RgbColor kMagenta{255, 0, 255};
 
-void Renderer::Initialize()
-{
+void Renderer::Initialize() {
     // array of checkerboard with black and magenta
     RgbColor colors[4][4] =
     {
@@ -50,27 +48,23 @@ void Renderer::Initialize()
     RenderCommand::SetCullFace(true);
 }
 
-void Renderer::UpdateProjection(const CameraProjection& projection)
-{
+void Renderer::UpdateProjection(const CameraProjection& projection) {
     projection_ = glm::perspective(glm::radians(projection.fov), projection.aspect_ratio, projection.z_near, projection.z_far);
 }
 
-void Renderer::BeginScene(glm::vec3 camera_pos, glm::quat camera_rotation)
-{
+void Renderer::BeginScene(glm::vec3 camera_pos, glm::quat camera_rotation) {
     RenderCommand::BeginScene();
     view_ = glm::inverse(glm::translate(glm::identity<glm::mat4>(), camera_pos) * glm::mat4_cast(camera_rotation));
     view_projection_ = projection_ * view_;
     camera_position_ = camera_pos;
 }
 
-void Renderer::EndScene()
-{
+void Renderer::EndScene() {
     RenderCommand::SetLineWidth(1);
     RenderCommand::EndScene();
 }
 
-void Renderer::SubmitTriangles(const SubmitCommandArgs& submit_args)
-{
+void Renderer::SubmitTriangles(const SubmitCommandArgs& submit_args) {
     ASSERT(submit_args.num_indices <= submit_args.vertex_array->GetNumIndices());
 
     Shader& shader = submit_args.GetShader();
@@ -81,8 +75,7 @@ void Renderer::SubmitTriangles(const SubmitCommandArgs& submit_args)
     RenderCommand::DrawTriangles(*submit_args.vertex_array, submit_args.num_indices);
 }
 
-void Renderer::SubmitLines(const SubmitCommandArgs& submit_args)
-{
+void Renderer::SubmitLines(const SubmitCommandArgs& submit_args) {
     ASSERT(submit_args.num_indices <= submit_args.vertex_array->GetNumIndices());
 
     Shader& shader = submit_args.GetShader();
@@ -93,8 +86,7 @@ void Renderer::SubmitLines(const SubmitCommandArgs& submit_args)
     RenderCommand::DrawLines(*submit_args.vertex_array, submit_args.num_indices);
 }
 
-void Renderer::SubmitPoints(const SubmitCommandArgs& submit_args)
-{
+void Renderer::SubmitPoints(const SubmitCommandArgs& submit_args) {
     ASSERT(submit_args.num_indices <= submit_args.vertex_array->GetNumIndices());
 
     Shader& shader = submit_args.GetShader();
@@ -105,8 +97,7 @@ void Renderer::SubmitPoints(const SubmitCommandArgs& submit_args)
     RenderCommand::DrawPoints(*submit_args.vertex_array, submit_args.num_indices);
 }
 
-void Renderer::SubmitSkeleton(const SubmitCommandArgs& submit_args, std::span<const glm::mat4> transforms)
-{
+void Renderer::SubmitSkeleton(const SubmitCommandArgs& submit_args, std::span<const glm::mat4> transforms) {
     Shader& shader = submit_args.GetShader();
 
     shader.Use();
@@ -117,8 +108,7 @@ void Renderer::SubmitSkeleton(const SubmitCommandArgs& submit_args, std::span<co
     RenderCommand::DrawTriangles(*submit_args.vertex_array, submit_args.num_indices);
 }
 
-void Renderer::SubmitMeshInstanced(const SubmitCommandArgs& submit_args, const UniformBuffer& transform_buffer, int num_instances)
-{
+void Renderer::SubmitMeshInstanced(const SubmitCommandArgs& submit_args, const UniformBuffer& transform_buffer, int num_instances) {
     Shader& shader = submit_args.GetShader();
 
     shader.Use();
@@ -129,18 +119,15 @@ void Renderer::SubmitMeshInstanced(const SubmitCommandArgs& submit_args, const U
     RenderCommand::DrawTrianglesInstanced(*submit_args.vertex_array, num_instances);
 }
 
-void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform, const glm::vec4& color)
-{
+void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform, const glm::vec4& color) {
     debug_batch_->AddBoxInstance(boxmin, boxmax, transform, color);
 }
 
-void Renderer::FlushDrawDebug(Material& shader)
-{
+void Renderer::FlushDrawDebug(Material& shader) {
     debug_batch_->FlushDraw(shader);
 }
 
-bool Renderer::IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_min, glm::vec3 bbox_max)
-{
+bool Renderer::IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_min, glm::vec3 bbox_max) {
     // only need apply translation for testing
     glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), worldspace_position);
 
@@ -158,8 +145,7 @@ bool Renderer::IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_m
         max_clipspace.z < -max_clipspace.w || min_clipspace.z > min_clipspace.w);
 }
 
-void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform)
-{
+void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform) {
     shader.SetUniform("u_projection_view", view_projection_);
     shader.SetUniform("u_transform", transform);
     shader.SetUniform("u_view", view_);

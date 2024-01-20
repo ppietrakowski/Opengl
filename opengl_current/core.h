@@ -17,8 +17,7 @@
 #endif
 
 template <typename CharType>
-FORCE_INLINE bool ContainsString(const std::basic_string<CharType>& str, const CharType* s)
-{
+FORCE_INLINE bool ContainsString(const std::basic_string<CharType>& str, const CharType* s) {
     size_t pos = str.find(s);
     return pos != std::basic_string<CharType>::npos;
 }

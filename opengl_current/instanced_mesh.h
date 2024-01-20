@@ -9,43 +9,36 @@
 constexpr uint32_t kNumInstancesTransform = 400;
 
 // struct representing same transforms as there are in shader
-struct InstancingTransforms
-{
+struct InstancingTransforms {
     glm::mat4 transforms[kNumInstancesTransform];
 };
 
 // Buffer for storing transform inside uniform buffer so it's faster to access
-struct InstancingTransformBuffer
-{
+struct InstancingTransformBuffer {
     std::shared_ptr<UniformBuffer> uniform_buffer;
     int num_transforms_occupied{0};
 
-    InstancingTransformBuffer():
-        uniform_buffer(std::make_shared<UniformBuffer>(sizeof(InstancingTransforms)))
-    {
+    InstancingTransformBuffer() :
+        uniform_buffer(std::make_shared<UniformBuffer>(static_cast<int>(sizeof(InstancingTransforms)))) {
     }
 
-    void AddTransform(const glm::mat4& transform)
-    {
-        uniform_buffer->UpdateBuffer(glm::value_ptr(transform), 
+    void AddTransform(const glm::mat4& transform) {
+        uniform_buffer->UpdateBuffer(glm::value_ptr(transform),
             sizeof(transform), num_transforms_occupied * sizeof(transform));
         num_transforms_occupied++;
     }
 
-    void Clear()
-    {
+    void Clear() {
         num_transforms_occupied = 0;
     }
 
     // Updates transform at relative index (from start of this buffer)
-    void UpdateTransform(const glm::mat4& transform, int relative_index) const
-    {
+    void UpdateTransform(const glm::mat4& transform, int relative_index) const {
         uniform_buffer->UpdateBuffer(glm::value_ptr(transform), sizeof(transform), relative_index * sizeof(transform));
     }
 };
 
-class InstancedMesh
-{
+class InstancedMesh {
 public:
     InstancedMesh(const std::shared_ptr<StaticMesh>& static_mesh, const std::shared_ptr<Material>& material);
 
@@ -54,15 +47,13 @@ public:
     // Adds new mesh instance. Returns index of newly created instance
     int AddInstance(const Transform& transform, int texture_id);
 
-    const StaticMesh& GetMesh() const
-    {
+    const StaticMesh& GetMesh() const {
         return *static_mesh_;
     }
 
     void RemoveInstance(int index);
 
-    int GetSize() const
-    {
+    int GetSize() const {
         return num_instances_;
     }
 

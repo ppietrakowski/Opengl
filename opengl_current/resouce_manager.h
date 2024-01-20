@@ -10,8 +10,7 @@
 
 class ResourceManagerImpl;
 
-class ResourceManager
-{
+class ResourceManager {
     friend class Level;
     friend class ResourceManagerImpl;
 public:

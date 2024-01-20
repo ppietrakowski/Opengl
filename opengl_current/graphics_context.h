@@ -2,8 +2,7 @@
 
 struct GLFWwindow;
 
-class GraphicsContext
-{
+class GraphicsContext {
 public:
     GraphicsContext(GLFWwindow* context_window);
     ~GraphicsContext() = default;

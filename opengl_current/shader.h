@@ -16,8 +16,7 @@
 
 #include "uniform_buffer.h"
 
-enum class UniformType
-{
+enum class UniformType {
     kUndefined,
     kVec4,
     kVec3,
@@ -32,34 +31,23 @@ enum class UniformType
     kSampler2D,
 };
 
-struct UniformInfo
-{
+struct UniformInfo {
     UniformType uniform_type;
     std::string name;
     int location;
     int array_size{1};
 };
 
-struct ShaderCompilationFailedException : public std::runtime_error
-{
-    ShaderCompilationFailedException(const char* error_message) :
-        std::runtime_error{error_message}
-    {
-    }
+struct ShaderCompilationFailedException : public std::runtime_error {
+    ShaderCompilationFailedException(const char* error_message);
 };
 
-struct ShaderProgramLinkingFailedException : public std::runtime_error
-{
-    ShaderProgramLinkingFailedException(const char* error_message) :
-        std::runtime_error{error_message}
-    {
-    }
+struct ShaderProgramLinkingFailedException : public std::runtime_error {
+    ShaderProgramLinkingFailedException(const char* error_message);
 };
 
-struct ShaderIndex
-{
-    enum IndexType
-    {
+struct ShaderIndex {
+    enum IndexType {
         kVertex = 0,
         kFragment,
         kGeometry,
@@ -69,38 +57,11 @@ struct ShaderIndex
     };
 };
 
-class Shader;
-
-class ShaderSourceBuilder
-{
-public:
-    std::shared_ptr<Shader> Build();
-
-    ShaderSourceBuilder& SetVertexShaderSource(const std::string& source);
-    ShaderSourceBuilder& LoadVertexShaderSource(const std::filesystem::path& file_path);
-
-    ShaderSourceBuilder& SetFragmentShaderSource(const std::string& source);
-    ShaderSourceBuilder& LoadFragmentShaderSource(const std::filesystem::path& file_path);
-
-    ShaderSourceBuilder& SetGeometryShaderSource(const std::string& source);
-    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& file_path);
-
-    ShaderSourceBuilder& SetTesselationShaderSource(const std::string& control_shader_source, const std::string& evaluate_shader_source);
-    ShaderSourceBuilder& LoadGeometryShaderSource(const std::filesystem::path& control_shader_path, const std::filesystem::path& evaluate_shader_path);
-
-private:
-    std::array<std::string, ShaderIndex::kCount> shader_sources_;
-
-    std::uint32_t GetLastShaderIndex() const;
-};
-
-
 class Texture;
 
 static constexpr int kMinTextureUnits = 16;
 
-class Shader
-{
+class Shader {
 public:
     Shader(std::span<const std::string> sources);
     ~Shader();
@@ -125,7 +86,7 @@ public:
     glm::vec2 GetUniformVec2(const char* name) const;
     glm::vec3 GetUniformVec3(const char* name) const;
     glm::vec4 GetUniformVec4(const char* name) const;
-                                                    ;
+
     std::vector<UniformInfo> GetUniformsInfo() const;
     void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, uint32_t start_texture_unit = 0);
 
@@ -139,9 +100,20 @@ private:
 private:
     Shader() = default;
 
+private:
     void GenerateShaders(std::span<std::string_view> sources);
     void GenerateShaders(std::span<const std::string> sources);
 
     int GetUniformLocation(const char* uniform_name) const;
     void AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, int location) const;
 };
+
+inline ShaderCompilationFailedException::ShaderCompilationFailedException(const char* error_message) :
+    std::runtime_error{error_message}
+{
+}
+
+inline ShaderProgramLinkingFailedException::ShaderProgramLinkingFailedException(const char* error_message) :
+    std::runtime_error{error_message}
+{
+}

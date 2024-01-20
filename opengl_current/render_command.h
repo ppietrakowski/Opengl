@@ -4,16 +4,14 @@
 #include "uniform_buffer.h"
 #include <cstdint>
 
-struct RenderStats
-{
+struct RenderStats {
     int num_drawcalls{0};
     int64_t delta_frame_time{0};
     int index_bufer_memory_allocation{0};
     int vertex_buffer_memory_allocation{0};
 };
 
-class RenderCommand
-{
+class RenderCommand {
 public:
     RenderCommand() = delete;
     RenderCommand(const RenderCommand&) = delete;

@@ -11,8 +11,7 @@
 SandboxGameLayer::SandboxGameLayer(Game* game) :
     camera_rotation_{glm::vec3{0, 0, 0}},
     camera_position_{0.0f, 0.0f, 0.0f},
-    game_(game)
-{
+    game_(game) {
     default_shader_ = ResourceManager::GetShader("shaders/default.shd");
     debug_shader_ = ResourceManager::GetShader("shaders/unshaded.shd");
     auto skeletal_shader = ResourceManager::GetShader("shaders/skeletal_default.shd");
@@ -57,20 +56,12 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     std::shared_ptr<Material> material = test_skeletal_mesh_->main_material;
     std::uint32_t texture_unit = 0;
 
-    for (const auto& path : test_skeletal_mesh_->texture_paths)
-    {
-        std::string name = "diffuse" + std::to_string(texture_unit + 1);
-        material->SetTextureProperty(name.c_str(), ResourceManager::GetTexture2D(path));
-        ++texture_unit;
-    }
-
     camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
     static_mesh_position_ = {2, 0, -10};
     std::vector<std::string> animations = std::move(test_skeletal_mesh_->GetAnimationNames());
     RenderCommand::SetClearColor(RgbaColor{50, 30, 170});
 
-    for (std::int32_t i = 0; i < 2; ++i)
-    {
+    for (std::int32_t i = 0; i < 2; ++i) {
         skeletal_mesh_actor_ = level_.CreateActor("SkeletalMesh" + std::to_string(i));
         skeletal_mesh_actor_.AddComponent<SkeletalMeshComponent>(test_skeletal_mesh_);
         skeletal_mesh_actor_.GetComponent<TransformComponent>().scale = glm::vec3{0.01f, 0.01f, 0.01f};
@@ -90,7 +81,7 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     shader->SetUniform("u_light_color", glm::vec3{1, 1, 1});
 
     auto mat = ResourceManager::CreateMaterial("shaders/instanced.shd", "instanced");
-    
+
     mat->SetVector3Property("diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
     mat->SetVector3Property("ambient", glm::vec3{0.01f, 0.01f, 0.01f});
     mat->SetVector3Property("specular", glm::vec3{0.797357, 0.723991, 0.208006});
@@ -103,10 +94,8 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
 
     InstancedMeshComponent& instanced_mesh = instance_mesh.GetComponent<InstancedMeshComponent>();
 
-    for (int i = 0; i < 10; ++i)
-    {
-        for (int j = 0; j < 400; ++j)
-        {
+    for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 400; ++j) {
             Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
             instanced_mesh.AddInstance(transform);
         }
@@ -121,28 +110,21 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     controller.BindMouseMoveCallback(std::bind(&SandboxGameLayer::RotateCamera, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-void SandboxGameLayer::Update(Duration delta_time)
-{
+void SandboxGameLayer::Update(Duration delta_time) {
     float dt = delta_time.GetSeconds();
 
-    if (Input::IsKeyPressed(GLFW_KEY_E))
-    {
+    if (Input::IsKeyPressed(GLFW_KEY_E)) {
         camera_yaw_ -= yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
-    }
-    else if (Input::IsKeyPressed(GLFW_KEY_Q))
-    {
+    } else if (Input::IsKeyPressed(GLFW_KEY_Q)) {
         camera_yaw_ += yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
     }
 
-    if (Input::IsKeyPressed(GLFW_KEY_Y))
-    {
+    if (Input::IsKeyPressed(GLFW_KEY_Y)) {
         glm::vec3 world_up = glm::vec3{0, 1, 0};
         camera_position_ += ascend_speed_ * world_up * dt;
-    }
-    else if (Input::IsKeyPressed(GLFW_KEY_H))
-    {
+    } else if (Input::IsKeyPressed(GLFW_KEY_H)) {
         glm::vec3 world_down = glm::vec3{0, -1, 0};
         camera_position_ += ascend_speed_ * world_down * dt;
     }
@@ -151,8 +133,7 @@ void SandboxGameLayer::Update(Duration delta_time)
     level_.BroadcastUpdate(delta_time);
 }
 
-void SandboxGameLayer::Render(Duration delta_time)
-{
+void SandboxGameLayer::Render(Duration delta_time) {
     Transform camera_transform = player_.GetComponent<TransformComponent>().GetAsTransform();
     Renderer::BeginScene(camera_transform.position, camera_transform.rotation);
     current_used_shader_->Use();
@@ -170,22 +151,17 @@ void SandboxGameLayer::Render(Duration delta_time)
     Renderer::EndScene();
 }
 
-bool SandboxGameLayer::OnEvent(const Event& event)
-{
+bool SandboxGameLayer::OnEvent(const Event& event) {
     return false;
 }
 
-void SandboxGameLayer::OnImguiFrame()
-{
+void SandboxGameLayer::OnImguiFrame() {
     static int last_framerate = 0;
     static int num_frame{0};
 
-    if (num_frame == 2)
-    {
+    if (num_frame == 2) {
         last_framerate = (last_framerate + static_cast<int>(1000 / last_delta_seconds_.GetMilliseconds())) / 2;
-    }
-    else
-    {
+    } else {
         num_frame++;
     }
 
@@ -206,14 +182,12 @@ void SandboxGameLayer::OnImguiFrame()
     Actor actor_to_remove = player_;
 
     ImGui::Begin("Hierarchy");
-    for (auto& [name, actor] : level_)
-    {
+    for (auto& [name, actor] : level_) {
         ImGui::Button(name.c_str());
         ImGui::SameLine();
 
         ImGui::PushID(name.c_str());
-        if (ImGui::Button("X"))
-        {
+        if (ImGui::Button("X")) {
             actor_to_remove = actor;
         }
         ImGui::PopID();
@@ -223,28 +197,24 @@ void SandboxGameLayer::OnImguiFrame()
 
     ImGui::End();
 
-    if (actor_to_remove != player_)
-    {
+    if (actor_to_remove != player_) {
         actor_to_remove.DestroyActor();
     }
 }
 
-void SandboxGameLayer::MoveForward(Actor& player, float axis_value)
-{
+void SandboxGameLayer::MoveForward(Actor& player, float axis_value) {
     TransformComponent& transform = player.GetComponent<TransformComponent>();
     glm::vec3 forward = axis_value * transform.GetForwardVector() * last_delta_seconds_.GetSeconds() * move_speed_;
     transform.Translate(forward);
 }
 
-void SandboxGameLayer::MoveRight(Actor& player, float axis_value)
-{
+void SandboxGameLayer::MoveRight(Actor& player, float axis_value) {
     TransformComponent& transform = player.GetComponent<TransformComponent>();
     glm::vec3 right = axis_value * transform.GetRightVector() * last_delta_seconds_.GetSeconds() * move_speed_;
     transform.Translate(right);
 }
 
-void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouse_move_delta)
-{
+void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouse_move_delta) {
     float dt = last_delta_seconds_.GetSeconds();
 
     TransformComponent& transform = player.GetComponent<TransformComponent>();
@@ -252,12 +222,10 @@ void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouse_move_delta)
     camera_yaw_ -= yaw_rotation_rate_ * mouse_move_delta.x * dt;
     camera_pitch_ -= pitch_rotation_rate_ * mouse_move_delta.y * dt;
 
-    if (camera_pitch_ < -89)
-    {
+    if (camera_pitch_ < -89) {
         camera_pitch_ = -89;
     }
-    if (camera_pitch_ > 89)
-    {
+    if (camera_pitch_ > 89) {
         camera_pitch_ = 89;
     }
 

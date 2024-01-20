@@ -9,8 +9,7 @@
 #include <GLFW/glfw3.h>
 
 GraphicsContext::GraphicsContext(GLFWwindow* context_window) :
-    window_{context_window}
-{
+    window_{context_window} {
     glfwMakeContextCurrent(window_);
     glfwSwapInterval(1);
     GLenum error_code = glewInit();
@@ -19,36 +18,30 @@ GraphicsContext::GraphicsContext(GLFWwindow* context_window) :
 
 constexpr const char* kGlslVersion = "#version 430 core";
 
-void GraphicsContext::InitializeForImGui()
-{
+void GraphicsContext::InitializeForImGui() {
     ImGui_ImplGlfw_InitForOpenGL(window_, true);
     ImGui_ImplOpenGL3_Init(kGlslVersion);
 }
 
-void GraphicsContext::DeinitializeImGui()
-{
+void GraphicsContext::DeinitializeImGui() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 }
 
-void GraphicsContext::ImGuiBeginFrame()
-{
+void GraphicsContext::ImGuiBeginFrame() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
 }
 
-void GraphicsContext::ImGuiDrawFrame()
-{
+void GraphicsContext::ImGuiDrawFrame() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void GraphicsContext::UpdateImGuiViewport()
-{
+void GraphicsContext::UpdateImGuiViewport() {
     ImGuiIO& io = ImGui::GetIO();
 
     // update viewport if enabled
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         GLFWwindow* currentContextWindow = glfwGetCurrentContext();
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
@@ -56,12 +49,10 @@ void GraphicsContext::UpdateImGuiViewport()
     }
 }
 
-void GraphicsContext::SwapBuffers()
-{
+void GraphicsContext::SwapBuffers() {
     glfwSwapBuffers(window_);
 }
 
-void GraphicsContext::SetVsync(bool vsync_enabled)
-{
+void GraphicsContext::SetVsync(bool vsync_enabled) {
     glfwSwapInterval(vsync_enabled ? 1 : 0);
 }
