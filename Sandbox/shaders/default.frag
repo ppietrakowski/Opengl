@@ -24,6 +24,8 @@ struct Light
     vec3 color;
     float direction_length;
     int type;
+    float cutoff;
+    float intensity;
 };
 
 layout(std140, binding=0) uniform Lights {
@@ -32,6 +34,7 @@ layout(std140, binding=0) uniform Lights {
 
 const int kLightTypeDirectional = 0;
 const int kLightTypePoint = 1;
+const int kLightTypeSpot = 2;
 
 uniform int u_num_lights;
 
@@ -42,15 +45,14 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir) {
     vec3 ambient = u_material.ambient;
 
     // Diffuse lighting
-    vec3 light_dir = normalize(light.position);
+    vec3 light_dir = normalize(-light.direction);
 
     // __________
     // cos(theta)
     float diff = max(dot(light_dir, norm), 0.0f);
 
-    vec3 diffuse = u_material.diffuse * light.color * diff;
+    vec3 diffuse = light.intensity * u_material.diffuse * light.color * diff;
 
-    
     // Specular lighting calculation
     vec3 specular = vec3(0.0, 0.0, 0.0);
 
@@ -58,7 +60,7 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir) {
 	    vec3 refl = reflect(-light_dir, norm);
         float fi = dot(view_dir, refl);
 
-	    specular = light.color * pow(max(0.0, fi), u_material.shininess) * u_material.specular;
+	    specular = light.intensity * light.color * pow(max(0.0, fi), u_material.shininess) * u_material.specular;
     }
 
     if (light.type == kLightTypePoint) {
@@ -73,6 +75,26 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir) {
 
         diffuse *= attenuation;
         specular *= attenuation;
+    } else if (light.type == kLightTypeSpot) {
+        vec3 light_to_fragment = normalize(frag_pos_ws - light.position);
+        float spot_factor = dot(light_to_fragment, light.direction);
+
+        if (spot_factor > light.cutoff) {
+            float attenuation = 0;
+            float dist = distance(light.position, frag_pos_ws);
+
+            if (dist <= 0.01f) {
+                attenuation = 1;
+            } else if (dist > 0.01f && dist < light.direction_length) {
+                attenuation = (light.direction_length - dist) / (light.direction_length - 0.01f);
+            }
+
+            diffuse *= attenuation;
+            specular *= attenuation;
+        } else {
+            diffuse = vec3(0, 0, 0);
+            specular = vec3(0, 0, 0);
+        }
     }
 
     // Final color calculation

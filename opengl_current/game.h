@@ -7,6 +7,8 @@
 #include "graphics_context.h"
 #include "window.h"
 
+#include "imgizmo/ImGuizmo.h"
+
 #include <cstdint>
 #include <string>
 

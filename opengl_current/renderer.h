@@ -78,8 +78,8 @@ public:
     static void AddLight(const LightData& light_data);
 
     static glm::mat4 view_;
-private:
     static glm::mat4 projection_;
+private:
     static glm::mat4 view_projection_;
     static glm::vec3 camera_position_;
     static std::shared_ptr<Texture2D> default_texture_;

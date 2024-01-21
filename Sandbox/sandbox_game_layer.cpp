@@ -79,7 +79,7 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     auto mat = ResourceManager::CreateMaterial("shaders/instanced.shd", "instanced");
 
     mat->SetVector3Property("diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
-    mat->SetVector3Property("ambient", 4.0f * glm::vec3{0.034615f, 0.03143f, 0.00903f});
+    mat->SetVector3Property("ambient", 4.0f * glm::vec3{0.0034615f, 0.003143f, 0.000903f});
     mat->SetVector3Property("specular", glm::vec3{0.797357, 0.723991, 0.208006});
     mat->SetFloatProperty("shininess", 32);
     instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_, ResourceManager::GetMaterial("instanced"));
@@ -97,19 +97,37 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
         }
     }
 
+
     Actor light_actor = level_.CreateActor("point_light");
 
-    light_actor.AddComponent<PointLightComponent>();
-    
-    PointLightComponent& point_light = light_actor.GetComponent<PointLightComponent>();
+    light_actor.AddComponent<SpotLightComponent>();
+
+    SpotLightComponent& point_light = light_actor.GetComponent<SpotLightComponent>();
 
     point_light.direction_length = 40.0f;
     point_light.direction = glm::vec3{0, -1, 0};
     point_light.color = glm::vec3{1, 0, 0};
-    light_actor.GetTransform().position = light_pos_ws_;
+    point_light.cut_off_angle = 45.0f;
+    light_actor.GetTransform().position = light_pos_ws_ - glm::vec3{0, -5, 0};
 
     player_ = level_.CreateActor("Player");
     player_.AddComponent<PlayerController>(player_);
+    player_.AddComponent<SpotLightComponent>();
+    SpotLightComponent& player_spot_light = player_.GetComponent<SpotLightComponent>();
+
+    player_spot_light.cut_off_angle = 28.0f;
+    player_spot_light.color = glm::vec3{0, 0, 1.0f};
+    player_spot_light.direction = {0, 0, -1};
+    player_spot_light.direction_length = 70.0f;
+    player_spot_light.intensity = 10;
+
+    {
+        Actor directional_light = level_.CreateActor("directional_light");
+        directional_light.AddComponent<DirectionalLightComponent>();
+
+        auto& directional = directional_light.GetComponent<DirectionalLightComponent>();
+        directional.direction = {0, -1, 0};
+    }
 
     PlayerController& controller = player_.GetComponent<PlayerController>();
     controller.BindForwardCallback(std::bind(&SandboxGameLayer::MoveForward, this, std::placeholders::_1, std::placeholders::_2));
@@ -146,8 +164,6 @@ void SandboxGameLayer::Render(Duration delta_time) {
     Transform camera_transform = player_.GetComponent<TransformComponent>().GetAsTransform();
     Renderer::BeginScene(camera_transform.position, camera_transform.rotation);
 
-    Renderer::AddLight(LightData{light_pos_ws_, 1.0f, glm::vec3{0, -1, 0}, 1.0f, glm::vec3{1, 1, 1}});
-
     current_used_shader_->Use();
     current_used_shader_->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
 
@@ -159,7 +175,7 @@ void SandboxGameLayer::Render(Duration delta_time) {
 
     level_.BroadcastRender(delta_time);
 
-    for (int i = 0; i < 3; ++i)         {
+    for (int i = 0; i < 3; ++i) {
         glm::vec3 pos = glm::vec3{0.0f};
         glm::vec4 color = glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
         pos[i] = 1;
@@ -232,6 +248,29 @@ void SandboxGameLayer::OnImguiFrame() {
     }
 }
 
+void SandboxGameLayer::OnImgizmoFrame() {
+    Actor actor{};
+
+    if (!level_.TryFindActor("point_light", actor)) {
+        return;
+    }
+
+    glm::mat4 transform = actor.GetTransform().GetWorldTransformMatrix();
+
+    if (ImGuizmo::Manipulate(glm::value_ptr(Renderer::view_), glm::value_ptr(Renderer::projection_),
+        ImGuizmo::OPERATION::UNIVERSAL, ImGuizmo::LOCAL, &transform[0][0]
+    )) {
+
+        glm::vec3 pos, rot, scale;
+
+        ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), &pos[0], &rot[0], &scale[0]);
+
+        actor.GetTransform().SetEulerAngles(rot);
+        actor.GetTransform().position = pos;
+        actor.GetTransform().scale = scale;
+    }
+}
+
 void SandboxGameLayer::MoveForward(Actor& player, float axis_value) {
     TransformComponent& transform = player.GetComponent<TransformComponent>();
     glm::vec3 forward = axis_value * transform.GetForwardVector() * last_delta_seconds_.GetSeconds() * move_speed_;
@@ -246,7 +285,7 @@ void SandboxGameLayer::MoveRight(Actor& player, float axis_value) {
 
 void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouse_move_delta) {
     if (game_->IsMouseVisible()) {
-        return; 
+        return;
     }
 
     float dt = last_delta_seconds_.GetSeconds();

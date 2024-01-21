@@ -38,6 +38,8 @@ public:
 
     void AddNewStaticMesh(const std::string& mesh_name, const Transform& transform);
 
+    bool TryFindActor(const std::string& name, Actor& out_actor);
+
 private:
     entt::registry registry_;
     std::map<std::string, Actor> actors_;

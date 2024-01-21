@@ -98,7 +98,7 @@ void Level::BroadcastRender(Duration duration) {
         glm::vec3 transformed_direction = transform.rotation * directional_light.direction;
 
         LightData light_data{transform.position, 1.0f, transformed_direction,
-            1.0f, directional_light.color, 0.0f, LightType::Directional};
+            1.0f, directional_light.color, 0.0f, LightType::Directional, 0.0f, 1.0f};
 
         Renderer::AddLight(light_data);
     }
@@ -109,7 +109,17 @@ void Level::BroadcastRender(Duration duration) {
         glm::vec3 transformed_direction = transform.rotation * point_light.direction;
 
         LightData light_data{transform.position, 1.0f, transformed_direction,
-            1.0f, point_light.color, point_light.direction_length, LightType::Point};
+            1.0f, point_light.color, point_light.direction_length, LightType::Point, 0.0f, point_light.intensity};
+        Renderer::AddLight(light_data);
+    }
+
+    auto spot_light_view = registry_.view<SpotLightComponent, TransformComponent>();
+
+    for (auto&& [entity, spot_light, transform] : spot_light_view.each()) {
+        glm::vec3 transformed_direction = transform.rotation * spot_light.direction;
+
+        LightData light_data{transform.position, 1.0f, transformed_direction,
+            1.0f, spot_light.color, spot_light.direction_length, LightType::Spot, cosf(glm::radians(spot_light.cut_off_angle)), spot_light.intensity};
         Renderer::AddLight(light_data);
     }
 
@@ -146,6 +156,19 @@ void Level::AddNewStaticMesh(const std::string& mesh_name, const Transform& tran
     if (Renderer::IsVisibleToCamera(transform.position, mesh.GetBBoxMin(), mesh.GetBBoxMax())) {
         it->second->AddInstance(transform, 0);
     }
+}
+
+
+bool Level::TryFindActor(const std::string& name, Actor& out_actor) {
+    auto it = actors_.find(name);
+
+    if (it != actors_.end()) {
+        out_actor = it->second;
+
+        return true;
+    }
+
+    return false;
 }
 
 void Level::UpdateSkeletalMeshesAnimation(Duration duration) {

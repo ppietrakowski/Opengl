@@ -16,6 +16,8 @@ public:
     bool OnEvent(const Event& event) override;
     void OnImguiFrame() override;
 
+    void OnImgizmoFrame() override;
+
     virtual std::type_index GetTypeIndex() const override
     {
         return typeid(SandboxGameLayer);

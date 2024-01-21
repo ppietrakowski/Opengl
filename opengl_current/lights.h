@@ -30,7 +30,7 @@ struct LightData {
 
     float direction_length{0.0f};
     LightType light_type{LightType::Directional};
-    float attentuation_factor{0.0f};
+    float cut_off{0.0f};
+    float intensity{0.0f};
     float decreasing_start_angle{0.0f};
-    float cut_off_angle{0.0f};
 };

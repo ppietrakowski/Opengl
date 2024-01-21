@@ -18,6 +18,8 @@ Game::Game(const WindowSettings& settings) :
 
     BindWindowEvents();
     InitializeImGui();
+
+    ImGuizmo::SetOrthographic(false);
 }
 
 Game::~Game() {
@@ -89,17 +91,29 @@ bool Game::InitializeImGui() {
 
 void Game::RunImguiFrame() {
     graphics_context_->ImGuiBeginFrame();
+    ImGuizmo::SetOrthographic(false);
+    ImGuiIO& io = ImGui::GetIO();
+    io.DisplaySize = ImVec2(static_cast<float>(window_->GetWidth()), static_cast<float>(window_->GetHeight()));
+
+    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
+
 
     // broadcast imgui frame draw
     for (const std::unique_ptr<Layer>& layer : layers_) {
         layer->OnImguiFrame();
     }
 
+    for (const std::unique_ptr<Layer>& layer : layers_) {
+        layer->OnImgizmoFrame();
+    }
+
     ImGui::Render();
     graphics_context_->ImGuiDrawFrame();
     ImGui::EndFrame();
     graphics_context_->UpdateImGuiViewport();
+
 }
 
 void Game::BindWindowEvents() {
