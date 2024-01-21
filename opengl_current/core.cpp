@@ -25,3 +25,23 @@ std::string LoadFileContent(const std::filesystem::path& file_path) {
     content << file.rdbuf();
     return content.str();
 }
+
+const char* FormatSize(int num_bytes) {
+    static char size[100] = {};
+    static const char* kUnits[] =
+    {
+        "B", "KB", "MB", "GB", "TB", "PB"
+    };
+
+    float temp = num_bytes;
+    int unit_index = 0;
+
+    while (temp > 1024) {
+        ++unit_index;
+        temp /= 1024.0f;
+    }
+
+    int last_index = sprintf(size, "%.3f %s", temp, kUnits[unit_index]);
+    size[last_index] = 0;
+    return size;
+}

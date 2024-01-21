@@ -5,6 +5,8 @@
 #include "game_layer.h"
 #include "material.h"
 
+#include "box.h"
+
 #include <glm/glm.hpp>
 #include <span>
 #include <string>
@@ -158,6 +160,10 @@ public:
 
     std::shared_ptr<Material> main_material;
 
+    Box GetBoundingBox() const {
+        return bounding_box_;
+    }
+
 private:
     std::shared_ptr<VertexArray> vertex_array_;
     Bone root_bone_;
@@ -166,8 +172,7 @@ private:
 
     uint32_t num_bones_;
 
-    glm::vec3 bbox_min_;
-    glm::vec3 bbox_max_;
+    Box bounding_box_;
 
 private:
     void UpdateAnimation(const AnimationUpdateArgs& update_args) const;
@@ -277,11 +282,11 @@ FORCE_INLINE void BoneAnimationUpdateArgs::UpdateTransformAt(int index, const gl
 }
 
 FORCE_INLINE const glm::vec3& SkeletalMesh::GetBboxMin() const {
-    return bbox_min_;
+    return bounding_box_.min_bounds;
 }
 
 FORCE_INLINE const glm::vec3& SkeletalMesh::GetBboxMax() const {
-    return bbox_max_;
+    return bounding_box_.max_bounds;
 }
 
 FORCE_INLINE const std::shared_ptr<Material>& SkeletalMesh::GetMaterial() const {

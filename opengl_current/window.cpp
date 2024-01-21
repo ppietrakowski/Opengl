@@ -111,6 +111,8 @@ void Window::SetMouseVisible(bool mouse_visible) {
     } else {
         glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
+
+    window_data_.mouse_visible = mouse_visible;
 }
 
 void Window::BindWindowCallbacks() {

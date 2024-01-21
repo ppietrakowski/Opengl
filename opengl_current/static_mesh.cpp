@@ -107,5 +107,5 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
 
     num_triangles_ = static_cast<int>(indices.size()) / 3;
     mesh_name_ = scene->mName.C_Str();
-    FindAabCollision(vertices, bbox_min_, bbox_max_);
+    FindAabCollision(vertices, bounding_box_.min_bounds, bounding_box_.max_bounds);
 }

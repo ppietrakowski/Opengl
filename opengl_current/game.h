@@ -31,6 +31,10 @@ public:
     void AddLayer(std::unique_ptr<Layer>&& game_layer);
     void RemoveLayer(std::type_index index);
 
+    bool IsMouseVisible() const {
+        return window_->IsMouseVisible();
+    }
+
 private:
     std::unique_ptr<Window> window_;
     GraphicsContext* graphics_context_;

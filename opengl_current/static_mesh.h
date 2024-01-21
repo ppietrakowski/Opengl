@@ -5,6 +5,8 @@
 #include "material.h"
 #include "batching.h"
 
+#include "box.h"
+
 #include <filesystem>
 #include <memory>
 
@@ -13,7 +15,7 @@ struct StaticMeshVertex {
     glm::vec3 normal{0, 0, 0};
     glm::vec2 texture_coords{0, 0};
     int texture_id{0};
-
+    
     static inline constexpr VertexAttribute kDataFormat[4] = {{3, PrimitiveVertexType::kFloat},
         {3, PrimitiveVertexType::kFloat}, {2, PrimitiveVertexType::kFloat}, {1, PrimitiveVertexType::kInt}};
 
@@ -57,12 +59,13 @@ public:
     std::vector<StaticMeshVertex> vertices;
     std::vector<uint32_t> indices;
 
+    Box GetBoundingBox() const;
+
 private:
     std::shared_ptr<VertexArray> vertex_array_;
     int num_triangles_;
 
-    glm::vec3 bbox_min_;
-    glm::vec3 bbox_max_;
+    Box bounding_box_;
     std::string mesh_name_;
 };
 
@@ -74,11 +77,11 @@ FORCE_INLINE StaticMeshVertex::StaticMeshVertex(const glm::vec3& position, const
 }
 
 FORCE_INLINE const glm::vec3& StaticMesh::GetBBoxMin() const {
-    return bbox_min_;
+    return bounding_box_.min_bounds;
 }
 
 FORCE_INLINE const glm::vec3& StaticMesh::GetBBoxMax() const {
-    return bbox_max_;
+    return bounding_box_.max_bounds;
 }
 
 FORCE_INLINE int StaticMesh::GetNumPolygons() const {
@@ -95,4 +98,8 @@ FORCE_INLINE std::string_view StaticMesh::GetName() const {
 
 FORCE_INLINE const VertexArray& StaticMesh::GetVertexArray() const {
     return *vertex_array_;
+}
+
+FORCE_INLINE Box StaticMesh::GetBoundingBox() const {
+    return bounding_box_;
 }

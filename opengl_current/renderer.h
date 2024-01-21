@@ -8,7 +8,14 @@
 #include "transform.h"
 #include "lights.h"
 
+#include "box.h"
+
 #include <cstdint>
+
+struct Line {
+    glm::vec3 start_pos{0.0f};
+    glm::vec3 end_pos{0.0f};
+};
 
 struct CameraProjection {
     float fov{45.0f};
@@ -62,8 +69,8 @@ public:
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();
 
-    static void DrawDebugBox(glm::vec3 box_min, glm::vec3 box_max, const Transform& transform, const glm::vec4& color = glm::vec4{0, 0, 0, 1});
-    static void DrawDebugLine(glm::vec3 start, glm::vec3 end, const Transform& transform, const glm::vec4& color = glm::vec4{0, 0, 0, 1});
+    static void DrawDebugBox(const Box& box, const Transform& transform, const glm::vec4& color = glm::vec4{1, 1, 1, 1});
+    static void DrawDebugLine(const Line& line, const Transform& transform, const glm::vec4& color = glm::vec4{1, 1, 1, 1});
     static void FlushDrawDebug(Material& shader);
 
     static bool IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_min, glm::vec3 bbox_max);

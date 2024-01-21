@@ -26,7 +26,9 @@ std::vector<std::string> SplitString(const std::string& string, std::string_view
 std::string LoadFileContent(const std::filesystem::path& file_path);
 
 template <typename T>
-void SafeDelete(T*& ptr) {
+FORCE_INLINE void SafeDelete(T*& ptr) {
     delete ptr;
     ptr = nullptr;
 }
+
+const char* FormatSize(int num_bytes);

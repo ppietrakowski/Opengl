@@ -314,5 +314,8 @@
     <ClInclude Include="light_component.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+    <ClInclude Include="box.h">
+      <Filter>Header Files\renderer</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

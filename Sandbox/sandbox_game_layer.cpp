@@ -153,17 +153,24 @@ void SandboxGameLayer::Render(Duration delta_time) {
 
     debug_shader_->Use();
     debug_shader_->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
-    Renderer::DrawDebugBox(static_mesh_->GetBBoxMin(), static_mesh_->GetBBoxMax(), Transform{static_mesh_position_, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}}, glm::vec4{1, 0, 0, 1});
-    Renderer::DrawDebugBox(static_mesh_->GetBBoxMin(), static_mesh_->GetBBoxMax(), Transform{static_mesh_position_ + glm::vec3{10, 0, 0}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}}, glm::vec4{1, 0, 0, 1});
-    Renderer::DrawDebugBox(test_skeletal_mesh_->GetBboxMin(), test_skeletal_mesh_->GetBboxMax(), Transform{glm::vec3{0, -2, -1}});
+    Renderer::DrawDebugBox(static_mesh_->GetBoundingBox(), Transform{static_mesh_position_, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}}, glm::vec4{1, 0, 0, 1});
+    Renderer::DrawDebugBox(static_mesh_->GetBoundingBox(), Transform{static_mesh_position_ + glm::vec3{10, 0, 0}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}}, glm::vec4{1, 0, 0, 1});
+    Renderer::DrawDebugBox(test_skeletal_mesh_->GetBoundingBox(), Transform{glm::vec3{0, -2, -1}});
 
-    Renderer::DrawDebugBox(bbox_min_, bbox_max_, Transform{glm::vec3{10, 2, 10}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}}, glm::vec4{1, 0, 1, 1});
     level_.BroadcastRender(delta_time);
 
-    Renderer::DrawDebugLine(light_pos_ws_, light_pos_ws_ + glm::vec3{1, 0, 0}, Transform{}, glm::vec4(1, 0, 0, 1));
-    Renderer::DrawDebugLine(light_pos_ws_, light_pos_ws_ + glm::vec3{0, 1, 0}, Transform{}, glm::vec4(0, 1, 0, 1));
-    Renderer::DrawDebugLine(light_pos_ws_, light_pos_ws_ + glm::vec3{0, 0, 1}, Transform{}, glm::vec4(0, 0, 1, 1));
-    Renderer::DrawDebugLine(light_pos_ws_, light_pos_ws_ + 2.0f * glm::vec3{0, -1, 0}, Transform{}, glm::vec4(0, 0, 1, 1));
+    for (int i = 0; i < 3; ++i)         {
+        glm::vec3 pos = glm::vec3{0.0f};
+        glm::vec4 color = glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
+        pos[i] = 1;
+        color[i] = 1;
+
+        Line line{light_pos_ws_, light_pos_ws_ + pos};
+
+        Renderer::DrawDebugLine(line, Transform{}, color);
+    }
+
+    Renderer::DrawDebugLine(Line{light_pos_ws_, light_pos_ws_ + 2.0f * glm::vec3{0, -1, 0}}, Transform{}, glm::vec4(0, 0, 1, 1));
     Renderer::FlushDrawDebug(*debug_material_);
 
     Renderer::EndScene();
@@ -172,10 +179,7 @@ void SandboxGameLayer::Render(Duration delta_time) {
 bool SandboxGameLayer::OnEvent(const Event& event) {
 
     if (event.type == EventType::kKeyPressed && event.key.key == GLFW_KEY_P) {
-        static bool mouse_visible = false;
-
-        mouse_visible = !mouse_visible;
-        game_->SetMouseVisible(mouse_visible);
+        game_->SetMouseVisible(!game_->IsMouseVisible());
     }
 
     return false;
@@ -199,10 +203,10 @@ void SandboxGameLayer::OnImguiFrame() {
     ImGui::Text("Fps: %i", last_framerate);
     ImGui::Text("Frame time: %.2f ms", last_delta_seconds_.GetMilliseconds());
     ImGui::Text("Drawcalls: %i", stats.num_drawcalls);
-    ImGui::Text("NumIndicesMemoryAllocated: %i bytes", stats.index_bufer_memory_allocation);
-    ImGui::Text("NumVerticesMemoryAllocated: %i bytes", stats.vertex_buffer_memory_allocation);
-    ImGui::Text("NumBytesUniformBuffer: %i bytes", (int)UniformBuffer::num_bytes_allocated);
-    ImGui::Text("NumTextureMemoryUsage: %i bytes", (int)Texture2D::num_texture_vram_used);
+    ImGui::Text("NumIndicesMemoryAllocated: %s", FormatSize(stats.index_bufer_memory_allocation));
+    ImGui::Text("NumVerticesMemoryAllocated: %s", FormatSize(stats.vertex_buffer_memory_allocation));
+    ImGui::Text("NumBytesUniformBuffer: %s", FormatSize((int)UniformBuffer::num_bytes_allocated));
+    ImGui::Text("NumTextureMemoryUsage: %s", FormatSize((int)Texture2D::num_texture_vram_used));
     ImGui::End();
 
     Actor actor_to_remove = player_;
@@ -241,6 +245,10 @@ void SandboxGameLayer::MoveRight(Actor& player, float axis_value) {
 }
 
 void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouse_move_delta) {
+    if (game_->IsMouseVisible()) {
+        return; 
+    }
+
     float dt = last_delta_seconds_.GetSeconds();
 
     TransformComponent& transform = player.GetComponent<TransformComponent>();

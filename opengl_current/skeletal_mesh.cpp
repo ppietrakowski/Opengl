@@ -190,12 +190,12 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     // find global transform for converting from bone space back to local space
     global_inverse_transform_ = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
 
-    FindAabCollision(vertices, bbox_min_, bbox_max_);
-    bbox_min_ *= 0.01f;
-    bbox_max_ *= 0.01f;
+    FindAabCollision(vertices, bounding_box_.min_bounds, bounding_box_.max_bounds);
+    bounding_box_.min_bounds *= 0.01f;
+    bounding_box_.max_bounds *= 0.01f;
 
-    bbox_min_.x *= 0.2f;
-    bbox_max_.x *= 0.2f;
+    bounding_box_.min_bounds.x *= 0.2f;
+    bounding_box_.max_bounds.x *= 0.2f;
 }
 
 void SkeletalMesh::LoadAnimation(const aiScene* scene, int anim_index) {

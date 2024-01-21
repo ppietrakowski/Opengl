@@ -150,12 +150,12 @@ void Renderer::SubmitMeshInstanced(const SubmitCommandArgs& submit_args, const U
     RenderCommand::DrawTrianglesInstanced(*submit_args.vertex_array, num_instances);
 }
 
-void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform& transform, const glm::vec4& color) {
-    debug_batch_->AddBoxInstance(boxmin, boxmax, transform, color);
+void Renderer::DrawDebugBox(const Box& box, const Transform& transform, const glm::vec4& color) {
+    debug_batch_->AddBoxInstance(box, transform, color);
 }
 
-void Renderer::DrawDebugLine(glm::vec3 start, glm::vec3 end, const Transform& transform, const glm::vec4& color) {
-    debug_batch_->AddLineInstance(start, end, transform, color);
+void Renderer::DrawDebugLine(const Line& line, const Transform& transform, const glm::vec4& color) {
+    debug_batch_->AddLineInstance(line, transform, color);
 }
 
 void Renderer::FlushDrawDebug(Material& shader) {

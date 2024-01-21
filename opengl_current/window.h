@@ -50,6 +50,10 @@ public:
     void Close();
     void SetMouseVisible(bool mouse_visible);
 
+    bool IsMouseVisible() const {
+        return window_data_.mouse_visible;
+    }
+
 private:
     GLFWwindow* window_;
     Input* input_;
