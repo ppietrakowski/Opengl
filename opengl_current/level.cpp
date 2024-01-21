@@ -164,7 +164,6 @@ bool Level::TryFindActor(const std::string& name, Actor& out_actor) {
 
     if (it != actors_.end()) {
         out_actor = it->second;
-
         return true;
     }
 
