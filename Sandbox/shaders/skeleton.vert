@@ -9,9 +9,6 @@ layout (location = 5) in uint a_texture_id;
 out vec2 texture_coords;
 out vec3 normal;
 out vec3 frag_pos_ws;
-out vec3 eye_direction;
-out vec3 light_direction;
-out float dist;
 
 out flat uint texture_id;
 
@@ -35,14 +32,6 @@ void main() {
 	frag_pos_ws = vec3(u_transform * bone_transform * pos);
 
 	texture_coords = a_texture_coords;
-	normal = mat3(transpose(inverse(u_view * u_transform * bone_transform))) * a_normal;
-	eye_direction = - ( u_view * u_transform * vec4(a_position,1)).xyz;
-
-	normal = normalize(normal);
+	normal = normalize(mat3(transpose(inverse(u_transform * bone_transform))) * a_normal);
 	texture_id = a_texture_id;
-
-	vec3 lightpos_cs = ( u_view * vec4(u_light_position_ws,1)).xyz;
-	light_direction = lightpos_cs + eye_direction;
-
-	dist = distance(u_light_position_ws, frag_pos_ws);
 }

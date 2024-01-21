@@ -112,14 +112,14 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
 
     player_ = level_.CreateActor("Player");
     player_.AddComponent<PlayerController>(player_);
-    player_.AddComponent<SpotLightComponent>();
-    SpotLightComponent& player_spot_light = player_.GetComponent<SpotLightComponent>();
-
-    player_spot_light.cut_off_angle = 28.0f;
-    player_spot_light.color = glm::vec3{0, 0, 1.0f};
-    player_spot_light.direction = {0, 0, -1};
-    player_spot_light.direction_length = 70.0f;
-    player_spot_light.intensity = 10;
+    //player_.AddComponent<SpotLightComponent>();
+    //SpotLightComponent& player_spot_light = player_.GetComponent<SpotLightComponent>();
+    //
+    //player_spot_light.cut_off_angle = 28.0f;
+    //player_spot_light.color = glm::vec3{0, 0, 1.0f};
+    //player_spot_light.direction = {0, 0, -1};
+    //player_spot_light.direction_length = 70.0f;
+    //player_spot_light.intensity = 10;
 
     {
         Actor directional_light = level_.CreateActor("directional_light");
