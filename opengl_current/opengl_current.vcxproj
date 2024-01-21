@@ -282,6 +282,8 @@
     <ClInclude Include="instanced_mesh_component.h" />
     <ClInclude Include="level.h" />
     <ClInclude Include="level_interface.h" />
+    <ClInclude Include="lights.h" />
+    <ClInclude Include="light_component.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="material_parameter.h" />

@@ -6,6 +6,7 @@
 #include "texture.h"
 #include "material.h"
 #include "transform.h"
+#include "lights.h"
 
 #include <cstdint>
 
@@ -62,12 +63,15 @@ public:
     static std::shared_ptr<Texture2D> GetDefaultTexture();
 
     static void DrawDebugBox(glm::vec3 box_min, glm::vec3 box_max, const Transform& transform, const glm::vec4& color = glm::vec4{0, 0, 0, 1});
+    static void DrawDebugLine(glm::vec3 start, glm::vec3 end, const Transform& transform, const glm::vec4& color = glm::vec4{0, 0, 0, 1});
     static void FlushDrawDebug(Material& shader);
 
     static bool IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_min, glm::vec3 bbox_max);
 
-private:
+    static void AddLight(const LightData& light_data);
+
     static glm::mat4 view_;
+private:
     static glm::mat4 projection_;
     static glm::mat4 view_projection_;
     static glm::vec3 camera_position_;

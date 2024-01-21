@@ -93,6 +93,10 @@ public:
     void BindUniformBuffer(int block_index, const UniformBuffer& buffer);
     int GetUniformBlockIndex(const std::string& name) const;
 
+    uint32_t GetOpenGlIdentifier() const {
+        return shader_program_;
+    }
+
 private:
     uint32_t shader_program_{0};
     mutable std::unordered_map<std::string, int> uniform_name_to_location_;

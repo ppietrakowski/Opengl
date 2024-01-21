@@ -3,7 +3,8 @@
 int main()
 {
     Game game(WindowSettings{1280, 720, "Game"});
-
+    game.SetMouseVisible(false);
+     
     game.AddLayer(std::make_unique<SandboxGameLayer>(&game));
     game.Run();
 

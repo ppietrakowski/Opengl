@@ -29,6 +29,8 @@ public:
     void FlushDraw(Material& material);
     void AddBoxInstance(glm::vec3 box_min, glm::vec3 box_max, const Transform& transform, const glm::vec4& color);
 
+    void AddLineInstance(const glm::vec3& start_pos, const glm::vec3& end_pos, const Transform& transform, const glm::vec4& color);
+
 private:
     BatchBase<DebugVertex> batch_base_;
 };

@@ -18,6 +18,18 @@ void DebugRenderBatch::FlushDraw(Material& material) {
     batch_base_.DrawLines(glm::mat4{1.0f}, material);
 }
 
+void DebugRenderBatch::AddLineInstance(const glm::vec3& start_pos, const glm::vec3& end_pos, const Transform& transform, const glm::vec4& color) {
+    RgbaColor packed_color(color);
+
+    std::array vertices = {
+        DebugVertex{start_pos, packed_color},
+        DebugVertex{end_pos, packed_color},
+    };
+
+    uint32_t kLineIndices[] = {0, 1};
+    batch_base_.QueueDraw(BatchGeometryInfo<DebugVertex>{vertices, kLineIndices, transform});
+}
+
 void DebugRenderBatch::AddBoxInstance(glm::vec3 box_min, glm::vec3 box_max, const Transform& transform, const glm::vec4& color) {
     if (!Renderer::IsVisibleToCamera(transform.position, box_min, box_max)) {
         return;

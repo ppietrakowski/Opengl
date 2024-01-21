@@ -4,6 +4,7 @@
 #include "instanced_mesh_component.h"
 #include "resouce_manager.h"
 #include "player_controller.h"
+#include "light_component.h"
 
 #include <future>
 
@@ -61,6 +62,15 @@ void Level::RemoveActor(const std::string& name) {
     actors_.erase(it);
 }
 
+void Level::NotifyActorNameChanged(const std::string& old_name, const std::string& new_name) {
+    Actor actor = actors_[old_name];
+
+    if (actors_.contains(new_name)) {
+        actors_.erase(old_name);
+        actors_[new_name] = actor;
+    }
+}
+
 void Level::StartupLevel() {
 }
 
@@ -81,6 +91,27 @@ void Level::BroadcastUpdate(Duration duration) {
 
 void Level::BroadcastRender(Duration duration) {
     auto static_mesh_view = registry_.view<TransformComponent, StaticMeshComponent>();
+
+    auto directional_light_view = registry_.view<DirectionalLightComponent, TransformComponent>();
+
+    for (auto&& [entity, directional_light, transform] : directional_light_view.each()) {
+        glm::vec3 transformed_direction = transform.rotation * directional_light.direction;
+
+        LightData light_data{transform.position, 1.0f, transformed_direction,
+            1.0f, directional_light.color, 0.0f, LightType::Directional};
+
+        Renderer::AddLight(light_data);
+    }
+
+    auto point_light_view = registry_.view<PointLightComponent, TransformComponent>();
+
+    for (auto&& [entity, point_light, transform] : point_light_view.each()) {
+        glm::vec3 transformed_direction = transform.rotation * point_light.direction;
+
+        LightData light_data{transform.position, 1.0f, transformed_direction,
+            1.0f, point_light.color, point_light.direction_length, LightType::Point};
+        Renderer::AddLight(light_data);
+    }
 
     for (auto&& [entity, transform, staticMesh] : static_mesh_view.each()) {
         AddNewStaticMesh(staticMesh.mesh_name, transform.GetAsTransform());

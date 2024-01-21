@@ -18,14 +18,34 @@ std::shared_ptr<Texture2D> Renderer::default_texture_;
 
 static DebugRenderBatch* debug_batch_ = nullptr;
 
-void Renderer::Quit() {
-    delete debug_batch_;
-    default_texture_.reset();
-    RenderCommand::Quit();
-}
 
 static constexpr RgbColor kBlack{0, 0, 0};
 static constexpr RgbColor kMagenta{255, 0, 255};
+
+struct LightBuffer {
+    UniformBuffer uniform_buffer;
+    int actual_num_lights{0};
+
+    LightBuffer(int num_lights) :
+        uniform_buffer(num_lights * sizeof(LightData)) {
+    }
+
+    void AddLight(const LightData& light_data) {
+        
+        uniform_buffer.UpdateBuffer(&light_data, sizeof(LightData), actual_num_lights * sizeof(LightData));
+        actual_num_lights++;
+    }
+
+    void Clear() {
+        actual_num_lights = 0;
+    }
+
+    void BindBuffer(Shader& shader, const std::string& binding_name) const {
+        shader.BindUniformBuffer(shader.GetUniformBlockIndex(binding_name), uniform_buffer);
+    }
+};
+
+static LightBuffer* light_buffer_ = nullptr;
 
 void Renderer::Initialize() {
     // array of checkerboard with black and magenta
@@ -46,6 +66,16 @@ void Renderer::Initialize() {
     debug_batch_ = new DebugRenderBatch();
     RenderCommand::ClearBufferBindings_Debug();
     RenderCommand::SetCullFace(true);
+
+    light_buffer_ = new LightBuffer(32);
+}
+
+void Renderer::Quit() {
+    SafeDelete(light_buffer_);
+    SafeDelete(debug_batch_);
+
+    default_texture_.reset();
+    RenderCommand::Quit();
 }
 
 void Renderer::UpdateProjection(const CameraProjection& projection) {
@@ -61,6 +91,7 @@ void Renderer::BeginScene(glm::vec3 camera_pos, glm::quat camera_rotation) {
 
 void Renderer::EndScene() {
     RenderCommand::SetLineWidth(1);
+    light_buffer_->Clear();
     RenderCommand::EndScene();
 }
 
@@ -123,6 +154,10 @@ void Renderer::DrawDebugBox(glm::vec3 boxmin, glm::vec3 boxmax, const Transform&
     debug_batch_->AddBoxInstance(boxmin, boxmax, transform, color);
 }
 
+void Renderer::DrawDebugLine(glm::vec3 start, glm::vec3 end, const Transform& transform, const glm::vec4& color) {
+    debug_batch_->AddLineInstance(start, end, transform, color);
+}
+
 void Renderer::FlushDrawDebug(Material& shader) {
     debug_batch_->FlushDraw(shader);
 }
@@ -145,6 +180,10 @@ bool Renderer::IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_m
         max_clipspace.z < -max_clipspace.w || min_clipspace.z > min_clipspace.w);
 }
 
+void Renderer::AddLight(const LightData& light_data) {
+    light_buffer_->AddLight(light_data);
+}
+
 void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform) {
     shader.SetUniform("u_projection_view", view_projection_);
     shader.SetUniform("u_transform", transform);
@@ -153,4 +192,6 @@ void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform) {
 
     glm::mat3 normal_matrix = glm::inverseTranspose(transform);
     shader.SetUniform("u_normal_transform", normal_matrix);
+    light_buffer_->BindBuffer(shader, "Lights");
+    shader.SetUniform("u_num_lights", light_buffer_->actual_num_lights);
 }

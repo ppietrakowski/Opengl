@@ -24,3 +24,9 @@ FORCE_INLINE bool ContainsString(const std::basic_string<CharType>& str, const C
 
 std::vector<std::string> SplitString(const std::string& string, std::string_view delimiter);
 std::string LoadFileContent(const std::filesystem::path& file_path);
+
+template <typename T>
+void SafeDelete(T*& ptr) {
+    delete ptr;
+    ptr = nullptr;
+}

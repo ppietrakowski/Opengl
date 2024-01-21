@@ -21,7 +21,7 @@ void main() {
     frag_pos_ws = vec3(u_transforms[gl_InstanceID] * vec4(a_position, 1));
     gl_Position = u_projection_view * vec4(frag_pos_ws, 1);
     texture_coords = a_texture_coords;
-    mat3 u_normal_transform = mat3(transpose(inverse(u_view * u_transforms[gl_InstanceID])));
+    mat3 u_normal_transform = mat3(transpose(inverse( u_transforms[gl_InstanceID])));
 
     normal = u_normal_transform * a_normal;
     texture_id = a_texture_id;

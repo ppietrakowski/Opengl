@@ -17,6 +17,7 @@ public:
     std::vector<Actor> FindActorsWithTag(const std::string& tag) const;
 
     void RemoveActor(const std::string& name) override;
+    void NotifyActorNameChanged(const std::string& old_name, const std::string& new_name) override;
 
     void StartupLevel();
     void BroadcastUpdate(Duration duration);

@@ -308,5 +308,11 @@
     <ClInclude Include="transform_component.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+    <ClInclude Include="lights.h">
+      <Filter>Header Files\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="light_component.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

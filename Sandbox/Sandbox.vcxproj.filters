@@ -70,5 +70,8 @@
     <None Include="shaders\instanced.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="billboard_test.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

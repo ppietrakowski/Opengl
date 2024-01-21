@@ -46,7 +46,7 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     default_material_->SetVector3Property("diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
     default_material_->SetVector3Property("ambient", glm::vec3{0.01f, 0.01f, 0.01f});
     default_material_->SetVector3Property("specular", glm::vec3{0.797357, 0.723991, 0.208006});
-    default_material_->SetFloatProperty("shininess", 87.2f);
+    default_material_->SetFloatProperty("shininess", 32.0f);
     debug_material_->use_wireframe = true;
     current_material_ = default_material_;
     ELOG_INFO(LOG_GLOBAL, "Loading postac.obj");
@@ -59,7 +59,6 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
     static_mesh_position_ = {2, 0, -10};
     std::vector<std::string> animations = std::move(test_skeletal_mesh_->GetAnimationNames());
-    RenderCommand::SetClearColor(RgbaColor{50, 30, 170});
 
     for (std::int32_t i = 0; i < 2; ++i) {
         skeletal_mesh_actor_ = level_.CreateActor("SkeletalMesh" + std::to_string(i));
@@ -77,15 +76,12 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
 
     auto shader = ResourceManager::GetShader("shaders/instanced.shd");
     shader->Use();
-    shader->SetUniform("u_light_pos", glm::vec3{0, 0, 0});
-    shader->SetUniform("u_light_color", glm::vec3{1, 1, 1});
-
     auto mat = ResourceManager::CreateMaterial("shaders/instanced.shd", "instanced");
 
     mat->SetVector3Property("diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
-    mat->SetVector3Property("ambient", glm::vec3{0.01f, 0.01f, 0.01f});
+    mat->SetVector3Property("ambient", 4.0f * glm::vec3{0.034615f, 0.03143f, 0.00903f});
     mat->SetVector3Property("specular", glm::vec3{0.797357, 0.723991, 0.208006});
-    mat->SetFloatProperty("shininess", 87.2f);
+    mat->SetFloatProperty("shininess", 32);
     instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_, ResourceManager::GetMaterial("instanced"));
 
     Actor instance_mesh = level_.CreateActor("InstancedMesh");
@@ -101,6 +97,17 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
         }
     }
 
+    Actor light_actor = level_.CreateActor("point_light");
+
+    light_actor.AddComponent<PointLightComponent>();
+    
+    PointLightComponent& point_light = light_actor.GetComponent<PointLightComponent>();
+
+    point_light.direction_length = 40.0f;
+    point_light.direction = glm::vec3{0, -1, 0};
+    point_light.color = glm::vec3{1, 0, 0};
+    light_actor.GetTransform().position = light_pos_ws_;
+
     player_ = level_.CreateActor("Player");
     player_.AddComponent<PlayerController>(player_);
 
@@ -113,6 +120,8 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
 void SandboxGameLayer::Update(Duration delta_time) {
     float dt = delta_time.GetSeconds();
 
+    auto shader = ResourceManager::GetShader("shaders/instanced.shd");
+    shader->Use();
     if (Input::IsKeyPressed(GLFW_KEY_E)) {
         camera_yaw_ -= yaw_rotation_rate_ * dt;
         camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
@@ -136,6 +145,9 @@ void SandboxGameLayer::Update(Duration delta_time) {
 void SandboxGameLayer::Render(Duration delta_time) {
     Transform camera_transform = player_.GetComponent<TransformComponent>().GetAsTransform();
     Renderer::BeginScene(camera_transform.position, camera_transform.rotation);
+
+    Renderer::AddLight(LightData{light_pos_ws_, 1.0f, glm::vec3{0, -1, 0}, 1.0f, glm::vec3{1, 1, 1}});
+
     current_used_shader_->Use();
     current_used_shader_->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
 
@@ -147,11 +159,25 @@ void SandboxGameLayer::Render(Duration delta_time) {
 
     Renderer::DrawDebugBox(bbox_min_, bbox_max_, Transform{glm::vec3{10, 2, 10}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}}, glm::vec4{1, 0, 1, 1});
     level_.BroadcastRender(delta_time);
+
+    Renderer::DrawDebugLine(light_pos_ws_, light_pos_ws_ + glm::vec3{1, 0, 0}, Transform{}, glm::vec4(1, 0, 0, 1));
+    Renderer::DrawDebugLine(light_pos_ws_, light_pos_ws_ + glm::vec3{0, 1, 0}, Transform{}, glm::vec4(0, 1, 0, 1));
+    Renderer::DrawDebugLine(light_pos_ws_, light_pos_ws_ + glm::vec3{0, 0, 1}, Transform{}, glm::vec4(0, 0, 1, 1));
+    Renderer::DrawDebugLine(light_pos_ws_, light_pos_ws_ + 2.0f * glm::vec3{0, -1, 0}, Transform{}, glm::vec4(0, 0, 1, 1));
     Renderer::FlushDrawDebug(*debug_material_);
+
     Renderer::EndScene();
 }
 
 bool SandboxGameLayer::OnEvent(const Event& event) {
+
+    if (event.type == EventType::kKeyPressed && event.key.key == GLFW_KEY_P) {
+        static bool mouse_visible = false;
+
+        mouse_visible = !mouse_visible;
+        game_->SetMouseVisible(mouse_visible);
+    }
+
     return false;
 }
 

@@ -207,6 +207,7 @@
     <ClInclude Include="sandbox_game_layer.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="billboard_test.vert" />
     <None Include="shaders\debug.vert" />
     <None Include="shaders\default.frag" />
     <None Include="shaders\default.shd" />

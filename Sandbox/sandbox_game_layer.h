@@ -43,6 +43,7 @@ private:
     float camera_yaw_ = 0.0f;
     float camera_pitch_ = 0.0f;
 
+    glm::vec3 light_pos_ws_{4, 10, 0};
     Duration last_delta_seconds_;
 
     float move_speed_ = 20.0f;
