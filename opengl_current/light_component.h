@@ -13,3 +13,10 @@ struct PointLightComponent {
 
     glm::vec3 color{1, 1, 1};
 };
+
+struct SpotLightComponent {
+    glm::vec3 direction{0, 1, 0};
+    float direction_length{0.0f};
+    glm::vec3 color{1, 1, 1};
+    float cut_off_angle{0.0f};
+};

@@ -37,36 +37,42 @@ uniform int u_num_lights;
 
 out vec4 frag_color;
 
+// Calculates color of fragment when specific light illuminates it. Calculation are using Phong shading model
 vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir) {
     vec3 ambient = u_material.ambient;
+
     // Diffuse lighting
     vec3 light_dir = normalize(light.position);
+
+    // __________
+    // cos(theta)
     float diff = max(dot(light_dir, norm), 0.0f);
 
     vec3 diffuse = u_material.diffuse * light.color * diff;
 
-    // Specular lighting
     
+    // Specular lighting calculation
     vec3 specular = vec3(0.0, 0.0, 0.0);
 
     if (dot(light_dir, view_dir) > 0.0) {
 	    vec3 refl = reflect(-light_dir, norm);
-	    specular = pow(max(0.0, dot(view_dir, refl)), u_material.shininess) * u_material.specular;
+        float fi = dot(view_dir, refl);
+
+	    specular = light.color * pow(max(0.0, fi), u_material.shininess) * u_material.specular;
     }
 
     if (light.type == kLightTypePoint) {
-        float fd = 0;
+        float attenuation = 0;
         float dist = distance(light.position, frag_pos_ws);
 
         if (dist <= 0.01f) {
-            fd = 1;
+            attenuation = 1;
         } else if (dist > 0.01f && dist < light.direction_length) {
-            fd = (light.direction_length - dist) / (light.direction_length - 0.01f);
+            attenuation = (light.direction_length - dist) / (light.direction_length - 0.01f);
         }
 
-        diffuse *= fd;
-        specular *= fd;
-        ambient *= fd;
+        diffuse *= attenuation;
+        specular *= attenuation;
     }
 
     // Final color calculation
