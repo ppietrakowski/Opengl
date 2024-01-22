@@ -95,7 +95,7 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec4 texel, vec3 refl
     }
 
     // Final color calculation
-    return clamp(ambient + diffuse + specular + vec3(u_material.reflection_factor * texture(u_skybox_texture, reflect_skybox)), 0.0, 1.0);
+    return clamp(ambient + diffuse + specular, 0.0, 1.0);
 }
 
 out vec4 frag_color;
@@ -119,5 +119,7 @@ void main() {
         color += CalculateLight(u_lights[i], norm, view_dir, texel, reflect_vec);
     }
     
+    color += vec3(u_material.reflection_factor * texture(u_skybox_texture, reflect_vec));
+
     frag_color = vec4(color, 1.0);
 }

@@ -9,7 +9,7 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 static void SetupDefaultProperties(const std::shared_ptr<Material>& material) {
-    material->SetFloatProperty("reflection_factor", 0.05f);
+    material->SetFloatProperty("reflection_factor", 0.1f);
     material->SetFloatProperty("shininess", 32.0f);
     material->transparent = true;
     material->cull_faces = false;
@@ -103,7 +103,12 @@ void SandboxGameLayer::Render(Duration delta_time) {
 
     debug_shader_->Use();
     debug_shader_->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
-    Renderer::DrawDebugBox(test_skeletal_mesh_->GetBoundingBox(), Transform{glm::vec3{0, -2, -1}});
+    Actor character_actor;
+
+    if (level_.TryFindActor("SkeletalMesh0", character_actor)) {
+        Renderer::DrawDebugBox(test_skeletal_mesh_->GetBoundingBox(), character_actor.GetTransform().GetAsTransform());
+    }
+
 
     // draw directional light gizmo
     for (int i = 0; i < 3; ++i) {
@@ -118,9 +123,6 @@ void SandboxGameLayer::Render(Duration delta_time) {
     }
 
     Renderer::DrawDebugLine(Line{light_pos, light_pos + 2.0f * glm::vec3{0, -1, 0}}, Transform{}, glm::vec4(0, 0, 1, 1));
-
-    Renderer2D::DrawRect(glm::vec2{1000, 10}, glm::vec2{1200, 50}, Transform2D{}, RgbaColor(255, 255, 255),
-        Renderer2D::BindTextureToDraw(ResourceManager::GetTexture2D("assets/test_hp.png")));
 
     level_.BroadcastRender(delta_time);
     skybox_->Draw();
@@ -164,7 +166,11 @@ void SandboxGameLayer::OnImguiFrame() {
     ImGui::Begin("Hierarchy");
 
     for (auto& [name, actor] : level_) {
-        ImGui::Button(name.c_str());
+        if (ImGui::Button(name.c_str())) {
+            selected_actor = actor;
+            break;
+        }
+
         ImGui::SameLine();
 
         ImGui::PushID(name.c_str());
@@ -185,25 +191,24 @@ void SandboxGameLayer::OnImguiFrame() {
 }
 
 void SandboxGameLayer::OnImgizmoFrame() {
-    Actor actor{};
-
-    if (!level_.TryFindActor("point_light", actor)) {
+    if (!selected_actor.IsAlive()) {
         return;
     }
 
-    glm::mat4 transform = actor.GetTransform().GetWorldTransformMatrix();
+    glm::mat4 transform = selected_actor.GetTransform().GetWorldTransformMatrix();
 
     if (ImGuizmo::Manipulate(glm::value_ptr(Renderer::view_), glm::value_ptr(Renderer::projection_),
-        ImGuizmo::OPERATION::UNIVERSAL, ImGuizmo::LOCAL, &transform[0][0]
+        ImGuizmo::OPERATION::UNIVERSAL, ImGuizmo::WORLD, glm::value_ptr(transform)
     )) {
 
         glm::vec3 pos, rot, scale;
 
         ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), &pos[0], &rot[0], &scale[0]);
 
-        actor.GetTransform().SetEulerAngles(rot);
-        actor.GetTransform().position = pos;
-        actor.GetTransform().scale = scale;
+        TransformComponent& transform = selected_actor.GetTransform();
+        transform.SetEulerAngles(rot);
+        transform.position = pos;
+        transform.scale = scale;
     }
 }
 
@@ -270,6 +275,8 @@ Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& file_path, c
     Actor instance_mesh = level_.CreateActor("InstancedMesh");
     instance_mesh.AddComponent<InstancedMeshComponent>(ResourceManager::GetStaticMesh(file_path), material);
 
+    material->SetTextureProperty("diffuse1", ResourceManager::GetTexture2D("assets/T_Metal_Steel_D.TGA"));
+
     InstancedMeshComponent& instanced_mesh = instance_mesh.GetComponent<InstancedMeshComponent>();
 
     for (int i = 0; i < 10; ++i) {
@@ -299,7 +306,9 @@ void SandboxGameLayer::PlaceLightsAndPlayer() {
     player.AddComponent<PlayerController>(player);
     player.AddComponent<CameraComponent>();
 
+
     Actor directional_light = level_.CreateActor("directional_light");
+    selected_actor = directional_light;
     directional_light.AddComponent<DirectionalLightComponent>();
 
     DirectionalLightComponent& directional = directional_light.GetComponent<DirectionalLightComponent>();

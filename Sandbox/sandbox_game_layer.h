@@ -46,6 +46,7 @@ private:
     float ascend_speed_ = 20.0f;
 
     std::shared_ptr<SkeletalMesh> test_skeletal_mesh_;
+    Actor selected_actor;
 
     Level level_;
     Game* game_{nullptr};
