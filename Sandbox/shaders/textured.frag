@@ -13,8 +13,7 @@ in vec3 normal;
 uniform Material u_material;
 uniform vec3 u_camera_location;
 
-struct Light
-{
+struct Light {
     vec3 position;
     vec3 direction;
     vec3 color;
@@ -52,10 +51,10 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec4 texel) {
     vec3 specular = vec3(0.0, 0.0, 0.0);
 
     if (dot(light_dir, view_dir) > 0.0) {
-	    vec3 refl = reflect(-light_dir, norm);
+        vec3 refl = reflect(-light_dir, norm);
         float fi = dot(view_dir, refl);
-
-	    specular = light.intensity * light.color * pow(max(0.0, fi), 32);
+        
+        specular = light.intensity * light.color * pow(max(0.0, fi), 32);
     }
 
     if (light.type == kLightTypePoint) {
