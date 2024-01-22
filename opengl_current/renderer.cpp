@@ -3,6 +3,7 @@
 #include "render_command.h"
 #include "debug_render_batch.h"
 #include "renderer_2d.h"
+#include "skybox.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
@@ -108,6 +109,13 @@ void Renderer::SubmitTriangles(const SubmitCommandArgs& submit_args) {
     submit_args.SetupShader();
 
     UploadUniforms(shader, submit_args.transform);
+
+
+    uint32_t texture_unit = submit_args.material->GetNumTextures();
+
+    Skybox::instance->GetCubeMap()->Bind(texture_unit);
+    shader.SetSamplerUniform("u_skybox_texture", Skybox::instance->GetCubeMap(), texture_unit);
+
     RenderCommand::DrawTriangles(*submit_args.vertex_array, submit_args.num_indices);
 }
 
@@ -141,6 +149,7 @@ void Renderer::SubmitSkeleton(const SubmitCommandArgs& submit_args, std::span<co
 
     UploadUniforms(shader, submit_args.transform);
     shader.SetUniformMat4Array("u_bone_transforms", transforms);
+
     RenderCommand::DrawTriangles(*submit_args.vertex_array, submit_args.num_indices);
 }
 
@@ -151,6 +160,11 @@ void Renderer::SubmitMeshInstanced(const SubmitCommandArgs& submit_args, const U
     submit_args.SetupShader();
     shader.BindUniformBuffer(shader.GetUniformBlockIndex("Transforms"), transform_buffer);
     UploadUniforms(shader, submit_args.transform);
+
+    uint32_t texture_unit = submit_args.material->GetNumTextures();
+
+    Skybox::instance->GetCubeMap()->Bind(texture_unit);
+    shader.SetSamplerUniform("u_skybox_texture", Skybox::instance->GetCubeMap(), texture_unit);
 
     RenderCommand::DrawTrianglesInstanced(*submit_args.vertex_array, num_instances);
 }

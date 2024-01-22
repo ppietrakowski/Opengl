@@ -194,6 +194,8 @@ CubeMap::CubeMap(std::span<const std::string> paths) {
             0, GL_RGBA, GL_UNSIGNED_BYTE, image_data.data
         );
 
+        Texture2D::num_texture_vram_used += 4 * image_data.width * image_data.height;
+
         STBI_FREE(image_data.data);
     }
 }

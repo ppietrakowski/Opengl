@@ -9,6 +9,7 @@ struct Material {
     vec3 diffuse;
     vec3 specular;
     float shininess;
+    float reflection_factor;
 };
 
 uniform Material u_material;
@@ -16,6 +17,7 @@ uniform vec3 u_light_pos;
 uniform vec3 u_light_color;
 uniform vec3 u_camera_location;
 uniform mat4 u_view;
+uniform samplerCube u_skybox_texture; 
 
 struct Light {
     vec3 position;
@@ -40,7 +42,7 @@ uniform int u_num_lights;
 out vec4 frag_color;
 
 // Calculates color of fragment when specific light illuminates it. Calculation are using Phong shading model
-vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir) {
+vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec3 reflect_skybox) {
     vec3 ambient = u_material.ambient;
 
     // Diffuse lighting
@@ -97,7 +99,7 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir) {
     }
 
     // Final color calculation
-    return clamp(ambient + diffuse + specular, 0.0, 1.0);
+    return clamp(ambient + diffuse + specular + vec3(u_material.reflection_factor * texture(u_skybox_texture, reflect_skybox)), 0.0, 1.0);
 }
 
 void main() {
@@ -105,9 +107,11 @@ void main() {
     vec3 color = vec3(0, 0, 0);
     vec3 norm = normalize(normal);
     vec3 view_dir = normalize(u_camera_location - frag_pos_ws);
+    vec3 eye_dir = normalize(frag_pos_ws - u_camera_location);
+    vec3 reflect_vec = reflect(eye_dir, normalize(norm));
 
     for (int i = 0; i < u_num_lights; ++i) {
-        color += CalculateLight(u_lights[i], norm, view_dir);
+        color += CalculateLight(u_lights[i], norm, view_dir, reflect_vec);
     }
 
     frag_color = vec4(color, 1.0);

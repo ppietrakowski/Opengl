@@ -65,9 +65,6 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     debug_material_ = ResourceManager::CreateMaterial("shaders/unshaded.shd", "wireframe");
     default_material_ = ResourceManager::CreateMaterial("shaders/default.shd", "postac_material");
 
-    default_material_->SetVector3Property("diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
-    default_material_->SetVector3Property("ambient", glm::vec3{0.01f, 0.01f, 0.01f});
-    default_material_->SetVector3Property("specular", glm::vec3{0.797357, 0.723991, 0.208006});
     default_material_->SetFloatProperty("shininess", 32.0f);
     debug_material_->use_wireframe = true;
     current_material_ = default_material_;
@@ -76,6 +73,8 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     static_mesh_->main_material = default_material_;
 
     std::shared_ptr<Material> material = test_skeletal_mesh_->main_material;
+
+    material->SetFloatProperty("shininess", 32.0f);
     std::uint32_t texture_unit = 0;
 
     camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
@@ -100,10 +99,8 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     shader->Use();
     auto mat = ResourceManager::CreateMaterial("shaders/instanced.shd", "instanced");
 
-    mat->SetVector3Property("diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
-    mat->SetVector3Property("ambient", 4.0f * glm::vec3{0.0034615f, 0.003143f, 0.000903f});
-    mat->SetVector3Property("specular", glm::vec3{0.797357, 0.723991, 0.208006});
-    mat->SetFloatProperty("shininess", 32);
+    mat->SetFloatProperty("reflection_factor", 0.05f);
+    mat->SetFloatProperty("shininess", 32.0f);
     instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_, ResourceManager::GetMaterial("instanced"));
 
     Actor instance_mesh = level_.CreateActor("InstancedMesh");

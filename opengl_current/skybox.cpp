@@ -56,6 +56,8 @@ Skybox::Skybox(const std::shared_ptr<CubeMap>& cube_map, const std::shared_ptr<S
     vertex_array_->AddVertexBuffer(buffer, std::array{
         VertexAttribute{3, PrimitiveVertexType::kFloat}
         });
+
+    instance = this;
 }
 
 void Skybox::Draw() {

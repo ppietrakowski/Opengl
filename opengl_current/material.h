@@ -35,6 +35,10 @@ public:
         return *shader_;
     }
 
+    uint32_t GetNumTextures() const {
+        return num_texture_units_;
+    }
+
 public:
 
     bool use_wireframe : 1{ false };

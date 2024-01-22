@@ -1,2 +1,2 @@
 VertexShader=instanced.vert
-FragmentShader=default.frag
+FragmentShader=textured.frag

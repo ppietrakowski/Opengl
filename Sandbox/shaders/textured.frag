@@ -3,6 +3,8 @@
 struct Material {
     sampler2D diffuse1;
     sampler2D diffuse2;
+    float reflection_factor;
+    float shininess;
 };
 
 in flat uint texture_id;
@@ -12,6 +14,7 @@ in vec3 normal;
 
 uniform Material u_material;
 uniform vec3 u_camera_location;
+uniform samplerCube u_skybox_texture; 
 
 struct Light {
     vec3 position;
@@ -35,7 +38,7 @@ uniform int u_num_lights;
 
 
 // Calculates color of fragment when specific light illuminates it. Calculation are using Phong shading model
-vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec4 texel) {
+vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec4 texel, vec3 reflect_skybox) {
     vec3 ambient = 0.01f * texel.xyz;
 
     // Diffuse lighting
@@ -54,7 +57,7 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec4 texel) {
         vec3 refl = reflect(-light_dir, norm);
         float fi = dot(view_dir, refl);
         
-        specular = light.intensity * light.color * pow(max(0.0, fi), 32);
+        specular = light.intensity * light.color * pow(max(0.0, fi), u_material.shininess);
     }
 
     if (light.type == kLightTypePoint) {
@@ -92,7 +95,7 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec4 texel) {
     }
 
     // Final color calculation
-    return clamp(ambient + diffuse + specular, 0.0, 1.0);
+    return clamp(ambient + diffuse + specular + vec3(u_material.reflection_factor * texture(u_skybox_texture, reflect_skybox)), 0.0, 1.0);
 }
 
 out vec4 frag_color;
@@ -109,9 +112,11 @@ void main() {
     vec3 color = vec3(0, 0, 0);
     vec3 norm = normalize(normal);
     vec3 view_dir = normalize(u_camera_location - frag_pos_ws);
-    
+    vec3 eye_dir = normalize(frag_pos_ws - u_camera_location);
+    vec3 reflect_vec = reflect(eye_dir, normalize(norm));
+
     for (int i = 0; i < u_num_lights; ++i) {
-        color += CalculateLight(u_lights[i], norm, view_dir, texel);
+        color += CalculateLight(u_lights[i], norm, view_dir, texel, reflect_vec);
     }
     
     frag_color = vec4(color, 1.0);

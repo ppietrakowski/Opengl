@@ -1,2 +1,2 @@
 VertexShader=default.vert
-FragmentShader=default.frag
+FragmentShader=textured.frag
