@@ -92,6 +92,7 @@ void Level::BroadcastUpdate(Duration duration) {
     float delta_seconds = duration.GetSeconds();
 
     for (auto&& [entity, tick_function] : actor_tick_functions.each()) {
+        tick_function.ExecuteTick(delta_seconds);
     }
 
     skeletal_animation_update_task.wait();
