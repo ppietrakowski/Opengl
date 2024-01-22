@@ -1,0 +1,2 @@
+VertexShader=skeleton.vert
+FragmentShader=textured.frag

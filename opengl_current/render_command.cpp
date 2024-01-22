@@ -136,3 +136,8 @@ void RenderCommand::DrawTrianglesInstanced(const VertexArray& vertex_array, int 
 void RenderCommand::SetDepthFunc(DepthFunction depth_function) {
     renderer_api_.SetDepthFunc(depth_function);
 }
+
+
+void RenderCommand::SetDepthEnabled(bool enabled) {
+    renderer_api_.SetDepthEnabled(enabled);
+}

@@ -31,64 +31,61 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\default.frag">
+    <None Include="assets\shaders\debug.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\default.shd">
+    <None Include="assets\shaders\default.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\default.vert">
+    <None Include="assets\shaders\default.shd">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\skeletal_default.shd">
+    <None Include="assets\shaders\default.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\skeleton.frag">
+    <None Include="assets\shaders\instanced.shd">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\skeleton.vert">
+    <None Include="assets\shaders\instanced.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\skeleton.vertex">
+    <None Include="assets\shaders\skeletal_default.shd">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\textured.frag">
+    <None Include="assets\shaders\skeleton.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\Unshaded.frag">
+    <None Include="assets\shaders\skeleton.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\unshaded.shd">
+    <None Include="assets\shaders\skeleton.vertex">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\debug.vert">
+    <None Include="assets\shaders\skybox.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\instanced.shd">
+    <None Include="assets\shaders\skybox.shd">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\instanced.vert">
+    <None Include="assets\shaders\skybox.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="billboard_test.vert">
+    <None Include="assets\shaders\sprite_2d.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\sprite_2d.frag">
+    <None Include="assets\shaders\sprite_2d.shd">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\sprite_2d.vert">
+    <None Include="assets\shaders\sprite_2d.vert">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\sprite_2d.shd">
+    <None Include="assets\shaders\textured.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\skybox.frag">
+    <None Include="assets\shaders\Unshaded.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="shaders\skybox.shd">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="shaders\skybox.vert">
+    <None Include="assets\shaders\unshaded.shd">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

@@ -24,14 +24,15 @@ struct BatchVertexCreator<DebugVertex> {
 
 class DebugRenderBatch {
 public:
-    DebugRenderBatch();
+    DebugRenderBatch(std::shared_ptr<Shader> shader);
 
-    void FlushDraw(Material& material);
+    void FlushDraw();
     void AddBoxInstance(const Box& box, const Transform& transform, const glm::vec4& color);
 
     void AddLineInstance(const Line& line, const Transform& transform, const glm::vec4& color);
 
 private:
     BatchBase<DebugVertex> batch_base_;
+    std::shared_ptr<Material> material_;
 };
 

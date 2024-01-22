@@ -8,169 +8,64 @@
 
 #include <glm/gtx/matrix_decompose.hpp>
 
-struct TestComponent {
-    float total_time{0.0f};
-
-    void Tick(float delta_seconds) {
-        total_time += delta_seconds;
-
-        if (total_time >= 1.0f) {
-            puts("OOKK");
-            total_time = 0.0f;
-        }
-    }
-};
-
-DECLARE_COMPONENT_TICKABLE(TestComponent);
+static void SetupDefaultProperties(const std::shared_ptr<Material>& material) {
+    material->SetFloatProperty("reflection_factor", 0.05f);
+    material->SetFloatProperty("shininess", 32.0f);
+    material->transparent = true;
+    material->cull_faces = false;
+}
 
 SandboxGameLayer::SandboxGameLayer(Game* game) :
     camera_rotation_{glm::vec3{0, 0, 0}},
     camera_position_{0.0f, 0.0f, 0.0f},
     game_(game) {
-    default_shader_ = ResourceManager::GetShader("shaders/default.shd");
-    debug_shader_ = ResourceManager::GetShader("shaders/unshaded.shd");
-    auto skeletal_shader = ResourceManager::GetShader("shaders/skeletal_default.shd");
+    default_shader_ = ResourceManager::GetShader("assets/shaders/default.shd");
+    debug_shader_ = ResourceManager::GetShader("assets/shaders/unshaded.shd");
 
-    ResourceManager::CreateMaterial("shaders/default.shd", "default");
-
-    test_skeletal_mesh_ = ResourceManager::GetSkeletalMesh("untitled.fbx");
-
-    test_skeletal_mesh_->main_material = ResourceManager::CreateMaterial("shaders/skeletal_default.shd", "skeletal1");
-
-    for (int i = 0; i < test_skeletal_mesh_->texture_names.size(); ++i) {
-        std::string property_name = std::string{"diffuse"} + std::to_string(i + 1);
-        test_skeletal_mesh_->main_material->SetTextureProperty(property_name.c_str(), ResourceManager::GetTexture2D(test_skeletal_mesh_->texture_names[i]));
-    }
+    ResourceManager::CreateMaterial("assets/shaders/default.shd", "default");
+    InitializeSkeletalMesh();
 
     current_used_shader_ = default_shader_;
-    current_used_shader_->Use();
-    current_used_shader_->SetUniform("u_light_color", glm::vec3{1, 1, 1});
-    current_used_shader_->SetUniform("u_light_pos", glm::vec3{-1, 0, -5});
-    default_shader_->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
-
-    current_used_shader_->SetUniform("u_material.ambient", glm::vec3{0.01f, 0.01f, 0.01f});
-    current_used_shader_->SetUniform("u_material.specular", glm::vec3{0.797357, 0.723991, 0.208006});
-    current_used_shader_->SetUniform("u_material.shininess", 87.2f);
-
-    debug_shader_->Use();
-    debug_shader_->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
-    current_used_shader_->Use();
-
-    default_shader_->SetUniform("u_projection_view", glm::identity<glm::mat4>());
-    default_shader_->SetUniform("u_transform", glm::identity<glm::mat4>());
     glm::vec3 white{1.0f, 1.0f, 1.0f};
 
-    default_shader_->SetUniform("u_material.Tint", white);
+    Renderer::InitializeDebugDraw(debug_shader_);
+    Renderer2D::SetDrawShader(ResourceManager::GetShader("assets/shaders/sprite_2d.shd"));
 
-    debug_material_ = ResourceManager::CreateMaterial("shaders/unshaded.shd", "wireframe");
-    default_material_ = ResourceManager::CreateMaterial("shaders/default.shd", "postac_material");
+    auto default_material = ResourceManager::CreateMaterial("assets/shaders/default.shd", "postac_material");
+    default_material->SetFloatProperty("shininess", 32.0f);
 
-    default_material_->SetFloatProperty("shininess", 32.0f);
-    debug_material_->use_wireframe = true;
-    current_material_ = default_material_;
-    ELOG_INFO(LOG_GLOBAL, "Loading postac.obj");
-    static_mesh_ = ResourceManager::GetStaticMesh("cube.obj");
-    static_mesh_->main_material = default_material_;
-
-    std::shared_ptr<Material> material = test_skeletal_mesh_->main_material;
-
-    material->SetFloatProperty("shininess", 32.0f);
-    std::uint32_t texture_unit = 0;
+    std::shared_ptr<StaticMesh> static_mesh = ResourceManager::GetStaticMesh("assets/cube.obj");
+    static_mesh->main_material = default_material;
+    default_material->transparent = true;
 
     camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
-    static_mesh_position_ = {2, 0, -10};
-    std::vector<std::string> animations = std::move(test_skeletal_mesh_->GetAnimationNames());
 
-    for (std::int32_t i = 0; i < 2; ++i) {
-        skeletal_mesh_actor_ = level_.CreateActor("SkeletalMesh" + std::to_string(i));
-        skeletal_mesh_actor_.AddComponent<SkeletalMeshComponent>(test_skeletal_mesh_);
-        skeletal_mesh_actor_.GetComponent<TransformComponent>().scale = glm::vec3{0.01f, 0.01f, 0.01f};
-        skeletal_mesh_actor_.GetComponent<TransformComponent>().position = glm::vec3{0, -2 * i - 2, -i - 1};
-    }
+    CreateSkeletalActors();
 
-    Actor static_mesh_actor = level_.CreateActor("StaticMeshActor");
-    static_mesh_actor.AddComponent<StaticMeshComponent>("cube.obj");
-    static_mesh_actor.GetComponent<TransformComponent>().SetEulerAngles(glm::vec3{0, 90, 0});
+    std::shared_ptr<Material> instanced_mesh_material = ResourceManager::CreateMaterial("assets/shaders/instanced.shd", "instanced");
+    SetupDefaultProperties(instanced_mesh_material);
+    instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh, instanced_mesh_material);
 
-    bbox_min_ = test_skeletal_mesh_->GetBboxMin();
-    bbox_max_ = test_skeletal_mesh_->GetBboxMax();
+    CreateInstancedMeshActor("assets/cube.obj", instanced_mesh_material);
 
-    auto shader = ResourceManager::GetShader("shaders/instanced.shd");
-    shader->Use();
-    auto mat = ResourceManager::CreateMaterial("shaders/instanced.shd", "instanced");
-
-    mat->SetFloatProperty("reflection_factor", 0.05f);
-    mat->SetFloatProperty("shininess", 32.0f);
-    instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_, ResourceManager::GetMaterial("instanced"));
-
-    Actor instance_mesh = level_.CreateActor("InstancedMesh");
-    instance_mesh.AddComponent<InstancedMeshComponent>(static_mesh_, ResourceManager::GetMaterial("instanced"));
-
-    InstancedMeshComponent& instanced_mesh = instance_mesh.GetComponent<InstancedMeshComponent>();
-
-    for (int i = 0; i < 10; ++i) {
-        for (int j = 0; j < 400; ++j) {
-            Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
-            instanced_mesh.AddInstance(transform);
-        }
-    }
-
-    Actor light_actor = level_.CreateActor("point_light");
-
-    light_actor.AddComponent<SpotLightComponent>();
-
-    SpotLightComponent& point_light = light_actor.GetComponent<SpotLightComponent>();
-
-    point_light.direction_length = 40.0f;
-    point_light.direction = glm::vec3{0, -1, 0};
-    point_light.color = glm::vec3{1, 0, 0};
-    point_light.cut_off_angle = 45.0f;
-    light_actor.GetTransform().position = light_pos_ws_ - glm::vec3{0, -5, 0};
-
-    player_ = level_.CreateActor("Player");
-    player_.AddComponent<PlayerController>(player_);
-    player_.AddComponent<TestComponent>();
-
-    //player_.AddComponent<SpotLightComponent>();
-    //SpotLightComponent& player_spot_light = player_.GetComponent<SpotLightComponent>();
-    //
-    //player_spot_light.cut_off_angle = 28.0f;
-    //player_spot_light.color = glm::vec3{0, 0, 1.0f};
-    //player_spot_light.direction = {0, 0, -1};
-    //player_spot_light.direction_length = 70.0f;
-    //player_spot_light.intensity = 10;
-
-    {
-        Actor directional_light = level_.CreateActor("directional_light");
-        directional_light.AddComponent<DirectionalLightComponent>();
-
-        auto& directional = directional_light.GetComponent<DirectionalLightComponent>();
-        directional.direction = {0, -1, 0};
-    }
-
-    Renderer2D::SetDrawShader(ResourceManager::GetShader("shaders/sprite_2d.shd"));
-
-    PlayerController& controller = player_.GetComponent<PlayerController>();
-    controller.BindForwardCallback(std::bind(&SandboxGameLayer::MoveForward, this, std::placeholders::_1, std::placeholders::_2));
-    controller.BindRightCallback(std::bind(&SandboxGameLayer::MoveRight, this, std::placeholders::_1, std::placeholders::_2));
-    controller.BindMouseMoveCallback(std::bind(&SandboxGameLayer::RotateCamera, this, std::placeholders::_1, std::placeholders::_2));
+    PlaceLightsAndPlayer();
 
     std::array<std::string, 6> texture_paths = {
-        "skybox/right.jpg",
-        "skybox/left.jpg",
-        "skybox/top.jpg",
-        "skybox/bottom.jpg",
-        "skybox/front.jpg",
-        "skybox/back.jpg"
+        "assets/skybox/right.jpg",
+        "assets/skybox/left.jpg",
+        "assets/skybox/top.jpg",
+        "assets/skybox/bottom.jpg",
+        "assets/skybox/front.jpg",
+        "assets/skybox/back.jpg"
     };
 
-    skybox_ = std::make_unique<Skybox>(std::make_shared<CubeMap>(texture_paths), ResourceManager::GetShader("shaders/skybox.shd"));
+    skybox_ = std::make_unique<Skybox>(std::make_shared<CubeMap>(texture_paths), ResourceManager::GetShader("assets/shaders/skybox.shd"));
 }
 
 void SandboxGameLayer::Update(Duration delta_time) {
     float dt = delta_time.GetSeconds();
 
-    auto shader = ResourceManager::GetShader("shaders/instanced.shd");
+    auto shader = ResourceManager::GetShader("assets/shaders/instanced.shd");
     shader->Use();
     if (Input::IsKeyPressed(GLFW_KEY_E)) {
         camera_yaw_ -= yaw_rotation_rate_ * dt;
@@ -193,36 +88,41 @@ void SandboxGameLayer::Update(Duration delta_time) {
 }
 
 void SandboxGameLayer::Render(Duration delta_time) {
-    Transform camera_transform = player_.GetComponent<TransformComponent>().GetAsTransform();
-    Renderer::BeginScene(camera_transform.position, camera_transform.rotation);
+    const CameraComponent& camera_transform = level_.FindCameraComponent();
+    Renderer::BeginScene(camera_transform.pos, camera_transform.rotation);
+
+    glm::vec3 light_pos{0.0f};
+
+    {
+        Actor directional_light = level_.FindActor("directional_light");
+        light_pos = directional_light.GetTransform().position;
+    }
 
     current_used_shader_->Use();
     current_used_shader_->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
 
     debug_shader_->Use();
     debug_shader_->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
-    Renderer::DrawDebugBox(static_mesh_->GetBoundingBox(), Transform{static_mesh_position_, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}}, glm::vec4{1, 0, 0, 1});
-    Renderer::DrawDebugBox(static_mesh_->GetBoundingBox(), Transform{static_mesh_position_ + glm::vec3{10, 0, 0}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}}, glm::vec4{1, 0, 0, 1});
     Renderer::DrawDebugBox(test_skeletal_mesh_->GetBoundingBox(), Transform{glm::vec3{0, -2, -1}});
 
-    level_.BroadcastRender(delta_time);
-
+    // draw directional light gizmo
     for (int i = 0; i < 3; ++i) {
         glm::vec3 pos = glm::vec3{0.0f};
         glm::vec4 color = glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
         pos[i] = 1;
         color[i] = 1;
 
-        Line line{light_pos_ws_, light_pos_ws_ + pos};
+        Line line{light_pos, light_pos + pos};
 
         Renderer::DrawDebugLine(line, Transform{}, color);
     }
 
-    Renderer::DrawDebugLine(Line{light_pos_ws_, light_pos_ws_ + 2.0f * glm::vec3{0, -1, 0}}, Transform{}, glm::vec4(0, 0, 1, 1));
-    Renderer::FlushDrawDebug(*debug_material_);
+    Renderer::DrawDebugLine(Line{light_pos, light_pos + 2.0f * glm::vec3{0, -1, 0}}, Transform{}, glm::vec4(0, 0, 1, 1));
 
-    Renderer2D::DrawRect(glm::vec2{1000, 10}, glm::vec2{1200, 50}, Transform2D{}, RgbaColor(255, 255, 255), Renderer2D::BindTextureToDraw(ResourceManager::GetTexture2D("test_hp.png")));
+    Renderer2D::DrawRect(glm::vec2{1000, 10}, glm::vec2{1200, 50}, Transform2D{}, RgbaColor(255, 255, 255),
+        Renderer2D::BindTextureToDraw(ResourceManager::GetTexture2D("assets/test_hp.png")));
 
+    level_.BroadcastRender(delta_time);
     skybox_->Draw();
     Renderer::EndScene();
 }
@@ -246,11 +146,9 @@ void SandboxGameLayer::OnImguiFrame() {
         num_frame++;
     }
 
-    ImGui::Begin("Transform");
-    ImGui::SliderFloat3("Position", &static_mesh_position_[0], -10, 10);
-
     RenderStats stats = RenderCommand::GetRenderStats();
 
+    ImGui::Begin("Stats");
     ImGui::Text("Fps: %i", last_framerate);
     ImGui::Text("Frame time: %.2f ms", last_delta_seconds_.GetMilliseconds());
     ImGui::Text("Drawcalls: %i", stats.num_drawcalls);
@@ -260,9 +158,11 @@ void SandboxGameLayer::OnImguiFrame() {
     ImGui::Text("NumTextureMemoryUsage: %s", FormatSize((int)Texture2D::num_texture_vram_used));
     ImGui::End();
 
-    Actor actor_to_remove = player_;
+    Actor actor_to_remove{};
+    std::string removed_actor_name;
 
     ImGui::Begin("Hierarchy");
+
     for (auto& [name, actor] : level_) {
         ImGui::Button(name.c_str());
         ImGui::SameLine();
@@ -270,6 +170,7 @@ void SandboxGameLayer::OnImguiFrame() {
         ImGui::PushID(name.c_str());
         if (ImGui::Button("X")) {
             actor_to_remove = actor;
+            removed_actor_name = name;
         }
         ImGui::PopID();
 
@@ -278,7 +179,7 @@ void SandboxGameLayer::OnImguiFrame() {
 
     ImGui::End();
 
-    if (actor_to_remove != player_) {
+    if (removed_actor_name != "player" && !removed_actor_name.empty()) {
         actor_to_remove.DestroyActor();
     }
 }
@@ -338,4 +239,75 @@ void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouse_move_delta) {
     }
 
     transform.SetEulerAngles(camera_pitch_, camera_yaw_, 0.0f);
+}
+
+void SandboxGameLayer::InitializeSkeletalMesh() {
+    auto skeletal_shader = ResourceManager::GetShader("assets/shaders/skeletal_default.shd");
+    test_skeletal_mesh_ = ResourceManager::GetSkeletalMesh("assets/test_character.fbx");
+    test_skeletal_mesh_->main_material = ResourceManager::CreateMaterial("assets/shaders/skeletal_default.shd", "skeletal1");
+
+    for (int i = 0; i < test_skeletal_mesh_->texture_names.size(); ++i) {
+        std::string property_name = std::string{"diffuse"} + std::to_string(i + 1);
+        test_skeletal_mesh_->main_material->SetTextureProperty(property_name.c_str(), ResourceManager::GetTexture2D(test_skeletal_mesh_->texture_names[i]));
+    }
+
+    std::shared_ptr<Material> material = test_skeletal_mesh_->main_material;
+
+    material->cull_faces = false;
+    material->SetFloatProperty("shininess", 32.0f);
+}
+
+void SandboxGameLayer::CreateSkeletalActors() {
+    for (std::int32_t i = 0; i < 2; ++i) {
+        Actor skeletal_mesh_actor = level_.CreateActor("SkeletalMesh" + std::to_string(i));
+        skeletal_mesh_actor.AddComponent<SkeletalMeshComponent>(test_skeletal_mesh_);
+        skeletal_mesh_actor.GetComponent<TransformComponent>().scale = glm::vec3{0.01f, 0.01f, 0.01f};
+        skeletal_mesh_actor.GetComponent<TransformComponent>().position = glm::vec3{0, -2 * i - 2, -i - 1};
+    }
+}
+
+Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& file_path, const std::shared_ptr<Material>& material) {
+    Actor instance_mesh = level_.CreateActor("InstancedMesh");
+    instance_mesh.AddComponent<InstancedMeshComponent>(ResourceManager::GetStaticMesh(file_path), material);
+
+    InstancedMeshComponent& instanced_mesh = instance_mesh.GetComponent<InstancedMeshComponent>();
+
+    for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 400; ++j) {
+            Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
+            instanced_mesh.AddInstance(transform);
+        }
+    }
+
+    return instance_mesh;
+}
+
+void SandboxGameLayer::PlaceLightsAndPlayer() {
+    Actor light_actor = level_.CreateActor("point_light");
+
+    light_actor.AddComponent<SpotLightComponent>();
+
+    SpotLightComponent& point_light = light_actor.GetComponent<SpotLightComponent>();
+
+    point_light.direction_length = 40.0f;
+    point_light.direction = glm::vec3{0, -1, 0};
+    point_light.color = glm::vec3{1, 0, 0};
+    point_light.cut_off_angle = 45.0f;
+    light_actor.GetTransform().position = glm::vec3{4, 5, 0};
+
+    Actor player = level_.CreateActor("player");
+    player.AddComponent<PlayerController>(player);
+    player.AddComponent<CameraComponent>();
+
+    Actor directional_light = level_.CreateActor("directional_light");
+    directional_light.AddComponent<DirectionalLightComponent>();
+
+    DirectionalLightComponent& directional = directional_light.GetComponent<DirectionalLightComponent>();
+    directional.direction = {0, -1, 0};
+
+    PlayerController& controller = player.GetComponent<PlayerController>();
+    controller.BindForwardCallback(std::bind(&SandboxGameLayer::MoveForward, this, std::placeholders::_1, std::placeholders::_2));
+    controller.BindRightCallback(std::bind(&SandboxGameLayer::MoveRight, this, std::placeholders::_1, std::placeholders::_2));
+    controller.BindMouseMoveCallback(std::bind(&SandboxGameLayer::RotateCamera, this, std::placeholders::_1, std::placeholders::_2));
+
 }

@@ -58,6 +58,7 @@ public:
     std::shared_ptr<Material> main_material;
     std::vector<StaticMeshVertex> vertices;
     std::vector<uint32_t> indices;
+    std::vector<std::string> texture_names;
 
     Box GetBoundingBox() const;
 

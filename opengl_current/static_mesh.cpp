@@ -72,6 +72,8 @@ StaticMesh::StaticMesh(const std::filesystem::path& file_path, const std::shared
                 ResourceManager::AddTexture2D(texture_path.C_Str(), std::make_shared<Texture2D>(
                     LoadRgbaImageFromMemory(texture->pcData, texture->mWidth * texture->mHeight)));
             }
+
+            texture_names.push_back(texture_path.C_Str());
         }
     }
 

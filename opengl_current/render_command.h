@@ -56,6 +56,7 @@ public:
 
     static void DrawTrianglesInstanced(const VertexArray& vertex_array, int num_instances);
     static void SetDepthFunc(DepthFunction depth_function);
+    static void SetDepthEnabled(bool enabled);
 
 private:
     static RendererApi renderer_api_;

@@ -58,11 +58,13 @@ public:
 
     static void DrawDebugBox(const Box& box, const Transform& transform, const glm::vec4& color = glm::vec4{1, 1, 1, 1});
     static void DrawDebugLine(const Line& line, const Transform& transform, const glm::vec4& color = glm::vec4{1, 1, 1, 1});
-    static void FlushDrawDebug(Material& shader);
+    static void FlushDrawDebug();
 
     static bool IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_min, glm::vec3 bbox_max);
 
     static void AddLight(const LightData& light_data);
+
+    static void InitializeDebugDraw(const std::shared_ptr<Shader>& debug_shader);
 
     static glm::mat4 view_;
     static glm::mat4 projection_;

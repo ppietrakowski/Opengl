@@ -207,26 +207,25 @@
     <ClInclude Include="sandbox_game_layer.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="billboard_test.vert" />
-    <None Include="shaders\debug.vert" />
-    <None Include="shaders\default.frag" />
-    <None Include="shaders\default.shd" />
-    <None Include="shaders\default.vert" />
-    <None Include="shaders\instanced.shd" />
-    <None Include="shaders\instanced.vert" />
-    <None Include="shaders\skeletal_default.shd" />
-    <None Include="shaders\skeleton.frag" />
-    <None Include="shaders\skeleton.vert" />
-    <None Include="shaders\skeleton.vertex" />
-    <None Include="shaders\skybox.frag" />
-    <None Include="shaders\skybox.shd" />
-    <None Include="shaders\skybox.vert" />
-    <None Include="shaders\sprite_2d.frag" />
-    <None Include="shaders\sprite_2d.shd" />
-    <None Include="shaders\sprite_2d.vert" />
-    <None Include="shaders\textured.frag" />
-    <None Include="shaders\Unshaded.frag" />
-    <None Include="shaders\unshaded.shd" />
+    <None Include="assets\shaders\debug.vert" />
+    <None Include="assets\shaders\default.frag" />
+    <None Include="assets\shaders\default.shd" />
+    <None Include="assets\shaders\default.vert" />
+    <None Include="assets\shaders\instanced.shd" />
+    <None Include="assets\shaders\instanced.vert" />
+    <None Include="assets\shaders\skeletal_default.shd" />
+    <None Include="assets\shaders\skeleton.frag" />
+    <None Include="assets\shaders\skeleton.vert" />
+    <None Include="assets\shaders\skeleton.vertex" />
+    <None Include="assets\shaders\skybox.frag" />
+    <None Include="assets\shaders\skybox.shd" />
+    <None Include="assets\shaders\skybox.vert" />
+    <None Include="assets\shaders\sprite_2d.frag" />
+    <None Include="assets\shaders\sprite_2d.shd" />
+    <None Include="assets\shaders\sprite_2d.vert" />
+    <None Include="assets\shaders\textured.frag" />
+    <None Include="assets\shaders\Unshaded.frag" />
+    <None Include="assets\shaders\unshaded.shd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

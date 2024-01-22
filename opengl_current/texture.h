@@ -69,6 +69,7 @@ private:
     uint32_t data_format_{0};
     uint32_t internal_data_format_{0};
     bool has_mipmaps_ : 1{false};
+    std::string load_path_;
 
 private:
     void GenerateTexture2D(const void* data);

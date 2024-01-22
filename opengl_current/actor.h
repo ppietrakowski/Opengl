@@ -67,6 +67,11 @@ struct ActorNativeTickable {
     void ExecuteTick(float delta_seconds);
 };
 
+struct CameraComponent {
+    glm::vec3 pos;
+    glm::quat rotation;
+};
+
 // Basic gameplay object. This class is copy constructible
 class Actor {
     friend class Level;

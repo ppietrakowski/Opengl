@@ -171,7 +171,6 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
         num_bones_ += mesh->mNumBones;
     }
 
-    main_material->cull_faces = false;
     main_material->transparent = true;
 
     for (uint32_t i = 0; i < scene->mNumAnimations; ++i) {

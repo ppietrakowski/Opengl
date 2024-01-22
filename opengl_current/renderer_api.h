@@ -60,6 +60,8 @@ public:
     void DrawLines(const VertexArray& vertex_array, int num_indices);
     void DrawPoints(const VertexArray& vertex_array, int num_indices);
 
+    void SetDepthEnabled(bool enabled);
+
     void SetWireframe(bool wireframe_enabled);
     bool IsWireframeEnabled() const;
 

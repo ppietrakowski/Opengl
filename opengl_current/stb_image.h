@@ -453,7 +453,7 @@ extern "C" {
 
     inline stbi_image_data_t stbi_load_from_memory_rgba(const uint8_t* buffer, int32_t length) {
         stbi_image_data_t image_data = {NULL, 0, 0, 0};
-        image_data.data = stbi_load_from_memory(buffer, length, &image_data.width, &image_data.height, &image_data.num_channels, STBI_rgb_alpha);
+        image_data.data = stbi_load_from_memory(buffer, length, &image_data.width, &image_data.height, &image_data.num_channels, 0);
         return image_data;
     }
 

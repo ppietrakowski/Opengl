@@ -87,6 +87,13 @@ void Level::BroadcastUpdate(Duration duration) {
         playerController.Update();
     }
 
+    auto camera = registry_.view<CameraComponent, TransformComponent>();
+
+    for (auto&& [entity, camera_component, transform] : camera.each()) {
+        camera_component.pos = transform.position;
+        camera_component.rotation = transform.rotation;
+    }
+
     auto actor_tick_functions = registry_.view<ActorNativeTickable>();
 
     float delta_seconds = duration.GetSeconds();
@@ -177,6 +184,12 @@ bool Level::TryFindActor(const std::string& name, Actor& out_actor) {
     }
 
     return false;
+}
+
+const CameraComponent& Level::FindCameraComponent() const {
+    auto view = View<CameraComponent>();
+
+    return registry_.get<CameraComponent>(view.front());
 }
 
 void Level::UpdateSkeletalMeshesAnimation(Duration duration) {

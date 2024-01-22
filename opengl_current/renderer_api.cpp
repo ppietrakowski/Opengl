@@ -5,6 +5,7 @@
 
 void RendererApi::Initialize() {
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LINE_SMOOTH);
 }
 
 void RendererApi::Clear() {
@@ -89,18 +90,19 @@ bool RendererApi::DoesCullFaces() const {
 }
 
 void RendererApi::SetBlendingEnabled(bool blending_enabled) {
-    if (blending_enabled && !blending_enabled) {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    } else {
-        glDisable(GL_BLEND);
-    }
-
-    blending_enabled = blending_enabled;
+    this->blending_enabled_ = blending_enabled;
 }
 
 void RendererApi::SetLineWidth(float lineWidth) {
     glLineWidth(lineWidth);
+}
+
+void RendererApi::SetDepthEnabled(bool enabled) {
+    if (enabled) {
+        glEnable(GL_DEPTH_TEST);
+    } else {
+        glDisable(GL_DEPTH_TEST);
+    }
 }
 
 void RendererApi::ClearBufferBindings_Debug() {

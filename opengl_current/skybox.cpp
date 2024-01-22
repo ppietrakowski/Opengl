@@ -80,4 +80,5 @@ void Skybox::Draw() {
 
     // switch back basic depth test
     RenderCommand::SetDepthFunc(DepthFunction::Less);
+    vertex_array_->Unbind();
 }

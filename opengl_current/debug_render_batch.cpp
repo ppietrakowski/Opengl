@@ -10,12 +10,14 @@ static const std::array<uint32_t, 24> kBaseBoxIndices =
     0, 4, 1, 5, 2, 6, 3, 7
 };
 
-DebugRenderBatch::DebugRenderBatch() :
+DebugRenderBatch::DebugRenderBatch(std::shared_ptr<Shader> shader) :
     batch_base_{std::array{VertexAttribute{3, PrimitiveVertexType::kFloat}, VertexAttribute{1, PrimitiveVertexType::kUnsignedInt}}} {
+
+    material_ = std::make_shared<Material>(shader);
 }
 
-void DebugRenderBatch::FlushDraw(Material& material) {
-    batch_base_.DrawLines(glm::mat4{1.0f}, material);
+void DebugRenderBatch::FlushDraw() {
+    batch_base_.DrawLines(glm::mat4{1.0f}, *material_);
 }
 
 void DebugRenderBatch::AddLineInstance(const Line& line, const Transform& transform, const glm::vec4& color) {

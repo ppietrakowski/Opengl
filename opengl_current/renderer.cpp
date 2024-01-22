@@ -20,7 +20,6 @@ std::shared_ptr<Texture2D> Renderer::default_texture_;
 
 static DebugRenderBatch* debug_batch_ = nullptr;
 
-
 static constexpr RgbColor kBlack{0, 0, 0};
 static constexpr RgbColor kMagenta{255, 0, 255};
 
@@ -65,7 +64,6 @@ void Renderer::Initialize() {
     default_texture_ = std::make_shared<Texture2D>(colors, TextureSpecification{colors_width, color_height, TextureFormat::kRgb});
     RenderCommand::Initialize();
 
-    debug_batch_ = new DebugRenderBatch();
     RenderCommand::ClearBufferBindings_Debug();
     RenderCommand::SetCullFace(true);
 
@@ -96,6 +94,11 @@ void Renderer::BeginScene(glm::vec3 camera_pos, glm::quat camera_rotation) {
 
 void Renderer::EndScene() {
     RenderCommand::SetLineWidth(1);
+
+    if (debug_batch_) {
+        Renderer::FlushDrawDebug();
+    }
+
     Renderer2D::FlushDraw();
     light_buffer_->Clear();
     RenderCommand::EndScene();
@@ -109,7 +112,6 @@ void Renderer::SubmitTriangles(const SubmitCommandArgs& submit_args) {
     submit_args.SetupShader();
 
     UploadUniforms(shader, submit_args.transform);
-
 
     uint32_t texture_unit = submit_args.material->GetNumTextures();
 
@@ -149,6 +151,9 @@ void Renderer::SubmitSkeleton(const SubmitCommandArgs& submit_args, std::span<co
 
     UploadUniforms(shader, submit_args.transform);
     shader.SetUniformMat4Array("u_bone_transforms", transforms);
+    uint32_t texture_unit = submit_args.material->GetNumTextures();
+    Skybox::instance->GetCubeMap()->Bind(texture_unit);
+    shader.SetSamplerUniform("u_skybox_texture", Skybox::instance->GetCubeMap(), texture_unit);
 
     RenderCommand::DrawTriangles(*submit_args.vertex_array, submit_args.num_indices);
 }
@@ -156,8 +161,10 @@ void Renderer::SubmitSkeleton(const SubmitCommandArgs& submit_args, std::span<co
 void Renderer::SubmitMeshInstanced(const SubmitCommandArgs& submit_args, const UniformBuffer& transform_buffer, int num_instances) {
     Shader& shader = submit_args.GetShader();
 
+    submit_args.material->SetupRenderState();
     shader.Use();
-    submit_args.SetupShader();
+    submit_args.material->SetShaderUniforms();
+
     shader.BindUniformBuffer(shader.GetUniformBlockIndex("Transforms"), transform_buffer);
     UploadUniforms(shader, submit_args.transform);
 
@@ -170,15 +177,18 @@ void Renderer::SubmitMeshInstanced(const SubmitCommandArgs& submit_args, const U
 }
 
 void Renderer::DrawDebugBox(const Box& box, const Transform& transform, const glm::vec4& color) {
+    ASSERT(debug_batch_);
     debug_batch_->AddBoxInstance(box, transform, color);
 }
 
 void Renderer::DrawDebugLine(const Line& line, const Transform& transform, const glm::vec4& color) {
+    ASSERT(debug_batch_);
     debug_batch_->AddLineInstance(line, transform, color);
 }
 
-void Renderer::FlushDrawDebug(Material& shader) {
-    debug_batch_->FlushDraw(shader);
+void Renderer::FlushDrawDebug() {
+    ASSERT(debug_batch_);
+    debug_batch_->FlushDraw();
 }
 
 bool Renderer::IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_min, glm::vec3 bbox_max) {
@@ -201,6 +211,10 @@ bool Renderer::IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_m
 
 void Renderer::AddLight(const LightData& light_data) {
     light_buffer_->AddLight(light_data);
+}
+
+void Renderer::InitializeDebugDraw(const std::shared_ptr<Shader>& debug_shader) {
+    debug_batch_ = new DebugRenderBatch(debug_shader);
 }
 
 void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform) {

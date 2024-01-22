@@ -29,7 +29,7 @@ struct SpriteBatch {
         material_2d(material) {
         material->cull_faces = false;
         sprites.reserve(MAX_SPRITES_DISPLAYED * NUM_QUAD_VERTICES);
-        std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(sprites.capacity() * sizeof(SpriteVertex));
+        std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(static_cast<int>(sprites.capacity() * sizeof(SpriteVertex)));
 
         vertex_array.AddVertexBuffer(buffer, kSpriteVertexAttributes);
 
@@ -58,9 +58,11 @@ struct SpriteBatch {
     void FlushDraw(const glm::mat4 &projection) {
         Shader& shader = material_2d->GetShader();
 
+        RenderCommand::SetDepthEnabled(false);
+        material_2d->SetupRenderState();
+
         shader.Use();
 
-        material_2d->SetupRenderState();
         material_2d->SetShaderUniforms();
 
         for (int i = 0; i < num_binded_textures; ++i) {
@@ -73,7 +75,7 @@ struct SpriteBatch {
         auto vertex_buffer = vertex_array.GetVertexBufferAt(0);
         
         vertex_array.Bind();
-        vertex_buffer->UpdateVertices(sprites.data(), sizeof(SpriteVertex) * sprites.size());
+        vertex_buffer->UpdateVertices(sprites.data(), (int)(sizeof(SpriteVertex) * sprites.size()));
 
         RenderCommand::DrawTriangles(vertex_array, num_indices_to_draw);
 
@@ -81,6 +83,9 @@ struct SpriteBatch {
         num_binded_textures = 0;
         num_indices_to_draw = 0;
         sprites.clear();
+
+        RenderCommand::SetDepthEnabled(true);
+        vertex_array.Unbind();
     }
 
     void AddSpriteInstance(const std::array<SpriteVertex, NUM_QUAD_VERTICES>& definition, const Transform2D& transform) {

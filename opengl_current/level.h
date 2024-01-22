@@ -36,9 +36,16 @@ public:
         return registry_.view<Args...>();
     }
 
+    template <typename ...Args>
+    const auto View() const {
+        return registry_.view<Args...>();
+    }
+
     void AddNewStaticMesh(const std::string& mesh_name, const Transform& transform);
 
     bool TryFindActor(const std::string& name, Actor& out_actor);
+
+    const CameraComponent& FindCameraComponent() const;
 
 private:
     entt::registry registry_;

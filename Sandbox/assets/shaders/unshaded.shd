@@ -1,0 +1,2 @@
+VertexShader=debug.vert
+FragmentShader=Unshaded.frag

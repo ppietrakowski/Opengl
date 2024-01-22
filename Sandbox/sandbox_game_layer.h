@@ -28,23 +28,16 @@ private:
     std::shared_ptr<Shader> debug_shader_;
     std::shared_ptr<Shader> current_used_shader_;
 
-    std::shared_ptr<StaticMesh> static_mesh_;
-    glm::vec3 static_mesh_position_;
-
     glm::vec3 camera_position_;
     glm::quat camera_rotation_;
 
-    std::shared_ptr<Material> default_material_;
     std::shared_ptr<Material> debug_material_;
-    std::shared_ptr<Material> current_material_;
     std::shared_ptr<InstancedMesh> instanced_mesh_;
     std::unique_ptr<Skybox> skybox_;
-    Actor player_;
 
     float camera_yaw_ = 0.0f;
     float camera_pitch_ = 0.0f;
 
-    glm::vec3 light_pos_ws_{4, 10, 0};
     Duration last_delta_seconds_;
 
     float move_speed_ = 20.0f;
@@ -52,17 +45,21 @@ private:
     float pitch_rotation_rate_ = 10.0f;
     float ascend_speed_ = 20.0f;
 
-    glm::vec3 bbox_min_;
-    glm::vec3 bbox_max_;
     std::shared_ptr<SkeletalMesh> test_skeletal_mesh_;
 
     Level level_;
-    Actor skeletal_mesh_actor_;
     Game* game_{nullptr};
 
 private:
     void MoveForward(Actor& player, float axis_value);
     void MoveRight(Actor& player, float axis_value);
     void RotateCamera(Actor& player, glm::vec2 mouse_move_delta);
+
+    void InitializeSkeletalMesh();
+
+    void CreateSkeletalActors();
+
+    Actor CreateInstancedMeshActor(const std::string& file_path, const std::shared_ptr<Material>& material);
+    void PlaceLightsAndPlayer();
 };
 

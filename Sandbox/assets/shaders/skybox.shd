@@ -1,0 +1,2 @@
+VertexShader=skybox.vert
+FragmentShader=skybox.frag
