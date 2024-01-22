@@ -44,7 +44,9 @@ Texture2D::Texture2D(const std::filesystem::path& file_path) {
 
     width_ = image_data.width;
     heigth_ = image_data.height;
-    gl_format_ = image_data.num_channels == 3 ? GL_RGB : GL_RGBA;
+
+    internal_data_format_ = GL_RGBA8;
+    data_format_ = GL_RGBA;
 
     GenerateTexture2D(image_data.data);
 
@@ -53,8 +55,16 @@ Texture2D::Texture2D(const std::filesystem::path& file_path) {
 
 Texture2D::Texture2D(const void* data, const TextureSpecification& specification) :
     width_{specification.width},
-    heigth_{specification.height},
-    gl_format_(specification.texture_format == TextureFormat::kRgb ? GL_RGB : GL_RGBA) {
+    heigth_{specification.height} {
+
+    if (specification.texture_format == TextureFormat::kRgba) {
+        internal_data_format_ = GL_RGBA8;
+        data_format_ = GL_RGBA;
+    } else if (specification.texture_format == TextureFormat::kRgb) {
+        internal_data_format_ = GL_RGB8;
+        data_format_ = GL_RGB;
+    }
+
     GenerateTexture2D(data);
 }
 
@@ -64,15 +74,22 @@ Texture2D::Texture2D(const ImageRgba& image) :
 
 Texture2D::Texture2D(const TextureSpecification& specification) :
     width_{specification.width},
-    heigth_{specification.height},
-    gl_format_(specification.texture_format == TextureFormat::kRgb ? GL_RGB : GL_RGBA) {
+    heigth_{specification.height} {
+
+    if (specification.texture_format == TextureFormat::kRgba) {
+        internal_data_format_ = GL_RGBA8;
+        data_format_ = GL_RGBA;
+    } else if (specification.texture_format == TextureFormat::kRgb) {
+        internal_data_format_ = GL_RGB8;
+        data_format_ = GL_RGB;
+    }
     GenerateTexture2D(nullptr);
 }
 
 Texture2D::~Texture2D() {
     int num_components = 3;
 
-    if (GetGlFormat() == GL_RGBA) {
+    if (data_format_ == GL_RGBA) {
         num_components = 4;
     }
 
@@ -106,7 +123,7 @@ void Texture2D::GenerateMipmaps() {
 }
 
 TextureFormat Texture2D::GetTextureFormat() const {
-    return gl_format_ == GL_RGB ? TextureFormat::kRgb : TextureFormat::kRgba;
+    return data_format_ == GL_RGB ? TextureFormat::kRgb : TextureFormat::kRgba;
 }
 
 void Texture2D::SetData(const void* data, const TextureSpecification& specification, glm::ivec2 offset) {
@@ -117,24 +134,20 @@ void Texture2D::SetData(const void* data, const TextureSpecification& specificat
         specification.width, specification.height, ConvertTextureFormatToGL(specification.texture_format), GL_UNSIGNED_BYTE, data);
 }
 
-uint32_t Texture2D::GetGlFormat() const {
-    return gl_format_;
-}
-
 void Texture2D::GenerateTexture2D(const void* data) {
     glCreateTextures(GL_TEXTURE_2D, 1, &renderer_id_);
     glBindTextureUnit(0, renderer_id_); // Binding to texture unit 0 by default
 
     SetStandardTextureOptions();
 
-    glTextureStorage2D(renderer_id_, 1, GetGlFormat() == GL_RGB ? GL_RGB8 : GL_RGBA8, width_, heigth_);
+    glTextureStorage2D(renderer_id_, 1, internal_data_format_, width_, heigth_);
 
     if (data != nullptr) {
-        glTextureSubImage2D(renderer_id_, 0, 0, 0, width_, heigth_, GetGlFormat(), GL_UNSIGNED_BYTE, data);
+        glTextureSubImage2D(renderer_id_, 0, 0, 0, width_, heigth_, data_format_, GL_UNSIGNED_BYTE, data);
 
         int num_components = 3;
 
-        if (GetGlFormat() == GL_RGBA) {
+        if (data_format_ == GL_RGBA) {
             num_components = 4;
         }
 
@@ -154,4 +167,67 @@ void Texture2D::SetStandardTextureOptions() {
 ImageRgba LoadRgbaImageFromMemory(const void* data, int length) {
     stbi_image_data_t image_data = stbi_load_from_memory_rgba(reinterpret_cast<const uint8_t*>(data), length);
     return ImageRgba{image_data.data, image_data.width, image_data.height, &StbiDeleter};
+}
+
+CubeMap::CubeMap(std::span<const std::string> paths) {
+    // Flip the image vertically if needed
+    stbi_set_flip_vertically_on_load(0);
+    glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &renderer_id_);
+    glTextureParameteri(renderer_id_, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(renderer_id_, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(renderer_id_, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(renderer_id_, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(renderer_id_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTextureUnit(0, renderer_id_);
+
+    for (uint32_t i = 0; i < paths.size(); ++i) {
+        const std::string& path = paths[i];
+        stbi_image_data_t image_data = stbi_load_from_filepath(path.c_str(), STBI_rgb_alpha);
+
+        if (image_data.data == nullptr) {
+            throw std::runtime_error{"Failed to load texture " + path};
+        }
+
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+            0, GL_RGBA, image_data.width, image_data.height,
+            0, GL_RGBA, GL_UNSIGNED_BYTE, image_data.data
+        );
+
+        STBI_FREE(image_data.data);
+    }
+}
+
+CubeMap::~CubeMap() {
+    glDeleteTextures(1, &renderer_id_);
+}
+
+int CubeMap::GetWidth() const {
+    return 0;
+}
+
+int CubeMap::GetHeight() const {
+    return 0;
+}
+
+void CubeMap::SetData(const void* data, const TextureSpecification& specification, glm::ivec2 offset) {
+}
+
+void CubeMap::Bind(uint32_t texture_unit) const {
+    glBindTextureUnit(texture_unit, renderer_id_);
+}
+
+void CubeMap::Unbind(uint32_t texture_unit) {
+    glBindTextureUnit(texture_unit, 0);
+}
+
+bool CubeMap::GotMinimaps() const {
+    return false;
+}
+
+void CubeMap::GenerateMipmaps() {
+}
+
+TextureFormat CubeMap::GetTextureFormat() const {
+    return TextureFormat::kRgba;
 }

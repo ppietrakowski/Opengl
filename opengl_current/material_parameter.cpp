@@ -104,6 +104,7 @@ void MaterialParam::SetTexture(const std::shared_ptr<Texture>& value) {
 }
 
 void TextureParameter::SetUniform(Shader& shader) const {
+    texture_->Bind(texture_unit_);
     shader.SetSamplerUniform(uniform_name_.c_str(), texture_, texture_unit_);
 }
 

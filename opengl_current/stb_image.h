@@ -459,7 +459,7 @@ extern "C" {
 
     inline stbi_image_data_t stbi_load_from_filepath(const char* filename, int32_t desired_channels) {
         stbi_image_data_t image_data = {NULL, 0, 0, 0};
-        image_data.data = stbi_load(filename, &image_data.width, &image_data.height, &image_data.num_channels, desired_channels);
+        image_data.data = stbi_load(filename, &image_data.width, &image_data.height, &image_data.num_channels, STBI_rgb_alpha);
         return image_data;
     }
 

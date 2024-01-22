@@ -34,7 +34,14 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     ResourceManager::CreateMaterial("shaders/default.shd", "default");
 
     test_skeletal_mesh_ = ResourceManager::GetSkeletalMesh("untitled.fbx");
+
     test_skeletal_mesh_->main_material = ResourceManager::CreateMaterial("shaders/skeletal_default.shd", "skeletal1");
+
+    for (int i = 0; i < test_skeletal_mesh_->texture_names.size(); ++i) {
+        std::string property_name = std::string{"diffuse"} + std::to_string(i + 1);
+        test_skeletal_mesh_->main_material->SetTextureProperty(property_name.c_str(), ResourceManager::GetTexture2D(test_skeletal_mesh_->texture_names[i]));
+    }
+
     current_used_shader_ = default_shader_;
     current_used_shader_->Use();
     current_used_shader_->SetUniform("u_light_color", glm::vec3{1, 1, 1});
@@ -100,7 +107,6 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh_, ResourceManager::GetMaterial("instanced"));
 
     Actor instance_mesh = level_.CreateActor("InstancedMesh");
-
     instance_mesh.AddComponent<InstancedMeshComponent>(static_mesh_, ResourceManager::GetMaterial("instanced"));
 
     InstancedMeshComponent& instanced_mesh = instance_mesh.GetComponent<InstancedMeshComponent>();
@@ -145,10 +151,23 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
         directional.direction = {0, -1, 0};
     }
 
+    Renderer2D::SetDrawShader(ResourceManager::GetShader("shaders/sprite_2d.shd"));
+
     PlayerController& controller = player_.GetComponent<PlayerController>();
     controller.BindForwardCallback(std::bind(&SandboxGameLayer::MoveForward, this, std::placeholders::_1, std::placeholders::_2));
     controller.BindRightCallback(std::bind(&SandboxGameLayer::MoveRight, this, std::placeholders::_1, std::placeholders::_2));
     controller.BindMouseMoveCallback(std::bind(&SandboxGameLayer::RotateCamera, this, std::placeholders::_1, std::placeholders::_2));
+
+    std::array<std::string, 6> texture_paths = {
+        "skybox/right.jpg",
+        "skybox/left.jpg",
+        "skybox/top.jpg",
+        "skybox/bottom.jpg",
+        "skybox/front.jpg",
+        "skybox/back.jpg"
+    };
+
+    skybox_ = std::make_unique<Skybox>(std::make_shared<CubeMap>(texture_paths), ResourceManager::GetShader("shaders/skybox.shd"));
 }
 
 void SandboxGameLayer::Update(Duration delta_time) {
@@ -205,6 +224,9 @@ void SandboxGameLayer::Render(Duration delta_time) {
     Renderer::DrawDebugLine(Line{light_pos_ws_, light_pos_ws_ + 2.0f * glm::vec3{0, -1, 0}}, Transform{}, glm::vec4(0, 0, 1, 1));
     Renderer::FlushDrawDebug(*debug_material_);
 
+    Renderer2D::DrawRect(glm::vec2{1000, 10}, glm::vec2{1200, 50}, Transform2D{}, RgbaColor(255, 255, 255), Renderer2D::BindTextureToDraw(ResourceManager::GetTexture2D("test_hp.png")));
+
+    skybox_->Draw();
     Renderer::EndScene();
 }
 

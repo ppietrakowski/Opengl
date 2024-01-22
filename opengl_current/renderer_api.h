@@ -36,6 +36,14 @@ inline bool operator!=(const RgbaColor& a, const RgbaColor& b) {
     return a.red != b.red || a.green != b.green || a.blue != b.blue || a.alpha != b.alpha;
 }
 
+enum class DepthFunction : uint8_t {
+    Less = 0,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    Equal
+};
+
 class RendererApi {
 public:
     RendererApi() = default;
@@ -46,6 +54,8 @@ public:
     void Clear();
     void SetClearColor(const RgbaColor& clear_color);
     void DrawTriangles(const VertexArray& vertex_array, int num_indices);
+    void DrawTrianglesArrays(const VertexArray& vertex_array, int num_vertices);
+
     void DrawTrianglesAdjancency(const VertexArray& vertex_array, int num_indices);
     void DrawLines(const VertexArray& vertex_array, int num_indices);
     void DrawPoints(const VertexArray& vertex_array, int num_indices);
@@ -54,6 +64,7 @@ public:
     bool IsWireframeEnabled() const;
 
     void SetCullFace(bool cull_faces);
+    void UpdateCullFace(bool use_clockwise);
     bool DoesCullFaces() const;
 
     void SetBlendingEnabled(bool blending_enabled);
@@ -62,6 +73,7 @@ public:
     void ClearBufferBindings_Debug();
     void SetViewport(int x, int y, int width, int height);
 
+    void SetDepthFunc(DepthFunction depth_function);
     void DrawTrianglesInstanced(const VertexArray& vertex_array, int num_instances);
 
 private:

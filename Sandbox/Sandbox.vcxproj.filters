@@ -73,5 +73,23 @@
     <None Include="billboard_test.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="shaders\sprite_2d.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\sprite_2d.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\sprite_2d.shd">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\skybox.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\skybox.shd">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\skybox.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

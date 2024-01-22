@@ -23,7 +23,6 @@ public:
         return typeid(SandboxGameLayer);
     }
 
-
 private:
     std::shared_ptr<Shader> default_shader_;
     std::shared_ptr<Shader> debug_shader_;
@@ -39,7 +38,7 @@ private:
     std::shared_ptr<Material> debug_material_;
     std::shared_ptr<Material> current_material_;
     std::shared_ptr<InstancedMesh> instanced_mesh_;
-
+    std::unique_ptr<Skybox> skybox_;
     Actor player_;
 
     float camera_yaw_ = 0.0f;

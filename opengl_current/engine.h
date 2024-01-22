@@ -12,6 +12,8 @@
 #include "input.h"
 #include "render_command.h"
 #include "renderer.h"
+#include "renderer_2d.h"
+#include "skybox.h"
 
 #include "Imgui/imgui.h"
 

@@ -89,6 +89,10 @@ public:
         texture_unit_{texture_unit} {
     }
 
+    void SetValue(std::shared_ptr<Texture> texture) override {
+        texture_ = texture;
+    }
+
     TextureParameter(const TextureParameter&) = default;
     TextureParameter& operator=(const TextureParameter&) = default;
 

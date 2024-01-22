@@ -26,6 +26,11 @@ void RendererApi::DrawTriangles(const VertexArray& vertex_array, int num_indices
     glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_INT, nullptr);
 }
 
+void RendererApi::DrawTrianglesArrays(const VertexArray& vertex_array, int num_vertices) {
+    vertex_array.Bind();
+    glDrawArrays(GL_TRIANGLES, 0, num_vertices);
+}
+
 void RendererApi::DrawTrianglesAdjancency(const VertexArray& vertex_array, int num_indices) {
     ASSERT(num_indices >= 0);
 
@@ -75,6 +80,10 @@ void RendererApi::SetCullFace(bool cull_faces) {
     cull_enabled_ = cull_faces;
 }
 
+void RendererApi::UpdateCullFace(bool use_clockwise) {
+    glFrontFace(use_clockwise ? GL_CW : GL_CCW);
+}
+
 bool RendererApi::DoesCullFaces() const {
     return cull_enabled_;
 }
@@ -111,4 +120,11 @@ void RendererApi::DrawTrianglesInstanced(const VertexArray& vertex_array, int nu
     vertex_array.Bind();
     glDrawElementsInstanced(GL_TRIANGLES, vertex_array.GetNumIndices(),
         GL_UNSIGNED_INT, nullptr, num_instances);
+}
+
+
+void RendererApi::SetDepthFunc(DepthFunction depth_function) {
+
+    GLenum functions[] = {GL_LESS, GL_LEQUAL, GL_GREATER, GL_GEQUAL, GL_EQUAL};
+    glDepthFunc(functions[(size_t)depth_function]);
 }

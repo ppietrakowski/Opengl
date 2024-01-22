@@ -164,6 +164,8 @@ public:
         return bounding_box_;
     }
 
+    std::vector<std::string> texture_names;
+
 private:
     std::shared_ptr<VertexArray> vertex_array_;
     Bone root_bone_;

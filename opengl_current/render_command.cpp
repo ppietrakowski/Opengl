@@ -32,6 +32,11 @@ void RenderCommand::DrawTriangles(const VertexArray& vertex_array, int num_indic
     render_stats_.num_drawcalls++;
 }
 
+void RenderCommand::DrawTrianglesArrays(const VertexArray& vertex_array, int num_vertices) {
+    renderer_api_.DrawTrianglesArrays(vertex_array, num_vertices);
+    render_stats_.num_drawcalls++;
+}
+
 void RenderCommand::DrawTrianglesAdjancency(const VertexArray& vertex_array, int num_indices) {
     ASSERT(s_bRenderCommandInitialized);
 
@@ -83,6 +88,10 @@ void RenderCommand::SetCullFace(bool cull_faces) {
     renderer_api_.SetCullFace(cull_faces);
 }
 
+void RenderCommand::UpdateCullFace(bool use_clockwise) {
+    renderer_api_.UpdateCullFace(use_clockwise);
+}
+
 bool RenderCommand::DoesCullFaces() {
     return renderer_api_.DoesCullFaces();
 }
@@ -122,4 +131,8 @@ void RenderCommand::NotifyVertexBufferDestroyed(int buffer_size) {
 void RenderCommand::DrawTrianglesInstanced(const VertexArray& vertex_array, int num_instances) {
     renderer_api_.DrawTrianglesInstanced(vertex_array, num_instances);
     render_stats_.num_drawcalls++;
+}
+
+void RenderCommand::SetDepthFunc(DepthFunction depth_function) {
+    renderer_api_.SetDepthFunc(depth_function);
 }

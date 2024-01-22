@@ -1,0 +1,2 @@
+VertexShader=sprite_2d.vert
+FragmentShader=sprite_2d.frag

@@ -291,6 +291,8 @@ std::shared_ptr<Texture2D> SkeletalMesh::LoadTexturesFromMaterial(const aiScene*
                     LoadRgbaImageFromMemory(texture->pcData, texture->mWidth * texture->mHeight)));
             }
 
+            texture_names.emplace_back(texture_path.C_Str());
+
             return ResourceManager::GetTexture2D(texture_path.C_Str());
         }
     }

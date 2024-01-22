@@ -177,6 +177,9 @@
     <ClCompile Include="renderer_2d.cpp">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="skybox.cpp">
+      <Filter>Source Files\renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Imgui\imconfig.h">
@@ -363,6 +366,9 @@
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
     <ClInclude Include="camera_projection.h">
+      <Filter>Header Files\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="skybox.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,7 @@
 #include "error_macros.h"
 #include "render_command.h"
 #include "debug_render_batch.h"
+#include "renderer_2d.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
@@ -68,6 +69,7 @@ void Renderer::Initialize() {
     RenderCommand::SetCullFace(true);
 
     light_buffer_ = new LightBuffer(32);
+    Renderer2D::Initialize();
 }
 
 void Renderer::Quit() {
@@ -75,11 +77,13 @@ void Renderer::Quit() {
     SafeDelete(debug_batch_);
 
     default_texture_.reset();
+    Renderer2D::Quit();
     RenderCommand::Quit();
 }
 
 void Renderer::UpdateProjection(const CameraProjection& projection) {
     projection_ = glm::perspective(glm::radians(projection.fov), projection.aspect_ratio, projection.z_near, projection.z_far);
+    Renderer2D::UpdateProjection(projection);
 }
 
 void Renderer::BeginScene(glm::vec3 camera_pos, glm::quat camera_rotation) {
@@ -91,6 +95,7 @@ void Renderer::BeginScene(glm::vec3 camera_pos, glm::quat camera_rotation) {
 
 void Renderer::EndScene() {
     RenderCommand::SetLineWidth(1);
+    Renderer2D::FlushDraw();
     light_buffer_->Clear();
     RenderCommand::EndScene();
 }

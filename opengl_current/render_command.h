@@ -24,6 +24,7 @@ public:
     static void ClearBufferBindings_Debug();
 
     static void DrawTriangles(const VertexArray& vertex_array, int num_indices);
+    static void DrawTrianglesArrays(const VertexArray& vertex_array, int num_vertices);
     static void DrawTrianglesAdjancency(const VertexArray& vertex_array, int num_indices);
     static void DrawLines(const VertexArray& vertex_array, int num_indices);
     static void DrawPoints(const VertexArray& vertex_array, int num_indices);
@@ -37,6 +38,7 @@ public:
     static bool IsWireframeEnabled();
 
     static void SetCullFace(bool cull_faces);
+    static void UpdateCullFace(bool use_clockwise);
     static bool DoesCullFaces();
 
     static void SetBlendingEnabled(bool blending_enabled);
@@ -53,7 +55,7 @@ public:
     static void NotifyVertexBufferDestroyed(int buffer_size);
 
     static void DrawTrianglesInstanced(const VertexArray& vertex_array, int num_instances);
-
+    static void SetDepthFunc(DepthFunction depth_function);
 
 private:
     static RendererApi renderer_api_;

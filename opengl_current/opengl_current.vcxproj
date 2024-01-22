@@ -249,6 +249,7 @@
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="skeletal_mesh.cpp" />
     <ClCompile Include="skeletal_mesh_component.cpp" />
+    <ClCompile Include="skybox.cpp" />
     <ClCompile Include="static_mesh.cpp" />
     <ClCompile Include="static_mesh_component.cpp" />
     <ClCompile Include="texture.cpp" />
@@ -310,6 +311,7 @@
     <ClInclude Include="shader.h" />
     <ClInclude Include="skeletal_mesh.h" />
     <ClInclude Include="skeletal_mesh_component.h" />
+    <ClInclude Include="skybox.h" />
     <ClInclude Include="static_mesh.h" />
     <ClInclude Include="static_mesh_component.h" />
     <ClInclude Include="stb_image.h" />
