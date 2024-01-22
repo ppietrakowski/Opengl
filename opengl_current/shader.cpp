@@ -232,6 +232,18 @@ void Shader::SetSamplerUniform(const char* uniform_name, const std::shared_ptr<T
     glUniform1i(GetUniformLocation(uniform_name), static_cast<GLint>(start_texture_unit));
 }
 
+void Shader::SetSamplersUniform(const char* uniform_name, std::span<const std::shared_ptr<Texture>> textures, uint32_t start_texture_unit) {
+    
+    std::array<int, kMinTextureUnits> textures_units;
+
+    int last = 0;
+    std::generate(textures_units.begin(), textures_units.begin() + textures.size(), [&last]() {
+        return last++;
+    });
+
+    glUniform1iv(GetUniformLocation(uniform_name), (GLsizei)textures.size(), textures_units.data());
+}
+
 void Shader::BindUniformBuffer(int block_index, const UniformBuffer& buffer) {
     buffer.Bind(block_index);
     glUniformBlockBinding(shader_program_, block_index, block_index);

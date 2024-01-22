@@ -89,6 +89,7 @@ public:
 
     std::vector<UniformInfo> GetUniformsInfo() const;
     void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, uint32_t start_texture_unit = 0);
+    void SetSamplersUniform(const char* uniform_name, std::span<const std::shared_ptr<Texture>> textures, uint32_t start_texture_unit = 0);
 
     void BindUniformBuffer(int block_index, const UniformBuffer& buffer);
     int GetUniformBlockIndex(const std::string& name) const;

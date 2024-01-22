@@ -242,6 +242,7 @@
     <ClCompile Include="material_parameter.cpp" />
     <ClCompile Include="player_controller.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="renderer_2d.cpp" />
     <ClCompile Include="renderer_api.cpp" />
     <ClCompile Include="render_command.cpp" />
     <ClCompile Include="resouce_manager.cpp" />
@@ -262,6 +263,7 @@
     <ClInclude Include="assimp_utils.h" />
     <ClInclude Include="batching.h" />
     <ClInclude Include="box.h" />
+    <ClInclude Include="camera_projection.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="debug_render_batch.h" />
     <ClInclude Include="duration.h" />
@@ -301,6 +303,7 @@
     <ClInclude Include="material_parameter.h" />
     <ClInclude Include="player_controller.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="renderer_2d.h" />
     <ClInclude Include="renderer_api.h" />
     <ClInclude Include="render_command.h" />
     <ClInclude Include="resouce_manager.h" />

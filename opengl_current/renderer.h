@@ -7,6 +7,7 @@
 #include "material.h"
 #include "transform.h"
 #include "lights.h"
+#include "camera_projection.h"
 
 #include "box.h"
 
@@ -17,20 +18,6 @@ struct Line {
     glm::vec3 end_pos{0.0f};
 };
 
-struct CameraProjection {
-    float fov{45.0f};
-    float aspect_ratio{0.0f};
-    float width{0};
-    float height{0};
-    float z_near{0.1f};
-    float z_far{1000.0f};
-
-    CameraProjection(uint32_t width, uint32_t height, float fov = 45.0f, float z_near = 0.1f, float z_far = 1000.0f);
-
-    CameraProjection() = default;
-    CameraProjection(const CameraProjection&) = default;
-    CameraProjection& operator=(const CameraProjection&) = default;
-};
 
 struct SubmitCommandArgs {
     const Material* material{nullptr};
@@ -86,15 +73,6 @@ private:
 
     static void UploadUniforms(Shader& shader, const glm::mat4& transform);
 };
-
-FORCE_INLINE CameraProjection::CameraProjection(uint32_t width, uint32_t height, float fov, float z_near, float z_far) :
-    width(static_cast<float>(width)),
-    height(static_cast<float>(height)),
-    fov(fov),
-    z_near(z_near),
-    z_far(z_far) {
-    aspect_ratio = this->width / this->height;
-}
 
 FORCE_INLINE std::shared_ptr<Texture2D> Renderer::GetDefaultTexture() {
     return default_texture_;
