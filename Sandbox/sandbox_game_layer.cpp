@@ -8,6 +8,21 @@
 
 #include <glm/gtx/matrix_decompose.hpp>
 
+struct TestComponent {
+    float total_time{0.0f};
+
+    void Tick(float delta_seconds) {
+        total_time += delta_seconds;
+
+        if (total_time >= 1.0f) {
+            puts("OOKK");
+            total_time = 0.0f;
+        }
+    }
+};
+
+DECLARE_COMPONENT_TICKABLE(TestComponent);
+
 SandboxGameLayer::SandboxGameLayer(Game* game) :
     camera_rotation_{glm::vec3{0, 0, 0}},
     camera_position_{0.0f, 0.0f, 0.0f},
@@ -97,7 +112,6 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
         }
     }
 
-
     Actor light_actor = level_.CreateActor("point_light");
 
     light_actor.AddComponent<SpotLightComponent>();
@@ -112,6 +126,8 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
 
     player_ = level_.CreateActor("Player");
     player_.AddComponent<PlayerController>(player_);
+    player_.AddComponent<TestComponent>();
+
     //player_.AddComponent<SpotLightComponent>();
     //SpotLightComponent& player_spot_light = player_.GetComponent<SpotLightComponent>();
     //

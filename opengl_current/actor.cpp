@@ -30,3 +30,10 @@ void Actor::DestroyActor() {
 bool Actor::IsAlive() const {
     return entity_handle_.valid();
 }
+
+void ActorNativeTickable::ExecuteTick(float delta_seconds) {
+
+    for (ActorTickFunction& tick_function : tick_functions) {
+        tick_function.ExecuteTick(delta_seconds, actor);
+    }
+}

@@ -20,6 +20,7 @@ Actor Level::CreateActor(const std::string& name) {
     Actor actor(this, entt::handle{registry_, registry_.create()});
     actor.AddComponent<TransformComponent>();
     actor.AddComponent<ActorTagComponent>();
+    actor.AddComponent<ActorNativeTickable>(actor.entity_handle_);
 
     auto& tag = actor.GetComponent<ActorTagComponent>();
     tag.name = name;
@@ -84,6 +85,13 @@ void Level::BroadcastUpdate(Duration duration) {
 
     for (auto&& [entity, playerController] : player_controller_view.each()) {
         playerController.Update();
+    }
+
+    auto actor_tick_functions = registry_.view<ActorNativeTickable>();
+
+    float delta_seconds = duration.GetSeconds();
+
+    for (auto&& [entity, tick_function] : actor_tick_functions.each()) {
     }
 
     skeletal_animation_update_task.wait();
