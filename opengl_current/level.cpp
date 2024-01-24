@@ -9,195 +9,228 @@
 #include <future>
 
 Level::Level() :
-    resource_manager_{ResourceManager::CreateResourceManager()} {
+    m_ResourceManager{ResourceManager::CreateResourceManager()}
+{
 }
 
-Level::~Level() {
+Level::~Level()
+{
     ResourceManager::Quit();
 }
 
-Actor Level::CreateActor(const std::string& name) {
-    Actor actor(this, entt::handle{registry_, registry_.create()});
+Actor Level::CreateActor(const std::string& name)
+{
+    Actor actor(this, entt::handle{m_Registry, m_Registry.create()});
     actor.AddComponent<TransformComponent>();
     actor.AddComponent<ActorTagComponent>();
-    actor.AddComponent<ActorNativeTickable>(actor.entity_handle_);
+    actor.AddComponent<ActorNativeTickable>(actor.m_EntityHandle);
 
     auto& tag = actor.GetComponent<ActorTagComponent>();
-    tag.name = name;
+    tag.Name = name;
 
-    actors_[name] = actor;
+    m_Actors[name] = actor;
     return actor;
 }
 
-Actor Level::FindActor(const std::string& name) const {
-    return actors_.at(name);
+Actor Level::FindActor(const std::string& name) const
+{
+    return m_Actors.at(name);
 }
 
-std::vector<Actor> Level::FindActorsWithTag(const std::string& tag) const {
-    std::vector<Actor> actors_with_tag;
+std::vector<Actor> Level::FindActorsWithTag(const std::string& tag) const
+{
+    std::vector<Actor> actorsWithTag;
 
-    actors_with_tag.reserve(actors_.size());
+    actorsWithTag.reserve(m_Actors.size());
 
-    auto view = registry_.view<ActorTagComponent>();
+    auto view = m_Registry.view<ActorTagComponent>();
 
-    for (auto&& [entity, t] : view.each()) {
-        if (t.tag == tag) {
-            actors_with_tag.emplace_back(ConstructFromEntity(entity));
+    for (auto&& [entity, t] : view.each())
+    {
+        if (t.Tag == tag)
+        {
+            actorsWithTag.emplace_back(ConstructFromEntity(entity));
         }
     }
 
-    return actors_with_tag;
+    return actorsWithTag;
 }
 
-void Level::RemoveActor(const std::string& name) {
-    auto it = actors_.find(name);
+void Level::RemoveActor(const std::string& name)
+{
+    auto it = m_Actors.find(name);
 
-    if (it == actors_.end()) {
+    if (it == m_Actors.end())
+    {
         return;
     }
 
     Actor actor = it->second;
 
     auto& tag = actor.GetComponent<ActorTagComponent>();
-    actor.entity_handle_.destroy();
-    actors_.erase(it);
+    actor.m_EntityHandle.destroy();
+    m_Actors.erase(it);
 }
 
-void Level::NotifyActorNameChanged(const std::string& old_name, const std::string& new_name) {
-    Actor actor = actors_[old_name];
+void Level::NotifyActorNameChanged(const std::string& oldName, const std::string& newName)
+{
+    Actor actor = m_Actors[oldName];
 
-    if (actors_.contains(new_name)) {
-        actors_.erase(old_name);
-        actors_[new_name] = actor;
+    if (m_Actors.contains(newName))
+    {
+        m_Actors.erase(oldName);
+        m_Actors[newName] = actor;
     }
 }
 
-void Level::StartupLevel() {
+void Level::StartupLevel()
+{
 }
 
-void Level::BroadcastUpdate(Duration duration) {
+void Level::BroadcastUpdate(Duration duration)
+{
     // start all update tasks that are independent from themselfs
-    auto skeletal_animation_update_task = std::async(std::launch::async, [this](Duration duration) {
+    auto skeletalAnimationUpdateTask = std::async(std::launch::async, [this](Duration duration)
+    {
         UpdateSkeletalMeshesAnimation(duration);
     }, duration);
 
-    auto player_controller_view = registry_.view<PlayerController>();
+    auto playerControllerView = m_Registry.view<PlayerController>();
 
-    for (auto&& [entity, playerController] : player_controller_view.each()) {
+    for (auto&& [entity, playerController] : playerControllerView.each())
+    {
         playerController.Update();
     }
 
-    auto camera = registry_.view<CameraComponent, TransformComponent>();
+    auto cameraView = m_Registry.view<CameraComponent, TransformComponent>();
 
-    for (auto&& [entity, camera_component, transform] : camera.each()) {
-        camera_component.pos = transform.position;
-        camera_component.rotation = transform.rotation;
+    for (auto&& [entity, cameraComponent, transform] : cameraView.each())
+    {
+        cameraComponent.Position = transform.Position;
+        cameraComponent.Rotation = transform.Rotation;
+
+        CameraPosition = transform.Position;
+        CameraRotation = transform.Rotation;
     }
 
-    auto actor_tick_functions = registry_.view<ActorNativeTickable>();
+    auto actorTickFunctionView = m_Registry.view<ActorNativeTickable>();
 
-    float delta_seconds = duration.GetSeconds();
-
-    for (auto&& [entity, tick_function] : actor_tick_functions.each()) {
-        tick_function.ExecuteTick(delta_seconds);
+    for (auto&& [entity, tick_function] : actorTickFunctionView.each())
+    {
+        tick_function.ExecuteTick(duration);
     }
 
-    skeletal_animation_update_task.wait();
+    skeletalAnimationUpdateTask.wait();
 }
 
-void Level::BroadcastRender(Duration duration) {
-    auto static_mesh_view = registry_.view<TransformComponent, StaticMeshComponent>();
+void Level::BroadcastRender()
+{
+    auto directionalLightView = m_Registry.view<DirectionalLightComponent, TransformComponent>();
 
-    auto directional_light_view = registry_.view<DirectionalLightComponent, TransformComponent>();
+    for (auto&& [entity, directionalLight, transform] : directionalLightView.each())
+    {
+        glm::vec3 transformedDirection = transform.Rotation * directionalLight.Direction;
 
-    for (auto&& [entity, directional_light, transform] : directional_light_view.each()) {
-        glm::vec3 transformed_direction = transform.rotation * directional_light.direction;
+        LightData lightData{transform.Position, 1.0f, transformedDirection,
+            1.0f, directionalLight.Color, 0.0f, LightType::Directional, 0.0f, 1.0f};
 
-        LightData light_data{transform.position, 1.0f, transformed_direction,
-            1.0f, directional_light.color, 0.0f, LightType::Directional, 0.0f, 1.0f};
-
-        Renderer::AddLight(light_data);
+        Renderer::AddLight(lightData);
     }
 
-    auto point_light_view = registry_.view<PointLightComponent, TransformComponent>();
+    auto pointLightView = m_Registry.view<PointLightComponent, TransformComponent>();
 
-    for (auto&& [entity, point_light, transform] : point_light_view.each()) {
-        glm::vec3 transformed_direction = transform.rotation * point_light.direction;
+    for (auto&& [entity, pointLight, transform] : pointLightView.each())
+    {
+        glm::vec3 transformedDirection = transform.Rotation * pointLight.Direction;
 
-        LightData light_data{transform.position, 1.0f, transformed_direction,
-            1.0f, point_light.color, point_light.direction_length, LightType::Point, 0.0f, point_light.intensity};
-        Renderer::AddLight(light_data);
+        LightData lightData{transform.Position, 1.0f, transformedDirection,
+            1.0f, pointLight.Color, pointLight.DirectionLength, LightType::Point, 0.0f, pointLight.Intensity};
+        Renderer::AddLight(lightData);
     }
 
-    auto spot_light_view = registry_.view<SpotLightComponent, TransformComponent>();
+    auto spot_light_view = m_Registry.view<SpotLightComponent, TransformComponent>();
 
-    for (auto&& [entity, spot_light, transform] : spot_light_view.each()) {
-        glm::vec3 transformed_direction = transform.rotation * spot_light.direction;
+    for (auto&& [entity, spot_light, transform] : spot_light_view.each())
+    {
+        glm::vec3 transformedDirection = transform.Rotation * spot_light.Direction;
 
-        LightData light_data{transform.position, 1.0f, transformed_direction,
-            1.0f, spot_light.color, spot_light.direction_length, LightType::Spot, cosf(glm::radians(spot_light.cut_off_angle)), spot_light.intensity};
-        Renderer::AddLight(light_data);
+        LightData lightData{transform.Position, 1.0f, transformedDirection,
+            1.0f, spot_light.Color, spot_light.DirectionLength, LightType::Spot, cosf(glm::radians(spot_light.CutOffAngle)), spot_light.Intensity};
+        Renderer::AddLight(lightData);
     }
 
-    for (auto&& [entity, transform, staticMesh] : static_mesh_view.each()) {
-        AddNewStaticMesh(staticMesh.mesh_name, transform.GetAsTransform());
+    auto staticMeshView = View<TransformComponent, StaticMeshComponent>();
+    for (auto&& [entity, transform, staticMesh] : staticMeshView.each())
+    {
+        AddNewStaticMesh(staticMesh.MeshName, transform.GetAsTransform());
     }
 
-    for (auto& [name, mesh] : instanced_mesh_) {
+    for (auto& [name, mesh] : m_MeshNameToInstancedMesh)
+    {
         mesh->Draw(glm::mat4{1.0f});
         mesh->Clear();
     }
 
-    auto skeletal_mesh_view = registry_.view<TransformComponent, SkeletalMeshComponent>();
-    for (auto&& [entity, transform, skeletal_mesh] : skeletal_mesh_view.each()) {
-        skeletal_mesh.Draw(transform.GetWorldTransformMatrix());
+    auto skeletalMeshView = m_Registry.view<TransformComponent, SkeletalMeshComponent>();
+    for (auto&& [entity, transform, skeletalMesh] : skeletalMeshView.each())
+    {
+        skeletalMesh.Draw(transform.GetWorldTransformMatrix());
     }
 
-    auto instanced_mesh_component = registry_.view<TransformComponent, InstancedMeshComponent>();
-    for (auto&& [entity, transform, staticMesh] : instanced_mesh_component.each()) {
+    auto instancedMeshComponentView = m_Registry.view<TransformComponent, InstancedMeshComponent>();
+    for (auto&& [entity, transform, staticMesh] : instancedMeshComponentView.each())
+    {
         staticMesh.Draw(transform.GetWorldTransformMatrix());
     }
 }
 
-void Level::AddNewStaticMesh(const std::string& mesh_name, const Transform& transform) {
-    auto it = instanced_mesh_.find(mesh_name);
+void Level::AddNewStaticMesh(const std::string& meshName, const Transform& transform)
+{
+    auto it = m_MeshNameToInstancedMesh.find(meshName);
 
-    if (it == instanced_mesh_.end()) {
-        it = instanced_mesh_.try_emplace(mesh_name, std::make_shared<InstancedMesh>(ResourceManager::GetStaticMesh(mesh_name),
+    if (it == m_MeshNameToInstancedMesh.end())
+    {
+        it = m_MeshNameToInstancedMesh.try_emplace(meshName, std::make_shared<InstancedMesh>(ResourceManager::GetStaticMesh(meshName),
             ResourceManager::GetMaterial("instanced"))).first;
     }
 
     auto& mesh = it->second->GetMesh();
 
-    if (Renderer::IsVisibleToCamera(transform.position, mesh.GetBBoxMin(), mesh.GetBBoxMax())) {
+    if (Renderer::IsVisibleToCamera(transform.Position, mesh.GetBBoxMin(), mesh.GetBBoxMax()))
+    {
         it->second->AddInstance(transform, 0);
     }
 }
 
 
-bool Level::TryFindActor(const std::string& name, Actor& out_actor) {
-    auto it = actors_.find(name);
+bool Level::TryFindActor(const std::string& name, Actor& outActor)
+{
+    auto it = m_Actors.find(name);
 
-    if (it != actors_.end()) {
-        out_actor = it->second;
+    if (it != m_Actors.end())
+    {
+        outActor = it->second;
         return true;
     }
 
     return false;
 }
 
-const CameraComponent& Level::FindCameraComponent() const {
+const CameraComponent& Level::FindCameraComponent() const
+{
     auto view = View<CameraComponent>();
 
-    return registry_.get<CameraComponent>(view.front());
+    return m_Registry.get<CameraComponent>(view.front());
 }
 
-void Level::UpdateSkeletalMeshesAnimation(Duration duration) {
-    auto skeletal_mesh_view = registry_.view<SkeletalMeshComponent, TransformComponent>();
+void Level::UpdateSkeletalMeshesAnimation(Duration duration)
+{
+    auto skeletalMeshView = m_Registry.view<SkeletalMeshComponent, TransformComponent>();
 
     float seconds = duration.GetSeconds();
 
-    for (auto&& [entity, skeletal_mesh, transform] : skeletal_mesh_view.each()) {
-        skeletal_mesh.UpdateAnimation(seconds, transform.GetAsTransform());
+    for (auto&& [entity, skeletalMesh, transform] : skeletalMeshView.each())
+    {
+        skeletalMesh.UpdateAnimation(seconds, transform.GetAsTransform());
     }
 }

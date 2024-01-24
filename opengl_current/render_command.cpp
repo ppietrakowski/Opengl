@@ -3,141 +3,170 @@
 
 #include <chrono>
 
-static RenderStats render_stats_;
+static RenderStats s_RenderStats;
 static std::chrono::nanoseconds s_StartTimestamp = std::chrono::nanoseconds::zero();
-RendererApi RenderCommand::renderer_api_{};
+RendererApi RenderCommand::s_RendererApi{};
 static bool s_bRenderCommandInitialized = false;
 
-static FORCE_INLINE int GetNumIndices(int num_indices, const VertexArray& vertex_array) {
-    return num_indices == 0 ? vertex_array.GetNumIndices() : num_indices;
+static FORCE_INLINE int GetNumIndices(int numIndices, const VertexArray& vertexArray)
+{
+    return numIndices == 0 ? vertexArray.GetNumIndices() : numIndices;
 }
 
-void RenderCommand::Initialize() {
-    renderer_api_.Initialize();
+void RenderCommand::Initialize()
+{
+    s_RendererApi.Initialize();
     s_bRenderCommandInitialized = true;
 }
 
-void RenderCommand::Quit() {
+void RenderCommand::Quit()
+{
     s_bRenderCommandInitialized = false;
 }
 
-void RenderCommand::ClearBufferBindings_Debug() {
+void RenderCommand::ClearBufferBindings_Debug()
+{
     ASSERT(s_bRenderCommandInitialized);
-    renderer_api_.ClearBufferBindings_Debug();
+    s_RendererApi.ClearBufferBindings_Debug();
 }
 
-void RenderCommand::DrawTriangles(const VertexArray& vertex_array, int num_indices) {
+void RenderCommand::DrawTriangles(const VertexArray& vertexArray, int numIndices)
+{
     ASSERT(s_bRenderCommandInitialized);
-    renderer_api_.DrawTriangles(vertex_array, GetNumIndices(num_indices, vertex_array));
-    render_stats_.num_drawcalls++;
+    s_RendererApi.DrawTriangles(vertexArray, GetNumIndices(numIndices, vertexArray));
+    s_RenderStats.NumDrawcalls++;
 }
 
-void RenderCommand::DrawTrianglesArrays(const VertexArray& vertex_array, int num_vertices) {
-    renderer_api_.DrawTrianglesArrays(vertex_array, num_vertices);
-    render_stats_.num_drawcalls++;
+void RenderCommand::DrawTrianglesArrays(const VertexArray& vertexArray, int numVertices)
+{
+    s_RendererApi.DrawTrianglesArrays(vertexArray, numVertices);
+    s_RenderStats.NumDrawcalls++;
 }
 
-void RenderCommand::DrawTrianglesAdjancency(const VertexArray& vertex_array, int num_indices) {
-    ASSERT(s_bRenderCommandInitialized);
-
-    renderer_api_.DrawTrianglesAdjancency(vertex_array, GetNumIndices(num_indices, vertex_array));
-    render_stats_.num_drawcalls++;
-}
-void RenderCommand::DrawLines(const VertexArray& vertex_array, int num_indices) {
+void RenderCommand::DrawTrianglesAdjancency(const VertexArray& vertexArray, int numIndices)
+{
     ASSERT(s_bRenderCommandInitialized);
 
-    renderer_api_.DrawLines(vertex_array, GetNumIndices(num_indices, vertex_array));
-    render_stats_.num_drawcalls++;
+    s_RendererApi.DrawTrianglesAdjancency(vertexArray, GetNumIndices(numIndices, vertexArray));
+    s_RenderStats.NumDrawcalls++;
 }
-void RenderCommand::DrawPoints(const VertexArray& vertex_array, int num_indices) {
+void RenderCommand::DrawLines(const VertexArray& vertexArray, int numIndices)
+{
     ASSERT(s_bRenderCommandInitialized);
 
-    renderer_api_.DrawPoints(vertex_array, GetNumIndices(num_indices, vertex_array));
-    render_stats_.num_drawcalls++;
+    s_RendererApi.DrawLines(vertexArray, GetNumIndices(numIndices, vertexArray));
+    s_RenderStats.NumDrawcalls++;
 }
-
-void RenderCommand::BeginScene() {
+void RenderCommand::DrawPoints(const VertexArray& vertexArray, int numIndices)
+{
     ASSERT(s_bRenderCommandInitialized);
 
-    render_stats_.num_drawcalls = 0;
+    s_RendererApi.DrawPoints(vertexArray, GetNumIndices(numIndices, vertexArray));
+    s_RenderStats.NumDrawcalls++;
 }
 
-void RenderCommand::EndScene() {
+void RenderCommand::BeginScene()
+{
+    ASSERT(s_bRenderCommandInitialized);
+
+    s_RenderStats.NumDrawcalls = 0;
+}
+
+void RenderCommand::EndScene()
+{
     auto now = std::chrono::system_clock::now().time_since_epoch();
-    render_stats_.delta_frame_time = (now - s_StartTimestamp).count();
+    s_RenderStats.DeltaFrameTime = (now - s_StartTimestamp).count();
     s_StartTimestamp = now;
 }
 
-void RenderCommand::SetClearColor(const RgbaColor& clear_color) {
-    renderer_api_.SetClearColor(clear_color);
+void RenderCommand::SetClearColor(const RgbaColor& clearColor)
+{
+    s_RendererApi.SetClearColor(clearColor);
 }
 
-void RenderCommand::Clear() {
-    renderer_api_.Clear();
+void RenderCommand::Clear()
+{
+    s_RendererApi.Clear();
 }
 
-void RenderCommand::SetWireframe(bool wireframe_enabled) {
-    renderer_api_.SetWireframe(wireframe_enabled);
+void RenderCommand::SetWireframe(bool bWireframeEnabled)
+{
+    s_RendererApi.SetWireframe(bWireframeEnabled);
 }
 
-bool RenderCommand::IsWireframeEnabled() {
-    return renderer_api_.IsWireframeEnabled();
+bool RenderCommand::IsWireframeEnabled()
+{
+    return s_RendererApi.IsWireframeEnabled();
 }
 
-void RenderCommand::SetCullFace(bool cull_faces) {
-    renderer_api_.SetCullFace(cull_faces);
+void RenderCommand::SetCullFace(bool bCullFaces)
+{
+    s_RendererApi.SetCullFace(bCullFaces);
 }
 
-void RenderCommand::UpdateCullFace(bool use_clockwise) {
-    renderer_api_.UpdateCullFace(use_clockwise);
+void RenderCommand::UpdateCullFace(bool bUseClockwise)
+{
+    s_RendererApi.UpdateCullFace(bUseClockwise);
 }
 
-bool RenderCommand::DoesCullFaces() {
-    return renderer_api_.DoesCullFaces();
+bool RenderCommand::DoesCullFaces()
+{
+    return s_RendererApi.DoesCullFaces();
 }
 
-void RenderCommand::SetBlendingEnabled(bool blending_enabled) {
-    renderer_api_.SetBlendingEnabled(blending_enabled);
+void RenderCommand::SetBlendingEnabled(bool bBlendingEnabled)
+{
+    s_RendererApi.SetBlendingEnabled(bBlendingEnabled);
 }
 
-void RenderCommand::SetLineWidth(float lineWidth) {
-    renderer_api_.SetLineWidth(lineWidth);
+void RenderCommand::SetLineWidth(float lineWidth)
+{
+    s_RendererApi.SetLineWidth(lineWidth);
 }
 
-void RenderCommand::SetViewport(int x, int y, int width, int height) {
-    renderer_api_.SetViewport(x, y, width, height);
+void RenderCommand::SetViewport(int x, int y, int width, int height)
+{
+    s_RendererApi.SetViewport(x, y, width, height);
 }
 
-RenderStats RenderCommand::GetRenderStats() {
-    return render_stats_;
+RenderStats RenderCommand::GetRenderStats()
+{
+    return s_RenderStats;
 }
 
-void RenderCommand::NotifyIndexBufferCreated(int buffer_size) {
-    render_stats_.index_bufer_memory_allocation += buffer_size;
+void RenderCommand::NotifyIndexBufferCreated(int bufferSize)
+{
+    s_RenderStats.IndexBufferMemoryAllocation += bufferSize;
 }
 
-void RenderCommand::NotifyIndexBufferDestroyed(int buffer_size) {
-    render_stats_.index_bufer_memory_allocation -= buffer_size;
+void RenderCommand::NotifyIndexBufferDestroyed(int bufferSize)
+{
+    s_RenderStats.IndexBufferMemoryAllocation -= bufferSize;
 }
 
-void RenderCommand::NotifyVertexBufferCreated(int buffer_size) {
-    render_stats_.vertex_buffer_memory_allocation += buffer_size;
+void RenderCommand::NotifyVertexBufferCreated(int bufferSize)
+{
+    s_RenderStats.VertexBufferMemoryAllocation += bufferSize;
 }
 
-void RenderCommand::NotifyVertexBufferDestroyed(int buffer_size) {
-    render_stats_.vertex_buffer_memory_allocation -= buffer_size;
+void RenderCommand::NotifyVertexBufferDestroyed(int bufferSize)
+{
+    s_RenderStats.VertexBufferMemoryAllocation -= bufferSize;
 }
 
-void RenderCommand::DrawTrianglesInstanced(const VertexArray& vertex_array, int num_instances) {
-    renderer_api_.DrawTrianglesInstanced(vertex_array, num_instances);
-    render_stats_.num_drawcalls++;
+void RenderCommand::DrawTrianglesInstanced(const VertexArray& vertexArray, int numInstances)
+{
+    s_RendererApi.DrawTrianglesInstanced(vertexArray, numInstances);
+    s_RenderStats.NumDrawcalls++;
 }
 
-void RenderCommand::SetDepthFunc(DepthFunction depth_function) {
-    renderer_api_.SetDepthFunc(depth_function);
+void RenderCommand::SetDepthFunc(DepthFunction depthFunction)
+{
+    s_RendererApi.SetDepthFunc(depthFunction);
 }
 
 
-void RenderCommand::SetDepthEnabled(bool enabled) {
-    renderer_api_.SetDepthEnabled(enabled);
+void RenderCommand::SetDepthEnabled(bool bEnabled)
+{
+    s_RendererApi.SetDepthEnabled(bEnabled);
 }

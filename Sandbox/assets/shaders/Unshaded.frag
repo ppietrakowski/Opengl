@@ -7,10 +7,10 @@ struct Material
 
 uniform Material u_material;
 
-in vec4 color;
+in vec4 Color;
 out vec4 frag_color;
 
 void main()
 {
-    frag_color = color;
+    frag_color = Color;
 }

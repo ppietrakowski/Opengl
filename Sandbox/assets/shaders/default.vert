@@ -9,15 +9,15 @@ uniform mat4 u_projection_view;
 uniform mat4 u_transform;
 uniform mat3 u_normal_transform;
 
-out vec2 texture_coords;
+out vec2 textureCoords;
 out vec3 frag_pos_ws;
 out vec3 normal;
-out flat uint texture_id;
+out flat uint textureId;
 
 void main() {
     frag_pos_ws = vec3(u_transform * vec4(a_position, 1));
     gl_Position = u_projection_view * vec4(frag_pos_ws, 1);
-    texture_coords = a_texture_coords;
+    textureCoords = a_texture_coords;
     normal = u_normal_transform * a_normal;
-    texture_id = a_texture_id;
+    textureId = a_texture_id;
 }  

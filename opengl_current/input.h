@@ -6,7 +6,8 @@
 
 struct GLFWwindow;
 
-class Input {
+class Input
+{
 public:
     Input(GLFWwindow* window);
     ~Input() = default;
@@ -20,14 +21,14 @@ public:
     static float GetMouseX();
     static float GetMouseY();
 
-    void Update(const GlfwWindowData& window_data);
+    void Update(const GlfwWindowData& windowData);
 
 private:
-    static Input* instance_;
+    static Input* s_Instance;
 
 private:
-    GLFWwindow* window_;
-    glm::vec2 mouse_position_;
+    GLFWwindow* m_Window;
+    glm::vec2 m_MousePosition;
 
 private:
     bool IsKeyPressedImpl(KeyCode key);

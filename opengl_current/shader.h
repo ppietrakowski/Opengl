@@ -16,52 +16,59 @@
 
 #include "uniform_buffer.h"
 
-enum class UniformType {
-    kUndefined,
-    kVec4,
-    kVec3,
-    kVec2,
-    kFloat,
-    kInt,
-    kIvec2,
-    kIvec3,
-    kMat4x4,
-    kMat3x3,
-    kBoolean,
-    kSampler2D,
+enum class UniformType : uint8_t
+{
+    Undefined,
+    Vec4,
+    Vec3,
+    Vec2,
+    Float,
+    Int,
+    Ivec2,
+    Ivec3,
+    Mat4x4,
+    Mat3x3,
+    Boolean,
+    Sampler2D,
 };
 
-struct UniformInfo {
-    UniformType uniform_type;
-    std::string name;
-    int location;
-    int array_size{1};
+struct UniformInfo
+{
+    UniformType Type;
+    std::string Name;
+    int Location;
+    int ArraySize{1};
 };
 
-struct ShaderCompilationFailedException : public std::runtime_error {
-    ShaderCompilationFailedException(const char* error_message);
+struct ShaderCompilationFailedException : public std::runtime_error
+{
+    ShaderCompilationFailedException(const char* errorMessage);
 };
 
-struct ShaderProgramLinkingFailedException : public std::runtime_error {
-    ShaderProgramLinkingFailedException(const char* error_message);
+struct ShaderProgramLinkingFailedException : public std::runtime_error
+{
+    ShaderProgramLinkingFailedException(const char* errorMessage);
 };
 
-struct ShaderIndex {
-    enum IndexType {
-        kVertex = 0,
-        kFragment,
-        kGeometry,
-        kTesselationControlShader,
-        kTesselationEvaluateShader,
-        kCount
+struct ShaderIndex
+{
+    enum IndexType
+    {
+        Vertex = 0,
+        Fragment,
+        Geometry,
+        TesselationControlShader,
+        TesselationEvaluateShader,
+        Count
     };
 };
 
 class Texture;
 
-static constexpr int kMinTextureUnits = 16;
+static constexpr int MinTextureUnits = 32;
 
-class Shader {
+class Shader
+{
 public:
     Shader(std::span<const std::string> sources);
     ~Shader();
@@ -88,19 +95,20 @@ public:
     glm::vec4 GetUniformVec4(const char* name) const;
 
     std::vector<UniformInfo> GetUniformsInfo() const;
-    void SetSamplerUniform(const char* uniform_name, const std::shared_ptr<Texture>& textures, uint32_t start_texture_unit = 0);
-    void SetSamplersUniform(const char* uniform_name, std::span<const std::shared_ptr<Texture>> textures, uint32_t start_texture_unit = 0);
+    void SetSamplerUniform(const char* uniformName, const std::shared_ptr<Texture>& textures, uint32_t startTextureUnit = 0);
+    void SetSamplersUniform(const char* uniformName, std::span<const std::shared_ptr<Texture>> textures, uint32_t startTextureUnit = 0);
 
-    void BindUniformBuffer(int block_index, const UniformBuffer& buffer);
+    void BindUniformBuffer(int blockIndex, const UniformBuffer& buffer);
     int GetUniformBlockIndex(const std::string& name) const;
 
-    uint32_t GetOpenGlIdentifier() const {
-        return shader_program_;
+    uint32_t GetOpenGlIdentifier() const
+    {
+        return m_ShaderProgram;
     }
 
 private:
-    uint32_t shader_program_{0};
-    mutable std::unordered_map<std::string, int> uniform_name_to_location_;
+    uint32_t m_ShaderProgram{0};
+    mutable std::unordered_map<std::string, int> m_UniformNameToLocation;
 
 private:
     Shader() = default;
@@ -109,16 +117,16 @@ private:
     void GenerateShaders(std::span<std::string_view> sources);
     void GenerateShaders(std::span<const std::string> sources);
 
-    int GetUniformLocation(const char* uniform_name) const;
-    void AddNewUniformInfo(std::vector<UniformInfo>& out_uniforms_info, int location) const;
+    int GetUniformLocation(const char* uniformName) const;
+    void AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, int location) const;
 };
 
-inline ShaderCompilationFailedException::ShaderCompilationFailedException(const char* error_message) :
-    std::runtime_error{error_message}
+inline ShaderCompilationFailedException::ShaderCompilationFailedException(const char* errorMessage) :
+    std::runtime_error{errorMessage}
 {
 }
 
-inline ShaderProgramLinkingFailedException::ShaderProgramLinkingFailedException(const char* error_message) :
-    std::runtime_error{error_message}
+inline ShaderProgramLinkingFailedException::ShaderProgramLinkingFailedException(const char* errorMessage) :
+    std::runtime_error{errorMessage}
 {
 }

@@ -6,23 +6,27 @@
 #include <glm/glm.hpp>
 
 
-struct DebugVertex {
+struct DebugVertex
+{
     glm::vec3 Position;
 
-    // Packed color to minimize size of updated data
+    // Packed Color to minimize size of updated data
     RgbaColor Color;
 };
 
 template<>
-struct BatchVertexCreator<DebugVertex> {
-    static DebugVertex CreateInstanceFrom(const DebugVertex& vertex, const glm::mat4& transform) {
+struct BatchVertexCreator<DebugVertex>
+{
+    static DebugVertex CreateInstanceFrom(const DebugVertex& vertex, const glm::mat4& transform)
+    {
         DebugVertex v{vertex};
         v.Position = transform * glm::vec4{v.Position,1};
         return v;
     }
 };
 
-class DebugRenderBatch {
+class DebugRenderBatch
+{
 public:
     DebugRenderBatch(std::shared_ptr<Shader> shader);
 
@@ -32,7 +36,7 @@ public:
     void AddLineInstance(const Line& line, const Transform& transform, const glm::vec4& color);
 
 private:
-    BatchBase<DebugVertex> batch_base_;
-    std::shared_ptr<Material> material_;
+    BatchBase<DebugVertex> m_BatchBase;
+    std::unique_ptr<Material> m_Material;
 };
 

@@ -17,7 +17,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <functional>
 
-class Game {
+class Game
+{
 public:
     Game(const WindowSettings& settings);
     ~Game();
@@ -28,20 +29,20 @@ public:
     bool IsRunning() const;
     void Quit();
 
-    void SetMouseVisible(bool mouse_visible);
+    void SetMouseVisible(bool bMouseVisible);
 
-    void AddLayer(std::unique_ptr<Layer>&& game_layer);
+    void AddLayer(std::unique_ptr<Layer>&& gameLayer);
     void RemoveLayer(std::type_index index);
 
-    bool IsMouseVisible() const {
-        return window_->IsMouseVisible();
+    bool IsMouseVisible() const
+    {
+        return m_Window->IsMouseVisible();
     }
 
 private:
-    std::unique_ptr<Window> window_;
-    GraphicsContext* graphics_context_;
-    ImGuiContext* imgui_context_;
-    std::vector<std::unique_ptr<Layer>> layers_;
+    std::unique_ptr<Window> m_Window;
+    ImGuiContext* m_ImguiContext;
+    std::vector<std::unique_ptr<Layer>> m_Layers;
 
 private:
     bool InitializeImGui();
@@ -49,8 +50,3 @@ private:
 
     void BindWindowEvents();
 };
-
-inline std::chrono::nanoseconds GetNow() {
-    using std::chrono::system_clock;
-    return system_clock::now().time_since_epoch();
-}

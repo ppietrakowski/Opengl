@@ -11,8 +11,8 @@ public:
     SandboxGameLayer(Game *game);
 
     // Inherited via IGameLayer
-    void Update(Duration delta_time) override;
-    void Render(Duration delta_time) override;
+    void Update(Duration deltaTime) override;
+    void Render() override;
     bool OnEvent(const Event& event) override;
     void OnImguiFrame() override;
 
@@ -60,7 +60,7 @@ private:
 
     void CreateSkeletalActors();
 
-    Actor CreateInstancedMeshActor(const std::string& file_path, const std::shared_ptr<Material>& material);
+    Actor CreateInstancedMeshActor(const std::string& filePath, const std::shared_ptr<Material>& material);
     void PlaceLightsAndPlayer();
 };
 

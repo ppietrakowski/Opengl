@@ -2,50 +2,60 @@
 
 #include <GLFW/glfw3.h>
 
-Input* Input::instance_ = nullptr;
+Input* Input::s_Instance = nullptr;
 
 Input::Input(GLFWwindow* window) :
-    window_{window} {
+    m_Window{window}
+{
     double x, y;
     glfwGetCursorPos(window, &x, &y);
-    mouse_position_ = {(float)x, (float)y};
-    instance_ = this;
+    m_MousePosition = {(float)x, (float)y};
+    s_Instance = this;
 }
 
-bool Input::IsKeyPressedImpl(KeyCode key) {
-    int state = glfwGetKey(window_, key);
+bool Input::IsKeyPressedImpl(KeyCode key)
+{
+    int state = glfwGetKey(m_Window, key);
     return state == GLFW_PRESS;
 }
 
-bool Input::IsMouseButtonPressedImpl(MouseButton button) {
-    int state = glfwGetMouseButton(window_, button);
+bool Input::IsMouseButtonPressedImpl(MouseButton button)
+{
+    int state = glfwGetMouseButton(m_Window, button);
     return state == GLFW_PRESS;
 }
 
-glm::vec2 Input::GetMousePositionImpl() const {
-    return mouse_position_;
+glm::vec2 Input::GetMousePositionImpl() const
+{
+    return m_MousePosition;
 }
 
-void Input::Update(const GlfwWindowData& window_data) {
-    mouse_position_ = window_data.mouse_position;
+void Input::Update(const GlfwWindowData& windowData)
+{
+    m_MousePosition = windowData.MousePosition;
 }
 
-bool Input::IsKeyPressed(KeyCode key) {
-    return instance_->IsKeyPressedImpl(key);
+bool Input::IsKeyPressed(KeyCode key)
+{
+    return s_Instance->IsKeyPressedImpl(key);
 }
 
-bool Input::IsMouseButtonPressed(MouseButton button) {
-    return instance_->IsMouseButtonPressedImpl(button);
+bool Input::IsMouseButtonPressed(MouseButton button)
+{
+    return s_Instance->IsMouseButtonPressedImpl(button);
 }
 
-glm::vec2 Input::GetMousePosition() {
-    return instance_->GetMousePositionImpl();
+glm::vec2 Input::GetMousePosition()
+{
+    return s_Instance->GetMousePositionImpl();
 }
 
-float Input::GetMouseX() {
-    return instance_->GetMousePositionImpl().x;
+float Input::GetMouseX()
+{
+    return s_Instance->GetMousePositionImpl().x;
 }
 
-float Input::GetMouseY() {
-    return instance_->GetMousePositionImpl().y;
+float Input::GetMouseY()
+{
+    return s_Instance->GetMousePositionImpl().y;
 }

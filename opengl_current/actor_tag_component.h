@@ -2,7 +2,8 @@
 
 #include <string>
 
-struct ActorTagComponent {
-    std::string name;
-    std::string tag{"Default"};
+struct ActorTagComponent
+{
+    std::string Name;
+    std::string Tag{"Default"};
 };

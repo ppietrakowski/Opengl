@@ -6,11 +6,11 @@ layout (location = 3) in ivec4 a_bone_ids;
 layout (location = 4) in vec4 a_bone_weights;
 layout (location = 5) in uint a_texture_id;
 
-out vec2 texture_coords;
+out vec2 textureCoords;
 out vec3 normal;
 out vec3 frag_pos_ws;
 
-out flat uint texture_id;
+out flat uint textureId;
 
 uniform mat4 u_bone_transforms[200];
 uniform mat4 u_projection_view;
@@ -31,7 +31,7 @@ void main() {
 	gl_Position = u_projection_view * u_transform * pos;
 	frag_pos_ws = vec3(u_transform * bone_transform * pos);
 
-	texture_coords = a_texture_coords;
+	textureCoords = a_texture_coords;
 	normal = normalize(mat3(transpose(inverse(u_transform * bone_transform))) * a_normal);
-	texture_id = a_texture_id;
+	textureId = a_texture_id;
 }

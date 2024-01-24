@@ -14,28 +14,31 @@ DECLARE_LOG_CATEGORY(GLOBAL);
 
 
 #define ELOG(level, category, Format, ...) ::Logging::Log(LogInfo{CURRENT_SOURCE_LOCATION, category.GetName(), level, FormatString(Format ,__VA_ARGS__)})
-#define ELOG_INFO(category, Format, ...) ELOG(LogLevel::kInfo, category, Format, __VA_ARGS__)
-#define ELOG_WARNING(category, Format, ...) ELOG(LogLevel::kWarning, category, Format, __VA_ARGS__)
-#define ELOG_ERROR(category, Format, ...) ELOG(LogLevel::kError, category, Format, __VA_ARGS__)
-#define ELOG_DEBUG(category, Format, ...) ELOG(LogLevel::kDebug, category, Format, __VA_ARGS__)
-#define ELOG_VERBOSE(category, Format, ...) ELOG(LogLevel::kVerbose, category, Format, __VA_ARGS__)
+#define ELOG_INFO(category, Format, ...) ELOG(LogLevel::Info, category, Format, __VA_ARGS__)
+#define ELOG_WARNING(category, Format, ...) ELOG(LogLevel::Warning, category, Format, __VA_ARGS__)
+#define ELOG_ERROR(category, Format, ...) ELOG(LogLevel::Error, category, Format, __VA_ARGS__)
+#define ELOG_DEBUG(category, Format, ...) ELOG(LogLevel::Debug, category, Format, __VA_ARGS__)
+#define ELOG_VERBOSE(category, Format, ...) ELOG(LogLevel::Verbose, category, Format, __VA_ARGS__)
 
-enum class LogLevel {
-    kInfo = 1,
-    kWarning = 1 << 1,
-    kError = 1 << 2,
-    kDebug = 1 << 3,
-    kVerbose = 1 << 4
+enum class LogLevel
+{
+    Info = 1,
+    Warning = 1 << 1,
+    Error = 1 << 2,
+    Debug = 1 << 3,
+    Verbose = 1 << 4
 };
 
-struct LogInfo {
-    SourceLocation source_location;
-    const char* category_name;
-    LogLevel log_level;
-    std::string message;
+struct LogInfo
+{
+    SourceLocation CodeLocation;
+    const char* CategoryName;
+    LogLevel Level;
+    std::string Message;
 };
 
-class LogDevice {
+class LogDevice
+{
 public:
     virtual ~LogDevice() = default;
 
@@ -47,7 +50,8 @@ std::string FormatString(const char* format, ...);
 
 using LogDeviceID = int16_t;
 
-class Logging {
+class Logging
+{
 public:
     static void Initialize();
     static void Quit();
@@ -63,7 +67,7 @@ public:
     static void EnableStdLogging();
 
 private:
-    static int ignored_log_levels_;
+    static int s_IgnoredLogLevels;
 
 private:
     static void SortLogDeviceIDs();

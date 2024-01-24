@@ -2,46 +2,55 @@
 #include <fstream>
 #include <sstream>
 
-std::vector<std::string> SplitString(const std::string& string, std::string_view delimiter) {
+#include <cassert>
+#include <array>
+
+std::vector<std::string> SplitString(const std::string& string, std::string_view delimiter)
+{
     std::vector<std::string> tokens;
-    size_t start_offset = 0;
-    size_t delimiter_pos = string.find(delimiter, start_offset);
+    size_t startOffset = 0;
+    size_t delimiterPos = string.find(delimiter, startOffset);
 
-    while (delimiter_pos != std::string::npos) {
-        tokens.emplace_back(string.substr(start_offset, delimiter_pos - start_offset));
+    while (delimiterPos != std::string::npos)
+    {
+        tokens.emplace_back(string.substr(startOffset, delimiterPos - startOffset));
 
-        start_offset = delimiter_pos + delimiter.length();
-        delimiter_pos = string.find(delimiter, start_offset);
+        startOffset = delimiterPos + delimiter.length();
+        delimiterPos = string.find(delimiter, startOffset);
     }
 
-    tokens.emplace_back(string.substr(start_offset));
+    tokens.emplace_back(string.substr(startOffset));
     return tokens;
 }
 
-std::string LoadFileContent(const std::filesystem::path& file_path) {
-    std::ifstream file(file_path.string());
+std::string LoadFileContent(const std::filesystem::path& filePath)
+{
+    std::ifstream file(filePath.string());
     file.exceptions(std::ios::failbit | std::ios::badbit);
     std::ostringstream content;
     content << file.rdbuf();
     return content.str();
 }
 
-const char* FormatSize(int num_bytes) {
-    static char size[100] = {};
+const char* FormatSize(size_t numBytes)
+{
+    static std::array<char, 100> strSize = {};
     static const char* kUnits[] =
     {
         "B", "KB", "MB", "GB", "TB", "PB"
     };
 
-    float temp = num_bytes;
-    int unit_index = 0;
+    float temp = static_cast<float>(numBytes);
+    size_t unitIndex = 0;
 
-    while (temp > 1024) {
-        ++unit_index;
+    while (temp > 1024)
+    {
+        ++unitIndex;
         temp /= 1024.0f;
     }
 
-    int last_index = sprintf(size, "%.3f %s", temp, kUnits[unit_index]);
-    size[last_index] = 0;
-    return size;
+    int lastIndex = sprintf(strSize.data(), "%.3f %s", temp, kUnits[unitIndex]);
+    assert(lastIndex >= 0 && lastIndex < strSize.size());
+    strSize[lastIndex] = 0;
+    return strSize.data();
 }

@@ -1,14 +1,14 @@
 #include "skybox.h"
 #include "renderer.h"
 
-static glm::vec3 kSkyboxVertices[] = {
+static glm::vec3 SkyboxVertices[] = {
     // positions          
-    glm::vec3{-1.0f,  1.0f, -1.0f}, 
-    glm::vec3{-1.0f, -1.0f, -1.0f}, 
-    glm::vec3{ 1.0f, -1.0f, -1.0f}, 
-    glm::vec3{ 1.0f, -1.0f, -1.0f}, 
-    glm::vec3{ 1.0f,  1.0f, -1.0f}, 
-    glm::vec3{-1.0f,  1.0f, -1.0f}, 
+    glm::vec3{-1.0f,  1.0f, -1.0f},
+    glm::vec3{-1.0f, -1.0f, -1.0f},
+    glm::vec3{ 1.0f, -1.0f, -1.0f},
+    glm::vec3{ 1.0f, -1.0f, -1.0f},
+    glm::vec3{ 1.0f,  1.0f, -1.0f},
+    glm::vec3{-1.0f,  1.0f, -1.0f},
 
     glm::vec3{-1.0f, -1.0f,  1.0f},
     glm::vec3{-1.0f, -1.0f, -1.0f},
@@ -46,39 +46,42 @@ static glm::vec3 kSkyboxVertices[] = {
     glm::vec3{ 1.0f, -1.0f,  1.0f}
 };
 
-Skybox::Skybox(const std::shared_ptr<CubeMap>& cube_map, const std::shared_ptr<Shader>& shader) :
-    cube_map_(cube_map),
-    shader_(shader) {
-    vertex_array_ = std::make_shared<VertexArray>();
 
-    std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(kSkyboxVertices, sizeof(kSkyboxVertices));
+Skybox::Skybox(const std::shared_ptr<CubeMap>& cubeMap, const std::shared_ptr<Shader>& shader) :
+    m_CubeMap(cubeMap),
+    m_Shader(shader)
+{
+    m_VertexArray = std::make_unique<VertexArray>();
 
-    vertex_array_->AddVertexBuffer(buffer, std::array{
-        VertexAttribute{3, PrimitiveVertexType::kFloat}
+    std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(SkyboxVertices, ISIZE_OF(SkyboxVertices));
+
+    m_VertexArray->AddVertexBuffer(buffer, std::array{
+        VertexAttribute{3, PrimitiveVertexType::Float}
         });
 
-    instance = this;
+    s_Instance = this;
 }
 
-void Skybox::Draw() {
+void Skybox::Draw()
+{
     // include depth test passes when values are equal to depth buffer's content
     RenderCommand::SetDepthFunc(DepthFunction::LessEqual);
 
-    shader_->Use();
+    m_Shader->Use();
 
     // cut last column (translation), so the skybox will be rendered as it was in center of camera
-    glm::mat4 view_without_translation = Renderer::view_;
-    view_without_translation[3] = glm::vec4{0, 0, 0, 1};
+    glm::mat4 viewWithoutTranslation = Renderer::s_View;
+    viewWithoutTranslation[3] = glm::vec4{0, 0, 0, 1};
 
-    shader_->SetUniform("u_view", view_without_translation);
-    shader_->SetUniform("u_projection", Renderer::projection_);
-    cube_map_->Bind(0);
-    shader_->SetSamplerUniform("u_skybox_texture", cube_map_, 0);
+    m_Shader->SetUniform("u_view", viewWithoutTranslation);
+    m_Shader->SetUniform("u_projection", Renderer::s_Projection);
+    m_CubeMap->Bind(0);
+    m_Shader->SetSamplerUniform("u_skybox_texture", m_CubeMap, 0);
 
     RenderCommand::SetWireframe(false);
-    RenderCommand::DrawTrianglesArrays(*vertex_array_, ARRAY_NUM_ELEMENTS(kSkyboxVertices));
+    RenderCommand::DrawTrianglesArrays(*m_VertexArray, ARRAY_NUM_ELEMENTS(SkyboxVertices));
 
     // switch back basic depth test
     RenderCommand::SetDepthFunc(DepthFunction::Less);
-    vertex_array_->Unbind();
+    m_VertexArray->Unbind();
 }

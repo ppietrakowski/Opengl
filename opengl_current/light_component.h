@@ -2,23 +2,26 @@
 
 #include "lights.h"
 
-struct DirectionalLightComponent {
-    glm::vec3 direction{0, 1, 0};
-    glm::vec3 color{1, 1, 1};
+struct DirectionalLightComponent
+{
+    glm::vec3 Direction{0, 1, 0};
+    glm::vec3 Color{1, 1, 1};
 };
 
-struct PointLightComponent {
-    glm::vec3 direction{0, 1, 0};
-    float direction_length{0.0f};
+struct PointLightComponent
+{
+    glm::vec3 Direction{0, 1, 0};
+    float DirectionLength{0.0f};
 
-    glm::vec3 color{1, 1, 1};
-    float intensity{1.0f};
+    glm::vec3 Color{1, 1, 1};
+    float Intensity{1.0f};
 };
 
-struct SpotLightComponent {
-    glm::vec3 direction{0, 1, 0};
-    float direction_length{0.0f};
-    glm::vec3 color{1, 1, 1};
-    float cut_off_angle{0.0f};
-    float intensity{1.0f};
+struct SpotLightComponent
+{
+    glm::vec3 Direction{0, 1, 0};
+    float DirectionLength{0.0f};
+    glm::vec3 Color{1, 1, 1};
+    float CutOffAngle{0.0f};
+    float Intensity{1.0f};
 };

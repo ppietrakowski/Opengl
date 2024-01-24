@@ -6,42 +6,45 @@
 #include "event.h"
 
 // Axis simulated by keys
-struct KeyAxis {
-    KeyCode key;
-    KeyCode reverse_key;
+struct KeyAxis
+{
+    KeyCode ForwardKey;
+    KeyCode ReverseKey;
 
     float GetAxisValue() const;
 };
 
-class PlayerController {
+class PlayerController
+{
 public:
     PlayerController(const Actor& actor);
     PlayerController(const PlayerController&) = default;
     PlayerController& operator=(const PlayerController&) = default;
 
-    void BindFireCallback(const std::function<void(Actor& actor)>& fire_callback);
-    void BindForwardCallback(const std::function<void(Actor& actor, float)>& forward_callback);
-    void BindRightCallback(const std::function<void(Actor& actor, float)>& right_callback);
+    void BindFireCallback(const std::function<void(Actor& actor)>& fireCallback);
+    void BindForwardCallback(const std::function<void(Actor& actor, float)>& forwardCallback);
+    void BindRightCallback(const std::function<void(Actor& actor, float)>& rightCallback);
 
-    void BindMouseMoveCallback(const std::function<void(Actor& actor, glm::vec2 delta)>& mouse_move);
+    void BindMouseMoveCallback(const std::function<void(Actor& actor, glm::vec2 delta)>& mouseMove);
 
     void Update();
 
-    const Actor& GetActor() const {
-        return player_actor_;
+    const Actor& GetActor() const
+    {
+        return m_PlayerActor;
     }
 
 private:
-    std::function<void(Actor& actor)> fire_callback_;
-    std::function<void(Actor& actor, float axisValue)> forward_callback_;
-    std::function<void(Actor& actor, float axisValue)> right_callback_;
-    std::function<void(Actor& actor, glm::vec2 delta)> mouse_move_;
+    std::function<void(Actor& actor)> m_FireCallback;
+    std::function<void(Actor& actor, float axisValue)> m_ForwardCallback;
+    std::function<void(Actor& actor, float axisValue)> m_RightCallback;
+    std::function<void(Actor& actor, glm::vec2 delta)> m_MouseMove;
 
-    bool fire_button_last_state_{false};
-    KeyAxis forward_axis_{GLFW_KEY_W, GLFW_KEY_S};
-    KeyAxis right_axis_{GLFW_KEY_D, GLFW_KEY_A};
+    bool m_bFireButtonLastState{false};
+    KeyAxis m_ForwardAxis{GLFW_KEY_W, GLFW_KEY_S};
+    KeyAxis m_RightAxis{GLFW_KEY_D, GLFW_KEY_A};
 
-    glm::vec2 last_mouse_position_{0.0f, 0.0f};
+    glm::vec2 m_LastMousePosition{0.0f, 0.0f};
 
-    Actor player_actor_;
+    Actor m_PlayerActor;
 };

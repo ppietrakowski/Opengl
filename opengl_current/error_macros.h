@@ -4,10 +4,11 @@
 #include <cstdint>
 #include <stdexcept>
 
-struct SourceLocation {
-    const char* file_name;
-    int line;
-    const char* function_name;
+struct SourceLocation
+{
+    const char* FileName;
+    int Line;
+    const char* FunctionName;
 };
 
 #ifdef _MSC_VER
@@ -31,21 +32,21 @@ void PrintError(const SourceLocation* location, const char* message);
     }
 
 #define ERR_FAIL()                                            \
-    SourceLocation source_location = CURRENT_SOURCE_LOCATION; \
-    PrintError(&source_location, "Method/function failed");   \
+    SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION; \
+    PrintError(&sourceLocation, "Method/function failed");   \
     return
 #define ERR_FAIL_V(RetVal)                                    \
-    SourceLocation source_location = CURRENT_SOURCE_LOCATION; \
-    PrintError(&source_location, "Method/function failed");   \
+    SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION; \
+    PrintError(&sourceLocation, "Method/function failed");   \
     return RetVal
 
 #define ERR_FAIL_MSG(Msg)                                     \
-    SourceLocation source_location = CURRENT_SOURCE_LOCATION; \
-    PrintError(&source_location, Msg);                        \
+    SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION; \
+    PrintError(&sourceLocation, Msg);                        \
     return
 #define ERR_FAIL_MSG_V(Msg, RetVal)                           \
-    SourceLocation source_location = CURRENT_SOURCE_LOCATION; \
-    PrintError(&source_location, Msg);                        \
+    SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION; \
+    PrintError(&sourceLocation, Msg);                        \
     return (RetVal)
 
 #define ERR_FAIL_NULL(Param)                                             \
@@ -118,8 +119,8 @@ void PrintError(const SourceLocation* location, const char* message);
 #define CRASH_EXPECTED_TRUE_MSG(Condition, Msg)                   \
     if (!(Condition)) {                                           \
         DEBUG_BREAK();                                            \
-        SourceLocation source_location = CURRENT_SOURCE_LOCATION; \
-        Crash(&source_location, Msg);                             \
+        SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION; \
+        Crash(&sourceLocation, Msg);                             \
     }
 
 #define CRASH_EXPECTED_TRUE(Condition) CRASH_EXPECTED_TRUE_MSG(Condition, "Fatal condition \"" #Condition "\" is false ")
@@ -135,13 +136,13 @@ void PrintError(const SourceLocation* location, const char* message);
 
 #define DO_ONCE(Lambda)            \
     {                                  \
-        static bool done_once = false; \
+        static bool bDoneOnce = false; \
                                        \
-        if (!done_once) {              \
+        if (!bDoneOnce) {              \
             do {                       \
                 Lambda();              \
             } while (0);               \
-            done_once = true;          \
+            bDoneOnce = true;          \
         }                              \
     }
 
@@ -150,8 +151,8 @@ void PrintError(const SourceLocation* location, const char* message);
 #if defined(_DEBUG) || defined(DEBUG)
 #define ASSERT(Condition)                                                            \
     if (!(Condition)) {                                                              \
-        SourceLocation source_location = CURRENT_SOURCE_LOCATION;                    \
-        PrintError(&source_location, "Assertion " #Condition " evaluates to false"); \
+        SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION;                    \
+        PrintError(&sourceLocation, "Assertion " #Condition " evaluates to false"); \
         DEBUG_BREAK();                                                               \
         THROW_ERROR("Fatal condition " #Condition " evaluates to false");            \
     }

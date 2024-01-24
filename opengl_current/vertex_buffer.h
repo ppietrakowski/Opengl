@@ -7,10 +7,11 @@
 
 #include "core.h"
 
-class VertexBuffer {
+class VertexBuffer
+{
 public:
-    VertexBuffer(const void* data, int size_bytes, bool dynamic = false);
-    VertexBuffer(int max_size_bytes);
+    VertexBuffer(const void* data, int sizeBytes, bool bDynamic = false);
+    VertexBuffer(int maxSizeBytes);
     ~VertexBuffer();
 
 public:
@@ -26,18 +27,21 @@ public:
     uint32_t GetOpenGlIdentifier() const;
 
 private:
-    uint32_t renderer_id_;
-    int buffer_size_;
+    uint32_t m_RendererId;
+    int m_BufferSize;
 };
 
-FORCE_INLINE void VertexBuffer::UpdateVertices(const void* buffer, int size) {
+FORCE_INLINE void VertexBuffer::UpdateVertices(const void* buffer, int size)
+{
     UpdateVertices(buffer, 0, size);
 }
 
-FORCE_INLINE int VertexBuffer::GetVerticesSizeBytes() const {
-    return buffer_size_;
+FORCE_INLINE int VertexBuffer::GetVerticesSizeBytes() const
+{
+    return m_BufferSize;
 }
 
-FORCE_INLINE uint32_t VertexBuffer::GetOpenGlIdentifier() const {
-    return renderer_id_;
+FORCE_INLINE uint32_t VertexBuffer::GetOpenGlIdentifier() const
+{
+    return m_RendererId;
 }

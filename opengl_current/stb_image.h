@@ -166,9 +166,9 @@ RECENT REVISION HISTORY:
 //
 //     N=#comp     components
 //       1           grey
-//       2           grey, alpha
-//       3           red, green, blue
-//       4           red, green, blue, alpha
+//       2           grey, Alpha
+//       3           Red, Green, Blue
+//       4           Red, Green, Blue, Alpha
 //
 // If image loading fails for any reason, the return value will be NULL,
 // and *x, *y, *channels_in_file will be unchanged. The function
@@ -288,7 +288,7 @@ RECENT REVISION HISTORY:
 // appropriately).
 //
 // Additionally, there is a new, parallel interface for loading files as
-// (linear) floats to preserve the full dynamic range:
+// (linear) floats to preserve the full bDynamic range:
 //
 //    float *data = stbi_loadf(filename, &x, &y, &n, 0);
 //
@@ -316,7 +316,7 @@ RECENT REVISION HISTORY:
 // stbi_convert_iphone_png_to_rgb(1).
 //
 // Call stbi_set_unpremultiply_on_load(1) as well to force a divide per
-// pixel to remove any premultiplied alpha *only* if the image file explicitly
+// pixel to remove any premultiplied Alpha *only* if the image file explicitly
 // says there's premultiplied data (currently only happens in iPhone images,
 // and only if iPhone convert-to-rgb processing is on).
 //
@@ -539,7 +539,7 @@ extern "C" {
 
 
 
-    // for image formats that explicitly notate that they have premultiplied alpha,
+    // for image formats that explicitly notate that they have premultiplied Alpha,
     // we just return the colors as stored in the file. set this flag to force
     // unpremultiplication. results are undefined if the unpremultiply overflow.
     STBIDEF void stbi_set_unpremultiply_on_load(int32_t flag_true_if_should_unpremultiply);
@@ -1687,8 +1687,8 @@ static uint32_t stbi__get32le(stbi__context* s) {
 //  generic converter from built-in img_n to req_comp
 //    individual types do this automatically as much as possible (e.g. jpeg
 //    does all cases internally since it needs to colorspace convert anyway,
-//    and it never has alpha, so very few cases ). png can automatically
-//    interleave an alpha=255 channel, but falls back to this for other cases
+//    and it never has Alpha, so very few cases ). png can automatically
+//    interleave an Alpha=255 channel, but falls back to this for other cases
 //
 //  assume data buffer is malloced, so malloc a new one and free that one
 //  only failure mode is malloc failing
@@ -1857,7 +1857,7 @@ static float* stbi__ldr_to_hdr(uint8_t* data, int32_t x, int32_t y, int32_t comp
     if (output == NULL) {
         STBI_FREE(data); return stbi__errpf("outofmem", "Out of memory");
     }
-    // compute number of non-alpha components
+    // compute number of non-Alpha components
     if (comp & 1) n = comp; else n = comp - 1;
     for (i = 0; i < x * y; ++i) {
         for (k = 0; k < n; ++k) {
@@ -1884,7 +1884,7 @@ static uint8_t* stbi__hdr_to_ldr(float* data, int32_t x, int32_t y, int32_t comp
     if (output == NULL) {
         STBI_FREE(data); return stbi__errpuc("outofmem", "Out of memory");
     }
-    // compute number of non-alpha components
+    // compute number of non-Alpha components
     if (comp & 1) n = comp; else n = comp - 1;
     for (i = 0; i < x * y; ++i) {
         for (k = 0; k < n; ++k) {
@@ -3147,7 +3147,7 @@ static int32_t stbi__process_marker(stbi__jpeg* z, int32_t m) {
                 stbi__get8(z->s); // version
                 stbi__get16be(z->s); // flags0
                 stbi__get16be(z->s); // flags1
-                z->app14_color_transform = stbi__get8(z->s); // color transform
+                z->app14_color_transform = stbi__get8(z->s); // Color transform
                 L -= 6;
             }
         }
@@ -3633,7 +3633,7 @@ static void stbi__YCbCr_to_RGB_simd(uint8_t* out, uint8_t const* y, uint8_t cons
         __m128i cb_const0 = _mm_set1_epi16(-(short)(0.34414f * 4096.0f + 0.5f));
         __m128i cb_const1 = _mm_set1_epi16((short)(1.77200f * 4096.0f + 0.5f));
         __m128i y_bias = _mm_set1_epi8((char)(uint8_t)128);
-        __m128i xw = _mm_set1_epi16(255); // alpha channel
+        __m128i xw = _mm_set1_epi16(255); // Alpha channel
 
         for (; i + 7 < count; i += 8) {
             // load
@@ -3648,7 +3648,7 @@ static void stbi__YCbCr_to_RGB_simd(uint8_t* out, uint8_t const* y, uint8_t cons
             __m128i crw = _mm_unpacklo_epi8(_mm_setzero_si128(), cr_biased);
             __m128i cbw = _mm_unpacklo_epi8(_mm_setzero_si128(), cb_biased);
 
-            // color transform
+            // Color transform
             __m128i yws = _mm_srli_epi16(yw, 4);
             __m128i cr0 = _mm_mulhi_epi16(cr_const0, crw);
             __m128i cb0 = _mm_mulhi_epi16(cb_const0, cbw);
@@ -3705,7 +3705,7 @@ static void stbi__YCbCr_to_RGB_simd(uint8_t* out, uint8_t const* y, uint8_t cons
             int16x8_t crw = vshll_n_s8(cr_biased, 7);
             int16x8_t cbw = vshll_n_s8(cb_biased, 7);
 
-            // color transform
+            // Color transform
             int16x8_t cr0 = vqdmulhq_s16(crw, cr_const0);
             int16x8_t cb0 = vqdmulhq_s16(cbw, cb_const0);
             int16x8_t cr1 = vqdmulhq_s16(crw, cr_const1);
@@ -3826,7 +3826,7 @@ static uint8_t* load_jpeg_image(stbi__jpeg* z, int32_t* out_x, int32_t* out_y, i
         stbi__cleanup_jpeg(z); return NULL;
     }
 
-    // resample and color-convert
+    // resample and Color-convert
     {
         int32_t k;
         uint32_t i, j;
@@ -3915,7 +3915,7 @@ static uint8_t* load_jpeg_image(stbi__jpeg* z, int32_t* out_x, int32_t* out_y, i
                             out[2] = stbi__blinn_8x8(255 - out[2], m);
                             out += n;
                         }
-                    } else { // YCbCr + alpha?  Ignore the fourth channel for now
+                    } else { // YCbCr + Alpha?  Ignore the fourth channel for now
                         z->YCbCr_to_RGB_kernel(out, y, coutput[1], coutput[2], z->s->img_x, n);
                     }
                 } else
@@ -4563,7 +4563,7 @@ static inline int32_t stbi__paeth(int32_t a, int32_t b, int32_t c) {
 static const uint8_t stbi__depth_scale_table[9] = {0, 0xff, 0x55, 0, 0x11, 0,0,0, 0x01};
 
 // create the png data from post-deflated data
-static int32_t stbi__create_png_image_raw(stbi__png* a, uint8_t* raw, uint32_t raw_len, int32_t out_n, uint32_t x, uint32_t y, int32_t depth, int32_t color) {
+static int32_t stbi__create_png_image_raw(stbi__png* a, uint8_t* raw, uint32_t raw_len, int32_t out_n, uint32_t x, uint32_t y, int32_t depth, int32_t Color) {
     int32_t bytes = (depth == 16 ? 2 : 1);
     stbi__context* s = a->s;
     uint32_t i, j, stride = x * out_n * bytes;
@@ -4701,7 +4701,7 @@ static int32_t stbi__create_png_image_raw(stbi__png* a, uint8_t* raw, uint32_t r
             }
 #undef STBI__CASE
 
-            // the loop above sets the high byte of the pixels' alpha, but for
+            // the loop above sets the high byte of the pixels' Alpha, but for
             // 16 bit png files we also need the low byte set. we'll do that here.
             if (depth == 16) {
                 cur = a->out + stride * j; // start at the beginning of the row again
@@ -4721,7 +4721,7 @@ static int32_t stbi__create_png_image_raw(stbi__png* a, uint8_t* raw, uint32_t r
             uint8_t* in = a->out + stride * j + x * out_n - img_width_bytes;
             // unpack 1/2/4-bit into a 8-bit buffer. allows us to keep the common 8-bit path optimal at minimal cost for 1/2/4-bit
             // png guarante byte alignment, if width is not multiple of 8/4/2 we'll decode dummy trailing data that will be skipped in the later loop
-            uint8_t scale = (color == 0) ? stbi__depth_scale_table[depth] : 1; // scale grayscale values to 0..255 range
+            uint8_t scale = (Color == 0) ? stbi__depth_scale_table[depth] : 1; // scale grayscale values to 0..255 range
 
             // note that the final byte might overshoot and write more data than desired.
             // we can allocate enough data that this never writes out of memory, but it
@@ -4766,7 +4766,7 @@ static int32_t stbi__create_png_image_raw(stbi__png* a, uint8_t* raw, uint32_t r
             }
             if (img_n != out_n) {
                 int32_t q;
-                // insert alpha = 255
+                // insert Alpha = 255
                 cur = a->out + stride * j;
                 if (img_n == 1) {
                     for (q = x - 1; q >= 0; --q) {
@@ -4800,13 +4800,13 @@ static int32_t stbi__create_png_image_raw(stbi__png* a, uint8_t* raw, uint32_t r
     return 1;
 }
 
-static int32_t stbi__create_png_image(stbi__png* a, uint8_t* image_data, uint32_t image_data_len, int32_t out_n, int32_t depth, int32_t color, int32_t interlaced) {
+static int32_t stbi__create_png_image(stbi__png* a, uint8_t* image_data, uint32_t image_data_len, int32_t out_n, int32_t depth, int32_t Color, int32_t interlaced) {
     int32_t bytes = (depth == 16 ? 2 : 1);
     int32_t out_bytes = out_n * bytes;
     uint8_t* final;
     int32_t p;
     if (!interlaced)
-        return stbi__create_png_image_raw(a, image_data, image_data_len, out_n, a->s->img_x, a->s->img_y, depth, color);
+        return stbi__create_png_image_raw(a, image_data, image_data_len, out_n, a->s->img_x, a->s->img_y, depth, Color);
 
     // de-interlacing
     final = (uint8_t*)stbi__malloc_mad3(a->s->img_x, a->s->img_y, out_bytes, 0);
@@ -4822,7 +4822,7 @@ static int32_t stbi__create_png_image(stbi__png* a, uint8_t* image_data, uint32_
         y = (a->s->img_y - yorig[p] + yspc[p] - 1) / yspc[p];
         if (x && y) {
             uint32_t img_len = ((((a->s->img_n * x * depth) + 7) >> 3) + 1) * y;
-            if (!stbi__create_png_image_raw(a, image_data, image_data_len, out_n, x, y, depth, color)) {
+            if (!stbi__create_png_image_raw(a, image_data, image_data_len, out_n, x, y, depth, Color)) {
                 STBI_FREE(final);
                 return 0;
             }
@@ -4849,8 +4849,8 @@ static int32_t stbi__compute_transparency(stbi__png* z, uint8_t tc[3], int32_t o
     uint32_t i, pixel_count = s->img_x * s->img_y;
     uint8_t* p = z->out;
 
-    // compute color-based transparency, assuming we've
-    // already got 255 as the alpha value in the output
+    // compute Color-based transparency, assuming we've
+    // already got 255 as the Alpha value in the output
     STBI_ASSERT(out_n == 2 || out_n == 4);
 
     if (out_n == 2) {
@@ -4873,8 +4873,8 @@ static int32_t stbi__compute_transparency16(stbi__png* z, uint16_t tc[3], int32_
     uint32_t i, pixel_count = s->img_x * s->img_y;
     uint16_t* p = (uint16_t*)z->out;
 
-    // compute color-based transparency, assuming we've
-    // already got 65535 as the alpha value in the output
+    // compute Color-based transparency, assuming we've
+    // already got 65535 as the Alpha value in the output
     STBI_ASSERT(out_n == 2 || out_n == 4);
 
     if (out_n == 2) {
@@ -5013,7 +5013,7 @@ static int32_t stbi__parse_png_file(stbi__png* z, int32_t scan, int32_t req_comp
     uint8_t has_trans = 0, tc[3] = {0};
     uint16_t tc16[3];
     uint32_t ioff = 0, idata_limit = 0, i, pal_len = 0;
-    int32_t first = 1, k, interlace = 0, color = 0, is_iphone = 0;
+    int32_t first = 1, k, interlace = 0, Color = 0, is_iphone = 0;
     stbi__context* s = z->s;
 
     z->expanded = NULL;
@@ -5042,15 +5042,15 @@ static int32_t stbi__parse_png_file(stbi__png* z, int32_t scan, int32_t req_comp
             if (s->img_y > STBI_MAX_DIMENSIONS) return stbi__err("too large", "Very large image (corrupt?)");
             if (s->img_x > STBI_MAX_DIMENSIONS) return stbi__err("too large", "Very large image (corrupt?)");
             z->depth = stbi__get8(s);  if (z->depth != 1 && z->depth != 2 && z->depth != 4 && z->depth != 8 && z->depth != 16)  return stbi__err("1/2/4/8/16-bit only", "PNG not supported: 1/2/4/8/16-bit only");
-            color = stbi__get8(s);  if (color > 6)         return stbi__err("bad ctype", "Corrupt PNG");
-            if (color == 3 && z->depth == 16)                  return stbi__err("bad ctype", "Corrupt PNG");
-            if (color == 3) pal_img_n = 3; else if (color & 1) return stbi__err("bad ctype", "Corrupt PNG");
+            Color = stbi__get8(s);  if (Color > 6)         return stbi__err("bad ctype", "Corrupt PNG");
+            if (Color == 3 && z->depth == 16)                  return stbi__err("bad ctype", "Corrupt PNG");
+            if (Color == 3) pal_img_n = 3; else if (Color & 1) return stbi__err("bad ctype", "Corrupt PNG");
             comp = stbi__get8(s);  if (comp) return stbi__err("bad comp method", "Corrupt PNG");
             filter = stbi__get8(s);  if (filter) return stbi__err("bad filter method", "Corrupt PNG");
             interlace = stbi__get8(s); if (interlace > 1) return stbi__err("bad interlace method", "Corrupt PNG");
             if (!s->img_x || !s->img_y) return stbi__err("0-pixel image", "Corrupt PNG");
             if (!pal_img_n) {
-                s->img_n = (color & 2 ? 3 : 1) + (color & 4 ? 1 : 0);
+                s->img_n = (Color & 2 ? 3 : 1) + (Color & 4 ? 1 : 0);
                 if ((1 << 30) / s->img_x / s->img_n < s->img_y) return stbi__err("too large", "Image too large to decode");
                 if (scan == STBI__SCAN_header) return 1;
             } else {
@@ -5143,7 +5143,7 @@ static int32_t stbi__parse_png_file(stbi__png* z, int32_t scan, int32_t req_comp
                 s->img_out_n = s->img_n + 1;
             else
                 s->img_out_n = s->img_n;
-            if (!stbi__create_png_image(z, z->expanded, raw_len, s->img_out_n, z->depth, color, interlace)) return 0;
+            if (!stbi__create_png_image(z, z->expanded, raw_len, s->img_out_n, z->depth, Color, interlace)) return 0;
             if (has_trans) {
                 if (z->depth == 16) {
                     if (!stbi__compute_transparency16(z, tc16, s->img_out_n)) return 0;
@@ -5161,7 +5161,7 @@ static int32_t stbi__parse_png_file(stbi__png* z, int32_t scan, int32_t req_comp
                 if (!stbi__expand_png_palette(z, palette, pal_len, s->img_out_n))
                     return 0;
             } else if (has_trans) {
-                // non-paletted image with tRNS -> source image has (constant) alpha
+                // non-paletted image with tRNS -> source image has (constant) Alpha
                 ++s->img_n;
             }
             STBI_FREE(z->expanded); z->expanded = NULL;
@@ -5201,7 +5201,7 @@ static void* stbi__do_png(stbi__png* p, int32_t* x, int32_t* y, int32_t* n, int3
         else if (p->depth == 16)
             ri->bits_per_channel = 16;
         else
-            return stbi__errpuc("bad bits_per_channel", "PNG not supported: unsupported color depth");
+            return stbi__errpuc("bad bits_per_channel", "PNG not supported: unsupported Color depth");
         result = p->out;
         p->out = NULL;
         if (req_comp && req_comp != p->s->img_out_n) {
@@ -5364,7 +5364,7 @@ static int32_t stbi__bmp_set_mask_defaults(stbi__bmp_data* info, int32_t compres
             info->mg = 0xffu << 8;
             info->mb = 0xffu << 0;
             info->ma = 0xffu << 24;
-            info->all_a = 0; // if all_a is 0 at end, then we loaded alpha channel but it was all 0
+            info->all_a = 0; // if all_a is 0 at end, then we loaded Alpha channel but it was all 0
         } else {
             // otherwise, use defaults, which is all-0
             info->mr = info->mg = info->mb = info->ma = 0;
@@ -5441,9 +5441,9 @@ static void* stbi__bmp_parse_header(stbi__context* s, stbi__bmp_data* info) {
             info->ma = stbi__get32le(s);
             if (compress != 3) // override mr/mg/mb unless in BI_BITFIELDS mode, as per docs
                 stbi__bmp_set_mask_defaults(info, compress);
-            stbi__get32le(s); // discard color space
+            stbi__get32le(s); // discard Color space
             for (i = 0; i < 12; ++i)
-                stbi__get32le(s); // discard color space parameters
+                stbi__get32le(s); // discard Color space parameters
             if (hsz == 124) {
                 stbi__get32le(s); // discard rendering intent
                 stbi__get32le(s); // discard offset of profile data
@@ -5533,10 +5533,10 @@ static void* stbi__bmp_load(stbi__context* s, int32_t* x, int32_t* y, int32_t* c
             for (j = 0; j < (int32_t)s->img_y; ++j) {
                 int32_t bit_offset = 7, v = stbi__get8(s);
                 for (i = 0; i < (int32_t)s->img_x; ++i) {
-                    int32_t color = (v >> bit_offset) & 0x1;
-                    out[z++] = pal[color][0];
-                    out[z++] = pal[color][1];
-                    out[z++] = pal[color][2];
+                    int32_t Color = (v >> bit_offset) & 0x1;
+                    out[z++] = pal[Color][0];
+                    out[z++] = pal[Color][1];
+                    out[z++] = pal[Color][2];
                     if (target == 4) out[z++] = 255;
                     if (i + 1 == (int32_t)s->img_x) break;
                     if ((--bit_offset) < 0) {
@@ -5625,7 +5625,7 @@ static void* stbi__bmp_load(stbi__context* s, int32_t* x, int32_t* y, int32_t* c
         }
     }
 
-    // if alpha channel is all 0s, replace with all 255s
+    // if Alpha channel is all 0s, replace with all 255s
     if (target == 4 && all_a == 0)
         for (i = 4 * s->img_x * s->img_y - 1; i >= 0; i -= 4)
             out[i] = 255;
@@ -5688,7 +5688,7 @@ static int32_t stbi__tga_info(stbi__context* s, int32_t* x, int32_t* y, int32_t*
             return 0;
         }
         stbi__skip(s, 4);       // skip index of first colormap entry and number of entries
-        sz = stbi__get8(s);    //   check bits per palette color entry
+        sz = stbi__get8(s);    //   check bits per palette Color entry
         if ((sz != 8) && (sz != 15) && (sz != 16) && (sz != 24) && (sz != 32)) {
             stbi__rewind(s);
             return 0;
@@ -5714,7 +5714,7 @@ static int32_t stbi__tga_info(stbi__context* s, int32_t* x, int32_t* y, int32_t*
         return 0;   // test height
     }
     tga_bits_per_pixel = stbi__get8(s); // bits per pixel
-    stbi__get8(s); // ignore alpha bits
+    stbi__get8(s); // ignore Alpha bits
     if (tga_colormap_bpp != 0) {
         if ((tga_bits_per_pixel != 8) && (tga_bits_per_pixel != 16)) {
             // when using a colormap, tga_bits_per_pixel is the size of the indexes
@@ -5740,13 +5740,13 @@ static int32_t stbi__tga_test(stbi__context* s) {
     int32_t res = 0;
     int32_t sz, tga_color_type;
     stbi__get8(s);      //   discard Offset
-    tga_color_type = stbi__get8(s);   //   color type
+    tga_color_type = stbi__get8(s);   //   Color type
     if (tga_color_type > 1) goto errorEnd;   //   only RGB or indexed allowed
     sz = stbi__get8(s);   //   image type
     if (tga_color_type == 1) { // colormapped (paletted) image
         if (sz != 1 && sz != 9) goto errorEnd; // colortype 1 demands image type 1 or 9
         stbi__skip(s, 4);       // skip index of first colormap entry and number of entries
-        sz = stbi__get8(s);    //   check bits per palette color entry
+        sz = stbi__get8(s);    //   check bits per palette Color entry
         if ((sz != 8) && (sz != 15) && (sz != 16) && (sz != 24) && (sz != 32)) goto errorEnd;
         stbi__skip(s, 4);       // skip image x and y origin
     } else { // "normal" image w/o colormap
@@ -5779,10 +5779,10 @@ static void stbi__tga_read_rgb16(stbi__context* s, uint8_t* out) {
     out[1] = (uint8_t)((g * 255) / 31);
     out[2] = (uint8_t)((b * 255) / 31);
 
-    // some people claim that the most significant bit might be used for alpha
-    // (possibly if an alpha-bit is set in the "image descriptor byte")
+    // some people claim that the most significant bit might be used for Alpha
+    // (possibly if an Alpha-bit is set in the "image descriptor byte")
     // but that only made 16bit test images completely translucent..
-    // so let's treat all 15 and 16bit TGAs as RGB with no alpha.
+    // so let's treat all 15 and 16bit TGAs as RGB with no Alpha.
 }
 
 static void* stbi__tga_load(stbi__context* s, int32_t* x, int32_t* y, int32_t* comp, int32_t req_comp, stbi__result_info* ri) {
@@ -6059,20 +6059,20 @@ static void* stbi__psd_load(stbi__context* s, int32_t* x, int32_t* y, int32_t* c
     if (bitdepth != 8 && bitdepth != 16)
         return stbi__errpuc("unsupported bit depth", "PSD bit depth is not 8 or 16 bit");
 
-    // Make sure the color mode is RGB.
+    // Make sure the Color mode is RGB.
     // Valid options are:
     //   0: Bitmap
     //   1: Grayscale
-    //   2: Indexed color
-    //   3: RGB color
-    //   4: CMYK color
+    //   2: Indexed Color
+    //   3: RGB Color
+    //   4: CMYK Color
     //   7: Multichannel
     //   8: Duotone
-    //   9: Lab color
+    //   9: Lab Color
     if (stbi__get16be(s) != 3)
-        return stbi__errpuc("wrong color format", "PSD is not in RGB color format");
+        return stbi__errpuc("wrong Color format", "PSD is not in RGB Color format");
 
-    // Skip the Mode Data.  (It's the palette for indexed color; other info for other modes.)
+    // Skip the Mode Data.  (It's the palette for indexed Color; other info for other modes.)
     stbi__skip(s, stbi__get32be(s));
 
     // Skip the image resources.  (resolution, pen tool paths, etc)
@@ -6305,7 +6305,7 @@ static uint8_t* stbi__pic_load_core(stbi__context* s, int32_t width, int32_t hei
         if (packet->size != 8)  return stbi__errpuc("bad format", "packet isn't 8bpp");
     } while (chained);
 
-    *comp = (act_comp & 0x10 ? 4 : 3); // has alpha channel?
+    *comp = (act_comp & 0x10 ? 4 : 3); // has Alpha channel?
 
     for (y = 0; y < height; ++y) {
         int32_t packet_idx;
@@ -6680,7 +6680,7 @@ static uint8_t* stbi__gif_load_next(stbi__context* s, stbi__gif* g, int32_t* com
 
         // image is treated as "transparent" at the start - ie, nothing overwrites the current background;
         // background colour is only used for pixels that are not rendered first frame, after that "background"
-        // color refers to the color that was there the previous frame.
+        // Color refers to the Color that was there the previous frame.
         memset(g->out, 0x00, 4 * pcount);
         memset(g->background, 0x00, 4 * pcount); // state of the background (starts transparent)
         memset(g->history, 0x00, pcount);        // pixels that were affected previous frame
@@ -6767,7 +6767,7 @@ static uint8_t* stbi__gif_load_next(stbi__context* s, stbi__gif* g, int32_t* com
             } else if (g->flags & 0x80) {
                 g->color_table = (uint8_t*)g->pal;
             } else
-                return stbi__errpuc("missing color table", "Corrupt GIF");
+                return stbi__errpuc("missing Color table", "Corrupt GIF");
 
             o = stbi__process_gif_raster(s, g);
             if (!o) return NULL;
@@ -6775,7 +6775,7 @@ static uint8_t* stbi__gif_load_next(stbi__context* s, stbi__gif* g, int32_t* com
             // if this was the first frame,
             pcount = g->w * g->h;
             if (first_frame && (g->bgindex > 0)) {
-                // if first frame, any pixel not drawn to gets the background color
+                // if first frame, any pixel not drawn to gets the background Color
                 for (pi = 0; pi < pcount; ++pi) {
                     if (g->history[pi] == 0) {
                         g->pal[g->bgindex][3] = 255; // just in case it was made transparent, undo that; It will be reset next frame if need be;
@@ -7692,7 +7692,7 @@ STBIDEF int32_t stbi_is_16_bit_from_callbacks(stbi_io_callbacks const* c, void* 
               remove duplicate typedef
       1.36  (2014-06-03)
               convert to header file single-file library
-              if de-iphone isn't set, load iphone images color-swapped instead of returning NULL
+              if de-iphone isn't set, load iphone images Color-swapped instead of returning NULL
       1.35  (2014-05-27)
               various warnings
               fix broken STBI_SIMD path
@@ -7755,13 +7755,13 @@ STBIDEF int32_t stbi_is_16_bit_from_callbacks(stbi_io_callbacks const* c, void* 
       1.07    attempt to fix C++ warning/errors again
       1.06    attempt to fix C++ warning/errors again
       1.05    fix TGA loading to return correct *comp and use good luminance calc
-      1.04    default float alpha is 1, not 255; use 'void *' for stbi_image_free
+      1.04    default float Alpha is 1, not 255; use 'void *' for stbi_image_free
       1.03    bugfixes to STBI_NO_STDIO, STBI_NO_HDR
       1.02    support for (subset of) HDR files, float interface for preferred access to them
       1.01    fix bug: possible bug in handling right-side up bmps... not sure
               fix bug: the stbi__bmp_load() and stbi__tga_load() functions didn't work at all
       1.00    interface to zlib that skips zlib header
-      0.99    correct handling of alpha in palette
+      0.99    correct handling of Alpha in palette
       0.98    TGA loader by lonesock; dynamically add loaders (untested)
       0.97    jpeg errors on too large a file; also catch another malloc failure
       0.96    fix detection of invalid v value - particleman@mollyrocket forum

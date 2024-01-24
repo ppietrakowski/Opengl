@@ -3,37 +3,44 @@
 
 #include "error_macros.h"
 
-Actor::Actor(LevelInterface* level, const entt::handle& entity_handle) :
-    home_level_{level},
-    entity_handle_{entity_handle} {
+Actor::Actor(LevelInterface* level, const entt::handle& entityHandle) :
+    m_HomeLevel{level},
+    m_EntityHandle{entityHandle}
+{
 }
 
-const std::string& Actor::GetName() const {
+const std::string& Actor::GetName() const
+{
     auto& tag_component = GetComponent<ActorTagComponent>();
-    return tag_component.name;
+    return tag_component.Name;
 }
 
-void Actor::SetName(const std::string& name) {
+void Actor::SetName(const std::string& name)
+{
     ASSERT(!name.empty());
 
     auto& tag_component = GetComponent<ActorTagComponent>();
-    std::string old_name = tag_component.name;
-    tag_component.name = name;
-    
-    home_level_->NotifyActorNameChanged(old_name, name);
+    std::string oldName = tag_component.Name;
+    tag_component.Name = name;
+
+    m_HomeLevel->NotifyActorNameChanged(oldName, name);
 }
 
-void Actor::DestroyActor() {
-    home_level_->RemoveActor(GetName());
+void Actor::DestroyActor()
+{
+    m_HomeLevel->RemoveActor(GetName());
 }
 
-bool Actor::IsAlive() const {
-    return entity_handle_.valid();
+bool Actor::IsAlive() const
+{
+    return m_EntityHandle.valid();
 }
 
-void ActorNativeTickable::ExecuteTick(float delta_seconds) {
+void ActorNativeTickable::ExecuteTick(Duration deltaSeconds)
+{
 
-    for (ActorTickFunction& tick_function : tick_functions) {
-        tick_function.ExecuteTick(delta_seconds, actor);
+    for (ActorTickFunction& tick_function : TickFunctions)
+    {
+        tick_function.ExecuteTick(deltaSeconds, TickableActor);
     }
 }

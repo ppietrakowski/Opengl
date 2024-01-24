@@ -6,86 +6,105 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
-InstancedMesh::InstancedMesh(const std::shared_ptr<StaticMesh>& static_mesh, const std::shared_ptr<Material>& material) :
-    static_mesh_{static_mesh},
-    material_{material} {
+InstancedMesh::InstancedMesh(const std::shared_ptr<StaticMesh>& staticMesh, const std::shared_ptr<Material>& material) :
+    m_StaticMesh{staticMesh},
+    m_Material{material}
+{
 }
 
-void InstancedMesh::Draw(const glm::mat4& transform) {
-    for (InstancingTransformBuffer& transform_buffer : transform_buffers_) {
-        material_->GetShader().BindUniformBuffer(0, *transform_buffer.uniform_buffer);
-        Renderer::SubmitMeshInstanced(SubmitCommandArgs{material_.get(), 0, static_mesh_->vertex_array_.get(), transform},
-            *transform_buffer.uniform_buffer, transform_buffer.num_transforms_occupied);
+void InstancedMesh::Draw(const glm::mat4& transform)
+{
+    for (InstancingTransformBuffer& transformBuffer : m_TransformBuffers)
+    {
+        Shader& shader = m_Material->GetShader();
+
+        shader.BindUniformBuffer(0, *transformBuffer.Buffer);
+
+        Renderer::SubmitMeshInstanced(SubmitCommandArgs{m_Material.get(), 0, m_StaticMesh->m_VertexArray.get(), transform},
+            *transformBuffer.Buffer, transformBuffer.NumTransformsOccupied);
     }
 }
 
-int InstancedMesh::AddInstance(const Transform& transform, int texture_id) {
-    auto it = transform_buffers_.begin();
-    int id = num_instances_;
+int InstancedMesh::AddInstance(const Transform& transform, int textureId)
+{
+    auto it = m_TransformBuffers.begin();
+    int id = m_NumInstances;
 
-    bool recycled_indices = !free_instance_indices_.empty();
-    if (recycled_indices) {
-        id = free_instance_indices_.back();
-        free_instance_indices_.pop_back();
+    bool recycled_indices = !m_RecyclingMeshIndices.empty();
+    if (recycled_indices)
+    {
+        id = m_RecyclingMeshIndices.back();
+        m_RecyclingMeshIndices.pop_back();
     }
 
     // find relative index and coresponding uniform buffer
-    while (id >= kNumInstancesTransform) {
-        id -= kNumInstancesTransform;
+    while (id >= NumInstancesTransform)
+    {
+        id -= NumInstancesTransform;
         ++it;
     }
 
-    bool buffer_present = it != transform_buffers_.end();
+    bool bBufferPresent = it != m_TransformBuffers.end();
 
-    if (!buffer_present) {
-        transform_buffers_.emplace_back();
+    if (!bBufferPresent)
+    {
+        m_TransformBuffers.emplace_back();
 
         // update iterator to point to new buffer
-        it = transform_buffers_.end() - 1;
+        it = m_TransformBuffers.end() - 1;
     }
 
-    if (recycled_indices) {
+    if (recycled_indices)
+    {
         it->UpdateTransform(transform.CalculateTransformMatrix(), id);
-    } else {
+    }
+    else
+    {
         it->AddTransform(transform.CalculateTransformMatrix());
     }
 
-    return num_instances_++;
+    return m_NumInstances++;
 }
 
-void InstancedMesh::RemoveInstance(int index) {
-    num_instances_--;
-    ASSERT(num_instances_ >= 0);
+void InstancedMesh::RemoveInstance(int index)
+{
+    m_NumInstances--;
+    ASSERT(m_NumInstances >= 0);
     Transform transform{};
 
     // easier than moving elements in memory
-    transform.scale = glm::vec3(0, 0, 0);
-    free_instance_indices_.emplace_back(index);
+    transform.Scale = glm::vec3(0, 0, 0);
+    m_RecyclingMeshIndices.emplace_back(index);
 
     UpdateInstance(index, transform);
 }
 
-void InstancedMesh::UpdateInstance(int index, const Transform& new_transform) {
-    auto it = transform_buffers_.begin();
+void InstancedMesh::UpdateInstance(int index, const Transform& newTransform)
+{
+    auto it = m_TransformBuffers.begin();
     int id = index;
 
     // find relative index and coresponding uniform buffer
-    while (id >= kNumInstancesTransform) {
-        id -= kNumInstancesTransform;
+    while (id >= NumInstancesTransform)
+    {
+        id -= NumInstancesTransform;
         ++it;
     }
 
-    if (it == transform_buffers_.end()) {
+    if (it == m_TransformBuffers.end())
+    {
         return;
     }
 
-    it->UpdateTransform(new_transform.CalculateTransformMatrix(), id);
+    it->UpdateTransform(newTransform.CalculateTransformMatrix(), id);
 }
 
-void InstancedMesh::Clear() {
-    for (InstancingTransformBuffer& transform_buffer : transform_buffers_) {
-        transform_buffer.Clear();
+void InstancedMesh::Clear()
+{
+    for (InstancingTransformBuffer& transformBuffer : m_TransformBuffers)
+    {
+        transformBuffer.Clear();
     }
 
-    num_instances_ = 0;
+    m_NumInstances = 0;
 }

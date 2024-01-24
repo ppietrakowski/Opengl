@@ -4,17 +4,17 @@
 
 class UniformBuffer {
 public:
-    UniformBuffer(int max_size);
+    UniformBuffer(int maxSize);
     ~UniformBuffer();
 
-    void UpdateBuffer(const void* data, int size_bytes);
-    void UpdateBuffer(const void* data, int size_bytes, int offset);
+    void UpdateBuffer(const void* data, int sizeBytes);
+    void UpdateBuffer(const void* data, int sizeBytes, int offset);
 
     void Bind(int binding_id) const;
 
-    static inline size_t num_bytes_allocated = 0;
+    static inline size_t NumBytesAllocated = 0;
 
 private:
-    uint32_t renderer_id_;
-    int max_size_;
+    uint32_t m_RendererId;
+    int m_MaxSize;
 };

@@ -9,59 +9,68 @@
 using MouseButton = int;
 using KeyCode = int;
 
-enum class EventType {
-    kInvalid = 0,
-    kLostFocus,
-    kGainedFocus,
-    kKeyPressed,
-    kKeyReleased,
-    kMouseWheelScrolled,
-    kMouseButtonPressed,
-    kMouseButtonReleased,
-    kMouseMoved,
-    kCount
+enum class EventType
+{
+    Invalid = 0,
+    LostFocus,
+    GainedFocus,
+    KeyPressed,
+    KeyReleased,
+    MouseWheelScrolled,
+    MouseButtonPressed,
+    MouseButtonReleased,
+    MouseMoved,
+    WindowResized,
+    Count
 };
 
-struct Event {
-    struct SizeEvent {
-        int width;
-        int height;
+struct Event
+{
+    struct SizeEvent
+    {
+        int Width;
+        int Height;
     };
 
-    struct KeyEvent {
-        KeyCode key;
-        int scancode;
-        bool alt_clicked : 1;
-        bool control_clicked : 1;
-        bool shift_clicked : 1;
-        bool system_clicked : 1;
+    struct KeyEvent
+    {
+        KeyCode Key;
+        int Scancode;
+        bool bAltClicked : 1;
+        bool bControlClicked : 1;
+        bool bShiftClicked : 1;
+        bool bSystemClicked : 1;
     };
 
-    struct MouseMoveEvent {
-        glm::vec2 mouse_position;
-        glm::vec2 last_mouse_position;
+    struct MouseMoveEvent
+    {
+        glm::vec2 MousePosition;
+        glm::vec2 LastMousePosition;
     };
 
-    struct MouseButtonEvent {
-        MouseButton button;
-        glm::vec2 mouse_position;
+    struct MouseButtonEvent
+    {
+        MouseButton Button;
+        glm::vec2 MousePosition;
     };
 
-    struct MouseWheelEvent {
-        glm::vec2 delta;
+    struct MouseWheelEvent
+    {
+        glm::vec2 Delta;
     };
 
     // Member data
-    EventType type;
+    EventType Type;
 
-    union {
-        SizeEvent size;
-        KeyEvent key;
-        MouseMoveEvent mouse_move;
-        MouseButtonEvent mouse_button;
-        MouseWheelEvent mouse_wheel;
+    union
+    {
+        SizeEvent Size;
+        KeyEvent Key;
+        MouseMoveEvent MouseMove;
+        MouseButtonEvent MouseButtonEvt;
+        MouseWheelEvent MouseWheel;
     };
 
-    std::chrono::milliseconds timestamp;
+    std::chrono::milliseconds Timestamp;
     Event();
 };

@@ -6,72 +6,70 @@
 
 #include "uniform_buffer.h"
 
-constexpr uint32_t kNumInstancesTransform = 400;
+constexpr uint32_t NumInstancesTransform = 400;
 
 // struct representing same transforms as there are in shader
 struct InstancingTransforms {
-    glm::mat4 transforms[kNumInstancesTransform];
+    glm::mat4 Transforms[NumInstancesTransform];
 };
 
 // Buffer for storing transform inside uniform buffer so it's faster to access
 struct InstancingTransformBuffer {
-    std::shared_ptr<UniformBuffer> uniform_buffer;
-    int num_transforms_occupied{0};
+    std::shared_ptr<UniformBuffer> Buffer;
+    int NumTransformsOccupied{0};
 
     InstancingTransformBuffer() :
-        uniform_buffer(std::make_shared<UniformBuffer>(static_cast<int>(sizeof(InstancingTransforms)))) {
+        Buffer(std::make_shared<UniformBuffer>(static_cast<int>(sizeof(InstancingTransforms)))) {
     }
 
     void AddTransform(const glm::mat4& transform) {
-        uniform_buffer->UpdateBuffer(glm::value_ptr(transform),
-            sizeof(transform), num_transforms_occupied * sizeof(transform));
-        num_transforms_occupied++;
+        Buffer->UpdateBuffer(glm::value_ptr(transform),
+            sizeof(transform), NumTransformsOccupied * sizeof(transform));
+        NumTransformsOccupied++;
     }
 
     void Clear() {
-        num_transforms_occupied = 0;
+        NumTransformsOccupied = 0;
     }
 
     // Updates transform at relative index (from start of this buffer)
-    void UpdateTransform(const glm::mat4& transform, int relative_index) const {
-        uniform_buffer->UpdateBuffer(glm::value_ptr(transform), sizeof(transform), relative_index * sizeof(transform));
+    void UpdateTransform(const glm::mat4& transform, int relativeIndex) const {
+        Buffer->UpdateBuffer(glm::value_ptr(transform), sizeof(transform), relativeIndex * sizeof(transform));
     }
 };
 
 class InstancedMesh {
 public:
-    InstancedMesh(const std::shared_ptr<StaticMesh>& static_mesh, const std::shared_ptr<Material>& material);
+    InstancedMesh(const std::shared_ptr<StaticMesh>& staticMesh, const std::shared_ptr<Material>& material);
 
     void Draw(const glm::mat4& transform);
 
     // Adds new mesh instance. Returns index of newly created instance
-    int AddInstance(const Transform& transform, int texture_id);
+    int AddInstance(const Transform& transform, int textureId);
 
     const StaticMesh& GetMesh() const {
-        return *static_mesh_;
+        return *m_StaticMesh;
     }
 
     void RemoveInstance(int index);
 
     int GetSize() const {
-        return num_instances_;
+        return m_NumInstances;
     }
 
-    void UpdateInstance(int index, const Transform& new_transform);
+    void UpdateInstance(int index, const Transform& newTransform);
 
     void Clear();
 
 private:
-    std::shared_ptr<StaticMesh> static_mesh_;
-    int num_instances_{0};
-    std::shared_ptr<Material> material_;
-
-    std::shared_ptr<VertexArray> vertex_array_;
+    std::shared_ptr<StaticMesh> m_StaticMesh;
+    int m_NumInstances{0};
+    std::shared_ptr<Material> m_Material;
 
     // transform buffers splitted into objects that can handle max 400 meshes
-    std::vector<InstancingTransformBuffer> transform_buffers_;
+    std::vector<InstancingTransformBuffer> m_TransformBuffers;
 
     // used for recycling indices when removing instances
-    std::vector<int> free_instance_indices_;
+    std::vector<int> m_RecyclingMeshIndices;
 };
 

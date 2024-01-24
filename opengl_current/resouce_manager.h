@@ -10,23 +10,24 @@
 
 class ResourceManagerImpl;
 
-class ResourceManager {
+class ResourceManager
+{
     friend class Level;
     friend class ResourceManagerImpl;
 public:
-    static std::shared_ptr<Shader> GetShader(const std::string& file_path);
-    static std::shared_ptr<Texture2D> GetTexture2D(const std::string& file_path);
+    static std::shared_ptr<Shader> GetShader(const std::string& filePath);
+    static std::shared_ptr<Texture2D> GetTexture2D(const std::string& filePath);
     static void AddTexture2D(const std::string& path, const std::shared_ptr<Texture2D>& texture);
-    static std::shared_ptr<SkeletalMesh> GetSkeletalMesh(const std::string& file_path);
-    static std::shared_ptr<StaticMesh> GetStaticMesh(const std::string& file_path);
+    static std::shared_ptr<SkeletalMesh> GetSkeletalMesh(const std::string& filePath);
+    static std::shared_ptr<StaticMesh> GetStaticMesh(const std::string& filePath);
 
-    static std::shared_ptr<Material> GetMaterial(const std::string& material_name);
-    static std::shared_ptr<Material> CreateMaterial(const std::string& shader_file_path, const std::string& material_name);
+    static std::shared_ptr<Material> GetMaterial(const std::string& materialName);
+    static std::shared_ptr<Material> CreateMaterial(const std::string& shaderFilePath, const std::string& materialName);
 
     static void Quit();
 
 private:
-    static std::shared_ptr<ResourceManagerImpl> resource_manager_instance_;
+    static std::shared_ptr<ResourceManagerImpl> s_ResourceManagerInstance;
 
 private:
     static std::shared_ptr<ResourceManagerImpl> CreateResourceManager();

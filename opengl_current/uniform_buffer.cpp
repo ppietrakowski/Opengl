@@ -2,30 +2,35 @@
 
 #include <GL/glew.h>
 
-UniformBuffer::UniformBuffer(int max_size) :
-    max_size_(max_size) {
-    glGenBuffers(1, &renderer_id_);
-    glBindBuffer(GL_UNIFORM_BUFFER, renderer_id_);
+UniformBuffer::UniformBuffer(int maxSize) :
+    m_MaxSize(maxSize)
+{
+    glGenBuffers(1, &m_RendererId);
+    glBindBuffer(GL_UNIFORM_BUFFER, m_RendererId);
 
-    glBufferData(GL_UNIFORM_BUFFER, (GLsizeiptr)max_size, nullptr, GL_DYNAMIC_DRAW);
-    num_bytes_allocated += max_size;
+    glBufferData(GL_UNIFORM_BUFFER, maxSize, nullptr, GL_DYNAMIC_DRAW);
+    NumBytesAllocated += maxSize;
 }
 
-UniformBuffer::~UniformBuffer() {
-    glDeleteBuffers(1, &renderer_id_);
-    num_bytes_allocated -= max_size_;
+UniformBuffer::~UniformBuffer()
+{
+    glDeleteBuffers(1, &m_RendererId);
+    NumBytesAllocated -= m_MaxSize;
 }
 
-void UniformBuffer::UpdateBuffer(const void* data, int size_bytes) {
-    glBindBuffer(GL_UNIFORM_BUFFER, renderer_id_);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, size_bytes, data);
+void UniformBuffer::UpdateBuffer(const void* data, int sizeBytes)
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, m_RendererId);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeBytes, data);
 }
 
-void UniformBuffer::UpdateBuffer(const void* data, int size_bytes, int offset) {
-    glBindBuffer(GL_UNIFORM_BUFFER, renderer_id_);
-    glBufferSubData(GL_UNIFORM_BUFFER, offset, size_bytes, data);
+void UniformBuffer::UpdateBuffer(const void* data, int sizeBytes, int offset)
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, m_RendererId);
+    glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeBytes, data);
 }
 
-void UniformBuffer::Bind(int binding_id) const {
-    glBindBufferBase(GL_UNIFORM_BUFFER, binding_id, renderer_id_);
+void UniformBuffer::Bind(int binding_id) const
+{
+    glBindBufferBase(GL_UNIFORM_BUFFER, binding_id, m_RendererId);
 }

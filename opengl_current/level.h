@@ -7,7 +7,8 @@
 
 class ResourceManagerImpl;
 
-class Level : public LevelInterface {
+class Level : public LevelInterface
+{
 public:
     Level();
     ~Level();
@@ -17,48 +18,57 @@ public:
     std::vector<Actor> FindActorsWithTag(const std::string& tag) const;
 
     void RemoveActor(const std::string& name) override;
-    void NotifyActorNameChanged(const std::string& old_name, const std::string& new_name) override;
+    void NotifyActorNameChanged(const std::string& oldName, const std::string& newName) override;
 
     void StartupLevel();
     void BroadcastUpdate(Duration duration);
-    void BroadcastRender(Duration duration);
+    void BroadcastRender();
 
-    auto begin() {
-        return actors_.begin();
+    auto begin()
+    {
+        return m_Actors.begin();
     }
 
-    auto end() {
-        return actors_.end();
-    }
-
-    template <typename ...Args>
-    auto View() {
-        return registry_.view<Args...>();
+    auto end()
+    {
+        return m_Actors.end();
     }
 
     template <typename ...Args>
-    const auto View() const {
-        return registry_.view<Args...>();
+    auto View()
+    {
+        return m_Registry.view<Args...>();
     }
 
-    void AddNewStaticMesh(const std::string& mesh_name, const Transform& transform);
+    template <typename ...Args>
+    const auto View() const
+    {
+        return m_Registry.view<Args...>();
+    }
 
-    bool TryFindActor(const std::string& name, Actor& out_actor);
+    void AddNewStaticMesh(const std::string& meshName, const Transform& transform);
+
+    bool TryFindActor(const std::string& name, Actor& outActor);
 
     const CameraComponent& FindCameraComponent() const;
 
-private:
-    entt::registry registry_;
-    std::map<std::string, Actor> actors_;
-    std::shared_ptr<ResourceManagerImpl> resource_manager_;
+    glm::vec3 CameraPosition{0, 0, 0};
+    glm::quat CameraRotation{glm::vec3{0, 0,0}};
 
-    std::unordered_map<std::string, std::shared_ptr<InstancedMesh>> instanced_mesh_;
+private:
+    entt::registry m_Registry;
+    std::map<std::string, Actor> m_Actors;
+    std::shared_ptr<ResourceManagerImpl> m_ResourceManager;
+
+    std::unordered_map<std::string, std::shared_ptr<InstancedMesh>> m_MeshNameToInstancedMesh;
+
 
 private:
     void UpdateSkeletalMeshesAnimation(Duration duration);
 
-    Actor ConstructFromEntity(entt::entity entity) const {
-        return Actor{const_cast<Level*>(this), entt::handle{const_cast<entt::registry&>(registry_), entity}};
+    Actor ConstructFromEntity(entt::entity entity) const
+    {
+        return Actor{const_cast<Level*>(this), entt::handle{const_cast<entt::registry&>(m_Registry), entity}};
     }
 };
 

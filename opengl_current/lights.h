@@ -2,35 +2,27 @@
 
 #include <glm/glm.hpp>
 
-enum class LightType : int32_t {
+enum class LightType : int32_t
+{
     Directional,
     Point,
     Spot
 };
 
-struct DirectionalLight {
-    glm::vec3 position;
-    glm::vec4 color;
-};
-
-struct PointLight {
-    glm::vec3 position;
-    glm::vec4 color;
-};
-
 // light data packed just to upload to uniform buffer 
-struct LightData {
-    glm::vec3 position{0, 0, 0};
-    float pack0;
-    
-    glm::vec3 direction{0, 1, 0};
-    float pack1;
+struct LightData
+{
+    glm::vec3 Position{0, 0, 0};
+    float Align0;
 
-    glm::vec3 color{1, 1, 1};
+    glm::vec3 Direction{0, 1, 0};
+    float Align1;
 
-    float direction_length{0.0f};
-    LightType light_type{LightType::Directional};
-    float cut_off{0.0f};
-    float intensity{0.0f};
-    float decreasing_start_angle{0.0f};
+    glm::vec3 Color{1, 1, 1};
+
+    float DirectionLength{0.0f};
+    LightType Type{LightType::Directional};
+    float CutOff{0.0f};
+    float Intensity{0.0f};
+    float DecreasingStartAngle{0.0f};
 };

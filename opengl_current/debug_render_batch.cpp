@@ -3,7 +3,7 @@
 #include <array>
 
 // Predefined box indices (base for offsets for box batching)
-static const std::array<uint32_t, 24> kBaseBoxIndices =
+static const std::array<uint32_t, 24> BaseBoxIndices =
 {
     0u, 1, 1, 2, 2, 3, 3, 0,
     4, 5, 5, 6, 6, 7, 7, 4,
@@ -11,42 +11,46 @@ static const std::array<uint32_t, 24> kBaseBoxIndices =
 };
 
 DebugRenderBatch::DebugRenderBatch(std::shared_ptr<Shader> shader) :
-    batch_base_{std::array{VertexAttribute{3, PrimitiveVertexType::kFloat}, VertexAttribute{1, PrimitiveVertexType::kUnsignedInt}}} {
+    m_BatchBase{std::array{VertexAttribute{3, PrimitiveVertexType::Float}, VertexAttribute{1, PrimitiveVertexType::UnsignedInt}}}
+{
 
-    material_ = std::make_shared<Material>(shader);
+    m_Material = std::make_unique<Material>(shader);
 }
 
-void DebugRenderBatch::FlushDraw() {
-    batch_base_.DrawLines(glm::mat4{1.0f}, *material_);
+void DebugRenderBatch::FlushDraw()
+{
+    m_BatchBase.DrawLines(glm::mat4{1.0f}, *m_Material);
 }
 
-void DebugRenderBatch::AddLineInstance(const Line& line, const Transform& transform, const glm::vec4& color) {
-    RgbaColor packed_color(color);
+void DebugRenderBatch::AddLineInstance(const Line& line, const Transform& transform, const glm::vec4& color)
+{
+    RgbaColor packedColor(color);
 
     std::array vertices = {
-        DebugVertex{line.start_pos, packed_color},
-        DebugVertex{line.end_pos, packed_color},
+        DebugVertex{line.StartPos, packedColor},
+        DebugVertex{line.EndPos, packedColor},
     };
 
-    uint32_t kLineIndices[] = {0, 1};
-    batch_base_.QueueDraw(BatchGeometryInfo<DebugVertex>{vertices, kLineIndices, transform});
+    const uint32_t LineIndices[] = {0, 1};
+    m_BatchBase.QueueDraw(BatchGeometryInfo<DebugVertex>{vertices, LineIndices, transform});
 }
 
-void DebugRenderBatch::AddBoxInstance(const Box& box, const Transform& transform, const glm::vec4& color) {
-    RgbaColor packed_color(color);
+void DebugRenderBatch::AddBoxInstance(const Box& box, const Transform& transform, const glm::vec4& color)
+{
+    RgbaColor packedColor(color);
 
-    std::array<DebugVertex, 8> box_vertices = {
-        DebugVertex{glm::vec3{box.min_bounds[0], box.min_bounds[1], box.min_bounds[2]}, packed_color},
-        DebugVertex{glm::vec3{box.max_bounds[0], box.min_bounds[1], box.min_bounds[2]}, packed_color},
-        DebugVertex{glm::vec3{box.max_bounds[0], box.max_bounds[1], box.min_bounds[2]}, packed_color},
-        DebugVertex{glm::vec3{box.min_bounds[0], box.max_bounds[1], box.min_bounds[2]}, packed_color},
+    std::array<DebugVertex, 8> boxVertices = {
+        DebugVertex{glm::vec3{box.MinBounds[0], box.MinBounds[1], box.MinBounds[2]}, packedColor},
+        DebugVertex{glm::vec3{box.MaxBounds[0], box.MinBounds[1], box.MinBounds[2]}, packedColor},
+        DebugVertex{glm::vec3{box.MaxBounds[0], box.MaxBounds[1], box.MinBounds[2]}, packedColor},
+        DebugVertex{glm::vec3{box.MinBounds[0], box.MaxBounds[1], box.MinBounds[2]}, packedColor},
 
-        DebugVertex{glm::vec3{box.min_bounds[0], box.min_bounds[1], box.max_bounds[2]}, packed_color},
-        DebugVertex{glm::vec3{box.max_bounds[0], box.min_bounds[1], box.max_bounds[2]}, packed_color},
-        DebugVertex{glm::vec3{box.max_bounds[0], box.max_bounds[1], box.max_bounds[2]}, packed_color},
-        DebugVertex{glm::vec3{box.min_bounds[0], box.max_bounds[1], box.max_bounds[2]}, packed_color}
+        DebugVertex{glm::vec3{box.MinBounds[0], box.MinBounds[1], box.MaxBounds[2]}, packedColor},
+        DebugVertex{glm::vec3{box.MaxBounds[0], box.MinBounds[1], box.MaxBounds[2]}, packedColor},
+        DebugVertex{glm::vec3{box.MaxBounds[0], box.MaxBounds[1], box.MaxBounds[2]}, packedColor},
+        DebugVertex{glm::vec3{box.MinBounds[0], box.MaxBounds[1], box.MaxBounds[2]}, packedColor}
     };
 
-    batch_base_.QueueDraw(BatchGeometryInfo<DebugVertex>{box_vertices, kBaseBoxIndices, transform});
+    m_BatchBase.QueueDraw(BatchGeometryInfo<DebugVertex>{boxVertices, BaseBoxIndices, transform});
 }
 

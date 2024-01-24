@@ -12,219 +12,242 @@
 
 #include <GL/glew.h>
 
-glm::mat4 Renderer::view_{1.0f};
-glm::mat4 Renderer::projection_{1.0f};
-glm::mat4 Renderer::view_projection_{1.0f};
-glm::vec3 Renderer::camera_position_{0.0f, 0.0f, 0.0f};
-std::shared_ptr<Texture2D> Renderer::default_texture_;
+glm::mat4 Renderer::s_View{1.0f};
+glm::mat4 Renderer::s_Projection{1.0f};
+glm::mat4 Renderer::s_ViewProjection{1.0f};
+glm::vec3 Renderer::s_CameraPosition{0.0f, 0.0f, 0.0f};
+std::shared_ptr<Texture2D> Renderer::s_DefaultTexture;
 
-static DebugRenderBatch* debug_batch_ = nullptr;
+static DebugRenderBatch* s_DebugBatch = nullptr;
 
-static constexpr RgbColor kBlack{0, 0, 0};
-static constexpr RgbColor kMagenta{255, 0, 255};
+static constexpr RgbColor Black{0, 0, 0};
+static constexpr RgbColor Magenta{255, 0, 255};
 
-struct LightBuffer {
-    UniformBuffer uniform_buffer;
-    int actual_num_lights{0};
+struct LightBuffer
+{
+    UniformBuffer Buffer;
+    int ActualNumLights{0};
 
     LightBuffer(int num_lights) :
-        uniform_buffer(num_lights * sizeof(LightData)) {
+        Buffer(num_lights * sizeof(LightData))
+    {
     }
 
-    void AddLight(const LightData& light_data) {
-        
-        uniform_buffer.UpdateBuffer(&light_data, sizeof(LightData), actual_num_lights * sizeof(LightData));
-        actual_num_lights++;
+    void AddLight(const LightData& lightData)
+    {
+
+        Buffer.UpdateBuffer(&lightData, sizeof(LightData), ActualNumLights * sizeof(LightData));
+        ActualNumLights++;
     }
 
-    void Clear() {
-        actual_num_lights = 0;
+    void Clear()
+    {
+        ActualNumLights = 0;
     }
 
-    void BindBuffer(Shader& shader, const std::string& binding_name) const {
-        shader.BindUniformBuffer(shader.GetUniformBlockIndex(binding_name), uniform_buffer);
+    void BindBuffer(Shader& shader, const std::string& bindingName) const
+    {
+        shader.BindUniformBuffer(shader.GetUniformBlockIndex(bindingName), Buffer);
     }
 };
 
-static LightBuffer* light_buffer_ = nullptr;
+static LightBuffer* s_LightBuffer = nullptr;
 
-void Renderer::Initialize() {
+void Renderer::Initialize()
+{
     // array of checkerboard with black and magenta
     RgbColor colors[4][4] =
     {
-        {kBlack, kBlack, kMagenta, kMagenta},
-        {kBlack, kBlack, kMagenta, kMagenta},
-        {kMagenta, kMagenta, kBlack, kBlack},
-        {kMagenta, kMagenta, kBlack, kBlack}
+        {Black, Black, Magenta, Magenta},
+        {Black, Black, Magenta, Magenta},
+        {Magenta, Magenta, Black, Black},
+        {Magenta, Magenta, Black, Black}
     };
 
-    int colors_width = 4;
-    int color_height = 4;
+    int colorsWidth = 4;
+    int colorsHeight = 4;
 
-    default_texture_ = std::make_shared<Texture2D>(colors, TextureSpecification{colors_width, color_height, TextureFormat::kRgb});
+    s_DefaultTexture = std::make_shared<Texture2D>(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::Rgb});
     RenderCommand::Initialize();
 
     RenderCommand::ClearBufferBindings_Debug();
     RenderCommand::SetCullFace(true);
 
-    light_buffer_ = new LightBuffer(32);
+    s_LightBuffer = new LightBuffer(32);
     Renderer2D::Initialize();
 }
 
-void Renderer::Quit() {
-    SafeDelete(light_buffer_);
-    SafeDelete(debug_batch_);
+void Renderer::Quit()
+{
+    SafeDelete(s_LightBuffer);
+    SafeDelete(s_DebugBatch);
 
-    default_texture_.reset();
+    s_DefaultTexture.reset();
     Renderer2D::Quit();
     RenderCommand::Quit();
 }
 
-void Renderer::UpdateProjection(const CameraProjection& projection) {
-    projection_ = glm::perspective(glm::radians(projection.fov), projection.aspect_ratio, projection.z_near, projection.z_far);
+void Renderer::UpdateProjection(const CameraProjection& projection)
+{
+    s_Projection = glm::perspective(glm::radians(projection.Fov), projection.AspectRatio, projection.ZNear, projection.ZFar);
     Renderer2D::UpdateProjection(projection);
 }
 
-void Renderer::BeginScene(glm::vec3 camera_pos, glm::quat camera_rotation) {
+void Renderer::BeginScene(glm::vec3 cameraPosition, glm::quat cameraRotation)
+{
     RenderCommand::BeginScene();
-    view_ = glm::inverse(glm::translate(glm::identity<glm::mat4>(), camera_pos) * glm::mat4_cast(camera_rotation));
-    view_projection_ = projection_ * view_;
-    camera_position_ = camera_pos;
+    s_View = glm::inverse(glm::translate(glm::identity<glm::mat4>(), cameraPosition) * glm::mat4_cast(cameraRotation));
+    s_ViewProjection = s_Projection * s_View;
+    s_CameraPosition = cameraPosition;
 }
 
-void Renderer::EndScene() {
+void Renderer::EndScene()
+{
     RenderCommand::SetLineWidth(1);
 
-    if (debug_batch_) {
+    if (s_DebugBatch)
+    {
         Renderer::FlushDrawDebug();
     }
 
     Renderer2D::FlushDraw();
-    light_buffer_->Clear();
+    s_LightBuffer->Clear();
     RenderCommand::EndScene();
 }
 
-void Renderer::SubmitTriangles(const SubmitCommandArgs& submit_args) {
-    ASSERT(submit_args.num_indices <= submit_args.vertex_array->GetNumIndices());
+void Renderer::SubmitTriangles(const SubmitCommandArgs& submitArgs)
+{
+    ASSERT(submitArgs.NumIndices <= submitArgs.TargetVertexArray->GetNumIndices());
 
-    Shader& shader = submit_args.GetShader();
+    Shader& shader = submitArgs.GetShader();
     shader.Use();
-    submit_args.SetupShader();
+    submitArgs.SetupShader();
 
-    UploadUniforms(shader, submit_args.transform);
+    UploadUniforms(shader, submitArgs.Transform);
 
-    uint32_t texture_unit = submit_args.material->GetNumTextures();
+    uint32_t textureUnit = submitArgs.UsedMaterial->GetNumTextures();
 
-    Skybox::instance->GetCubeMap()->Bind(texture_unit);
-    shader.SetSamplerUniform("u_skybox_texture", Skybox::instance->GetCubeMap(), texture_unit);
+    Skybox::s_Instance->GetCubeMap()->Bind(textureUnit);
+    shader.SetSamplerUniform("u_skybox_texture", Skybox::s_Instance->GetCubeMap(), textureUnit);
 
-    RenderCommand::DrawTriangles(*submit_args.vertex_array, submit_args.num_indices);
+    RenderCommand::DrawTriangles(*submitArgs.TargetVertexArray, submitArgs.NumIndices);
 }
 
-void Renderer::SubmitLines(const SubmitCommandArgs& submit_args) {
-    ASSERT(submit_args.num_indices <= submit_args.vertex_array->GetNumIndices());
+void Renderer::SubmitLines(const SubmitCommandArgs& submitArgs)
+{
+    ASSERT(submitArgs.NumIndices <= submitArgs.TargetVertexArray->GetNumIndices());
 
-    Shader& shader = submit_args.GetShader();
+    Shader& shader = submitArgs.GetShader();
     shader.Use();
-    submit_args.SetupShader();
+    submitArgs.SetupShader();
 
-    UploadUniforms(shader, submit_args.transform);
-    RenderCommand::DrawLines(*submit_args.vertex_array, submit_args.num_indices);
+    UploadUniforms(shader, submitArgs.Transform);
+    RenderCommand::DrawLines(*submitArgs.TargetVertexArray, submitArgs.NumIndices);
 }
 
-void Renderer::SubmitPoints(const SubmitCommandArgs& submit_args) {
-    ASSERT(submit_args.num_indices <= submit_args.vertex_array->GetNumIndices());
+void Renderer::SubmitPoints(const SubmitCommandArgs& submitArgs)
+{
+    ASSERT(submitArgs.NumIndices <= submitArgs.TargetVertexArray->GetNumIndices());
 
-    Shader& shader = submit_args.GetShader();
+    Shader& shader = submitArgs.GetShader();
     shader.Use();
-    submit_args.SetupShader();
+    submitArgs.SetupShader();
 
-    UploadUniforms(shader, submit_args.transform);
-    RenderCommand::DrawPoints(*submit_args.vertex_array, submit_args.num_indices);
+    UploadUniforms(shader, submitArgs.Transform);
+    RenderCommand::DrawPoints(*submitArgs.TargetVertexArray, submitArgs.NumIndices);
 }
 
-void Renderer::SubmitSkeleton(const SubmitCommandArgs& submit_args, std::span<const glm::mat4> transforms) {
-    Shader& shader = submit_args.GetShader();
+void Renderer::SubmitSkeleton(const SubmitCommandArgs& submitArgs, std::span<const glm::mat4> transforms)
+{
+    Shader& shader = submitArgs.GetShader();
 
     shader.Use();
-    submit_args.SetupShader();
+    submitArgs.SetupShader();
 
-    UploadUniforms(shader, submit_args.transform);
+    UploadUniforms(shader, submitArgs.Transform);
     shader.SetUniformMat4Array("u_bone_transforms", transforms);
-    uint32_t texture_unit = submit_args.material->GetNumTextures();
-    Skybox::instance->GetCubeMap()->Bind(texture_unit);
-    shader.SetSamplerUniform("u_skybox_texture", Skybox::instance->GetCubeMap(), texture_unit);
+    uint32_t textureUnit = submitArgs.UsedMaterial->GetNumTextures();
+    Skybox::s_Instance->GetCubeMap()->Bind(textureUnit);
+    shader.SetSamplerUniform("u_skybox_texture", Skybox::s_Instance->GetCubeMap(), textureUnit);
 
-    RenderCommand::DrawTriangles(*submit_args.vertex_array, submit_args.num_indices);
+    RenderCommand::DrawTriangles(*submitArgs.TargetVertexArray, submitArgs.NumIndices);
 }
 
-void Renderer::SubmitMeshInstanced(const SubmitCommandArgs& submit_args, const UniformBuffer& transform_buffer, int num_instances) {
-    Shader& shader = submit_args.GetShader();
+void Renderer::SubmitMeshInstanced(const SubmitCommandArgs& submitArgs, const UniformBuffer& transformBuffer, int numInstances)
+{
+    Shader& shader = submitArgs.GetShader();
 
-    submit_args.material->SetupRenderState();
+    submitArgs.UsedMaterial->SetupRenderState();
     shader.Use();
-    submit_args.material->SetShaderUniforms();
+    submitArgs.UsedMaterial->SetShaderUniforms();
 
-    shader.BindUniformBuffer(shader.GetUniformBlockIndex("Transforms"), transform_buffer);
-    UploadUniforms(shader, submit_args.transform);
+    shader.BindUniformBuffer(shader.GetUniformBlockIndex("Transforms"), transformBuffer);
+    UploadUniforms(shader, submitArgs.Transform);
 
-    uint32_t texture_unit = submit_args.material->GetNumTextures();
+    uint32_t textureUnit = submitArgs.UsedMaterial->GetNumTextures();
 
-    Skybox::instance->GetCubeMap()->Bind(texture_unit);
-    shader.SetSamplerUniform("u_skybox_texture", Skybox::instance->GetCubeMap(), texture_unit);
+    Skybox::s_Instance->GetCubeMap()->Bind(textureUnit);
+    shader.SetSamplerUniform("u_skybox_texture", Skybox::s_Instance->GetCubeMap(), textureUnit);
 
-    RenderCommand::DrawTrianglesInstanced(*submit_args.vertex_array, num_instances);
+    RenderCommand::DrawTrianglesInstanced(*submitArgs.TargetVertexArray, numInstances);
 }
 
-void Renderer::DrawDebugBox(const Box& box, const Transform& transform, const glm::vec4& color) {
-    ASSERT(debug_batch_);
-    debug_batch_->AddBoxInstance(box, transform, color);
+void Renderer::DrawDebugBox(const Box& box, const Transform& transform, const glm::vec4& Color)
+{
+    ASSERT(s_DebugBatch);
+    s_DebugBatch->AddBoxInstance(box, transform, Color);
 }
 
-void Renderer::DrawDebugLine(const Line& line, const Transform& transform, const glm::vec4& color) {
-    ASSERT(debug_batch_);
-    debug_batch_->AddLineInstance(line, transform, color);
+void Renderer::DrawDebugLine(const Line& line, const Transform& transform, const glm::vec4& Color)
+{
+    ASSERT(s_DebugBatch);
+    s_DebugBatch->AddLineInstance(line, transform, Color);
 }
 
-void Renderer::FlushDrawDebug() {
-    ASSERT(debug_batch_);
-    debug_batch_->FlushDraw();
+void Renderer::FlushDrawDebug()
+{
+    ASSERT(s_DebugBatch);
+    s_DebugBatch->FlushDraw();
 }
 
-bool Renderer::IsVisibleToCamera(glm::vec3 worldspace_position, glm::vec3 bbox_min, glm::vec3 bbox_max) {
+bool Renderer::IsVisibleToCamera(glm::vec3 worldspacePosition, glm::vec3 bboxMin, glm::vec3 bboxMax)
+{
     // only need apply translation for testing
-    glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), worldspace_position);
+    glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), worldspacePosition);
 
     // Apply transformations to the bounding box
-    glm::vec3 min_box_ws = transform * glm::vec4(bbox_min, 1.0f);
-    glm::vec3 max_box_ws = transform * glm::vec4(bbox_max, 1.0f);
+    glm::vec3 minBoxWs = transform * glm::vec4(bboxMin, 1.0f);
+    glm::vec3 maxBoxWs = transform * glm::vec4(bboxMax, 1.0f);
 
     // Calculate the bounding box corners in clip space
-    glm::vec4 min_clipspace = view_projection_ * glm::vec4(min_box_ws, 1.0f);
-    glm::vec4 max_clipspace = view_projection_ * glm::vec4(max_box_ws, 1.0f);
+    glm::vec4 minClipspace = s_ViewProjection * glm::vec4(minBoxWs, 1.0f);
+    glm::vec4 maxClipspace = s_ViewProjection * glm::vec4(maxBoxWs, 1.0f);
 
     // Check for intersection with the view frustum
-    return !(max_clipspace.x < -max_clipspace.w || min_clipspace.x > min_clipspace.w ||
-        max_clipspace.y < -max_clipspace.w || min_clipspace.y > min_clipspace.w ||
-        max_clipspace.z < -max_clipspace.w || min_clipspace.z > min_clipspace.w);
+    return !(maxClipspace.x < -maxClipspace.w || minClipspace.x > minClipspace.w ||
+        maxClipspace.y < -maxClipspace.w || minClipspace.y > minClipspace.w ||
+        maxClipspace.z < -maxClipspace.w || minClipspace.z > minClipspace.w);
 }
 
-void Renderer::AddLight(const LightData& light_data) {
-    light_buffer_->AddLight(light_data);
+void Renderer::AddLight(const LightData& lightData)
+{
+    s_LightBuffer->AddLight(lightData);
 }
 
-void Renderer::InitializeDebugDraw(const std::shared_ptr<Shader>& debug_shader) {
-    debug_batch_ = new DebugRenderBatch(debug_shader);
+void Renderer::InitializeDebugDraw(const std::shared_ptr<Shader>& debugShader)
+{
+    s_DebugBatch = new DebugRenderBatch(debugShader);
 }
 
-void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform) {
-    shader.SetUniform("u_projection_view", view_projection_);
+void Renderer::UploadUniforms(Shader& shader, const glm::mat4& transform)
+{
+    shader.SetUniform("u_projection_view", s_ViewProjection);
     shader.SetUniform("u_transform", transform);
-    shader.SetUniform("u_view", view_);
-    shader.SetUniform("u_camera_location", camera_position_);
+    shader.SetUniform("u_view", s_View);
+    shader.SetUniform("u_camera_location", s_CameraPosition);
 
-    glm::mat3 normal_matrix = glm::inverseTranspose(transform);
-    shader.SetUniform("u_normal_transform", normal_matrix);
-    light_buffer_->BindBuffer(shader, "Lights");
-    shader.SetUniform("u_num_lights", light_buffer_->actual_num_lights);
+    glm::mat3 normalMatrix = glm::inverseTranspose(transform);
+    shader.SetUniform("u_normal_transform", normalMatrix);
+    s_LightBuffer->BindBuffer(shader, "Lights");
+    shader.SetUniform("u_num_lights", s_LightBuffer->ActualNumLights);
 }

@@ -93,7 +93,7 @@
     <ClCompile Include="image_rgba.cpp">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="index_buffer.cpp">
+    <ClCompile Include="indexBuffer.cpp">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
     <ClCompile Include="material.cpp">
@@ -123,10 +123,10 @@
     <ClCompile Include="texture.cpp">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="vertex_array.cpp">
+    <ClCompile Include="vertexArray.cpp">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
-    <ClCompile Include="vertex_buffer.cpp">
+    <ClCompile Include="vertexBuffer.cpp">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
     <ClCompile Include="actor.cpp">
@@ -248,7 +248,7 @@
     <ClInclude Include="image_rgba.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="index_buffer.h">
+    <ClInclude Include="indexBuffer.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
     <ClInclude Include="material.h">
@@ -278,10 +278,10 @@
     <ClInclude Include="texture.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="vertex_array.h">
+    <ClInclude Include="vertexArray.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="vertex_buffer.h">
+    <ClInclude Include="vertexBuffer.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
     <ClInclude Include="duration.h">

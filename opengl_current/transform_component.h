@@ -5,19 +5,20 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-struct TransformComponent {
-    glm::vec3 position{0, 0, 0};
-    glm::quat rotation{glm::vec3{0, 0, 0}};
-    glm::vec3 scale{1, 1, 1};
+struct TransformComponent
+{
+    glm::vec3 Position{0, 0, 0};
+    glm::quat Rotation{glm::vec3{0, 0, 0}};
+    glm::vec3 Scale{1, 1, 1};
 
     glm::mat4 GetWorldTransformMatrix() const;
 
     void Translate(const glm::vec3& pos);
 
-    void SetEulerAngles(const glm::vec3& euler_angles);
+    void SetEulerAngles(const glm::vec3& eulerAngles);
     void SetEulerAngles(float pitch, float yaw, float roll);
 
-    void AddEulerAngles(const glm::vec3& euler_angles);
+    void AddEulerAngles(const glm::vec3& eulerAngles);
     glm::vec3 GetEulerAngles() const;
 
     glm::vec3 GetForwardVector() const;
@@ -27,44 +28,54 @@ struct TransformComponent {
     Transform GetAsTransform() const;
 };
 
-FORCE_INLINE void TransformComponent::Translate(const glm::vec3& pos) {
-    position += pos;
+FORCE_INLINE void TransformComponent::Translate(const glm::vec3& pos)
+{
+    Position += pos;
 }
 
-FORCE_INLINE void TransformComponent::SetEulerAngles(const glm::vec3& euler_angles) {
-    rotation = glm::quat{glm::radians(euler_angles)};
+FORCE_INLINE void TransformComponent::SetEulerAngles(const glm::vec3& eulerAngles)
+{
+    Rotation = glm::quat{glm::radians(eulerAngles)};
 }
 
-FORCE_INLINE void TransformComponent::SetEulerAngles(float pitch, float yaw, float roll) {
-    rotation = glm::quat{glm::radians(glm::vec3{pitch, yaw, roll})};
+FORCE_INLINE void TransformComponent::SetEulerAngles(float pitch, float yaw, float roll)
+{
+    Rotation = glm::quat{glm::radians(glm::vec3{pitch, yaw, roll})};
 }
 
-FORCE_INLINE void TransformComponent::AddEulerAngles(const glm::vec3& euler_angles) {
-    rotation *= glm::quat{glm::vec3{euler_angles}};
+FORCE_INLINE void TransformComponent::AddEulerAngles(const glm::vec3& eulerAngles)
+{
+    Rotation *= glm::quat{glm::vec3{eulerAngles}};
 }
 
-FORCE_INLINE glm::mat4 TransformComponent::GetWorldTransformMatrix() const {
-    return glm::translate(glm::identity<glm::mat4>(), position) *
-        glm::mat4_cast(rotation) *
-        glm::scale(glm::identity<glm::mat4>(), scale);
+FORCE_INLINE glm::mat4 TransformComponent::GetWorldTransformMatrix() const
+{
+    return glm::translate(glm::identity<glm::mat4>(), Position) *
+        glm::mat4_cast(Rotation) *
+        glm::scale(glm::identity<glm::mat4>(), Scale);
 }
 
-FORCE_INLINE glm::vec3 TransformComponent::GetEulerAngles() const {
-    return glm::degrees(glm::eulerAngles(rotation));
+FORCE_INLINE glm::vec3 TransformComponent::GetEulerAngles() const
+{
+    return glm::degrees(glm::eulerAngles(Rotation));
 }
 
-FORCE_INLINE glm::vec3 TransformComponent::GetForwardVector() const {
-    return glm::normalize(rotation * glm::vec3{0, 0, -1});
+FORCE_INLINE glm::vec3 TransformComponent::GetForwardVector() const
+{
+    return glm::normalize(Rotation * glm::vec3{0, 0, -1});
 }
 
-FORCE_INLINE glm::vec3 TransformComponent::GetRightVector() const {
-    return glm::normalize(rotation * glm::vec3{1, 0, 0});
+FORCE_INLINE glm::vec3 TransformComponent::GetRightVector() const
+{
+    return glm::normalize(Rotation * glm::vec3{1, 0, 0});
 }
 
-FORCE_INLINE glm::vec3 TransformComponent::GetUpVector() const {
-    return glm::normalize(rotation * glm::vec3{0, 1, 0});
+FORCE_INLINE glm::vec3 TransformComponent::GetUpVector() const
+{
+    return glm::normalize(Rotation * glm::vec3{0, 1, 0});
 }
 
-FORCE_INLINE Transform TransformComponent::GetAsTransform() const {
-    return Transform{position, rotation, scale};
+FORCE_INLINE Transform TransformComponent::GetAsTransform() const
+{
+    return Transform{Position, Rotation, Scale};
 }

@@ -12,15 +12,17 @@
 
 struct GLFWwindow;
 
-struct WindowSettings {
-    uint32_t width;
-    uint32_t height;
-    std::string title;
+struct WindowSettings
+{
+    uint32_t Width;
+    uint32_t Height;
+    std::string Title;
 };
 
 class Input;
 
-class Window {
+class Window
+{
 public:
     Window(const WindowSettings& settings);
     ~Window();
@@ -44,21 +46,26 @@ public:
     void DisableVSync();
     bool IsVSyncEnabled() const;
 
-    void* GetWindowNativeHandle() const;
-    GraphicsContext* GetContext() const;
-
     void Close();
-    void SetMouseVisible(bool mouse_visible);
+    void SetMouseVisible(bool bMouseVisible);
 
-    bool IsMouseVisible() const {
-        return window_data_.mouse_visible;
+    bool IsMouseVisible() const
+    {
+        return m_WindowData.bMouseVisible;
     }
 
+    void InitializeImGui();
+    void DeinitializeImGui();
+
+    void ImGuiBeginFrame();
+    void ImGuiDrawFrame();
+    void ImGuiUpdateViewport();
+
 private:
-    GLFWwindow* window_;
-    Input* input_;
-    GraphicsContext* graphics_context_;
-    GlfwWindowData window_data_;
+    GLFWwindow* m_Window;
+    Input* m_Input;
+    GraphicsContext* m_GraphicsContext;
+    GlfwWindowData m_WindowData;
 
 private:
     void BindWindowCallbacks();
