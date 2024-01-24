@@ -12,6 +12,7 @@ public:
 
     static void DrawDebugBox(const Box& box, const Transform& transform, const glm::vec4& color = glm::vec4{1, 1, 1, 1});
     static void DrawDebugLine(const Line& line, const Transform& transform, const glm::vec4& color = glm::vec4{1, 1, 1, 1});
+    static void DrawDebugRect(const glm::vec2& position, const glm::vec2& size, const Transform& transform, const glm::vec4& color = glm::vec4{1, 1, 1, 1});
     static void FlushDrawDebug();
 
     static void InitializeDebugDraw(const std::shared_ptr<Shader>& debugShader);

@@ -44,6 +44,8 @@ DECLARE_COMPONENT_TICKABLE(FpsCounter);
 SandboxGameLayer::SandboxGameLayer(Game* game) :
     m_Game(game)
 {
+    m_Level = game->GetCurrentLevel();
+
     m_DefaultShader = ResourceManager::GetShader("assets/shaders/default.shd");
     m_DebugShader = ResourceManager::GetShader("assets/shaders/unshaded.shd");
 
@@ -52,7 +54,6 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
 
     m_CurrentUsedShader = m_DefaultShader;
 
-    Renderer::InitializeDebugDraw(m_DebugShader);
     Renderer2D::SetDrawShader(ResourceManager::GetShader("assets/shaders/sprite_2d.shd"));
 
     auto defaultMaterial = ResourceManager::CreateMaterial("assets/shaders/default.shd", "postac_material");
@@ -90,8 +91,6 @@ void SandboxGameLayer::Update(Duration deltaTime)
     auto shader = ResourceManager::GetShader("assets/shaders/instanced.shd");
     shader->Use();
     m_LastDeltaSeconds = deltaTime;
-
-    m_Level.BroadcastUpdate(deltaTime);
 }
 
 void SandboxGameLayer::Render()
@@ -100,12 +99,10 @@ void SandboxGameLayer::Render()
     static float accum = 0.0f;
     static int numFrames = 0;
 
-    Renderer::BeginScene(m_Level.CameraPosition, m_Level.CameraRotation, m_Level.GetLightsData());
-
     glm::vec3 lightPosition{0.0f};
 
     {
-        Actor directional_light = m_Level.FindActor("directional_light");
+        Actor directional_light = m_Level->FindActor("directional_light");
         lightPosition = directional_light.GetTransform().Position;
     }
 
@@ -116,7 +113,7 @@ void SandboxGameLayer::Render()
     m_DebugShader->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
     Actor characterActor;
 
-    if (m_Level.TryFindActor("SkeletalMesh0", characterActor))
+    if (m_Level->TryFindActor("SkeletalMesh0", characterActor))
     {
         Transform transform = characterActor.GetTransform().GetAsTransform();
         transform.Scale = {1, 1, 1};
@@ -131,13 +128,13 @@ void SandboxGameLayer::Render()
         pos[i] = 1;
         color[i] = 1;
 
-        Line line{lightPosition, lightPosition + pos};
-            
-        Debug::DrawDebugLine(line, Transform{}, color);
+        Line line{glm::zero<glm::vec3>(), pos};
+
+        Debug::DrawDebugLine(line, Transform{lightPosition}, color);
     }
 
     Debug::DrawDebugLine(Line{lightPosition, lightPosition + 2.0f * glm::vec3{0, -1, 0}}, Transform{}, glm::vec4(0, 0, 1, 1));
-    
+
     accum += m_LastDeltaSeconds.GetSeconds();
 
     if (accum > 0.4f)
@@ -155,18 +152,17 @@ void SandboxGameLayer::Render()
         ResourceManager::GetTexture2D("assets/fireworks.png")
     };
 
-    Sprite2D spriteDefinition(glm::vec2(1000, 10), glm::vec2(200, 200), 
+    Sprite2D spriteDefinition(glm::vec2(1000, 10), glm::vec2(200, 200),
         Renderer2D::BindTextureToDraw(ResourceManager::GetTexture2D("assets/fireworks.png")),
         spriteSheetData, glm::uvec2(numFrames, 0), RgbaColor(255, 255, 255));
 
     spriteDefinition.Transform.Rotation = v;
 
+    Debug::DrawDebugRect(glm::vec2(1000, 10), glm::vec2(200, 200), Transform{}, glm::vec4(0.8f, 0.4f, 0.1f, 1.0f));
     ResourceManager::GetTexture2D("assets/fireworks.png")->SetFilteringType(FilteringType::Nearest);
     Renderer2D::DrawSprite(spriteDefinition);
     
-    m_Level.BroadcastRender();
     m_Skybox->Draw();
-    Renderer::EndScene();
 }
 
 bool SandboxGameLayer::OnEvent(const Event& event)
@@ -182,7 +178,7 @@ bool SandboxGameLayer::OnEvent(const Event& event)
 void SandboxGameLayer::OnImguiFrame()
 {
     {
-        FpsCounter& counter = m_Level.FindActor("player").GetComponent<FpsCounter>();
+        FpsCounter& counter = m_Level->FindActor("player").GetComponent<FpsCounter>();
 
         RenderStats stats = RenderCommand::GetRenderStats();
 
@@ -206,7 +202,7 @@ void SandboxGameLayer::OnImguiFrame()
 
     ImGui::Begin("Hierarchy");
 
-    for (auto& [name, actor] : m_Level)
+    for (auto& [name, actor] : *m_Level)
     {
         if (ImGui::Button(name.c_str()))
         {
@@ -325,7 +321,7 @@ void SandboxGameLayer::CreateSkeletalActors()
 {
     for (std::int32_t i = 0; i < 2; ++i)
     {
-        Actor skeletalMeshActor = m_Level.CreateActor("SkeletalMesh" + std::to_string(i));
+        Actor skeletalMeshActor = m_Level->CreateActor("SkeletalMesh" + std::to_string(i));
         skeletalMeshActor.AddComponent<SkeletalMeshComponent>(m_TestSkeletalMesh);
         skeletalMeshActor.GetComponent<TransformComponent>().Scale = glm::vec3{0.01f, 0.01f, 0.01f};
         skeletalMeshActor.GetComponent<TransformComponent>().Position = glm::vec3{0, -2 * i - 2, -i - 1};
@@ -334,7 +330,7 @@ void SandboxGameLayer::CreateSkeletalActors()
 
 Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, const std::shared_ptr<Material>& material)
 {
-    Actor instanceMesh = m_Level.CreateActor("InstancedMesh");
+    Actor instanceMesh = m_Level->CreateActor("InstancedMesh");
     instanceMesh.AddComponent<InstancedMeshComponent>(ResourceManager::GetStaticMesh(filePath), material);
 
     material->SetTextureProperty("diffuse1", ResourceManager::GetTexture2D("assets/T_Metal_Steel_D.TGA"));
@@ -355,7 +351,7 @@ Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, co
 
 void SandboxGameLayer::PlaceLightsAndPlayer()
 {
-    Actor lightActor = m_Level.CreateActor("point_light");
+    Actor lightActor = m_Level->CreateActor("point_light");
 
     lightActor.AddComponent<PointLightComponent>();
 
@@ -365,12 +361,12 @@ void SandboxGameLayer::PlaceLightsAndPlayer()
     pointLight.Color = glm::vec3{1, 0, 0};
     lightActor.GetTransform().Position = glm::vec3{4, 5, 0};
 
-    Actor player = m_Level.CreateActor("player");
+    Actor player = m_Level->CreateActor("player");
     player.AddComponent<PlayerController>(player);
     player.AddComponent<CameraComponent>();
     player.AddComponent<FpsCounter>();
 
-    Actor directionalLight = m_Level.CreateActor("directional_light");
+    Actor directionalLight = m_Level->CreateActor("directional_light");
     m_SelectedActor = directionalLight;
     directionalLight.AddComponent<DirectionalLightComponent>();
 
@@ -381,5 +377,4 @@ void SandboxGameLayer::PlaceLightsAndPlayer()
     controller.BindForwardCallback(std::bind(&SandboxGameLayer::MoveForward, this, std::placeholders::_1, std::placeholders::_2));
     controller.BindRightCallback(std::bind(&SandboxGameLayer::MoveRight, this, std::placeholders::_1, std::placeholders::_2));
     controller.BindMouseMoveCallback(std::bind(&SandboxGameLayer::RotateCamera, this, std::placeholders::_1, std::placeholders::_2));
-
 }

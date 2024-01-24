@@ -5,6 +5,9 @@
 #include "logging.h"
 
 #include "renderer_2d.h"
+#include "debug.h"
+#include "delta_clock.h"
+#include "resouce_manager.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <thread>
@@ -21,17 +24,24 @@ Game::Game(const WindowSettings& settings) :
 
     // initialize subsystems
     Renderer::Initialize();
+    Renderer2D::Initialize();
+    Renderer2D::UpdateProjection(CameraProjection{settings.Width, settings.Height, 45.0f});
     Renderer::UpdateProjection(CameraProjection{settings.Width, settings.Height, 45.0f});
 
     BindWindowEvents();
     InitializeImGui();
 
+    m_LevelContext.CreateNewEmpty();
+
+    Debug::InitializeDebugDraw(ResourceManager::GetShader("assets/shaders/unshaded.shd"));
     ImGuizmo::SetOrthographic(false);
 }
 
 Game::~Game()
 {
     // deinitialize all libraries
+    Renderer2D::Quit();
+    Debug::Quit();
     Renderer::Quit();
 
     m_Window->DeinitializeImGui();
@@ -39,42 +49,6 @@ Game::~Game()
 
     Logging::Quit();
 }
-
-template<typename chrono_clock, typename duration = chrono_clock::duration>
-class delta_clock_base
-{
-public:
-    using time_point_t = chrono_clock::time_point;
-    using duration_t = duration;
-
-    delta_clock_base()
-    {
-        PerformTick();
-        PerformTick();
-    }
-
-    void PerformTick()
-    {
-        m_Then = m_Now;
-        m_Now = chrono_clock::now();
-        m_Delta = std::chrono::duration_cast<duration>(m_Now - m_Then);
-    }
-
-    time_point_t GetNow() const
-    {
-        return m_Now;
-    }
-
-    duration_t GetDelta() const
-    {
-        return m_Delta;
-    }
-
-private:
-    time_point_t m_Now;
-    time_point_t m_Then;
-    duration_t m_Delta;
-};
 
 using DeltaTimeClock = delta_clock_base<ChronoDeltaTimeClock>;
 
@@ -98,10 +72,19 @@ void Game::Run()
                 layer->Update(Duration{deltaTime});
             }
 
+            m_LevelContext.CurrentLevel->BroadcastUpdate(deltaTime);
+
             frameTime -= deltaTime;
         }
+        
 
         RenderCommand::Clear();
+        std::shared_ptr<Level> level = m_LevelContext.CurrentLevel;
+        Renderer::BeginScene(level->CameraPosition, level->CameraRotation, level->GetLightsData());
+        Level::BeginScene(Renderer::GetProjectionMatrix(), Renderer::GetViewMatrix(), Renderer::GetViewport());
+        Debug::BeginScene(Renderer::GetProjectionViewMatrix());
+
+        m_LevelContext.CurrentLevel->BroadcastRender();
 
         // broadcast render command
         for (const std::unique_ptr<Layer>& layer : m_Layers)
@@ -110,7 +93,11 @@ void Game::Run()
         }
 
         RunImguiFrame();
+
         Renderer2D::FlushDraw();
+        Debug::FlushDrawDebug();
+        Renderer::EndScene();
+        
         m_Window->Update();
     }
 }
@@ -183,6 +170,13 @@ void Game::BindWindowEvents()
                 return;
             }
         }
+
+        if (evt.Type == EventType::WindowResized)
+        {
+            CameraProjection projection(evt.Size.Width, evt.Size.Height);
+            Renderer2D::UpdateProjection(projection);
+            Renderer::UpdateProjection(projection);
+        }
     });
 }
 
@@ -209,4 +203,9 @@ void Game::RemoveLayer(std::type_index index)
     {
         m_Layers.erase(it);
     }
+}
+
+void LevelContext::CreateNewEmpty()
+{
+    CurrentLevel = std::make_shared<Level>();
 }

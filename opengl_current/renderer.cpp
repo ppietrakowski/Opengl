@@ -1,10 +1,7 @@
 #include "renderer.h"
 #include "error_macros.h"
 #include "render_command.h"
-#include "renderer_2d.h"
 #include "skybox.h"
-
-#include "debug.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
@@ -69,7 +66,6 @@ void Renderer::Initialize()
     RenderCommand::SetCullFace(true);
 
     s_LightBuffer = new LightBuffer(32);
-    Renderer2D::Initialize();
 }
 
 void Renderer::Quit()
@@ -77,15 +73,13 @@ void Renderer::Quit()
     SafeDelete(s_LightBuffer);
     
     s_DefaultTexture.reset();
-    Debug::Quit();
-    Renderer2D::Quit();
     RenderCommand::Quit();
 }
 
 void Renderer::UpdateProjection(const CameraProjection& projection)
 {
+    s_RendererData.Projection = projection;
     s_RendererData.ProjectionMatrix = glm::perspective(glm::radians(projection.Fov), projection.AspectRatio, projection.ZNear, projection.ZFar);
-    Renderer2D::UpdateProjection(projection);
 }
 
 void Renderer::BeginScene(glm::vec3 cameraPosition, glm::quat cameraRotation, const std::vector<LightData>& lights)
@@ -101,13 +95,10 @@ void Renderer::BeginScene(glm::vec3 cameraPosition, glm::quat cameraRotation, co
     {
         s_LightBuffer->AddLight(lightData);
     }
-
-    Debug::BeginScene(s_RendererData.ProjectionViewMatrix);
 }
 
 void Renderer::EndScene()
 {
-    Debug::FlushDrawDebug();
     RenderCommand::SetLineWidth(1);
     s_LightBuffer->Clear();
     RenderCommand::EndScene();
@@ -158,11 +149,6 @@ void Renderer::SubmitMeshInstanced(const InstancedDrawArgs& instancedDrawArgs)
 
     shader->BindUniformBuffer(shader->GetUniformBlockIndex("Transforms"), *instancedDrawArgs.TransformBuffer);
     RenderCommand::DrawIndexedInstanced(submitArgs.TargetVertexArray, instancedDrawArgs.NumInstances);
-}
-
-void Renderer::InitializeDebugDraw(const std::shared_ptr<Shader>& debugShader)
-{
-    Debug::InitializeDebugDraw(debugShader);
 }
 
 void Renderer::UploadUniforms(const std::shared_ptr<Shader>& shader, const glm::mat4& transform, uint32_t cubeMapTextureUnit)

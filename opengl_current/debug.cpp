@@ -1,5 +1,6 @@
 #include "debug.h"
 #include "render_command.h"
+#include "level_interface.h"
 
 struct DebugVertex
 {
@@ -71,6 +72,32 @@ public:
         const uint32_t LineIndices[] = {0, 1};
         glm::mat4 combinedTransform = transform.CalculateTransformMatrix();
         AddGeometry(vertices, LineIndices, combinedTransform);
+    }
+
+    void AddRectInstance(glm::vec2 position, glm::vec2 size, const Transform& transform, const glm::vec4& color)
+    {
+        // Offset to add to prevent flickering when camera moves
+        constexpr float FlickeringStopOffset = 0.01f;
+
+        RgbaColor packedColor(color);
+
+        // rect data initialized with screen space vertices
+        std::array vertices = {
+            DebugVertex{glm::vec3(position, 0), packedColor},
+            DebugVertex{glm::vec3(position.x + size.x, position.y, FlickeringStopOffset), packedColor},
+            DebugVertex{glm::vec3(position.x + size.x, position.y + size.y, FlickeringStopOffset), packedColor},
+            DebugVertex{glm::vec3(position.x, position.y + size.y, FlickeringStopOffset), packedColor},
+        };
+
+        // DebugVertexBatch requires vertices to be in world space so project every point to world
+        for (DebugVertex& vertex : vertices)
+        {
+            vertex.Position = LevelInterface::ProjectScreenToWorld(vertex.Position);
+        }
+
+        const uint32_t rectIndices[] = {0, 1, 1, 2, 2, 3, 3, 0};
+        glm::mat4 combinedTransform = transform.CalculateTransformMatrix();
+        AddGeometry(vertices, rectIndices, combinedTransform);
     }
 
     void FlushDraw()
@@ -153,6 +180,11 @@ void Debug::DrawDebugBox(const Box& box, const Transform& transform, const glm::
 void Debug::DrawDebugLine(const Line& line, const Transform& transform, const glm::vec4& color)
 {
     s_DebugRenderBatch->AddLineInstance(line, transform, color);
+}
+
+void Debug::DrawDebugRect(const glm::vec2& position, const glm::vec2& size, const Transform& transform, const glm::vec4& color)
+{
+    s_DebugRenderBatch->AddRectInstance(position, size, transform, color);
 }
 
 void Debug::FlushDrawDebug()

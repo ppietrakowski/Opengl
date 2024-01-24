@@ -44,8 +44,8 @@ private:
 
     std::shared_ptr<SkeletalMesh> m_TestSkeletalMesh;
     Actor m_SelectedActor;
-
-    Level m_Level;
+    
+    std::shared_ptr<Level> m_Level;
     Game* m_Game{nullptr};
 
 private:

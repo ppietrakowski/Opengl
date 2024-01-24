@@ -10,6 +10,7 @@
 #include "camera_projection.h"
 #include "submit_args.h"
 #include "box.h"
+#include "viewport.h"
 
 #include <cstdint>
 
@@ -19,6 +20,7 @@ struct RendererData
     glm::mat4 ProjectionViewMatrix = glm::identity<glm::mat4>();
     glm::mat4 ProjectionMatrix = glm::identity<glm::mat4>();
     glm::vec3 CameraPosition{0, 0, 0};
+    CameraProjection Projection;
 };
 
 struct InstancedDrawArgs
@@ -46,7 +48,6 @@ public:
     static void SubmitMeshInstanced(const InstancedDrawArgs& instancedDrawArgs);
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();
-    static void InitializeDebugDraw(const std::shared_ptr<Shader>& debugShader);
 
     static glm::mat4 GetViewMatrix()
     {
@@ -56,6 +57,16 @@ public:
     static glm::mat4 GetProjectionMatrix()
     {
         return s_RendererData.ProjectionMatrix;
+    }
+
+    static glm::mat4 GetProjectionViewMatrix()
+    {
+        return s_RendererData.ProjectionViewMatrix;
+    }
+
+    static Viewport GetViewport()
+    {
+        return Viewport{glm::vec2(0, 0), glm::vec2(s_RendererData.Projection.Width, s_RendererData.Projection.Height)};
     }
 
 private:

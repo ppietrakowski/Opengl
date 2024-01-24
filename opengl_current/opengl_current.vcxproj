@@ -237,6 +237,7 @@
     <ClCompile Include="instanced_mesh.cpp" />
     <ClCompile Include="instanced_mesh_component.cpp" />
     <ClCompile Include="level.cpp" />
+    <ClCompile Include="level_interface.cpp" />
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="material.cpp" />
     <ClCompile Include="material_parameter.cpp" />
@@ -266,6 +267,7 @@
     <ClInclude Include="camera_projection.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="debug.h" />
+    <ClInclude Include="delta_clock.h" />
     <ClInclude Include="duration.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="error_macros.h" />
@@ -321,6 +323,7 @@
     <ClInclude Include="uniform_buffer.h" />
     <ClInclude Include="vertex_array.h" />
     <ClInclude Include="vertex_buffer.h" />
+    <ClInclude Include="viewport.h" />
     <ClInclude Include="window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

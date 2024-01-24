@@ -180,6 +180,9 @@
     <ClCompile Include="debug.cpp">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="level_interface.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Imgui\imconfig.h">
@@ -369,6 +372,12 @@
       <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="submit_args.h">
+      <Filter>Header Files\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="delta_clock.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="viewport.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
   </ItemGroup>

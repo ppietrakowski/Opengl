@@ -7,6 +7,7 @@
 #include "graphics_context.h"
 #include "window.h"
 
+#include "level.h"
 #include "imgizmo/ImGuizmo.h"
 
 #include <cstdint>
@@ -16,6 +17,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <functional>
+
+struct LevelContext
+{
+    std::shared_ptr<Level> CurrentLevel;
+    void CreateNewEmpty();
+};
 
 class Game
 {
@@ -39,10 +46,16 @@ public:
         return m_Window->IsMouseVisible();
     }
 
+    std::shared_ptr<Level> GetCurrentLevel() const
+    {
+        return m_LevelContext.CurrentLevel;
+    }
+
 private:
     std::unique_ptr<Window> m_Window;
     ImGuiContext* m_ImguiContext;
     std::vector<std::unique_ptr<Layer>> m_Layers;
+    LevelContext m_LevelContext;
 
 private:
     bool InitializeImGui();
