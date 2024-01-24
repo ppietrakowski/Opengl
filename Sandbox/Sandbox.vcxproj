@@ -214,9 +214,7 @@
     <None Include="assets\shaders\instanced.shd" />
     <None Include="assets\shaders\instanced.vert" />
     <None Include="assets\shaders\skeletal_default.shd" />
-    <None Include="assets\shaders\skeleton.frag" />
     <None Include="assets\shaders\skeleton.vert" />
-    <None Include="assets\shaders\skeleton.vertex" />
     <None Include="assets\shaders\skybox.frag" />
     <None Include="assets\shaders\skybox.shd" />
     <None Include="assets\shaders\skybox.vert" />

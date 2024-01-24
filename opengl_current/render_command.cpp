@@ -30,7 +30,7 @@ void RenderCommand::ClearBufferBindings_Debug()
     s_RendererApi.ClearBufferBindings_Debug();
 }
 
-void RenderCommand::DrawTriangles(const VertexArray& vertexArray, int numIndices)
+void RenderCommand::DrawIndexed(const VertexArray& vertexArray, int numIndices)
 {
     ASSERT(s_bRenderCommandInitialized);
     s_RendererApi.DrawTriangles(vertexArray, GetNumIndices(numIndices, vertexArray));
@@ -154,7 +154,7 @@ void RenderCommand::NotifyVertexBufferDestroyed(int bufferSize)
     s_RenderStats.VertexBufferMemoryAllocation -= bufferSize;
 }
 
-void RenderCommand::DrawTrianglesInstanced(const VertexArray& vertexArray, int numInstances)
+void RenderCommand::DrawIndexedInstanced(const VertexArray& vertexArray, int numInstances)
 {
     s_RendererApi.DrawTrianglesInstanced(vertexArray, numInstances);
     s_RenderStats.NumDrawcalls++;

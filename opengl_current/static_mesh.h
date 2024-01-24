@@ -3,7 +3,6 @@
 #include "shader.h"
 #include "vertex_array.h"
 #include "material.h"
-#include "batching.h"
 
 #include "box.h"
 
@@ -25,20 +24,6 @@ struct StaticMeshVertex
 
     StaticMeshVertex(const StaticMeshVertex&) = default;
     StaticMeshVertex& operator=(const StaticMeshVertex&) = default;
-};
-
-template<>
-struct BatchVertexCreator<StaticMeshVertex>
-{
-    static StaticMeshVertex CreateInstanceFrom(const StaticMeshVertex& vertex, const glm::mat4& transform, int textureId)
-    {
-        StaticMeshVertex v{vertex};
-        glm::mat3 normal_matrix = transform;
-        v.Position = transform * glm::vec4{v.Position,1};
-        v.Normal = normal_matrix * v.Normal;
-        v.TextureId = textureId;
-        return v;
-    }
 };
 
 class StaticMesh
@@ -67,7 +52,7 @@ public:
     Box GetBoundingBox() const;
 
 private:
-    std::unique_ptr<VertexArray> m_VertexArray;
+    std::shared_ptr<VertexArray> m_VertexArray;
     int m_NumTriangles;
 
     Box m_BoundingBox;

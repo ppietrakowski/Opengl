@@ -32,9 +32,9 @@ public:
     void SetupRenderState() const;
     void SetShaderUniforms() const;
 
-    Shader& GetShader() const
+    const std::shared_ptr<Shader>& GetShader() const
     {
-        return *m_Shader;
+        return m_Shader;
     }
 
     uint32_t GetNumTextures() const

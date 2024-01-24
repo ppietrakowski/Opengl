@@ -19,11 +19,12 @@ uniform samplerCube u_skybox_texture;
 struct Light {
     vec3 position;
     vec3 Direction;
-    vec3 Color;
+    vec3 color;
     float DirectionLength;
     int type;
     float cutoff;
     float Intensity;
+    float OuterCutOff;
 };
 
 layout(std140, binding=0) uniform Lights {
@@ -37,18 +38,31 @@ const int kLightTypeSpot = 2;
 uniform int u_num_lights;
 
 
-// Calculates Color of fragment when specific light illuminates it. Calculation are using Phong shading model
+// Calculates color of fragment when specific light illuminates it. Calculation are using Phong shading model
 vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec4 texel, vec3 reflect_skybox) {
-    vec3 ambient = 0.01f * texel.xyz;
 
     // Diffuse lighting
-    vec3 light_dir = normalize(-light.Direction);
+
+    // find light_dir, which points towards light 
+    vec3 light_dir = vec3(0, 0, 0);
+
+    if (light.type != kLightTypeDirectional)
+    {
+        // find light
+        light_dir = normalize(light.position - frag_pos_ws);
+    }
+    else
+    {
+        light_dir = normalize(-light.Direction);
+    }
+
+    vec3 ambient = 0.05f * texel.xyz;
 
     // __________
     // cos(theta)
     float diff = max(dot(light_dir, norm), 0.0f);
 
-    vec3 diffuse = light.Intensity * texel.xyz * light.Color * diff;
+    vec3 diffuse = light.Intensity * texel.xyz * light.color * diff;
 
     // Specular lighting calculation
     vec3 specular = vec3(0.0, 0.0, 0.0);
@@ -57,7 +71,7 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec4 texel, vec3 refl
         vec3 refl = reflect(-light_dir, norm);
         float fi = dot(view_dir, refl);
         
-        specular = light.Intensity * light.Color * pow(max(0.0, fi), u_material.shininess);
+        specular = light.Intensity * light.color * pow(max(0.0, fi), u_material.shininess);
     }
 
     if (light.type == kLightTypePoint) {
@@ -76,25 +90,25 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec4 texel, vec3 refl
         vec3 light_to_fragment = normalize(frag_pos_ws - light.position);
         float spot_factor = dot(light_to_fragment, light.Direction);
 
-        if (spot_factor > light.cutoff) {
-            float attenuation = 0;
-            float dist = distance(light.position, frag_pos_ws);
+        float epsilon = light.cutoff - light.OuterCutOff;
+        float intensity = clamp((spot_factor - light.OuterCutOff) / epsilon, 0.0, 1.0);    
 
-            if (dist <= 0.01f) {
-                attenuation = 1;
-            } else if (dist > 0.01f && dist < light.DirectionLength) {
-                attenuation = (light.DirectionLength - dist) / (light.DirectionLength - 0.01f);
-            }
+        float attenuation = 0;
+        float dist = distance(light.position, frag_pos_ws);
 
-            diffuse *= attenuation;
-            specular *= attenuation;
-        } else {
-            diffuse = vec3(0, 0, 0);
-            specular = vec3(0, 0, 0);
+        if (dist <= 0.01f) {
+            attenuation = 1;
+        } else if (dist > 0.01f && dist < light.DirectionLength) {
+            attenuation = (light.DirectionLength - dist) / (light.DirectionLength - 0.01f);
         }
+
+        diffuse *= attenuation;
+        diffuse *= intensity;
+        specular *= attenuation;
+        specular *= intensity;
     }
 
-    // Final Color calculation
+    // Final color calculation
     return clamp(ambient + diffuse + specular, 0.0, 1.0);
 }
 
@@ -103,23 +117,27 @@ out vec4 frag_color;
 void main() {
     vec4 texel = vec4(0, 0, 0, 1);
 
-    if (textureId == 0u) {
+    if (textureId == 0u) 
+    {
         texel = texture(u_material.diffuse1, textureCoords);
-    } else if (textureId == 1u) {
+    } 
+    else if (textureId == 1u) 
+    {
         texel = texture(u_material.diffuse2, textureCoords);
     }
     
-    vec3 Color = vec3(0, 0, 0);
+    vec3 color = vec3(0, 0, 0);
     vec3 norm = normalize(normal);
     vec3 view_dir = normalize(u_camera_location - frag_pos_ws);
     vec3 eye_dir = normalize(frag_pos_ws - u_camera_location);
     vec3 reflect_vec = reflect(eye_dir, normalize(norm));
-
-    for (int i = 0; i < u_num_lights; ++i) {
-        Color += CalculateLight(u_lights[i], norm, view_dir, texel, reflect_vec);
+    
+    for (int i = 0; i < u_num_lights; ++i) 
+    {
+        color += CalculateLight(u_lights[i], norm, view_dir, texel, reflect_vec);
     }
     
-    Color += vec3(u_material.reflection_factor * texture(u_skybox_texture, reflect_vec));
+    color += vec3(u_material.reflection_factor * texture(u_skybox_texture, reflect_vec));
 
-    frag_color = vec4(Color, 1.0);
+    frag_color = vec4(color, 1.0);
 }

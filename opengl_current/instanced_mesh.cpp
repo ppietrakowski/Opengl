@@ -16,12 +16,12 @@ void InstancedMesh::Draw(const glm::mat4& transform)
 {
     for (InstancingTransformBuffer& transformBuffer : m_TransformBuffers)
     {
-        Shader& shader = m_Material->GetShader();
+        std::shared_ptr<Shader> shader = m_Material->GetShader();
 
-        shader.BindUniformBuffer(0, *transformBuffer.Buffer);
+        shader->BindUniformBuffer(0, *transformBuffer.Buffer);
 
-        Renderer::SubmitMeshInstanced(SubmitCommandArgs{m_Material.get(), 0, m_StaticMesh->m_VertexArray.get(), transform},
-            *transformBuffer.Buffer, transformBuffer.NumTransformsOccupied);
+        Renderer::SubmitMeshInstanced(InstancedDrawArgs{SubmitCommandArgs{m_Material, 0, m_StaticMesh->m_VertexArray, transform},
+            transformBuffer.Buffer, transformBuffer.NumTransformsOccupied});
     }
 }
 

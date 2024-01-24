@@ -10,7 +10,6 @@ struct DirectionalLightComponent
 
 struct PointLightComponent
 {
-    glm::vec3 Direction{0, 1, 0};
     float DirectionLength{0.0f};
 
     glm::vec3 Color{1, 1, 1};
@@ -24,4 +23,5 @@ struct SpotLightComponent
     glm::vec3 Color{1, 1, 1};
     float CutOffAngle{0.0f};
     float Intensity{1.0f};
+    float OuterCutOffAngle{1.0f};
 };

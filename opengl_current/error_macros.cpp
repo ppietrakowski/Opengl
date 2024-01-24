@@ -22,6 +22,6 @@ void Crash(const SourceLocation* location, const char* description)
 void PrintError(const SourceLocation* location, const char* message)
 {
 #if defined(DEBUG) || defined(_DEBUG)
-    printf("Error in %s: %u in %s msg: %s\n", location->file_name, location->line, location->function_name, message);
+    printf("Error in %s: %u in %s msg: %s\n", location->FileName, location->Line, location->FunctionName, message);
 #endif
 }

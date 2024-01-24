@@ -6,7 +6,6 @@
 #include "texture.h"
 #include "material.h"
 #include "transform.h"
-#include "batching.h"
 #include "camera_projection.h"
 
 struct SpriteVertex

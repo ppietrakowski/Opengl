@@ -1,10 +1,12 @@
 #pragma once
 
 #include "static_mesh.h"
+#include "uniform_buffer.h"
+#include "transform.h"
+
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "uniform_buffer.h"
 
 constexpr uint32_t NumInstancesTransform = 400;
 

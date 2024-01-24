@@ -214,7 +214,7 @@
   <ItemGroup>
     <ClCompile Include="actor.cpp" />
     <ClCompile Include="core.cpp" />
-    <ClCompile Include="debug_render_batch.cpp" />
+    <ClCompile Include="debug.cpp" />
     <ClCompile Include="error_macros.cpp" />
     <ClCompile Include="event.cpp" />
     <ClCompile Include="game.cpp" />
@@ -262,11 +262,10 @@
     <ClInclude Include="actor.h" />
     <ClInclude Include="actor_tag_component.h" />
     <ClInclude Include="assimp_utils.h" />
-    <ClInclude Include="batching.h" />
     <ClInclude Include="box.h" />
     <ClInclude Include="camera_projection.h" />
     <ClInclude Include="core.h" />
-    <ClInclude Include="debug_render_batch.h" />
+    <ClInclude Include="debug.h" />
     <ClInclude Include="duration.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="error_macros.h" />
@@ -315,6 +314,7 @@
     <ClInclude Include="static_mesh.h" />
     <ClInclude Include="static_mesh_component.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="submit_args.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="transform.h" />
     <ClInclude Include="transform_component.h" />

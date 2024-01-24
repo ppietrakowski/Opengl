@@ -93,7 +93,7 @@ bool SkeletonMeshVertex::AddBoneData(int boneId, float weight)
 SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material) :
     MainMaterial{material},
     m_NumBones{0},
-    m_VertexArray{std::make_unique<VertexArray>()}
+    m_VertexArray{std::make_shared<VertexArray>()}
 {
     // maps bone name to boneID
     std::unordered_map<std::string, int> boneNameToIndex;
@@ -268,7 +268,7 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, int animationIndex)
 
 void SkeletalMesh::Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& worldTransform)
 {
-    Renderer::SubmitSkeleton(SubmitCommandArgs{MainMaterial.get(), 0, m_VertexArray.get(), worldTransform}, transforms);
+    Renderer::SubmitSkeleton(SubmitCommandArgs{MainMaterial, 0, m_VertexArray, worldTransform}, transforms);
 }
 
 std::vector<std::string> SkeletalMesh::GetAnimationNames() const

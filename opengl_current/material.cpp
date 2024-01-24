@@ -142,10 +142,10 @@ void Material::SetupRenderState() const
 
 void Material::SetShaderUniforms() const
 {
-    Shader& shader = GetShader();
+    std::shared_ptr<Shader> shader = GetShader();
 
     for (auto& [name, param] : m_MaterialParams)
     {
-        param.SetUniform(shader);
+        param.SetUniform(*shader);
     }
 }

@@ -25,7 +25,7 @@ public:
 
     static void ClearBufferBindings_Debug();
 
-    static void DrawTriangles(const VertexArray& vertexArray, int numIndices);
+    static void DrawIndexed(const VertexArray& vertexArray, int numIndices);
     static void DrawTrianglesArrays(const VertexArray& vertexArray, int numVertices);
     static void DrawTrianglesAdjancency(const VertexArray& vertexArray, int numIndices);
     static void DrawLines(const VertexArray& vertexArray, int numIndices);
@@ -56,7 +56,7 @@ public:
     static void NotifyVertexBufferCreated(int bufferSize);
     static void NotifyVertexBufferDestroyed(int bufferSize);
 
-    static void DrawTrianglesInstanced(const VertexArray& vertexArray, int numInstances);
+    static void DrawIndexedInstanced(const VertexArray& vertexArray, int numInstances);
     static void SetDepthFunc(DepthFunction depthFunction);
     static void SetDepthEnabled(bool bEnabled);
 

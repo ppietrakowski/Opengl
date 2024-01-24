@@ -24,5 +24,5 @@ struct LightData
     LightType Type{LightType::Directional};
     float CutOff{0.0f};
     float Intensity{0.0f};
-    float DecreasingStartAngle{0.0f};
+    float OuterCutOff{0.0f};
 };

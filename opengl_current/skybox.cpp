@@ -70,11 +70,12 @@ void Skybox::Draw()
     m_Shader->Use();
 
     // cut last column (translation), so the skybox will be rendered as it was in center of camera
-    glm::mat4 viewWithoutTranslation = Renderer::s_View;
+    glm::mat4 viewWithoutTranslation = Renderer::GetViewMatrix();
     viewWithoutTranslation[3] = glm::vec4{0, 0, 0, 1};
 
-    m_Shader->SetUniform("u_view", viewWithoutTranslation);
-    m_Shader->SetUniform("u_projection", Renderer::s_Projection);
+    glm::mat4 projectionView = Renderer::GetProjectionMatrix() * viewWithoutTranslation;
+
+    m_Shader->SetUniform("u_ProjectionView", projectionView);
     m_CubeMap->Bind(0);
     m_Shader->SetSamplerUniform("u_skybox_texture", m_CubeMap, 0);
 

@@ -10,7 +10,7 @@
 
 static void SetupDefaultProperties(const std::shared_ptr<Material>& material)
 {
-    material->SetFloatProperty("reflection_factor", 0.1f);
+    material->SetFloatProperty("reflection_factor", 0.5f);
     material->SetFloatProperty("shininess", 32.0f);
     material->bTransparent = true;
     material->bCullFaces = false;
@@ -60,7 +60,7 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     auto defaultMaterial = ResourceManager::CreateMaterial("assets/shaders/default.shd", "postac_material");
     defaultMaterial->SetFloatProperty("shininess", 32.0f);
 
-    std::shared_ptr<StaticMesh> staticMesh = ResourceManager::GetStaticMesh("assets/cube.obj");
+    std::shared_ptr<StaticMesh> staticMesh = ResourceManager::GetStaticMesh("assets/box.fbx");
     staticMesh->MainMaterial = defaultMaterial;
     defaultMaterial->bTransparent = true;
 
@@ -70,7 +70,7 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     SetupDefaultProperties(instancedMeshMaterial);
     m_InstancedMesh = std::make_shared<InstancedMesh>(staticMesh, instancedMeshMaterial);
 
-    CreateInstancedMeshActor("assets/cube.obj", instancedMeshMaterial);
+    CreateInstancedMeshActor("assets/box.fbx", instancedMeshMaterial);
 
     PlaceLightsAndPlayer();
 
@@ -99,7 +99,7 @@ void SandboxGameLayer::Update(Duration deltaTime)
 
 void SandboxGameLayer::Render()
 {
-    Renderer::BeginScene(m_Level.CameraPosition, m_Level.CameraRotation);
+    Renderer::BeginScene(m_Level.CameraPosition, m_Level.CameraRotation, m_Level.GetLightsData());
 
     glm::vec3 lightPosition{0.0f};
 
@@ -119,7 +119,7 @@ void SandboxGameLayer::Render()
     {
         Transform transform = characterActor.GetTransform().GetAsTransform();
         transform.Scale = {1, 1, 1};
-        Renderer::DrawDebugBox(m_TestSkeletalMesh->GetBoundingBox(), transform);
+        Debug::DrawDebugBox(m_TestSkeletalMesh->GetBoundingBox(), transform);
     }
 
     // draw directional light gizmo
@@ -131,11 +131,11 @@ void SandboxGameLayer::Render()
         color[i] = 1;
 
         Line line{lightPosition, lightPosition + pos};
-
-        Renderer::DrawDebugLine(line, Transform{}, color);
+            
+        Debug::DrawDebugLine(line, Transform{}, color);
     }
 
-    Renderer::DrawDebugLine(Line{lightPosition, lightPosition + 2.0f * glm::vec3{0, -1, 0}}, Transform{}, glm::vec4(0, 0, 1, 1));
+    Debug::DrawDebugLine(Line{lightPosition, lightPosition + 2.0f * glm::vec3{0, -1, 0}}, Transform{}, glm::vec4(0, 0, 1, 1));
 
     m_Level.BroadcastRender();
     m_Skybox->Draw();
@@ -217,7 +217,10 @@ void SandboxGameLayer::OnImgizmoFrame()
 
     glm::mat4 transform = m_SelectedActor.GetTransform().GetWorldTransformMatrix();
 
-    if (ImGuizmo::Manipulate(glm::value_ptr(Renderer::s_View), glm::value_ptr(Renderer::s_Projection),
+    glm::mat4 view = Renderer::GetViewMatrix();
+    glm::mat4 projection = Renderer::GetProjectionMatrix();
+
+    if (ImGuizmo::Manipulate(&view[0][0], glm::value_ptr(projection),
         ImGuizmo::OPERATION::UNIVERSAL, ImGuizmo::WORLD, glm::value_ptr(transform)
     ))
     {
@@ -327,14 +330,12 @@ void SandboxGameLayer::PlaceLightsAndPlayer()
 {
     Actor lightActor = m_Level.CreateActor("point_light");
 
-    lightActor.AddComponent<SpotLightComponent>();
+    lightActor.AddComponent<PointLightComponent>();
 
-    SpotLightComponent& spotLight = lightActor.GetComponent<SpotLightComponent>();
+    PointLightComponent& pointLight = lightActor.GetComponent<PointLightComponent>();
 
-    spotLight.DirectionLength = 40.0f;
-    spotLight.Direction = glm::vec3{0, -1, 0};
-    spotLight.Color = glm::vec3{1, 0, 0};
-    spotLight.CutOffAngle = 45.0f;
+    pointLight.DirectionLength = 40.0f;
+    pointLight.Color = glm::vec3{1, 0, 0};
     lightActor.GetTransform().Position = glm::vec3{4, 5, 0};
 
     Actor player = m_Level.CreateActor("player");
@@ -347,7 +348,7 @@ void SandboxGameLayer::PlaceLightsAndPlayer()
     directionalLight.AddComponent<DirectionalLightComponent>();
 
     DirectionalLightComponent& directional = directionalLight.GetComponent<DirectionalLightComponent>();
-    directional.Direction = {0, -1, 0};
+    directional.Direction = glm::normalize(glm::vec3{1, -1, 0});
 
     PlayerController& controller = player.GetComponent<PlayerController>();
     controller.BindForwardCallback(std::bind(&SandboxGameLayer::MoveForward, this, std::placeholders::_1, std::placeholders::_2));

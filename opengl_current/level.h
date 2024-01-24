@@ -4,6 +4,7 @@
 #include "duration.h"
 
 #include "instanced_mesh.h"
+#include "lights.h"
 
 class ResourceManagerImpl;
 
@@ -55,6 +56,11 @@ public:
     glm::vec3 CameraPosition{0, 0, 0};
     glm::quat CameraRotation{glm::vec3{0, 0,0}};
 
+    const std::vector<LightData>& GetLightsData() const
+    {
+        return m_Lights;
+    }
+
 private:
     entt::registry m_Registry;
     std::map<std::string, Actor> m_Actors;
@@ -62,6 +68,7 @@ private:
 
     std::unordered_map<std::string, std::shared_ptr<InstancedMesh>> m_MeshNameToInstancedMesh;
 
+    std::vector<LightData> m_Lights;
 
 private:
     void UpdateSkeletalMeshesAnimation(Duration duration);

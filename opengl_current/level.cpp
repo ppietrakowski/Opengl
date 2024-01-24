@@ -125,6 +125,8 @@ void Level::BroadcastUpdate(Duration duration)
 
 void Level::BroadcastRender()
 {
+    m_Lights.clear();
+
     auto directionalLightView = m_Registry.view<DirectionalLightComponent, TransformComponent>();
 
     for (auto&& [entity, directionalLight, transform] : directionalLightView.each())
@@ -134,18 +136,18 @@ void Level::BroadcastRender()
         LightData lightData{transform.Position, 1.0f, transformedDirection,
             1.0f, directionalLight.Color, 0.0f, LightType::Directional, 0.0f, 1.0f};
 
-        Renderer::AddLight(lightData);
+        m_Lights.emplace_back(lightData);
     }
 
     auto pointLightView = m_Registry.view<PointLightComponent, TransformComponent>();
 
     for (auto&& [entity, pointLight, transform] : pointLightView.each())
     {
-        glm::vec3 transformedDirection = transform.Rotation * pointLight.Direction;
 
-        LightData lightData{transform.Position, 1.0f, transformedDirection,
+        LightData lightData{transform.Position, 1.0f, glm::vec3{0.0f},
             1.0f, pointLight.Color, pointLight.DirectionLength, LightType::Point, 0.0f, pointLight.Intensity};
-        Renderer::AddLight(lightData);
+
+        m_Lights.emplace_back(lightData);
     }
 
     auto spot_light_view = m_Registry.view<SpotLightComponent, TransformComponent>();
@@ -155,8 +157,11 @@ void Level::BroadcastRender()
         glm::vec3 transformedDirection = transform.Rotation * spot_light.Direction;
 
         LightData lightData{transform.Position, 1.0f, transformedDirection,
-            1.0f, spot_light.Color, spot_light.DirectionLength, LightType::Spot, cosf(glm::radians(spot_light.CutOffAngle)), spot_light.Intensity};
-        Renderer::AddLight(lightData);
+            1.0f, spot_light.Color, spot_light.DirectionLength, LightType::Spot, cosf(glm::radians(spot_light.CutOffAngle)), spot_light.Intensity,
+        cosf(glm::radians(spot_light.OuterCutOffAngle))
+        };
+
+        m_Lights.emplace_back(lightData);
     }
 
     auto staticMeshView = View<TransformComponent, StaticMeshComponent>();
@@ -195,11 +200,7 @@ void Level::AddNewStaticMesh(const std::string& meshName, const Transform& trans
     }
 
     auto& mesh = it->second->GetMesh();
-
-    if (Renderer::IsVisibleToCamera(transform.Position, mesh.GetBBoxMin(), mesh.GetBBoxMax()))
-    {
-        it->second->AddInstance(transform, 0);
-    }
+    it->second->AddInstance(transform, 0);
 }
 
 

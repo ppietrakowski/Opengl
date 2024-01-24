@@ -57,12 +57,12 @@ struct SpriteBatch
 
     void FlushDraw(const glm::mat4& projection)
     {
-        Shader& shader = Material2d->GetShader();
+        std::shared_ptr<Shader> shader = Material2d->GetShader();
 
         RenderCommand::SetDepthEnabled(false);
         Material2d->SetupRenderState();
 
-        shader.Use();
+        shader->Use();
 
         Material2d->SetShaderUniforms();
 
@@ -71,15 +71,15 @@ struct SpriteBatch
             bind_textures[i]->Bind(i);
         }
 
-        shader.SetSamplersUniform("u_textures", std::span<const std::shared_ptr<Texture>>{bind_textures.begin(), (size_t)NumBindedTextures});
+        shader->SetSamplersUniform("u_textures", std::span<const std::shared_ptr<Texture>>{bind_textures.begin(), (size_t)NumBindedTextures});
 
-        shader.SetUniform("u_projection", projection);
+        shader->SetUniform("u_projection", projection);
         auto vertexBuffer = SpriteVertexArray.GetVertexBufferAt(0);
 
         SpriteVertexArray.Bind();
         vertexBuffer->UpdateVertices(Sprites.data(), static_cast<int>(sizeof(SpriteVertex) * Sprites.size()));
 
-        RenderCommand::DrawTriangles(SpriteVertexArray, NumIndicesToDraw);
+        RenderCommand::DrawIndexed(SpriteVertexArray, NumIndicesToDraw);
 
         LastIndex = 0;
         NumBindedTextures = 0;

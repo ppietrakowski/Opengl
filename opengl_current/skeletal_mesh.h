@@ -177,7 +177,7 @@ public:
     std::vector<std::string> TextureNames;
 
 private:
-    std::unique_ptr<VertexArray> m_VertexArray;
+    std::shared_ptr<VertexArray> m_VertexArray;
     Bone m_RootBone;
     std::unordered_map<std::string, SkeletalAnimation> m_Animations;
     glm::mat4 m_GlobalInverseTransform;
