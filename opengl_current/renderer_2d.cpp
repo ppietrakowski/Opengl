@@ -13,12 +13,14 @@ static const std::array SpriteVertexAttributes{
 
 #define NUM_QUAD_VERTICES 4
 
+static glm::mat4 s_Projection{1.0f};
+
 struct SpriteBatch
 {
     std::shared_ptr<VertexArray> SpriteVertexArray;
     std::vector<SpriteVertex> Sprites;
 
-    std::array<std::shared_ptr<Texture>, MinTextureUnits> bind_textures;
+    std::array<std::shared_ptr<Texture>, MinTextureUnits> BindTextures;
     int NumBindedTextures = 0;
 
     int LastIndex = 0;
@@ -69,10 +71,10 @@ struct SpriteBatch
 
         for (int i = 0; i < NumBindedTextures; ++i)
         {
-            bind_textures[i]->Bind(i);
+            BindTextures[i]->Bind(i);
         }
 
-        shader->SetSamplersUniform("u_textures", std::span<const std::shared_ptr<Texture>>{bind_textures.begin(), (size_t)NumBindedTextures});
+        shader->SetSamplersUniform("u_textures", std::span<const std::shared_ptr<Texture>>{BindTextures.begin(), (size_t)NumBindedTextures});
 
         shader->SetUniform("u_projection", projection);
         auto vertexBuffer = SpriteVertexArray->GetVertexBufferAt(0);
@@ -104,12 +106,34 @@ struct SpriteBatch
 
     void BindNewTexture(std::shared_ptr<Texture> texture)
     {
-        bind_textures[NumBindedTextures++] = texture;
+        if (NumBindedTextures == MinTextureUnits)
+        {
+            FlushDraw(s_Projection);
+        }
+
+        BindTextures[NumBindedTextures++] = texture;
     }
 };
 
+SpriteSheetData::SpriteSheetData(glm::uvec2 numFrames, glm::vec2 margin, glm::vec2 spriteSheetSize, const std::shared_ptr<Texture2D>& texture) :
+    m_NumFrames(numFrames),
+    m_Margin(margin),
+    m_SpriteSheetSize(spriteSheetSize),
+    m_Texture(texture)
+{
+    assert(m_SpriteSheetSize.x <= m_Texture->GetWidth() && m_SpriteSheetSize.y <= m_Texture->GetHeight());
+}
+
+Sprite2D::Sprite2D(glm::vec2 position, glm::vec2 size, int textureId, const SpriteSheetData& spriteSheetData, glm::uvec2 animationFrame, RgbaColor tint) :
+    Transform{position, 0.0f, size, size / 2.0f},
+    Tint(tint),
+    TextureId(textureId),
+    AnimationFrame(animationFrame),
+    SpriteSheetInfo(spriteSheetData)
+{
+}
+
 static SpriteBatch* s_SpriteBatch = nullptr;
-static glm::mat4 s_Projection{1.0f};
 
 void Renderer2D::Initialize()
 {
@@ -130,16 +154,28 @@ void Renderer2D::UpdateProjection(const CameraProjection& projection)
     s_Projection = glm::ortho(0.0f, projection.Width, 0.0f, projection.Height, -1.0f, 1.0f);
 }
 
-void Renderer2D::DrawRect(const glm::vec2& mins, const glm::vec2& maxs, const Transform2D& transform, const RgbaColor& Color, int textureId, glm::vec2 tilling)
+static constexpr glm::vec2 SpriteVertexPositions[] = 
+        {{  0.0f, 0.0f },
+         {  1.0f, 0.0f },
+         {  1.0f,  1.0f },
+         {  0.0f,  1.0f }};
+
+
+void Renderer2D::DrawSprite(const Sprite2D& definition)
 {
-    std::array vertices = {
-        SpriteVertex{mins, tilling * glm::vec2{0.0f, 0.0f}, textureId, Color},
-        SpriteVertex{glm::vec2{maxs.x, mins.y}, tilling * glm::vec2{1.0f, 0.0f}, textureId, Color},
-        SpriteVertex{glm::vec2{maxs.x, maxs.y}, tilling * glm::vec2{1.0f, 1.0f}, textureId, Color},
-        SpriteVertex{glm::vec2{mins.x, maxs.y}, tilling * glm::vec2{0.0f, 1.0f}, textureId, Color},
+    assert(definition.TextureId < s_SpriteBatch->NumBindedTextures);
+
+    glm::vec2 start = definition.SpriteSheetInfo.GetStartUvCoordinate(definition.AnimationFrame);
+    glm::vec2 end = definition.SpriteSheetInfo.GetEndUvCoordinate(definition.AnimationFrame);
+
+    std::array<SpriteVertex, 4> vertices = {
+        SpriteVertex{SpriteVertexPositions[0], start, definition.TextureId, definition.Tint},
+        SpriteVertex{SpriteVertexPositions[1], glm::vec2(end.x, start.y), definition.TextureId, definition.Tint},
+        SpriteVertex{SpriteVertexPositions[2], end, definition.TextureId, definition.Tint},
+        SpriteVertex{SpriteVertexPositions[3], glm::vec2(start.x, end.y), definition.TextureId, definition.Tint}
     };
 
-    s_SpriteBatch->AddSpriteInstance(vertices, transform);
+    s_SpriteBatch->AddSpriteInstance(vertices, definition.Transform);
 }
 
 void Renderer2D::FlushDraw()
@@ -155,13 +191,14 @@ int Renderer2D::BindTextureToDraw(const std::shared_ptr<Texture>& texture)
 
 glm::mat4 Transform2D::GetTransformMatrix() const
 {
-    const glm::mat4 rotationZ = glm::rotate(glm::mat4(1.0f), glm::radians(Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(Position, 0.0f));
 
-    glm::mat4 rotationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3{Origin, 0.0f});
-    rotationMatrix = rotationMatrix * rotationZ;
-    rotationMatrix = glm::translate(rotationMatrix, glm::vec3{-Origin, 0.0f});
+    model = glm::translate(model, glm::vec3(Origin, 0.0f));
+    model = glm::rotate(model, glm::radians(Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::translate(model, glm::vec3(-Origin, 0.0f));
 
-    // TRS matrix
-    return glm::translate(glm::mat4(1.0f), glm::vec3{Position + Origin, 0.0f}) *
-        rotationMatrix * glm::scale(glm::mat4(1.0f), glm::vec3{Scale, 1});
+    model = glm::scale(model, glm::vec3(Size, 1.0f));
+
+    return model;
 }

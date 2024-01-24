@@ -23,6 +23,12 @@ struct TextureSpecification
     TextureFormat Format;
 };
 
+enum class FilteringType : uint8_t
+{
+    Linear = 0,
+    Nearest
+};
+
 class Texture
 {
 public:
@@ -39,6 +45,8 @@ public:
     virtual bool GotMinimaps() const = 0;
     virtual void GenerateMipmaps() = 0;
     virtual TextureFormat GetTextureFormat() const = 0;
+
+    virtual void SetFilteringType(FilteringType filteringType) = 0;
 };
 
 class Texture2D : public Texture
@@ -63,6 +71,7 @@ public:
 
 
     TextureFormat GetTextureFormat() const override;
+    void SetFilteringType(FilteringType filteringType) override;
 
     static inline size_t s_NumTextureVramUsed = 0;
 
@@ -111,6 +120,7 @@ public:
     bool GotMinimaps() const override;
     void GenerateMipmaps() override;
     TextureFormat GetTextureFormat() const override;
+    void SetFilteringType(FilteringType filteringType) override;
 
 private:
     uint32_t m_RendererId;

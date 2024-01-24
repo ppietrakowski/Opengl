@@ -4,6 +4,8 @@
 #include "renderer.h"
 #include "logging.h"
 
+#include "renderer_2d.h"
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <thread>
 
@@ -108,6 +110,7 @@ void Game::Run()
         }
 
         RunImguiFrame();
+        Renderer2D::FlushDraw();
         m_Window->Update();
     }
 }

@@ -184,6 +184,14 @@ TextureFormat Texture2D::GetTextureFormat() const
     return m_DataFormat == GL_RGB ? TextureFormat::Rgb : TextureFormat::Rgba;
 }
 
+static GLenum FilteringTypes[] = {GL_LINEAR, GL_NEAREST};
+
+void Texture2D::SetFilteringType(FilteringType filteringType)
+{
+    glTextureParameteri(m_RendererId, GL_TEXTURE_MIN_FILTER, FilteringTypes[(size_t)filteringType]);
+    glTextureParameteri(m_RendererId, GL_TEXTURE_MAG_FILTER, FilteringTypes[(size_t)filteringType]);
+}
+
 void Texture2D::SetData(const void* data, const TextureSpecification& specification, glm::ivec2 offset)
 {
     ERR_FAIL_EXPECTED_TRUE(specification.Width < GetWidth() && specification.Height < GetHeight());
@@ -355,4 +363,8 @@ void CubeMap::GenerateMipmaps()
 TextureFormat CubeMap::GetTextureFormat() const
 {
     return TextureFormat::Rgba;
+}
+
+void CubeMap::SetFilteringType(FilteringType filteringType)
+{
 }

@@ -96,6 +96,10 @@ void SandboxGameLayer::Update(Duration deltaTime)
 
 void SandboxGameLayer::Render()
 {
+    static float v = 0.00f;
+    static float accum = 0.0f;
+    static int numFrames = 0;
+
     Renderer::BeginScene(m_Level.CameraPosition, m_Level.CameraRotation, m_Level.GetLightsData());
 
     glm::vec3 lightPosition{0.0f};
@@ -133,7 +137,33 @@ void SandboxGameLayer::Render()
     }
 
     Debug::DrawDebugLine(Line{lightPosition, lightPosition + 2.0f * glm::vec3{0, -1, 0}}, Transform{}, glm::vec4(0, 0, 1, 1));
+    
+    accum += m_LastDeltaSeconds.GetSeconds();
 
+    if (accum > 0.4f)
+    {
+        accum = 0;
+        numFrames = (numFrames + 1) % 3;
+    }
+    v += 10.0f * m_LastDeltaSeconds.GetSeconds();
+    v = fmod(v, 148.0f);
+
+    SpriteSheetData spriteSheetData{
+        glm::uvec2(3, 1),
+        glm::vec2(0, 0),
+        glm::vec2(48, 48),
+        ResourceManager::GetTexture2D("assets/fireworks.png")
+    };
+
+    Sprite2D spriteDefinition(glm::vec2(1000, 10), glm::vec2(200, 200), 
+        Renderer2D::BindTextureToDraw(ResourceManager::GetTexture2D("assets/fireworks.png")),
+        spriteSheetData, glm::uvec2(numFrames, 0), RgbaColor(255, 255, 255));
+
+    spriteDefinition.Transform.Rotation = v;
+
+    ResourceManager::GetTexture2D("assets/fireworks.png")->SetFilteringType(FilteringType::Nearest);
+    Renderer2D::DrawSprite(spriteDefinition);
+    
     m_Level.BroadcastRender();
     m_Skybox->Draw();
     Renderer::EndScene();

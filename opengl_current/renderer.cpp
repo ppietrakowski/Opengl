@@ -109,7 +109,6 @@ void Renderer::EndScene()
 {
     Debug::FlushDrawDebug();
     RenderCommand::SetLineWidth(1);
-    Renderer2D::FlushDraw();
     s_LightBuffer->Clear();
     RenderCommand::EndScene();
 }
