@@ -38,8 +38,8 @@ void VertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuf
     int attributeStartIndex = STD_ARRAY_NUM_ELEMENTS(m_VertexBuffers);
     int stride = 0;
 
-    const uintptr_t AttributeSizes[MaxAttributes] = {sizeof(int), sizeof(uint32_t), sizeof(float)};
-    const GLenum AttributeConversionTable[MaxAttributes] = {GL_INT, GL_UNSIGNED_INT, GL_FLOAT};
+    constexpr uintptr_t AttributeSizes[MaxAttributes] = {sizeof(int), sizeof(uint32_t), sizeof(float)};
+    constexpr GLenum AttributeConversionTable[MaxAttributes] = {GL_INT, GL_UNSIGNED_INT, GL_FLOAT};
 
     Bind();
     vertexBuffer->Bind();

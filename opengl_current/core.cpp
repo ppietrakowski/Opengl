@@ -32,9 +32,9 @@ std::string LoadFileContent(const std::filesystem::path& filePath)
     return content.str();
 }
 
-const char* FormatSize(size_t numBytes)
+std::string FormatSize(size_t numBytes)
 {
-    static std::array<char, 100> strSize = {};
+    std::array<char, 100> strSize = {};
     static const char* kUnits[] =
     {
         "B", "KB", "MB", "GB", "TB", "PB"
@@ -51,6 +51,7 @@ const char* FormatSize(size_t numBytes)
 
     int lastIndex = sprintf(strSize.data(), "%.3f %s", temp, kUnits[unitIndex]);
     assert(lastIndex >= 0 && lastIndex < strSize.size());
-    strSize[lastIndex] = 0;
-    return strSize.data();
+    strSize.back() = 0;
+    std::string str = strSize.data();
+    return str;
 }

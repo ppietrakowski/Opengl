@@ -12,7 +12,7 @@ public:
 
     void Bind(int binding_id) const;
 
-    static inline size_t NumBytesAllocated = 0;
+    static inline size_t s_NumBytesAllocated = 0;
 
 private:
     uint32_t m_RendererId;

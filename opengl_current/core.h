@@ -36,4 +36,4 @@ FORCE_INLINE void SafeDelete(T*& ptr)
     ptr = nullptr;
 }
 
-const char* FormatSize(size_t numBytes);
+std::string FormatSize(size_t numBytes);

@@ -8,7 +8,7 @@
 class SandboxGameLayer : public Layer
 {
 public:
-    SandboxGameLayer(Game *game);
+    SandboxGameLayer(Game* game);
 
     // Inherited via IGameLayer
     void Update(Duration deltaTime) override;
@@ -24,37 +24,34 @@ public:
     }
 
 private:
-    std::shared_ptr<Shader> default_shader_;
-    std::shared_ptr<Shader> debug_shader_;
-    std::shared_ptr<Shader> current_used_shader_;
+    std::shared_ptr<Shader> m_DefaultShader;
+    std::shared_ptr<Shader> m_DebugShader;
+    std::shared_ptr<Shader> m_CurrentUsedShader;
 
-    glm::vec3 camera_position_;
-    glm::quat camera_rotation_;
+    std::shared_ptr<Material> m_DebugMaterial;
+    std::shared_ptr<InstancedMesh> m_InstancedMesh;
+    std::unique_ptr<Skybox> m_Skybox;
 
-    std::shared_ptr<Material> debug_material_;
-    std::shared_ptr<InstancedMesh> instanced_mesh_;
-    std::unique_ptr<Skybox> skybox_;
+    float m_CameraYaw = 0.0f;
+    float m_CameraPitch = 0.0f;
 
-    float camera_yaw_ = 0.0f;
-    float camera_pitch_ = 0.0f;
+    Duration m_LastDeltaSeconds;
 
-    Duration last_delta_seconds_;
+    float m_MoveSpeed = 20.0f;
+    float m_YawRotationRate = 10.0f;
+    float m_PitchRotationRate = 10.0f;
+    float m_AscendSpeed = 20.0f;
 
-    float move_speed_ = 20.0f;
-    float yaw_rotation_rate_ = 10.0f;
-    float pitch_rotation_rate_ = 10.0f;
-    float ascend_speed_ = 20.0f;
+    std::shared_ptr<SkeletalMesh> m_TestSkeletalMesh;
+    Actor m_SelectedActor;
 
-    std::shared_ptr<SkeletalMesh> test_skeletal_mesh_;
-    Actor selected_actor;
-
-    Level level_;
-    Game* game_{nullptr};
+    Level m_Level;
+    Game* m_Game{nullptr};
 
 private:
-    void MoveForward(Actor& player, float axis_value);
-    void MoveRight(Actor& player, float axis_value);
-    void RotateCamera(Actor& player, glm::vec2 mouse_move_delta);
+    void MoveForward(Actor& player, float axisValue);
+    void MoveRight(Actor& player, float axisValue);
+    void RotateCamera(Actor& player, glm::vec2 mouseMoveDelta);
 
     void InitializeSkeletalMesh();
 

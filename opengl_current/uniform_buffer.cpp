@@ -9,13 +9,13 @@ UniformBuffer::UniformBuffer(int maxSize) :
     glBindBuffer(GL_UNIFORM_BUFFER, m_RendererId);
 
     glBufferData(GL_UNIFORM_BUFFER, maxSize, nullptr, GL_DYNAMIC_DRAW);
-    NumBytesAllocated += maxSize;
+    s_NumBytesAllocated += maxSize;
 }
 
 UniformBuffer::~UniformBuffer()
 {
     glDeleteBuffers(1, &m_RendererId);
-    NumBytesAllocated -= m_MaxSize;
+    s_NumBytesAllocated -= m_MaxSize;
 }
 
 void UniformBuffer::UpdateBuffer(const void* data, int sizeBytes)

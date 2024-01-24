@@ -8,29 +8,35 @@
 
 #include <glm/gtx/matrix_decompose.hpp>
 
-static void SetupDefaultProperties(const std::shared_ptr<Material>& material) {
+static void SetupDefaultProperties(const std::shared_ptr<Material>& material)
+{
     material->SetFloatProperty("reflection_factor", 0.1f);
     material->SetFloatProperty("shininess", 32.0f);
     material->bTransparent = true;
     material->bCullFaces = false;
 }
 
-struct FpsCounter {
-    float total_frametime = 1.0f;
-    milliseconds_float_t frame_time = milliseconds_float_t::zero();
-    FpsCounter() {
-    }
-     
-    double GetFrameTime() const {
-        return frame_time.count();
+struct FpsCounter
+{
+    float AccumulatedFrameTime = 1.0f;
+    milliseconds_float_t FrameTime = milliseconds_float_t::zero();
+    FpsCounter()
+    {
     }
 
-    void Tick(Duration deltaSeconds) {
-        total_frametime += deltaSeconds.GetSeconds();
+    double GetFrameTime() const
+    {
+        return FrameTime.count();
+    }
 
-        if (total_frametime >= 1.0f) {
-            total_frametime = 0.0f;
-            frame_time = deltaSeconds.GetChronoNanoSeconds();
+    void Tick(Duration deltaSeconds)
+    {
+        AccumulatedFrameTime += deltaSeconds.GetSeconds();
+
+        if (AccumulatedFrameTime >= 1.0f)
+        {
+            AccumulatedFrameTime = 0.0f;
+            FrameTime = deltaSeconds.GetChronoNanoSeconds();
         }
     }
 };
@@ -38,41 +44,37 @@ struct FpsCounter {
 DECLARE_COMPONENT_TICKABLE(FpsCounter);
 
 SandboxGameLayer::SandboxGameLayer(Game* game) :
-    camera_rotation_{glm::vec3{0, 0, 0}},
-    camera_position_{0.0f, 0.0f, 0.0f},
-    game_(game) {
-    default_shader_ = ResourceManager::GetShader("assets/shaders/default.shd");
-    debug_shader_ = ResourceManager::GetShader("assets/shaders/unshaded.shd");
+    m_Game(game)
+{
+    m_DefaultShader = ResourceManager::GetShader("assets/shaders/default.shd");
+    m_DebugShader = ResourceManager::GetShader("assets/shaders/unshaded.shd");
 
     ResourceManager::CreateMaterial("assets/shaders/default.shd", "default");
     InitializeSkeletalMesh();
 
-    current_used_shader_ = default_shader_;
-    glm::vec3 white{1.0f, 1.0f, 1.0f};
+    m_CurrentUsedShader = m_DefaultShader;
 
-    Renderer::InitializeDebugDraw(debug_shader_);
+    Renderer::InitializeDebugDraw(m_DebugShader);
     Renderer2D::SetDrawShader(ResourceManager::GetShader("assets/shaders/sprite_2d.shd"));
 
-    auto default_material = ResourceManager::CreateMaterial("assets/shaders/default.shd", "postac_material");
-    default_material->SetFloatProperty("shininess", 32.0f);
+    auto defaultMaterial = ResourceManager::CreateMaterial("assets/shaders/default.shd", "postac_material");
+    defaultMaterial->SetFloatProperty("shininess", 32.0f);
 
-    std::shared_ptr<StaticMesh> static_mesh = ResourceManager::GetStaticMesh("assets/cube.obj");
-    static_mesh->MainMaterial = default_material;
-    default_material->bTransparent = true;
-
-    camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
+    std::shared_ptr<StaticMesh> staticMesh = ResourceManager::GetStaticMesh("assets/cube.obj");
+    staticMesh->MainMaterial = defaultMaterial;
+    defaultMaterial->bTransparent = true;
 
     CreateSkeletalActors();
 
-    std::shared_ptr<Material> instanced_mesh_material = ResourceManager::CreateMaterial("assets/shaders/instanced.shd", "instanced");
-    SetupDefaultProperties(instanced_mesh_material);
-    instanced_mesh_ = std::make_shared<InstancedMesh>(static_mesh, instanced_mesh_material);
+    std::shared_ptr<Material> instancedMeshMaterial = ResourceManager::CreateMaterial("assets/shaders/instanced.shd", "instanced");
+    SetupDefaultProperties(instancedMeshMaterial);
+    m_InstancedMesh = std::make_shared<InstancedMesh>(staticMesh, instancedMeshMaterial);
 
-    CreateInstancedMeshActor("assets/cube.obj", instanced_mesh_material);
+    CreateInstancedMeshActor("assets/cube.obj", instancedMeshMaterial);
 
     PlaceLightsAndPlayer();
 
-    std::array<std::string, 6> texture_paths = {
+    std::array<std::string, 6> texturePaths = {
         "assets/skybox/right.jpg",
         "assets/skybox/left.jpg",
         "assets/skybox/top.jpg",
@@ -81,86 +83,79 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
         "assets/skybox/back.jpg"
     };
 
-    skybox_ = std::make_unique<Skybox>(std::make_shared<CubeMap>(texture_paths), ResourceManager::GetShader("assets/shaders/skybox.shd"));
+    m_Skybox = std::make_unique<Skybox>(std::make_shared<CubeMap>(texturePaths), ResourceManager::GetShader("assets/shaders/skybox.shd"));
 }
 
-void SandboxGameLayer::Update(Duration deltaTime) {
+void SandboxGameLayer::Update(Duration deltaTime)
+{
     float dt = deltaTime.GetSeconds();
 
     auto shader = ResourceManager::GetShader("assets/shaders/instanced.shd");
     shader->Use();
-    if (Input::IsKeyPressed(GLFW_KEY_E)) {
-        camera_yaw_ -= yaw_rotation_rate_ * dt;
-        camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
-    } else if (Input::IsKeyPressed(GLFW_KEY_Q)) {
-        camera_yaw_ += yaw_rotation_rate_ * dt;
-        camera_rotation_ = glm::quat{glm::radians(glm::vec3{camera_pitch_, camera_yaw_, 0.0f})};
-    }
+    m_LastDeltaSeconds = deltaTime;
 
-    if (Input::IsKeyPressed(GLFW_KEY_Y)) {
-        glm::vec3 world_up = glm::vec3{0, 1, 0};
-        camera_position_ += ascend_speed_ * world_up * dt;
-    } else if (Input::IsKeyPressed(GLFW_KEY_H)) {
-        glm::vec3 world_down = glm::vec3{0, -1, 0};
-        camera_position_ += ascend_speed_ * world_down * dt;
-    }
-    last_delta_seconds_ = deltaTime;
-
-    level_.BroadcastUpdate(deltaTime);
+    m_Level.BroadcastUpdate(deltaTime);
 }
 
-void SandboxGameLayer::Render() {
-    Renderer::BeginScene(level_.CameraPosition, level_.CameraRotation);
+void SandboxGameLayer::Render()
+{
+    Renderer::BeginScene(m_Level.CameraPosition, m_Level.CameraRotation);
 
-    glm::vec3 light_pos{0.0f};
+    glm::vec3 lightPosition{0.0f};
 
     {
-        Actor directional_light = level_.FindActor("directional_light");
-        light_pos = directional_light.GetTransform().Position;
+        Actor directional_light = m_Level.FindActor("directional_light");
+        lightPosition = directional_light.GetTransform().Position;
     }
 
-    current_used_shader_->Use();
-    current_used_shader_->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
+    m_CurrentUsedShader->Use();
+    m_CurrentUsedShader->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
 
-    debug_shader_->Use();
-    debug_shader_->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
-    Actor character_actor;
+    m_DebugShader->Use();
+    m_DebugShader->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
+    Actor characterActor;
 
-    if (level_.TryFindActor("SkeletalMesh0", character_actor)) {
-        Renderer::DrawDebugBox(test_skeletal_mesh_->GetBoundingBox(), character_actor.GetTransform().GetAsTransform());
+    if (m_Level.TryFindActor("SkeletalMesh0", characterActor))
+    {
+        Transform transform = characterActor.GetTransform().GetAsTransform();
+        transform.Scale = {1, 1, 1};
+        Renderer::DrawDebugBox(m_TestSkeletalMesh->GetBoundingBox(), transform);
     }
 
     // draw directional light gizmo
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i)
+    {
         glm::vec3 pos = glm::vec3{0.0f};
-        glm::vec4 Color = glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
+        glm::vec4 color = glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
         pos[i] = 1;
-        Color[i] = 1;
+        color[i] = 1;
 
-        Line line{light_pos, light_pos + pos};
+        Line line{lightPosition, lightPosition + pos};
 
-        Renderer::DrawDebugLine(line, Transform{}, Color);
+        Renderer::DrawDebugLine(line, Transform{}, color);
     }
 
-    Renderer::DrawDebugLine(Line{light_pos, light_pos + 2.0f * glm::vec3{0, -1, 0}}, Transform{}, glm::vec4(0, 0, 1, 1));
+    Renderer::DrawDebugLine(Line{lightPosition, lightPosition + 2.0f * glm::vec3{0, -1, 0}}, Transform{}, glm::vec4(0, 0, 1, 1));
 
-    level_.BroadcastRender();
-    skybox_->Draw();
+    m_Level.BroadcastRender();
+    m_Skybox->Draw();
     Renderer::EndScene();
 }
 
-bool SandboxGameLayer::OnEvent(const Event& event) {
-    if (event.Type == EventType::KeyPressed && event.Key.Key == GLFW_KEY_P) {
-        game_->SetMouseVisible(!game_->IsMouseVisible());
+bool SandboxGameLayer::OnEvent(const Event& event)
+{
+    if (event.Type == EventType::KeyPressed && event.Key.Key == GLFW_KEY_P)
+    {
+        m_Game->SetMouseVisible(!m_Game->IsMouseVisible());
     }
 
     return false;
 }
 
-void SandboxGameLayer::OnImguiFrame() {
-    static int num_frame{0};
+void SandboxGameLayer::OnImguiFrame()
+{
     {
-        FpsCounter& counter = level_.FindActor("player").GetComponent<FpsCounter>();
+        FpsCounter& counter = m_Level.FindActor("player").GetComponent<FpsCounter>();
 
         RenderStats stats = RenderCommand::GetRenderStats();
 
@@ -168,30 +163,37 @@ void SandboxGameLayer::OnImguiFrame() {
         ImGui::Text("Fps: %i", static_cast<int>(round(1000.0 / counter.GetFrameTime())));
         ImGui::Text("Frame time: %.2f ms", counter.GetFrameTime());
         ImGui::Text("Drawcalls: %i", stats.NumDrawcalls);
-        ImGui::Text("NumIndicesMemoryAllocated: %s", FormatSize(stats.IndexBufferMemoryAllocation));
-        ImGui::Text("NumVerticesMemoryAllocated: %s", FormatSize(stats.VertexBufferMemoryAllocation));
-        ImGui::Text("NumBytesUniformBuffer: %s", FormatSize(UniformBuffer::NumBytesAllocated));
-        ImGui::Text("NumTextureMemoryUsage: %s", FormatSize(Texture2D::s_NumTextureVramUsed));
+        std::string text = FormatSize(stats.IndexBufferMemoryAllocation);
+        ImGui::Text("NumIndicesMemoryAllocated: %s", text.c_str());
+        text = FormatSize(stats.VertexBufferMemoryAllocation);
+        ImGui::Text("NumVerticesMemoryAllocated: %s", text.c_str());
+        text = FormatSize(UniformBuffer::s_NumBytesAllocated);
+        ImGui::Text("NumBytesUniformBuffer: %s", text.c_str());
+        text = FormatSize(Texture2D::s_NumTextureVramUsed);
+        ImGui::Text("NumTextureMemoryUsage: %s", text.c_str());
         ImGui::End();
     }
 
-    Actor actor_to_remove{};
-    std::string removed_actor_name;
+    Actor actorToRemove{};
+    std::string removedActorName;
 
     ImGui::Begin("Hierarchy");
 
-    for (auto& [name, actor] : level_) {
-        if (ImGui::Button(name.c_str())) {
-            selected_actor = actor;
+    for (auto& [name, actor] : m_Level)
+    {
+        if (ImGui::Button(name.c_str()))
+        {
+            m_SelectedActor = actor;
             break;
         }
 
         ImGui::SameLine();
 
         ImGui::PushID(name.c_str());
-        if (ImGui::Button("X")) {
-            actor_to_remove = actor;
-            removed_actor_name = name;
+        if (ImGui::Button("X"))
+        {
+            actorToRemove = actor;
+            removedActorName = name;
         }
         ImGui::PopID();
 
@@ -200,133 +202,151 @@ void SandboxGameLayer::OnImguiFrame() {
 
     ImGui::End();
 
-    if (removed_actor_name != "player" && !removed_actor_name.empty()) {
-        actor_to_remove.DestroyActor();
+    if (removedActorName != "player" && !removedActorName.empty())
+    {
+        actorToRemove.DestroyActor();
     }
 }
 
-void SandboxGameLayer::OnImgizmoFrame() {
-    if (!selected_actor.IsAlive()) {
+void SandboxGameLayer::OnImgizmoFrame()
+{
+    if (!m_SelectedActor.IsAlive())
+    {
         return;
     }
 
-    glm::mat4 transform = selected_actor.GetTransform().GetWorldTransformMatrix();
+    glm::mat4 transform = m_SelectedActor.GetTransform().GetWorldTransformMatrix();
 
     if (ImGuizmo::Manipulate(glm::value_ptr(Renderer::s_View), glm::value_ptr(Renderer::s_Projection),
         ImGuizmo::OPERATION::UNIVERSAL, ImGuizmo::WORLD, glm::value_ptr(transform)
-    )) {
+    ))
+    {
 
         glm::vec3 pos, rot, scale;
 
         ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), &pos[0], &rot[0], &scale[0]);
 
-        TransformComponent& transform = selected_actor.GetTransform();
+        TransformComponent& transform = m_SelectedActor.GetTransform();
         transform.SetEulerAngles(rot);
         transform.Position = pos;
         transform.Scale = scale;
     }
 }
 
-void SandboxGameLayer::MoveForward(Actor& player, float axis_value) {
+void SandboxGameLayer::MoveForward(Actor& player, float axisValue)
+{
     TransformComponent& transform = player.GetComponent<TransformComponent>();
-    glm::vec3 forward = axis_value * transform.GetForwardVector() * static_cast<float>(last_delta_seconds_.GetSeconds()) * move_speed_;
+    glm::vec3 forward = axisValue * transform.GetForwardVector() * static_cast<float>(m_LastDeltaSeconds.GetSeconds()) * m_MoveSpeed;
     transform.Translate(forward);
 }
 
-void SandboxGameLayer::MoveRight(Actor& player, float axis_value) {
+void SandboxGameLayer::MoveRight(Actor& player, float axisValue)
+{
     TransformComponent& transform = player.GetComponent<TransformComponent>();
-    glm::vec3 right = axis_value * transform.GetRightVector() * static_cast<float>(last_delta_seconds_.GetSeconds()) * move_speed_;
+    glm::vec3 right = axisValue * transform.GetRightVector() * static_cast<float>(m_LastDeltaSeconds.GetSeconds()) * m_MoveSpeed;
     transform.Translate(right);
 }
 
-void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouse_move_delta) {
-    if (game_->IsMouseVisible()) {
+void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouseMoveDelta)
+{
+    if (m_Game->IsMouseVisible())
+    {
         return;
     }
 
-    float dt = last_delta_seconds_.GetSeconds();
+    float dt = m_LastDeltaSeconds.GetSeconds();
 
     TransformComponent& transform = player.GetComponent<TransformComponent>();
 
-    camera_yaw_ -= yaw_rotation_rate_ * mouse_move_delta.x * dt;
-    camera_pitch_ -= pitch_rotation_rate_ * mouse_move_delta.y * dt;
+    m_CameraYaw -= m_YawRotationRate * mouseMoveDelta.x * dt;
+    m_CameraPitch -= m_PitchRotationRate * mouseMoveDelta.y * dt;
 
-    if (camera_pitch_ < -89) {
-        camera_pitch_ = -89;
+    if (m_CameraPitch < -89)
+    {
+        m_CameraPitch = -89;
     }
-    if (camera_pitch_ > 89) {
-        camera_pitch_ = 89;
+    if (m_CameraPitch > 89)
+    {
+        m_CameraPitch = 89;
     }
 
-    transform.SetEulerAngles(camera_pitch_, camera_yaw_, 0.0f);
+    transform.SetEulerAngles(m_CameraPitch, m_CameraYaw, 0.0f);
 }
 
-void SandboxGameLayer::InitializeSkeletalMesh() {
+void SandboxGameLayer::InitializeSkeletalMesh()
+{
     auto skeletal_shader = ResourceManager::GetShader("assets/shaders/skeletal_default.shd");
-    test_skeletal_mesh_ = ResourceManager::GetSkeletalMesh("assets/test_character.fbx");
-    test_skeletal_mesh_->MainMaterial = ResourceManager::CreateMaterial("assets/shaders/skeletal_default.shd", "skeletal1");
+    m_TestSkeletalMesh = ResourceManager::GetSkeletalMesh("assets/test_character.fbx");
+    m_TestSkeletalMesh->MainMaterial = ResourceManager::CreateMaterial("assets/shaders/skeletal_default.shd", "skeletal1");
 
-    for (int i = 0; i < test_skeletal_mesh_->TextureNames.size(); ++i) {
+    for (int i = 0; i < m_TestSkeletalMesh->TextureNames.size(); ++i)
+    {
         std::string property_name = std::string{"diffuse"} + std::to_string(i + 1);
-        test_skeletal_mesh_->MainMaterial->SetTextureProperty(property_name.c_str(), ResourceManager::GetTexture2D(test_skeletal_mesh_->TextureNames[i]));
+        m_TestSkeletalMesh->MainMaterial->SetTextureProperty(property_name.c_str(), ResourceManager::GetTexture2D(m_TestSkeletalMesh->TextureNames[i]));
     }
 
-    std::shared_ptr<Material> material = test_skeletal_mesh_->MainMaterial;
+    std::shared_ptr<Material> material = m_TestSkeletalMesh->MainMaterial;
 
     material->bCullFaces = false;
     material->SetFloatProperty("shininess", 32.0f);
 }
 
-void SandboxGameLayer::CreateSkeletalActors() {
-    for (std::int32_t i = 0; i < 2; ++i) {
-        Actor skeletal_mesh_actor = level_.CreateActor("SkeletalMesh" + std::to_string(i));
-        skeletal_mesh_actor.AddComponent<SkeletalMeshComponent>(test_skeletal_mesh_);
-        skeletal_mesh_actor.GetComponent<TransformComponent>().Scale = glm::vec3{0.01f, 0.01f, 0.01f};
-        skeletal_mesh_actor.GetComponent<TransformComponent>().Position = glm::vec3{0, -2 * i - 2, -i - 1};
+void SandboxGameLayer::CreateSkeletalActors()
+{
+    for (std::int32_t i = 0; i < 2; ++i)
+    {
+        Actor skeletalMeshActor = m_Level.CreateActor("SkeletalMesh" + std::to_string(i));
+        skeletalMeshActor.AddComponent<SkeletalMeshComponent>(m_TestSkeletalMesh);
+        skeletalMeshActor.GetComponent<TransformComponent>().Scale = glm::vec3{0.01f, 0.01f, 0.01f};
+        skeletalMeshActor.GetComponent<TransformComponent>().Position = glm::vec3{0, -2 * i - 2, -i - 1};
     }
 }
 
-Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, const std::shared_ptr<Material>& material) {
-    Actor instance_mesh = level_.CreateActor("InstancedMesh");
-    instance_mesh.AddComponent<InstancedMeshComponent>(ResourceManager::GetStaticMesh(filePath), material);
+Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, const std::shared_ptr<Material>& material)
+{
+    Actor instanceMesh = m_Level.CreateActor("InstancedMesh");
+    instanceMesh.AddComponent<InstancedMeshComponent>(ResourceManager::GetStaticMesh(filePath), material);
 
     material->SetTextureProperty("diffuse1", ResourceManager::GetTexture2D("assets/T_Metal_Steel_D.TGA"));
 
-    InstancedMeshComponent& instanced_mesh = instance_mesh.GetComponent<InstancedMeshComponent>();
+    InstancedMeshComponent& instancedMesh = instanceMesh.GetComponent<InstancedMeshComponent>();
 
-    for (int i = 0; i < 10; ++i) {
-        for (int j = 0; j < 400; ++j) {
+    for (int i = 0; i < 10; ++i)
+    {
+        for (int j = 0; j < 400; ++j)
+        {
             Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
-            instanced_mesh.AddInstance(transform);
+            instancedMesh.AddInstance(transform);
         }
     }
 
-    return instance_mesh;
+    return instanceMesh;
 }
 
-void SandboxGameLayer::PlaceLightsAndPlayer() {
-    Actor light_actor = level_.CreateActor("point_light");
+void SandboxGameLayer::PlaceLightsAndPlayer()
+{
+    Actor lightActor = m_Level.CreateActor("point_light");
 
-    light_actor.AddComponent<SpotLightComponent>();
+    lightActor.AddComponent<SpotLightComponent>();
 
-    SpotLightComponent& point_light = light_actor.GetComponent<SpotLightComponent>();
+    SpotLightComponent& spotLight = lightActor.GetComponent<SpotLightComponent>();
 
-    point_light.DirectionLength = 40.0f;
-    point_light.Direction = glm::vec3{0, -1, 0};
-    point_light.Color = glm::vec3{1, 0, 0};
-    point_light.CutOffAngle = 45.0f;
-    light_actor.GetTransform().Position = glm::vec3{4, 5, 0};
+    spotLight.DirectionLength = 40.0f;
+    spotLight.Direction = glm::vec3{0, -1, 0};
+    spotLight.Color = glm::vec3{1, 0, 0};
+    spotLight.CutOffAngle = 45.0f;
+    lightActor.GetTransform().Position = glm::vec3{4, 5, 0};
 
-    Actor player = level_.CreateActor("player");
+    Actor player = m_Level.CreateActor("player");
     player.AddComponent<PlayerController>(player);
     player.AddComponent<CameraComponent>();
     player.AddComponent<FpsCounter>();
 
-    Actor directional_light = level_.CreateActor("directional_light");
-    selected_actor = directional_light;
-    directional_light.AddComponent<DirectionalLightComponent>();
+    Actor directionalLight = m_Level.CreateActor("directional_light");
+    m_SelectedActor = directionalLight;
+    directionalLight.AddComponent<DirectionalLightComponent>();
 
-    DirectionalLightComponent& directional = directional_light.GetComponent<DirectionalLightComponent>();
+    DirectionalLightComponent& directional = directionalLight.GetComponent<DirectionalLightComponent>();
     directional.Direction = {0, -1, 0};
 
     PlayerController& controller = player.GetComponent<PlayerController>();
