@@ -15,7 +15,7 @@ static const std::array SpriteVertexAttributes{
 
 struct SpriteBatch
 {
-    VertexArray SpriteVertexArray;
+    std::shared_ptr<VertexArray> SpriteVertexArray;
     std::vector<SpriteVertex> Sprites;
 
     std::array<std::shared_ptr<Texture>, MinTextureUnits> bind_textures;
@@ -28,11 +28,13 @@ struct SpriteBatch
     SpriteBatch(std::shared_ptr<Material> material) :
         Material2d(material)
     {
+        SpriteVertexArray = std::make_shared<VertexArray>();
+
         material->bCullFaces = false;
         Sprites.reserve(MAX_SPRITES_DISPLAYED * NUM_QUAD_VERTICES);
         std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(static_cast<int>(Sprites.capacity() * sizeof(SpriteVertex)));
 
-        SpriteVertexArray.AddVertexBuffer(buffer, SpriteVertexAttributes);
+        SpriteVertexArray->AddVertexBuffer(buffer, SpriteVertexAttributes);
 
         uint32_t startIndex = 0;
         uint32_t indices[] = {0, 1, 2, 0, 2, 3};
@@ -52,14 +54,13 @@ struct SpriteBatch
         }
 
         std::shared_ptr<IndexBuffer> indexBuffer = std::make_shared<IndexBuffer>(batchedIndices.data(), (int)batchedIndices.size());
-        SpriteVertexArray.SetIndexBuffer(indexBuffer);
+        SpriteVertexArray->SetIndexBuffer(indexBuffer);
     }
 
     void FlushDraw(const glm::mat4& projection)
     {
         std::shared_ptr<Shader> shader = Material2d->GetShader();
 
-        RenderCommand::SetDepthEnabled(false);
         Material2d->SetupRenderState();
 
         shader->Use();
@@ -74,9 +75,9 @@ struct SpriteBatch
         shader->SetSamplersUniform("u_textures", std::span<const std::shared_ptr<Texture>>{bind_textures.begin(), (size_t)NumBindedTextures});
 
         shader->SetUniform("u_projection", projection);
-        auto vertexBuffer = SpriteVertexArray.GetVertexBufferAt(0);
+        auto vertexBuffer = SpriteVertexArray->GetVertexBufferAt(0);
 
-        SpriteVertexArray.Bind();
+        SpriteVertexArray->Bind();
         vertexBuffer->UpdateVertices(Sprites.data(), static_cast<int>(sizeof(SpriteVertex) * Sprites.size()));
 
         RenderCommand::DrawIndexed(SpriteVertexArray, NumIndicesToDraw);
@@ -85,9 +86,6 @@ struct SpriteBatch
         NumBindedTextures = 0;
         NumIndicesToDraw = 0;
         Sprites.clear();
-
-        RenderCommand::SetDepthEnabled(true);
-        SpriteVertexArray.Unbind();
     }
 
     void AddSpriteInstance(const std::array<SpriteVertex, NUM_QUAD_VERTICES>& definition, const Transform2D& transform)
@@ -134,7 +132,6 @@ void Renderer2D::UpdateProjection(const CameraProjection& projection)
 
 void Renderer2D::DrawRect(const glm::vec2& mins, const glm::vec2& maxs, const Transform2D& transform, const RgbaColor& Color, int textureId, glm::vec2 tilling)
 {
-
     std::array vertices = {
         SpriteVertex{mins, tilling * glm::vec2{0.0f, 0.0f}, textureId, Color},
         SpriteVertex{glm::vec2{maxs.x, mins.y}, tilling * glm::vec2{1.0f, 0.0f}, textureId, Color},

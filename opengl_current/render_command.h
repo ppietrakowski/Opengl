@@ -25,25 +25,18 @@ public:
 
     static void ClearBufferBindings_Debug();
 
-    static void DrawIndexed(const VertexArray& vertexArray, int numIndices);
-    static void DrawTrianglesArrays(const VertexArray& vertexArray, int numVertices);
-    static void DrawTrianglesAdjancency(const VertexArray& vertexArray, int numIndices);
-    static void DrawLines(const VertexArray& vertexArray, int numIndices);
-    static void DrawPoints(const VertexArray& vertexArray, int numIndices);
+    static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, int numIndices);
+    static void DrawArrays(const std::shared_ptr<VertexArray>& vertexArray, int numVertices);
+    static void DrawLines(const std::shared_ptr<VertexArray>& vertexArray, int numIndices);
+    static void DrawIndexedInstanced(const std::shared_ptr<VertexArray>& vertexArray, int numInstances);
 
     static void BeginScene();
     static void EndScene();
     static void SetClearColor(const RgbaColor& clearColor);
     static void Clear();
 
-    static void SetWireframe(bool bWireframeEnabled);
-    static bool IsWireframeEnabled();
-
     static void SetCullFace(bool bCullFaces);
-    static void UpdateCullFace(bool bUseClockwise);
     static bool DoesCullFaces();
-
-    static void SetBlendingEnabled(bool bBlendingEnabled);
 
     static void SetLineWidth(float line_width);
     static void SetViewport(int x, int y, int width, int height);
@@ -56,11 +49,6 @@ public:
     static void NotifyVertexBufferCreated(int bufferSize);
     static void NotifyVertexBufferDestroyed(int bufferSize);
 
-    static void DrawIndexedInstanced(const VertexArray& vertexArray, int numInstances);
     static void SetDepthFunc(DepthFunction depthFunction);
-    static void SetDepthEnabled(bool bEnabled);
-
-private:
-    static RendererApi s_RendererApi;
 };
 

@@ -44,9 +44,7 @@ public:
 
 public:
 
-    bool bUseWireframe : 1{ false };
     bool bCullFaces : 1{ true };
-    bool bTransparent : 1{ false };
 
 private:
     std::shared_ptr<Shader> m_Shader;

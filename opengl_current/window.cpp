@@ -19,6 +19,10 @@ Window::Window(const WindowSettings& settings)
     // initialize glfw and create window with opengl 4.3 context
     CRASH_EXPECTED_TRUE(glfwInit());
 
+#if defined(DEBUG) || defined(_DEBUG)
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);

@@ -126,7 +126,7 @@ void Renderer::Submit(const SubmitCommandArgs& submitArgs)
     UploadUniforms(shader, submitArgs.Transform, textureUnit);
     submitArgs.ApplyMaterialUniforms();
 
-    RenderCommand::DrawIndexed(*submitArgs.TargetVertexArray, submitArgs.NumIndices);
+    RenderCommand::DrawIndexed(submitArgs.TargetVertexArray, submitArgs.NumIndices);
 }
 
 void Renderer::SubmitSkeleton(const SubmitCommandArgs& submitArgs, std::span<const glm::mat4> transforms)
@@ -142,7 +142,7 @@ void Renderer::SubmitSkeleton(const SubmitCommandArgs& submitArgs, std::span<con
     submitArgs.ApplyMaterialUniforms();
     shader->SetUniformMat4Array("u_bone_transforms", transforms);
 
-    RenderCommand::DrawIndexed(*submitArgs.TargetVertexArray, submitArgs.NumIndices);
+    RenderCommand::DrawIndexed(submitArgs.TargetVertexArray, submitArgs.NumIndices);
 }
 
 void Renderer::SubmitMeshInstanced(const InstancedDrawArgs& instancedDrawArgs)
@@ -158,7 +158,7 @@ void Renderer::SubmitMeshInstanced(const InstancedDrawArgs& instancedDrawArgs)
     submitArgs.ApplyMaterialUniforms();;
 
     shader->BindUniformBuffer(shader->GetUniformBlockIndex("Transforms"), *instancedDrawArgs.TransformBuffer);
-    RenderCommand::DrawIndexedInstanced(*submitArgs.TargetVertexArray, instancedDrawArgs.NumInstances);
+    RenderCommand::DrawIndexedInstanced(submitArgs.TargetVertexArray, instancedDrawArgs.NumInstances);
 }
 
 void Renderer::InitializeDebugDraw(const std::shared_ptr<Shader>& debugShader)

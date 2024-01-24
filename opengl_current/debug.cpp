@@ -75,7 +75,6 @@ public:
 
     void FlushDraw()
     {
-        RenderCommand::SetDepthEnabled(true);
         m_VertexArray->Bind();
         UploadBufferData();
 
@@ -84,7 +83,7 @@ public:
         shader->Use();
         shader->SetUniform("u_ProjectionView", Debug::GetProjectionViewMatrix());
 
-        RenderCommand::DrawLines(*m_VertexArray, m_NumDrawIndices);
+        RenderCommand::DrawLines(m_VertexArray, m_NumDrawIndices);
 
         m_NumDrawIndices = 0;
         m_NumDrawVertices = 0;

@@ -135,9 +135,7 @@ void Material::AddNewProperty(const UniformInfo& info)
 
 void Material::SetupRenderState() const
 {
-    RenderCommand::SetWireframe(bUseWireframe);
     RenderCommand::SetCullFace(bCullFaces);
-    RenderCommand::SetBlendingEnabled(bTransparent);
 }
 
 void Material::SetShaderUniforms() const

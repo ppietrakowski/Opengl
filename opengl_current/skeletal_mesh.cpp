@@ -196,8 +196,6 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
         m_NumBones += mesh->mNumBones;
     }
 
-    MainMaterial->bTransparent = true;
-
     for (uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
         LoadAnimation(scene, i);

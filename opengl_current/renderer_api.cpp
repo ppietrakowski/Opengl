@@ -1,12 +1,53 @@
 #include "renderer_api.h"
 #include "error_macros.h"
+#include "logging.h"
 
 #include <GL/glew.h>
+
+static void OpenGlErrorCallback(
+    unsigned source,
+    unsigned type,
+    unsigned id,
+    unsigned severity,
+    int length,
+    const char* message,
+    const void* userParam)
+{
+    switch (severity)
+    {
+    case GL_DEBUG_SEVERITY_HIGH:         ELOG_ERROR(LOG_RENDERER, message); return;
+    case GL_DEBUG_SEVERITY_MEDIUM:       ELOG_ERROR(LOG_RENDERER, message); return;
+    case GL_DEBUG_SEVERITY_LOW:          ELOG_WARNING(LOG_RENDERER, message); return;
+    case GL_DEBUG_SEVERITY_NOTIFICATION: ELOG_VERBOSE(LOG_RENDERER, message); return;
+    }
+}
 
 void RendererApi::Initialize()
 {
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glEnable(GL_LINE_SMOOTH);
+    SetCullFace(true);
+
+#if defined(DEBUG) || defined(_DEBUG)
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+    constexpr const void* const userData = nullptr;
+    glDebugMessageCallback(&OpenGlErrorCallback, userData);
+
+    constexpr GLenum sourceOfDebugMessage = GL_DONT_CARE;
+    constexpr GLenum typeOfDebugMessage = GL_DONT_CARE;
+    constexpr GLenum severityOfDebugMessage = GL_DEBUG_SEVERITY_NOTIFICATION;
+    constexpr GLsizei numMessageIds = 0;
+    constexpr const GLuint* const messageIds = nullptr;
+    constexpr GLboolean selectedMessagesEnabled = GL_FALSE;
+
+    glDebugMessageControl(sourceOfDebugMessage, typeOfDebugMessage, 
+        severityOfDebugMessage, numMessageIds, messageIds, selectedMessagesEnabled);
+#endif
 }
 
 void RendererApi::Clear()
@@ -24,75 +65,48 @@ void RendererApi::SetClearColor(const RgbaColor& clearColor)
     }
 }
 
-void RendererApi::DrawTriangles(const VertexArray& vertexArray, int numIndices)
+static FORCE_INLINE void DrawIndexedUsingGlPrimitives(const std::shared_ptr<VertexArray>& vertexArray, int numIndices, GLenum primitiveType)
 {
     ASSERT(numIndices >= 0);
 
-    vertexArray.Bind();
-    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, nullptr);
+    vertexArray->Bind();
+    glDrawElements(primitiveType, numIndices, GL_UNSIGNED_INT, nullptr);
 }
 
-void RendererApi::DrawTrianglesArrays(const VertexArray& vertexArray, int numVertices)
+void RendererApi::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, int numIndices)
 {
-    vertexArray.Bind();
+    DrawIndexedUsingGlPrimitives(vertexArray, numIndices, GL_TRIANGLES);
+}
+
+void RendererApi::DrawArrays(const std::shared_ptr<VertexArray>& vertexArray, int numVertices)
+{
+    vertexArray->Bind();
     glDrawArrays(GL_TRIANGLES, 0, numVertices);
 }
 
-void RendererApi::DrawTrianglesAdjancency(const VertexArray& vertexArray, int numIndices)
+void RendererApi::DrawLines(const std::shared_ptr<VertexArray>& vertexArray, int numIndices)
 {
-    ASSERT(numIndices >= 0);
-
-    vertexArray.Bind();
-    glDrawElements(GL_TRIANGLES_ADJACENCY, numIndices, GL_UNSIGNED_INT, nullptr);
+    DrawIndexedUsingGlPrimitives(vertexArray, numIndices, GL_LINES);
 }
 
-void RendererApi::DrawLines(const VertexArray& vertexArray, int numIndices)
+void RendererApi::DrawIndexedInstanced(const std::shared_ptr<VertexArray>& vertexArray, int numInstances)
 {
-    ASSERT(numIndices >= 0);
+    ASSERT(numInstances >= 0);
 
-    vertexArray.Bind();
-    glDrawElements(GL_LINES, numIndices, GL_UNSIGNED_INT, nullptr);
-}
-
-void RendererApi::DrawPoints(const VertexArray& vertexArray, int numIndices)
-{
-    ASSERT(numIndices >= 0);
-
-    vertexArray.Bind();
-    glDrawElements(GL_POINTS, numIndices, GL_UNSIGNED_INT, nullptr);
-}
-
-void RendererApi::SetWireframe(bool bWireframeEnabled)
-{
-    if (m_bWireframeEnabled != bWireframeEnabled)
-    {
-        if (bWireframeEnabled)
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        }
-        else
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        }
-
-        m_bWireframeEnabled = bWireframeEnabled;
-    }
-}
-
-bool RendererApi::IsWireframeEnabled() const
-{
-    return m_bWireframeEnabled;
+    vertexArray->Bind();
+    glDrawElementsInstanced(GL_TRIANGLES, vertexArray->GetNumIndices(),
+        GL_UNSIGNED_INT, nullptr, numInstances);
 }
 
 void RendererApi::SetCullFace(bool bCullFaces)
 {
-    if (bCullFaces && !DoesCullFaces())
+    if (bCullFaces)
     {
         glEnable(GL_CULL_FACE);
         glFrontFace(GL_CCW);
         glCullFace(GL_BACK);
     }
-    else if (!bCullFaces)
+    else
     {
         glDisable(GL_CULL_FACE);
     }
@@ -100,36 +114,14 @@ void RendererApi::SetCullFace(bool bCullFaces)
     m_bCullFaces = bCullFaces;
 }
 
-void RendererApi::UpdateCullFace(bool bUseClockwise)
-{
-    glFrontFace(bUseClockwise ? GL_CW : GL_CCW);
-}
-
 bool RendererApi::DoesCullFaces() const
 {
     return m_bCullFaces;
 }
 
-void RendererApi::SetBlendingEnabled(bool bBlendingEnabled)
-{
-    this->m_bBlendingEnabled = bBlendingEnabled;
-}
-
 void RendererApi::SetLineWidth(float lineWidth)
 {
     glLineWidth(lineWidth);
-}
-
-void RendererApi::SetDepthEnabled(bool bEnabled)
-{
-    if (bEnabled)
-    {
-        glEnable(GL_DEPTH_TEST);
-    }
-    else
-    {
-        glDisable(GL_DEPTH_TEST);
-    }
 }
 
 void RendererApi::ClearBufferBindings_Debug()
@@ -144,16 +136,6 @@ void RendererApi::SetViewport(int x, int y, int width, int height)
     glViewport(x, y, width, height);
     glScissor(x, y, width, height);
 }
-
-void RendererApi::DrawTrianglesInstanced(const VertexArray& vertexArray, int numInstances)
-{
-    ASSERT(numInstances >= 0);
-
-    vertexArray.Bind();
-    glDrawElementsInstanced(GL_TRIANGLES, vertexArray.GetNumIndices(),
-        GL_UNSIGNED_INT, nullptr, numInstances);
-}
-
 
 void RendererApi::SetDepthFunc(DepthFunction depthFunction)
 {

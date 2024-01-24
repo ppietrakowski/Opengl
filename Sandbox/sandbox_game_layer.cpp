@@ -12,8 +12,6 @@ static void SetupDefaultProperties(const std::shared_ptr<Material>& material)
 {
     material->SetFloatProperty("reflection_factor", 0.5f);
     material->SetFloatProperty("shininess", 32.0f);
-    material->bTransparent = true;
-    material->bCullFaces = false;
 }
 
 struct FpsCounter
@@ -62,7 +60,6 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
 
     std::shared_ptr<StaticMesh> staticMesh = ResourceManager::GetStaticMesh("assets/box.fbx");
     staticMesh->MainMaterial = defaultMaterial;
-    defaultMaterial->bTransparent = true;
 
     CreateSkeletalActors();
 

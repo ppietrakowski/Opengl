@@ -59,35 +59,24 @@ public:
 
     void Clear();
     void SetClearColor(const RgbaColor& clearColor);
-    void DrawTriangles(const VertexArray& vertexArray, int numIndices);
-    void DrawTrianglesArrays(const VertexArray& vertexArray, int numVertices);
 
-    void DrawTrianglesAdjancency(const VertexArray& vertexArray, int numIndices);
-    void DrawLines(const VertexArray& vertexArray, int numIndices);
-    void DrawPoints(const VertexArray& vertexArray, int numIndices);
-
-    void SetDepthEnabled(bool bEnabled);
-
-    void SetWireframe(bool bWireframeEnabled);
-    bool IsWireframeEnabled() const;
+    void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, int numIndices);
+    void DrawArrays(const std::shared_ptr<VertexArray>& vertexArray, int numVertices);
+    void DrawLines(const std::shared_ptr<VertexArray>& vertexArray, int numIndices);
+    void DrawIndexedInstanced(const std::shared_ptr<VertexArray>& vertexArray, int numInstances);
 
     void SetCullFace(bool bCullFaces);
-    void UpdateCullFace(bool bUseClockwise);
     bool DoesCullFaces() const;
 
-    void SetBlendingEnabled(bool bBlendingEnabled);
     void SetLineWidth(float lineWidth);
 
     void ClearBufferBindings_Debug();
     void SetViewport(int x, int y, int width, int height);
 
     void SetDepthFunc(DepthFunction depthFunction);
-    void DrawTrianglesInstanced(const VertexArray& vertexArray, int numInstances);
-
+   
 private:
-    bool m_bCullFaces : 1 = false;
-    bool m_bWireframeEnabled : 1 = false;
-    bool m_bBlendingEnabled : 1 = false;
+    bool m_bCullFaces : 1 = true;
     RgbaColor m_ClearColor{0, 0, 0, 255};
 };
 
