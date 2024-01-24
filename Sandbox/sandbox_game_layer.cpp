@@ -54,8 +54,6 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
 
     m_CurrentUsedShader = m_DefaultShader;
 
-    Renderer2D::SetDrawShader(ResourceManager::GetShader("assets/shaders/sprite_2d.shd"));
-
     auto defaultMaterial = ResourceManager::CreateMaterial("assets/shaders/default.shd", "postac_material");
     defaultMaterial->SetFloatProperty("shininess", 32.0f);
 

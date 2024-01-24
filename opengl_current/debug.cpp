@@ -10,7 +10,7 @@ struct DebugVertex
     RgbaColor Color;
 };
 
-static const std::array<uint32_t, 24> BaseBoxIndices =
+static const uint32_t BaseBoxIndices[24] =
 {
     0u, 1, 1, 2, 2, 3, 3, 0,
     4, 5, 5, 6, 6, 7, 7, 4,

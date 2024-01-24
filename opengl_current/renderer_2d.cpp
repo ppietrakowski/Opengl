@@ -1,17 +1,16 @@
 #include "renderer_2d.h"
+#include "error_macros.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
-static const std::array SpriteVertexAttributes{
+static const std::array<VertexAttribute, 4> SpriteVertexAttributes{
     VertexAttribute{2, PrimitiveVertexType::Float},
     VertexAttribute{2, PrimitiveVertexType::Float},
     VertexAttribute{1, PrimitiveVertexType::Int},
     VertexAttribute{1, PrimitiveVertexType::UnsignedInt}
 };
 
-#define MAX_SPRITES_DISPLAYED 400
-
-#define NUM_QUAD_VERTICES 4
+constexpr size_t MaxSpritesDisplayed = 400;
 
 static glm::mat4 s_Projection{1.0f};
 
@@ -33,29 +32,29 @@ struct SpriteBatch
         SpriteVertexArray = std::make_shared<VertexArray>();
 
         material->bCullFaces = false;
-        Sprites.reserve(MAX_SPRITES_DISPLAYED * NUM_QUAD_VERTICES);
+        Sprites.reserve(MaxSpritesDisplayed * NumQuadVertices);
         std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(static_cast<int>(Sprites.capacity() * sizeof(SpriteVertex)));
 
         SpriteVertexArray->AddVertexBuffer(buffer, SpriteVertexAttributes);
 
         uint32_t startIndex = 0;
-        uint32_t indices[] = {0, 1, 2, 0, 2, 3};
+        constexpr std::array<uint32_t, 6> BaseQuatIndices = {0, 1, 2, 0, 2, 3};
 
         std::vector<uint32_t> batchedIndices;
 
-        batchedIndices.reserve(ARRAY_NUM_ELEMENTS(indices) * MAX_SPRITES_DISPLAYED);
+        batchedIndices.reserve(BaseQuatIndices.size() * MaxSpritesDisplayed);
 
-        for (uint32_t i = 0; i < MAX_SPRITES_DISPLAYED; ++i)
+        for (uint32_t i = 0; i < MaxSpritesDisplayed; ++i)
         {
-            for (uint32_t index : indices)
+            for (uint32_t index : BaseQuatIndices)
             {
                 batchedIndices.emplace_back(index + startIndex);
             }
 
-            startIndex += NUM_QUAD_VERTICES;
+            startIndex += NumQuadVertices;
         }
 
-        std::shared_ptr<IndexBuffer> indexBuffer = std::make_shared<IndexBuffer>(batchedIndices.data(), (int)batchedIndices.size());
+        std::shared_ptr<IndexBuffer> indexBuffer = std::make_shared<IndexBuffer>(batchedIndices.data(), STD_ARRAY_NUM_ELEMENTS(batchedIndices));
         SpriteVertexArray->SetIndexBuffer(indexBuffer);
     }
 
@@ -77,7 +76,7 @@ struct SpriteBatch
         shader->SetSamplersUniform("u_textures", std::span<const std::shared_ptr<Texture>>{BindTextures.begin(), (size_t)NumBindedTextures});
 
         shader->SetUniform("u_projection", projection);
-        auto vertexBuffer = SpriteVertexArray->GetVertexBufferAt(0);
+        std::shared_ptr<VertexBuffer> vertexBuffer = SpriteVertexArray->GetVertexBufferAt(0);
 
         SpriteVertexArray->Bind();
         vertexBuffer->UpdateVertices(Sprites.data(), static_cast<int>(sizeof(SpriteVertex) * Sprites.size()));
@@ -90,7 +89,7 @@ struct SpriteBatch
         Sprites.clear();
     }
 
-    void AddSpriteInstance(const std::array<SpriteVertex, NUM_QUAD_VERTICES>& definition, const Transform2D& transform)
+    void AddSpriteInstance(const std::array<SpriteVertex, NumQuadVertices>& definition, const Transform2D& transform)
     {
         glm::mat4 transformMatrix = transform.GetTransformMatrix();
 
@@ -106,9 +105,10 @@ struct SpriteBatch
 
     void BindNewTexture(std::shared_ptr<Texture> texture)
     {
-        if (NumBindedTextures == MinTextureUnits)
+        if (NumBindedTextures >= MinTextureUnits)
         {
             FlushDraw(s_Projection);
+            NumBindedTextures = 0;
         }
 
         BindTextures[NumBindedTextures++] = texture;
@@ -121,7 +121,7 @@ SpriteSheetData::SpriteSheetData(glm::uvec2 numFrames, glm::vec2 margin, glm::ve
     m_SpriteSheetSize(spriteSheetSize),
     m_Texture(texture)
 {
-    assert(m_SpriteSheetSize.x <= m_Texture->GetWidth() && m_SpriteSheetSize.y <= m_Texture->GetHeight());
+    ASSERT(m_SpriteSheetSize.x <= m_Texture->GetWidth() && m_SpriteSheetSize.y <= m_Texture->GetHeight());
 }
 
 Sprite2D::Sprite2D(glm::vec2 position, glm::vec2 size, int textureId, const SpriteSheetData& spriteSheetData, glm::uvec2 animationFrame, RgbaColor tint) :
@@ -146,6 +146,7 @@ void Renderer2D::Quit()
 
 void Renderer2D::SetDrawShader(const std::shared_ptr<Shader>& shader)
 {
+    SafeDelete(s_SpriteBatch);
     s_SpriteBatch = new SpriteBatch(std::make_shared<Material>(shader));
 }
 
@@ -154,7 +155,7 @@ void Renderer2D::UpdateProjection(const CameraProjection& projection)
     s_Projection = glm::ortho(0.0f, projection.Width, 0.0f, projection.Height, -1.0f, 1.0f);
 }
 
-static constexpr glm::vec2 SpriteVertexPositions[] = 
+static constexpr glm::vec2 SpriteVertexPositions[4] = 
         {{  0.0f, 0.0f },
          {  1.0f, 0.0f },
          {  1.0f,  1.0f },
@@ -163,12 +164,13 @@ static constexpr glm::vec2 SpriteVertexPositions[] =
 
 void Renderer2D::DrawSprite(const Sprite2D& definition)
 {
-    assert(definition.TextureId < s_SpriteBatch->NumBindedTextures);
+    ASSERT(s_SpriteBatch);
+    ASSERT(definition.TextureId < s_SpriteBatch->NumBindedTextures);
 
     glm::vec2 start = definition.SpriteSheetInfo.GetStartUvCoordinate(definition.AnimationFrame);
     glm::vec2 end = definition.SpriteSheetInfo.GetEndUvCoordinate(definition.AnimationFrame);
 
-    std::array<SpriteVertex, 4> vertices = {
+    std::array<SpriteVertex, NumQuadVertices> vertices = {
         SpriteVertex{SpriteVertexPositions[0], start, definition.TextureId, definition.Tint},
         SpriteVertex{SpriteVertexPositions[1], glm::vec2(end.x, start.y), definition.TextureId, definition.Tint},
         SpriteVertex{SpriteVertexPositions[2], end, definition.TextureId, definition.Tint},
