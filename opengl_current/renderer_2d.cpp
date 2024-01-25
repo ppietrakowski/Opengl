@@ -120,7 +120,7 @@ private:
 
     int LastIndex = 0;
     int NumIndicesToDraw = 0;
-    std::shared_ptr<Material> Material2d = nullptr;
+    std::shared_ptr<Material> Material2d;
 
 private:
 
