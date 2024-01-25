@@ -106,26 +106,6 @@ RenderStats RenderCommand::GetRenderStats()
     return s_RenderStats;
 }
 
-void RenderCommand::NotifyIndexBufferCreated(int bufferSize)
-{
-    s_RenderStats.IndexBufferMemoryAllocation += bufferSize;
-}
-
-void RenderCommand::NotifyIndexBufferDestroyed(int bufferSize)
-{
-    s_RenderStats.IndexBufferMemoryAllocation -= bufferSize;
-}
-
-void RenderCommand::NotifyVertexBufferCreated(int bufferSize)
-{
-    s_RenderStats.VertexBufferMemoryAllocation += bufferSize;
-}
-
-void RenderCommand::NotifyVertexBufferDestroyed(int bufferSize)
-{
-    s_RenderStats.VertexBufferMemoryAllocation -= bufferSize;
-}
-
 void RenderCommand::SetDepthFunc(DepthFunction depthFunction)
 {
     s_RendererApi.SetDepthFunc(depthFunction);

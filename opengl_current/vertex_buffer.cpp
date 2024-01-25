@@ -14,7 +14,7 @@ VertexBuffer::VertexBuffer(const void* data, int sizeBytes, bool bDynamic) :
     glBindBuffer(GL_ARRAY_BUFFER, m_RendererId);
     glBufferData(GL_ARRAY_BUFFER, sizeBytes, data, bufferUsage);
 
-    RenderCommand::NotifyVertexBufferCreated(sizeBytes);
+    s_NumVertexBufferMemoryAllocated += sizeBytes;
 }
 
 VertexBuffer::VertexBuffer(int maxSizeBytes) :
@@ -25,7 +25,7 @@ VertexBuffer::VertexBuffer(int maxSizeBytes) :
 VertexBuffer::~VertexBuffer()
 {
     glDeleteBuffers(1, &m_RendererId);
-    RenderCommand::NotifyVertexBufferDestroyed(m_BufferSize);
+    s_NumVertexBufferMemoryAllocated += m_BufferSize;
 }
 
 void VertexBuffer::Bind() const

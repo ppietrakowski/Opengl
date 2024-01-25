@@ -25,6 +25,8 @@ public:
 
     uint32_t GetOpenGlIdentifier() const;
 
+    static inline size_t s_IndexBufferMemoryAllocation{0};
+
 private:
     uint32_t m_RendererId;
     int m_NumIndices;

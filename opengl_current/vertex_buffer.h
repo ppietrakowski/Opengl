@@ -25,6 +25,8 @@ public:
 
     int GetVerticesSizeBytes() const;
     uint32_t GetOpenGlIdentifier() const;
+    
+    static inline size_t s_NumVertexBufferMemoryAllocated = 0;
 
 private:
     uint32_t m_RendererId;

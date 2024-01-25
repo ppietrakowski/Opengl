@@ -8,8 +8,6 @@ struct RenderStats
 {
     size_t NumDrawcalls{0};
     int64_t DeltaFrameTime{0};
-    size_t IndexBufferMemoryAllocation{0};
-    size_t VertexBufferMemoryAllocation{0};
 };
 
 class RenderCommand
@@ -42,12 +40,6 @@ public:
     static void SetViewport(int x, int y, int width, int height);
 
     static RenderStats GetRenderStats();
-
-    static void NotifyIndexBufferCreated(int bufferSize);
-    static void NotifyIndexBufferDestroyed(int bufferSize);
-
-    static void NotifyVertexBufferCreated(int bufferSize);
-    static void NotifyVertexBufferDestroyed(int bufferSize);
 
     static void SetDepthFunc(DepthFunction depthFunction);
     static void SetDepthEnabled(bool bDepthEnabled);

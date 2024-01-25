@@ -18,7 +18,7 @@ IndexBuffer::IndexBuffer(const uint32_t* data, int numIndices, bool bDynamic) :
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(uint32_t), data, bufferUsage);
 
-    RenderCommand::NotifyIndexBufferCreated(numIndices * sizeof(uint32_t));
+    s_IndexBufferMemoryAllocation += numIndices * sizeof(uint32_t);
 }
 
 IndexBuffer::IndexBuffer(int maxNumIndices) :
@@ -28,7 +28,7 @@ IndexBuffer::IndexBuffer(int maxNumIndices) :
 
 IndexBuffer::~IndexBuffer()
 {
-    RenderCommand::NotifyIndexBufferDestroyed(m_NumIndices * sizeof(uint32_t));
+    s_IndexBufferMemoryAllocation -= m_NumIndices * sizeof(uint32_t);
     glDeleteBuffers(1, &m_RendererId);
 }
 

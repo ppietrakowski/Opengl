@@ -187,9 +187,9 @@ void SandboxGameLayer::OnImguiFrame()
         ImGui::Text("Fps: %i", static_cast<int>(round(1000.0 / counter.GetFrameTime())));
         ImGui::Text("Frame time: %.2f ms", counter.GetFrameTime());
         ImGui::Text("Drawcalls: %i", stats.NumDrawcalls);
-        std::string text = FormatSize(stats.IndexBufferMemoryAllocation);
+        std::string text = FormatSize(IndexBuffer::s_IndexBufferMemoryAllocation);
         ImGui::Text("NumIndicesMemoryAllocated: %s", text.c_str());
-        text = FormatSize(stats.VertexBufferMemoryAllocation);
+        text = FormatSize(VertexBuffer::s_NumVertexBufferMemoryAllocated);
         ImGui::Text("NumVerticesMemoryAllocated: %s", text.c_str());
         text = FormatSize(UniformBuffer::s_NumBytesAllocated);
         ImGui::Text("NumBytesUniformBuffer: %s", text.c_str());
