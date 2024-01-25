@@ -32,13 +32,10 @@ struct InstancedDrawArgs
 
 class Renderer
 {
-public:
-    static void Initialize();
-    static void Quit();
+    friend class Game;
 
     static void UpdateProjection(const CameraProjection& projection);
 
-public:
     static void BeginScene(glm::vec3 cameraPosition, glm::quat cameraRotation, const std::vector<LightData>& lights);
     static void EndScene();
 
@@ -72,6 +69,10 @@ public:
 private:
     static RendererData s_RendererData;
     static std::shared_ptr<Texture2D> s_DefaultTexture;
+
+private:
+    static void Initialize();
+    static void Quit();
     static void UploadUniforms(const std::shared_ptr<Shader>& shader, const glm::mat4& transform, uint32_t cubeMapTextureUnit);
 };
 

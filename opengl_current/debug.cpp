@@ -194,5 +194,6 @@ void Debug::FlushDrawDebug()
 
 void Debug::InitializeDebugDraw(const std::shared_ptr<Shader>& debugShader)
 {
+    SafeDelete(s_DebugRenderBatch);
     s_DebugRenderBatch = new DebugRendererBatch(debugShader);
 }

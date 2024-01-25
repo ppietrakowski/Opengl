@@ -45,37 +45,6 @@ struct LightBuffer
 
 static LightBuffer* s_LightBuffer = nullptr;
 
-void Renderer::Initialize()
-{
-    // array of checkerboard with black and magenta
-    RgbColor colors[4][4] =
-    {
-        {Black, Black, Magenta, Magenta},
-        {Black, Black, Magenta, Magenta},
-        {Magenta, Magenta, Black, Black},
-        {Magenta, Magenta, Black, Black}
-    };
-
-    int colorsWidth = 4;
-    int colorsHeight = 4;
-
-    s_DefaultTexture = std::make_shared<Texture2D>(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::Rgb});
-    RenderCommand::Initialize();
-
-    RenderCommand::ClearBufferBindings_Debug();
-    RenderCommand::SetCullFace(true);
-
-    s_LightBuffer = new LightBuffer(32);
-}
-
-void Renderer::Quit()
-{
-    SafeDelete(s_LightBuffer);
-    
-    s_DefaultTexture.reset();
-    RenderCommand::Quit();
-}
-
 void Renderer::UpdateProjection(const CameraProjection& projection)
 {
     s_RendererData.Projection = projection;
@@ -150,6 +119,38 @@ void Renderer::SubmitMeshInstanced(const InstancedDrawArgs& instancedDrawArgs)
     shader->BindUniformBuffer(shader->GetUniformBlockIndex("Transforms"), *instancedDrawArgs.TransformBuffer);
     RenderCommand::DrawIndexedInstanced(submitArgs.TargetVertexArray, instancedDrawArgs.NumInstances);
 }
+
+void Renderer::Initialize()
+{
+    // array of checkerboard with black and magenta
+    RgbColor colors[4][4] =
+    {
+        {Black, Black, Magenta, Magenta},
+        {Black, Black, Magenta, Magenta},
+        {Magenta, Magenta, Black, Black},
+        {Magenta, Magenta, Black, Black}
+    };
+
+    int colorsWidth = 4;
+    int colorsHeight = 4;
+
+    s_DefaultTexture = std::make_shared<Texture2D>(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::Rgb});
+    RenderCommand::Initialize();
+
+    RenderCommand::ClearBufferBindings_Debug();
+    RenderCommand::SetCullFace(true);
+
+    s_LightBuffer = new LightBuffer(32);
+}
+
+void Renderer::Quit()
+{
+    SafeDelete(s_LightBuffer);
+
+    s_DefaultTexture.reset();
+    RenderCommand::Quit();
+}
+
 
 void Renderer::UploadUniforms(const std::shared_ptr<Shader>& shader, const glm::mat4& transform, uint32_t cubeMapTextureUnit)
 {

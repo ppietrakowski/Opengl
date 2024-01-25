@@ -82,10 +82,13 @@ struct Sprite2D
 
 class Renderer2D
 {
-public:
+    friend class Game;
+
+private:
     static void Initialize();
     static void Quit();
 
+public:
     static void SetDrawShader(const std::shared_ptr<Shader>& shader);
 
     static void UpdateProjection(const CameraProjection& projection);
