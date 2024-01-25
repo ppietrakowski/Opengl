@@ -31,15 +31,15 @@ class SpriteBatch
 {
 public:
     SpriteBatch(std::shared_ptr<Material> material) :
-        Material2d(material)
+        m_Material2d(material)
     {
-        SpriteVertexArray = std::make_shared<VertexArray>();
+        m_SpriteVertexArray = std::make_shared<VertexArray>();
 
         material->bCullFaces = false;
-        Sprites.reserve(MaxSpritesDisplayed * NumQuadVertices);
-        std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(static_cast<int>(Sprites.capacity() * sizeof(SpriteVertex)));
+        m_Sprites.reserve(MaxSpritesDisplayed * NumQuadVertices);
+        std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(static_cast<int>(m_Sprites.capacity() * sizeof(SpriteVertex)));
 
-        SpriteVertexArray->AddVertexBuffer(buffer, SpriteVertexAttributes);
+        m_SpriteVertexArray->AddVertexBuffer(buffer, SpriteVertexAttributes);
 
         uint32_t startIndex = 0;
         constexpr std::array<uint32_t, 6> BaseQuatIndices = {0, 1, 2, 0, 2, 3};
@@ -59,25 +59,25 @@ public:
         }
 
         std::shared_ptr<IndexBuffer> indexBuffer = std::make_shared<IndexBuffer>(batchedIndices.data(), STD_ARRAY_NUM_ELEMENTS(batchedIndices));
-        SpriteVertexArray->SetIndexBuffer(indexBuffer);
+        m_SpriteVertexArray->SetIndexBuffer(indexBuffer);
     }
 
     void FlushDraw(const glm::mat4& projection)
     {
-        std::shared_ptr<Shader> shader = Material2d->GetShader();
+        std::shared_ptr<Shader> shader = m_Material2d->GetShader();
 
         // just prevents UI from being culled
-        Material2d->SetupRenderState();
+        m_Material2d->SetupRenderState();
         DepthTestDisabler depthTestDisabler{};
 
         BindSpriteUniforms(projection);
 
-        std::shared_ptr<VertexBuffer> vertexBuffer = SpriteVertexArray->GetVertexBufferAt(0);
+        std::shared_ptr<VertexBuffer> vertexBuffer = m_SpriteVertexArray->GetVertexBufferAt(0);
 
-        SpriteVertexArray->Bind();
-        vertexBuffer->UpdateVertices(Sprites.data(), static_cast<int>(sizeof(SpriteVertex) * Sprites.size()));
+        m_SpriteVertexArray->Bind();
+        vertexBuffer->UpdateVertices(m_Sprites.data(), static_cast<int>(sizeof(SpriteVertex) * m_Sprites.size()));
 
-        RenderCommand::DrawIndexed(SpriteVertexArray, NumIndicesToDraw);
+        RenderCommand::DrawIndexed(m_SpriteVertexArray, m_NumIndicesToDraw);
         Reset();
     }
 
@@ -89,63 +89,63 @@ public:
         {
             SpriteVertex vertex = sprite_vertex;
             vertex.Position = transformMatrix * glm::vec4(vertex.Position, 0.5f, 1);
-            Sprites.emplace_back(vertex);
+            m_Sprites.emplace_back(vertex);
         }
 
-        NumIndicesToDraw += 6;
+        m_NumIndicesToDraw += 6;
     }
 
     void BindNewTexture(std::shared_ptr<Texture> texture)
     {
-        if (NumBindedTextures >= MinTextureUnits)
+        if (m_NumBindedTextures >= MinTextureUnits)
         {
             FlushDraw(s_Projection);
-            NumBindedTextures = 0;
+            m_NumBindedTextures = 0;
         }
 
-        BindTextures[NumBindedTextures++] = texture;
+        m_BindTextures[m_NumBindedTextures++] = texture;
     }
 
     int GetNumBindedTextures() const
     {
-        return NumBindedTextures;
+        return m_NumBindedTextures;
     }
 
 private:
-    std::shared_ptr<VertexArray> SpriteVertexArray;
-    std::vector<SpriteVertex> Sprites;
+    std::shared_ptr<VertexArray> m_SpriteVertexArray;
+    std::vector<SpriteVertex> m_Sprites;
 
-    std::array<std::shared_ptr<Texture>, MinTextureUnits> BindTextures;
-    int NumBindedTextures = 0;
+    std::array<std::shared_ptr<Texture>, MinTextureUnits> m_BindTextures;
+    int m_NumBindedTextures = 0;
 
-    int LastIndex = 0;
-    int NumIndicesToDraw = 0;
-    std::shared_ptr<Material> Material2d;
+    int m_LastIndex = 0;
+    int m_NumIndicesToDraw = 0;
+    std::shared_ptr<Material> m_Material2d;
 
 private:
 
     void BindSpriteUniforms(const glm::mat4& projection)
     {
-        std::shared_ptr<Shader> shader = Material2d->GetShader();
+        std::shared_ptr<Shader> shader = m_Material2d->GetShader();
         shader->Use();
-        Material2d->SetShaderUniforms();
+        m_Material2d->SetShaderUniforms();
 
         // bind all attached textures
-        for (int i = 0; i < NumBindedTextures; ++i)
+        for (int i = 0; i < m_NumBindedTextures; ++i)
         {
-            BindTextures[i]->Bind(i);
+            m_BindTextures[i]->Bind(i);
         }
 
-        shader->SetSamplersUniform("u_textures", std::span<const std::shared_ptr<Texture>>{BindTextures.begin(), (size_t)NumBindedTextures});
+        shader->SetSamplersUniform("u_textures", std::span<const std::shared_ptr<Texture>>{m_BindTextures.begin(), (size_t)m_NumBindedTextures});
         shader->SetUniform("u_projection", projection);
     }
 
     void Reset()
     {
-        LastIndex = 0;
-        NumBindedTextures = 0;
-        NumIndicesToDraw = 0;
-        Sprites.clear();
+        m_LastIndex = 0;
+        m_NumBindedTextures = 0;
+        m_NumIndicesToDraw = 0;
+        m_Sprites.clear();
     }
 };
 
