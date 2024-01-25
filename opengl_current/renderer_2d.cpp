@@ -27,18 +27,9 @@ struct DepthTestDisabler
     }
 };
 
-struct SpriteBatch
+class SpriteBatch
 {
-    std::shared_ptr<VertexArray> SpriteVertexArray;
-    std::vector<SpriteVertex> Sprites;
-
-    std::array<std::shared_ptr<Texture>, MinTextureUnits> BindTextures;
-    int NumBindedTextures = 0;
-
-    int LastIndex = 0;
-    int NumIndicesToDraw = 0;
-    std::shared_ptr<Material> Material2d = nullptr;
-
+public:
     SpriteBatch(std::shared_ptr<Material> material) :
         Material2d(material)
     {
@@ -115,6 +106,24 @@ struct SpriteBatch
         BindTextures[NumBindedTextures++] = texture;
     }
 
+    int GetNumBindedTextures() const
+    {
+        return NumBindedTextures;
+    }
+
+private:
+    std::shared_ptr<VertexArray> SpriteVertexArray;
+    std::vector<SpriteVertex> Sprites;
+
+    std::array<std::shared_ptr<Texture>, MinTextureUnits> BindTextures;
+    int NumBindedTextures = 0;
+
+    int LastIndex = 0;
+    int NumIndicesToDraw = 0;
+    std::shared_ptr<Material> Material2d = nullptr;
+
+private:
+
     void BindSpriteUniforms(const glm::mat4& projection)
     {
         std::shared_ptr<Shader> shader = Material2d->GetShader();
@@ -189,7 +198,7 @@ void Renderer2D::UpdateProjection(const CameraProjection& projection)
 void Renderer2D::DrawSprite(const Sprite2D& definition)
 {
     ASSERT(s_SpriteBatch);
-    ASSERT(definition.TextureId < s_SpriteBatch->NumBindedTextures);
+    ASSERT(definition.TextureId < s_SpriteBatch->GetNumBindedTextures());
 
     glm::vec2 start = definition.SpriteSheetInfo.GetStartUvCoordinate(definition.AnimationFrame);
     glm::vec2 end = definition.SpriteSheetInfo.GetEndUvCoordinate(definition.AnimationFrame);
@@ -212,7 +221,7 @@ void Renderer2D::FlushDraw()
 int Renderer2D::BindTextureToDraw(const std::shared_ptr<Texture>& texture)
 {
     s_SpriteBatch->BindNewTexture(texture);
-    return s_SpriteBatch->NumBindedTextures - 1;
+    return s_SpriteBatch->GetNumBindedTextures() - 1;
 }
 
 glm::mat4 Transform2D::GetTransformMatrix() const
