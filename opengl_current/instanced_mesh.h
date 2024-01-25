@@ -11,36 +11,43 @@
 constexpr uint32_t NumInstancesTransform = 400;
 
 // struct representing same transforms as there are in shader
-struct InstancingTransforms {
+struct InstancingTransforms
+{
     glm::mat4 Transforms[NumInstancesTransform];
 };
 
 // Buffer for storing transform inside uniform buffer so it's faster to access
-struct InstancingTransformBuffer {
+struct InstancingTransformBuffer
+{
     std::shared_ptr<UniformBuffer> Buffer;
     int NumTransformsOccupied{0};
 
     InstancingTransformBuffer() :
-        Buffer(std::make_shared<UniformBuffer>(static_cast<int>(sizeof(InstancingTransforms)))) {
+        Buffer(std::make_shared<UniformBuffer>(static_cast<int>(sizeof(InstancingTransforms))))
+    {
     }
 
-    void AddTransform(const glm::mat4& transform) {
+    void AddTransform(const glm::mat4& transform)
+    {
         Buffer->UpdateBuffer(glm::value_ptr(transform),
             sizeof(transform), NumTransformsOccupied * sizeof(transform));
         NumTransformsOccupied++;
     }
 
-    void Clear() {
+    void Clear()
+    {
         NumTransformsOccupied = 0;
     }
 
     // Updates transform at relative index (from start of this buffer)
-    void UpdateTransform(const glm::mat4& transform, int relativeIndex) const {
+    void UpdateTransform(const glm::mat4& transform, int relativeIndex) const
+    {
         Buffer->UpdateBuffer(glm::value_ptr(transform), sizeof(transform), relativeIndex * sizeof(transform));
     }
 };
 
-class InstancedMesh {
+class InstancedMesh
+{
 public:
     InstancedMesh(const std::shared_ptr<StaticMesh>& staticMesh, const std::shared_ptr<Material>& material);
 
@@ -49,13 +56,15 @@ public:
     // Adds new mesh instance. Returns index of newly created instance
     int AddInstance(const Transform& transform, int textureId);
 
-    const StaticMesh& GetMesh() const {
+    const StaticMesh& GetMesh() const
+    {
         return *m_StaticMesh;
     }
 
     void RemoveInstance(int index);
 
-    int GetSize() const {
+    int GetSize() const
+    {
         return m_NumInstances;
     }
 
