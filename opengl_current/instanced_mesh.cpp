@@ -31,8 +31,8 @@ int InstancedMesh::AddInstance(const Transform& transform, int textureId)
     auto it = m_TransformBuffers.begin();
     int id = m_NumInstances;
 
-    bool recycled_indices = !m_RecyclingMeshIndices.empty();
-    if (recycled_indices)
+    bool bShouldRecycleTransform = !m_RecyclingMeshIndices.empty();
+    if (bShouldRecycleTransform)
     {
         id = m_RecyclingMeshIndices.back();
         m_RecyclingMeshIndices.pop_back();
@@ -55,7 +55,7 @@ int InstancedMesh::AddInstance(const Transform& transform, int textureId)
         it = m_TransformBuffers.end() - 1;
     }
 
-    if (recycled_indices)
+    if (bShouldRecycleTransform)
     {
         it->UpdateTransform(transform.CalculateTransformMatrix(), id);
     }

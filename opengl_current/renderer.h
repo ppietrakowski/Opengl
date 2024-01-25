@@ -34,6 +34,7 @@ class Renderer
 {
     friend class Game;
 
+public:
     static void UpdateProjection(const CameraProjection& projection);
 
     static void BeginScene(glm::vec3 cameraPosition, glm::quat cameraRotation, const std::vector<LightData>& lights);

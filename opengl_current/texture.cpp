@@ -328,8 +328,8 @@ CubeMap::CubeMap(std::span<const std::string> paths)
             0, dataFormat, GL_UNSIGNED_BYTE, image.get()
         );
 
-        int memory_used = imageData.NumComps * imageData.NumPixels();
-        Texture2D::s_NumTextureVramUsed += memory_used;
+        int numBytesUsed = imageData.NumComps * imageData.NumPixels();
+        Texture2D::s_NumTextureVramUsed += numBytesUsed;
     }
 }
 
@@ -378,4 +378,6 @@ TextureFormat CubeMap::GetTextureFormat() const
 
 void CubeMap::SetFilteringType(FilteringType filteringType)
 {
+    glTextureParameteri(m_RendererId, GL_TEXTURE_MIN_FILTER, FilteringTypes[(size_t)filteringType]);
+    glTextureParameteri(m_RendererId, GL_TEXTURE_MAG_FILTER, FilteringTypes[(size_t)filteringType]);
 }

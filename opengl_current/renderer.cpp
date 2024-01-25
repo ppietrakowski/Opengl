@@ -151,7 +151,6 @@ void Renderer::Quit()
     RenderCommand::Quit();
 }
 
-
 void Renderer::UploadUniforms(const std::shared_ptr<Shader>& shader, const glm::mat4& transform, uint32_t cubeMapTextureUnit)
 {
     shader->SetUniform("u_projection_view", s_RendererData.ProjectionViewMatrix);

@@ -320,9 +320,9 @@ std::shared_ptr<Texture2D> SkeletalMesh::LoadTexturesFromMaterial(const aiScene*
 
         if (texture != nullptr)
         {
-            bool is_compressed = texture->mHeight == 0;
+            bool bCompressed = texture->mHeight == 0;
 
-            if (is_compressed)
+            if (bCompressed)
             {
                 ResourceManager::AddTexture2D(texturePaths.C_Str(),
                     std::make_shared<Texture2D>(LoadRgbaImageFromMemory(texture->pcData, texture->mWidth)));
