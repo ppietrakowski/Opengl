@@ -363,6 +363,9 @@ Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, co
             instancedMesh.AddInstance(transform);
         }
     }
+
+    instancedMesh.AddInstance(Transform(glm::vec3(25, 4, -40)));
+
     return instanceMesh;
 }
 
@@ -381,7 +384,16 @@ void SandboxGameLayer::PlaceLightsAndPlayer()
     Actor player = m_Level->CreateActor("player");
     player.AddComponent<PlayerController>(player);
     player.AddComponent<CameraComponent>();
+    player.AddComponent<SpotLightComponent>();
     player.AddComponent<FpsCounter>();
+
+    SpotLightComponent& playerSpotLight = player.GetComponent<SpotLightComponent>();
+    playerSpotLight.CutOffAngle = 10.0f;
+    playerSpotLight.OuterCutOffAngle = 20.0f;
+    playerSpotLight.DirectionLength = 120;
+    playerSpotLight.Direction = {0, 0, -1};
+    playerSpotLight.Intensity = 10.0f;
+    playerSpotLight.Color = glm::vec4(0.2f, 0.8f, 0.2f, 1.0f);
 
     Actor directionalLight = m_Level->CreateActor("directional_light");
     m_SelectedActor = directionalLight;

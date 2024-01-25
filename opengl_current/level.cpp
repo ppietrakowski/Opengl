@@ -154,7 +154,7 @@ void Level::BroadcastRender()
 
     for (auto&& [entity, spot_light, transform] : spot_light_view.each())
     {
-        glm::vec3 transformedDirection = transform.Rotation * spot_light.Direction;
+        glm::vec3 transformedDirection = glm::normalize(transform.Rotation * spot_light.Direction);
 
         LightData lightData{transform.Position, 1.0f, transformedDirection,
             1.0f, spot_light.Color, spot_light.DirectionLength, LightType::Spot, cosf(glm::radians(spot_light.CutOffAngle)), spot_light.Intensity,
