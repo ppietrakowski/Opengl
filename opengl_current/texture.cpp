@@ -14,7 +14,7 @@ extern "C" {
 #include "stb_image.h"
 }
 
-static void StbiDeleter(uint8_t* bytes)
+static void StbiDeleteFunc(uint8_t* bytes)
 {
     if (bytes != nullptr)
     {
@@ -22,7 +22,18 @@ static void StbiDeleter(uint8_t* bytes)
     }
 }
 
-using StbiImageUniquePtr = std::unique_ptr<uint8_t, decltype(&StbiDeleter)>;
+struct StbiDeleter
+{
+    void operator()(uint8_t* bytes)
+    {
+        if (bytes != nullptr)
+        {
+            stbi_image_free(bytes);
+        }
+    }
+};
+
+using StbiImageUniquePtr = std::unique_ptr<uint8_t, StbiDeleter>;
 
 struct StbiImageData
 {
@@ -91,7 +102,7 @@ static StbiImageUniquePtr LoadImageFromFilePath(const std::string& filePath, Stb
         throw std::runtime_error{"Failed to load texture " + std::string{stbi_failure_reason()}};
     }
 
-    return StbiImageUniquePtr(image, &StbiDeleter);
+    return StbiImageUniquePtr(image);
 }
 
 Texture2D::Texture2D(const std::filesystem::path& filePath)
@@ -257,7 +268,7 @@ static StbiImageUniquePtr ConvertRgbToRgbaImage(const uint8_t* rgbImage, const S
         }
     }
 
-    return StbiImageUniquePtr(reinterpret_cast<uint8_t*>(imgData), &StbiDeleter);
+    return StbiImageUniquePtr(reinterpret_cast<uint8_t*>(imgData));
 }
 
 StbiImageUniquePtr MakeImageUniquePtrFromMemory(const void* data, int length, StbiImageData& outImageData)
@@ -273,7 +284,7 @@ StbiImageUniquePtr MakeImageUniquePtrFromMemory(const void* data, int length, St
         throw std::runtime_error(stbi_failure_reason());
     }
 
-    return StbiImageUniquePtr(imageData, &StbiDeleter);
+    return StbiImageUniquePtr(imageData);
 }
 
 ImageRgba LoadRgbaImageFromMemory(const void* data, int length)
@@ -286,7 +297,7 @@ ImageRgba LoadRgbaImageFromMemory(const void* data, int length)
         img = ConvertRgbToRgbaImage(img.get(), imageData);
     }
 
-    return ImageRgba{img.release(), imageData.Width, imageData.Height, &StbiDeleter};
+    return ImageRgba{img.release(), imageData.Width, imageData.Height, &StbiDeleteFunc};
 }
 
 CubeMap::CubeMap(std::span<const std::string> paths)
