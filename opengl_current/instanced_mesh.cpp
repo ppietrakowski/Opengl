@@ -58,6 +58,7 @@ int InstancedMesh::AddInstance(const Transform& transform, int textureId)
     if (bShouldRecycleTransform)
     {
         it->UpdateTransform(transform.CalculateTransformMatrix(), id);
+        return id;
     }
     else
     {
