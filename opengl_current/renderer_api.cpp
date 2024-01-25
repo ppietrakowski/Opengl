@@ -143,3 +143,15 @@ void RendererApi::SetDepthFunc(DepthFunction depthFunction)
 
     glDepthFunc(functions[(size_t)depthFunction]);
 }
+
+void RendererApi::SetDepthEnabled(bool bDepthEnabled)
+{
+    if (bDepthEnabled)
+    {
+        glEnable(GL_DEPTH_TEST);
+    }
+    else
+    {
+        glDisable(GL_DEPTH_TEST);
+    }
+}

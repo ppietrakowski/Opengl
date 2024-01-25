@@ -50,5 +50,6 @@ public:
     static void NotifyVertexBufferDestroyed(int bufferSize);
 
     static void SetDepthFunc(DepthFunction depthFunction);
+    static void SetDepthEnabled(bool bDepthEnabled);
 };
 

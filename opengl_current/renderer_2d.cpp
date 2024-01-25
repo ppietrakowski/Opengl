@@ -14,6 +14,19 @@ constexpr size_t MaxSpritesDisplayed = 400;
 
 static glm::mat4 s_Projection{1.0f};
 
+struct DepthTestDisabler
+{
+    DepthTestDisabler()
+    {
+        RenderCommand::SetDepthEnabled(false);
+    }
+
+    ~DepthTestDisabler()
+    {
+        RenderCommand::SetDepthEnabled(true);
+    }
+};
+
 struct SpriteBatch
 {
     std::shared_ptr<VertexArray> SpriteVertexArray;
@@ -62,31 +75,19 @@ struct SpriteBatch
     {
         std::shared_ptr<Shader> shader = Material2d->GetShader();
 
+        // just prevents UI from being culled
         Material2d->SetupRenderState();
+        DepthTestDisabler depthTestDisabler{};
 
-        shader->Use();
+        BindSpriteUniforms(projection);
 
-        Material2d->SetShaderUniforms();
-
-        for (int i = 0; i < NumBindedTextures; ++i)
-        {
-            BindTextures[i]->Bind(i);
-        }
-
-        shader->SetSamplersUniform("u_textures", std::span<const std::shared_ptr<Texture>>{BindTextures.begin(), (size_t)NumBindedTextures});
-
-        shader->SetUniform("u_projection", projection);
         std::shared_ptr<VertexBuffer> vertexBuffer = SpriteVertexArray->GetVertexBufferAt(0);
 
         SpriteVertexArray->Bind();
         vertexBuffer->UpdateVertices(Sprites.data(), static_cast<int>(sizeof(SpriteVertex) * Sprites.size()));
 
         RenderCommand::DrawIndexed(SpriteVertexArray, NumIndicesToDraw);
-
-        LastIndex = 0;
-        NumBindedTextures = 0;
-        NumIndicesToDraw = 0;
-        Sprites.clear();
+        Reset();
     }
 
     void AddSpriteInstance(const std::array<SpriteVertex, NumQuadVertices>& definition, const Transform2D& transform)
@@ -96,7 +97,7 @@ struct SpriteBatch
         for (const SpriteVertex& sprite_vertex : definition)
         {
             SpriteVertex vertex = sprite_vertex;
-            vertex.Position = transformMatrix * glm::vec4(vertex.Position, 0, 1);
+            vertex.Position = transformMatrix * glm::vec4(vertex.Position, 0.5f, 1);
             Sprites.emplace_back(vertex);
         }
 
@@ -112,6 +113,30 @@ struct SpriteBatch
         }
 
         BindTextures[NumBindedTextures++] = texture;
+    }
+
+    void BindSpriteUniforms(const glm::mat4& projection)
+    {
+        std::shared_ptr<Shader> shader = Material2d->GetShader();
+        shader->Use();
+        Material2d->SetShaderUniforms();
+
+        // bind all attached textures
+        for (int i = 0; i < NumBindedTextures; ++i)
+        {
+            BindTextures[i]->Bind(i);
+        }
+
+        shader->SetSamplersUniform("u_textures", std::span<const std::shared_ptr<Texture>>{BindTextures.begin(), (size_t)NumBindedTextures});
+        shader->SetUniform("u_projection", projection);
+    }
+
+    void Reset()
+    {
+        LastIndex = 0;
+        NumBindedTextures = 0;
+        NumIndicesToDraw = 0;
+        Sprites.clear();
     }
 };
 
@@ -135,6 +160,12 @@ Sprite2D::Sprite2D(glm::vec2 position, glm::vec2 size, int textureId, const Spri
 
 static SpriteBatch* s_SpriteBatch = nullptr;
 
+static constexpr glm::vec2 SpriteVertexPositions[4] =
+{{  0.0f, 0.0f },
+ {  1.0f, 0.0f },
+ {  1.0f,  1.0f },
+ {  0.0f,  1.0f }};
+
 void Renderer2D::Initialize()
 {
 }
@@ -154,13 +185,6 @@ void Renderer2D::UpdateProjection(const CameraProjection& projection)
 {
     s_Projection = glm::ortho(0.0f, projection.Width, 0.0f, projection.Height, -1.0f, 1.0f);
 }
-
-static constexpr glm::vec2 SpriteVertexPositions[4] = 
-        {{  0.0f, 0.0f },
-         {  1.0f, 0.0f },
-         {  1.0f,  1.0f },
-         {  0.0f,  1.0f }};
-
 
 void Renderer2D::DrawSprite(const Sprite2D& definition)
 {

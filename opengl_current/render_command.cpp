@@ -130,3 +130,7 @@ void RenderCommand::SetDepthFunc(DepthFunction depthFunction)
 {
     s_RendererApi.SetDepthFunc(depthFunction);
 }
+
+void RenderCommand::SetDepthEnabled(bool bDepthEnabled)
+{
+}

@@ -94,12 +94,12 @@ void Game::Run()
             layer->Render();
         }
 
-        RunImguiFrame();
-
-        Renderer2D::FlushDraw();
         Debug::FlushDrawDebug();
+        Renderer2D::FlushDraw();
+
+        RunImguiFrame();
         Renderer::EndScene();
-        
+
         m_Window->Update();
     }
 }

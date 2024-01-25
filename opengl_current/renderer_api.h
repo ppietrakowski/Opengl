@@ -74,7 +74,8 @@ public:
     void SetViewport(int x, int y, int width, int height);
 
     void SetDepthFunc(DepthFunction depthFunction);
-   
+    void SetDepthEnabled(bool bDepthEnabled);
+
 private:
     bool m_bCullFaces : 1 = true;
     RgbaColor m_ClearColor{0, 0, 0, 255};

@@ -9,7 +9,7 @@ struct CameraProjection
     float ZNear{0.1f};
     float ZFar{1000.0f};
 
-    CameraProjection(uint32_t width, uint32_t height, float fov = 45.0f, float zNear = 0.1f, float zFar = 1000.0f);
+    CameraProjection(uint32_t width, uint32_t height, float fov = 45.0f, float zNear = 0.001f, float zFar = 1000.0f);
 
     CameraProjection() = default;
     CameraProjection(const CameraProjection&) = default;

@@ -96,6 +96,7 @@ void SandboxGameLayer::Render()
     static float v = 0.00f;
     static float accum = 0.0f;
     static int numFrames = 0;
+    static float Max = 0.2f;
 
     glm::vec3 lightPosition{0.0f};
 
@@ -135,11 +136,13 @@ void SandboxGameLayer::Render()
 
     accum += m_LastDeltaSeconds.GetSeconds();
 
-    if (accum > 0.4f)
+    if (accum > Max)
     {
         accum = 0;
         numFrames = (numFrames + 1) % 3;
+        Max = std::fmod(Max, 0.4f) + 0.2f;
     }
+
     v += 10.0f * m_LastDeltaSeconds.GetSeconds();
     v = fmod(v, 148.0f);
 
@@ -227,6 +230,8 @@ void SandboxGameLayer::OnImguiFrame()
     {
         actorToRemove.DestroyActor();
     }
+
+    ImGui::ShowDemoWindow();
 }
 
 void SandboxGameLayer::OnImgizmoFrame()
@@ -311,7 +316,6 @@ void SandboxGameLayer::InitializeSkeletalMesh()
 
     std::shared_ptr<Material> material = m_TestSkeletalMesh->MainMaterial;
 
-    material->bCullFaces = false;
     material->SetFloatProperty("shininess", 32.0f);
 }
 
