@@ -144,7 +144,7 @@ void SandboxGameLayer::Render()
     }
 
     v += 10.0f * m_LastDeltaSeconds.GetSeconds();
-    v = fmod(v, 148.0f);
+    v = fmod(v, 360.0f);
 
     SpriteSheetData spriteSheetData{
         glm::uvec2(3, 1),
@@ -162,7 +162,7 @@ void SandboxGameLayer::Render()
     Debug::DrawDebugRect(glm::vec2(1000, 10), glm::vec2(200, 200), Transform{}, glm::vec4(0.8f, 0.4f, 0.1f, 1.0f));
     ResourceManager::GetTexture2D("assets/fireworks.png")->SetFilteringType(FilteringType::Nearest);
     Renderer2D::DrawSprite(spriteDefinition);
-    
+
     m_Skybox->Draw();
 }
 
@@ -230,6 +230,22 @@ void SandboxGameLayer::OnImguiFrame()
     {
         actorToRemove.DestroyActor();
     }
+
+    ImGui::Begin("Test image");
+
+    std::shared_ptr<Texture2D> texture = ResourceManager::GetTexture2D("assets/fireworks.png");
+
+    ImGui::Image((void*)texture->GetRendererId(), ImVec2(600, 400), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 0, 1, 1));
+
+    std::filesystem::directory_iterator it(std::filesystem::current_path());
+
+    for (const auto& entry : it)
+    {
+        std::string str = std::filesystem::relative(entry.path(), std::filesystem::current_path()).string();
+        ImGui::Button(str.c_str());
+    }
+
+    ImGui::End();
 
     ImGui::ShowDemoWindow();
 }
@@ -347,7 +363,6 @@ Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, co
             instancedMesh.AddInstance(transform);
         }
     }
-
     return instanceMesh;
 }
 

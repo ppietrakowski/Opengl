@@ -48,6 +48,8 @@ private:
     std::shared_ptr<Level> m_Level;
     Game* m_Game{nullptr};
 
+    std::vector<std::string> paths;
+
 private:
     void MoveForward(Actor& player, float axisValue);
     void MoveRight(Actor& player, float axisValue);

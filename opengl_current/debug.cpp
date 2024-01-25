@@ -77,7 +77,7 @@ public:
     void AddRectInstance(glm::vec2 position, glm::vec2 size, const Transform& transform, const glm::vec4& color)
     {
         // Offset to add to prevent flickering when camera moves
-        constexpr float FlickeringStopOffset = 0.01f;
+        constexpr float FlickeringStopOffset = 0.5f;
 
         RgbaColor packedColor(color);
 
