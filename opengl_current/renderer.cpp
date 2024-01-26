@@ -135,6 +135,7 @@ void Renderer::Initialize()
     int colorsHeight = 4;
 
     s_DefaultTexture = std::make_shared<Texture2D>(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::Rgb});
+    s_DefaultTexture->SetFilteringType(FilteringType::Nearest);
     RenderCommand::Initialize();
 
     RenderCommand::ClearBufferBindings_Debug();

@@ -46,7 +46,7 @@ public:
     virtual void GenerateMipmaps() = 0;
     virtual TextureFormat GetTextureFormat() const = 0;
 
-    virtual const void* GetRendererId() const = 0;
+    virtual uint32_t GetRendererId() const = 0;
 
     virtual void SetFilteringType(FilteringType filteringType) = 0;
 };
@@ -72,9 +72,9 @@ public:
     void GenerateMipmaps() override;
 
 
-    const void* GetRendererId() const override
+    uint32_t GetRendererId() const override
     {
-        return (const void*)static_cast<intptr_t>(m_RendererId);
+        return m_RendererId;
     }
 
     TextureFormat GetTextureFormat() const override;
@@ -130,9 +130,9 @@ public:
     TextureFormat GetTextureFormat() const override;
     void SetFilteringType(FilteringType filteringType) override;
 
-    const void* GetRendererId() const override
+    uint32_t GetRendererId() const override
     {
-        return (const void*)static_cast<intptr_t>(m_RendererId);
+        return m_RendererId;
     }
 
 private:

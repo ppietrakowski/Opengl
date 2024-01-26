@@ -14,6 +14,8 @@ static void SetupDefaultProperties(const std::shared_ptr<Material>& material)
     material->SetFloatProperty("Shininess", 32.0f);
 }
 
+#define TEXTURE_ID_TO_IMGUI_TEXTURE_ID(Id) reinterpret_cast<void*>(static_cast<intptr_t>(Id))
+
 class MaterialGuiDisplay : public IMaterialParameterVisitor
 {
     // Inherited via IMaterialParameterVisitor
@@ -59,6 +61,10 @@ class MaterialGuiDisplay : public IMaterialParameterVisitor
 
     void Visit(TextureParameter& param, const std::string& name) override
     {
+        std::shared_ptr<Texture> texture = param.GetPrimitiveValue();
+
+        ImGui::Text("%s", name.c_str());
+        ImGui::Image(TEXTURE_ID_TO_IMGUI_TEXTURE_ID(texture->GetRendererId()), ImVec2(300, 300));
     }
 };
 
