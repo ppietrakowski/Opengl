@@ -296,7 +296,7 @@ void SkeletalMesh::CalculateTransform(const BoneAnimationUpdateArgs& updateArgs)
 
     int index = bone.BoneTransformIndex;
     glm::mat4 globalTransform = updateArgs.ParentTransform * transform;
-    updateArgs.UpdateTransformAt(index, m_GlobalInverseTransform * globalTransform * bone.BoneOffset);
+    updateArgs.UpdateTransformAt(index, globalTransform * bone.BoneOffset);
 
     // run chain to update other joint transforms
     for (const Bone& child : bone.Children)
