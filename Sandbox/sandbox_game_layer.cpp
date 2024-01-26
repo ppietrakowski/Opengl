@@ -7,6 +7,7 @@
 #include "logging.h"
 
 #include <glm/gtx/matrix_decompose.hpp>
+#include <random>
 
 static void SetupDefaultProperties(const std::shared_ptr<Material>& material)
 {
@@ -400,6 +401,9 @@ void SandboxGameLayer::CreateSkeletalActors()
 Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, const std::shared_ptr<Material>& material)
 {
     Actor instanceMesh = m_Level->CreateActor("InstancedMesh");
+    ResourceManager::GetStaticMesh(filePath)->LoadLod("assets/box_lod1.fbx", 1);
+    ResourceManager::GetStaticMesh(filePath)->LoadLod("assets/box_lod2.fbx", 2);
+
     instanceMesh.AddComponent<InstancedMeshComponent>(ResourceManager::GetStaticMesh(filePath), material);
 
     material->SetTextureProperty("Diffuse1", ResourceManager::GetTexture2D("assets/T_Metal_Steel_D.TGA"));
@@ -416,6 +420,18 @@ Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, co
     }
 
     instancedMesh.AddInstance(Transform(glm::vec3(25, 4, -40)));
+
+    std::mt19937 m{};
+    std::uniform_real_distribution<float> distribution{-10.0f, 10.0f};
+
+    for (int i = 0; i < 200; ++i)
+    {
+            Transform transform{glm::vec3{distribution(m), distribution(m), distribution(m)}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
+            Actor actor = m_Level->CreateActor("StaticMesh" + std::to_string(i));
+
+            actor.AddComponent<StaticMeshComponent>(filePath);
+            actor.GetTransform().Position = transform.Position;
+    }
 
     return instanceMesh;
 }

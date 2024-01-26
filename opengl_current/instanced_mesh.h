@@ -77,6 +77,11 @@ public:
         return m_Material;
     }
 
+    void SetLod(int lod)
+    {
+        m_Lod = lod;
+    }
+
 private:
     std::shared_ptr<StaticMesh> m_StaticMesh;
     int m_NumInstances{0};
@@ -87,5 +92,7 @@ private:
 
     // used for recycling indices when removing instances
     std::vector<int> m_RecyclingMeshIndices;
+
+    int m_Lod{0};
 };
 

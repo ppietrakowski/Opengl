@@ -21,7 +21,7 @@ void InstancedMesh::Draw(const glm::mat4& transform)
     {
         shader->BindUniformBuffer(blockIndex, *transformBuffer.Buffer);
 
-        Renderer::SubmitMeshInstanced(InstancedDrawArgs{SubmitCommandArgs{m_Material, 0, m_StaticMesh->m_VertexArray, transform},
+        Renderer::SubmitMeshInstanced(InstancedDrawArgs{SubmitCommandArgs{m_Material, 0, m_StaticMesh->GetStaticMeshEntry(m_Lod).m_VertexArray, transform},
             transformBuffer.Buffer, transformBuffer.NumTransformsOccupied});
     }
 }

@@ -165,6 +165,7 @@ void Level::BroadcastRender()
     }
 
     auto staticMeshView = View<TransformComponent, StaticMeshComponent>();
+
     for (auto&& [entity, transform, staticMesh] : staticMeshView.each())
     {
         AddNewStaticMesh(staticMesh.MeshName, transform.GetAsTransform());
@@ -191,15 +192,32 @@ void Level::BroadcastRender()
 
 void Level::AddNewStaticMesh(const std::string& meshName, const Transform& transform)
 {
-    auto it = m_MeshNameToInstancedMesh.find(meshName);
+    float distance = glm::distance(CameraPosition, transform.Position);
+    int lod = 0;
+    std::shared_ptr<StaticMesh> mesh = ResourceManager::GetStaticMesh(meshName);
+
+    int numLods = mesh->GetNumLods();
+
+    if (distance > 40 && numLods >= 1)
+    {
+        lod = 1;
+    }
+    else if (distance > 80 && numLods >= 2)
+    {
+        lod = 2;
+    }
+
+    MeshKey key{meshName, lod};
+    auto it = m_MeshNameToInstancedMesh.find(key);
 
     if (it == m_MeshNameToInstancedMesh.end())
     {
-        it = m_MeshNameToInstancedMesh.try_emplace(meshName, std::make_shared<InstancedMesh>(ResourceManager::GetStaticMesh(meshName),
+        it = m_MeshNameToInstancedMesh.try_emplace(key, std::make_shared<InstancedMesh>(ResourceManager::GetStaticMesh(meshName),
             ResourceManager::GetMaterial("instanced"))).first;
+
+        it->second->SetLod(lod);
     }
 
-    auto& mesh = it->second->GetMesh();
     it->second->AddInstance(transform, 0);
 }
 

@@ -66,7 +66,7 @@ private:
     std::map<std::string, Actor> m_Actors;
     std::shared_ptr<ResourceManagerImpl> m_ResourceManager;
 
-    std::unordered_map<std::string, std::shared_ptr<InstancedMesh>> m_MeshNameToInstancedMesh;
+    std::unordered_map<MeshKey, std::shared_ptr<InstancedMesh>> m_MeshNameToInstancedMesh;
 
     std::vector<LightData> m_Lights;
 
