@@ -1,13 +1,14 @@
 #version 330 core
 
-uniform sampler2D u_textures[32];
+uniform sampler2D u_Textures[32];
 
-in vec4 tint;
-in vec2 textureCoords;
-flat in int textureId;
+in vec4 Tint;
+in vec2 TextureCoords;
+flat in int TextureId;
 
-out vec4 frag_color;
+out vec4 FragColor;
 
-void main() {
-	frag_color = tint * texture(u_textures[textureId], textureCoords);
+void main() 
+{
+	FragColor = Tint * texture(u_Textures[TextureId], TextureCoords);
 }

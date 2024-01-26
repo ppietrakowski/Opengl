@@ -136,8 +136,8 @@ private:
             m_BindTextures[i]->Bind(i);
         }
 
-        shader->SetSamplersUniform("u_textures", std::span<const std::shared_ptr<Texture>>{m_BindTextures.begin(), (size_t)m_NumBindedTextures});
-        shader->SetUniform("u_projection", projection);
+        shader->SetSamplersUniform("u_Textures", std::span<const std::shared_ptr<Texture>>{m_BindTextures.begin(), (size_t)m_NumBindedTextures});
+        shader->SetUniform("u_Projection", projection);
     }
 
     void Reset()

@@ -1,10 +1,11 @@
 #version 330 core
 
-uniform samplerCube u_skybox_texture; 
-in vec3 position;
+uniform samplerCube u_SkyboxTexture; 
+in vec3 Position;
 
-out vec4 frag_color;
+out vec4 FragColor;
 
-void main() {
-	frag_color = texture(u_skybox_texture, position);
+void main() 
+{
+	FragColor = texture(u_SkyboxTexture, Position);
 }

@@ -10,8 +10,8 @@
 
 static void SetupDefaultProperties(const std::shared_ptr<Material>& material)
 {
-    material->SetFloatProperty("reflection_factor", 0.5f);
-    material->SetFloatProperty("shininess", 32.0f);
+    material->SetFloatProperty("ReflectionFactor", 0.05f);
+    material->SetFloatProperty("Shininess", 32.0f);
 }
 
 struct FpsCounter
@@ -55,7 +55,7 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     m_CurrentUsedShader = m_DefaultShader;
 
     auto defaultMaterial = ResourceManager::CreateMaterial("assets/shaders/default.shd", "postac_material");
-    defaultMaterial->SetFloatProperty("shininess", 32.0f);
+    defaultMaterial->SetFloatProperty("Shininess", 32.0f);
 
     std::shared_ptr<StaticMesh> staticMesh = ResourceManager::GetStaticMesh("assets/box.fbx");
     staticMesh->MainMaterial = defaultMaterial;
@@ -101,8 +101,12 @@ void SandboxGameLayer::Render()
     glm::vec3 lightPosition{0.0f};
 
     {
-        Actor directional_light = m_Level->FindActor("directional_light");
-        lightPosition = directional_light.GetTransform().Position;
+        Actor directionalLight;
+
+        if (m_Level->TryFindActor("directional_light", directionalLight))
+        {
+            lightPosition = directionalLight.GetTransform().Position;
+        }
     }
 
     m_CurrentUsedShader->Use();
@@ -326,13 +330,13 @@ void SandboxGameLayer::InitializeSkeletalMesh()
 
     for (int i = 0; i < m_TestSkeletalMesh->TextureNames.size(); ++i)
     {
-        std::string property_name = std::string{"diffuse"} + std::to_string(i + 1);
+        std::string property_name = std::string{"Diffuse"} + std::to_string(i + 1);
         m_TestSkeletalMesh->MainMaterial->SetTextureProperty(property_name.c_str(), ResourceManager::GetTexture2D(m_TestSkeletalMesh->TextureNames[i]));
     }
 
     std::shared_ptr<Material> material = m_TestSkeletalMesh->MainMaterial;
 
-    material->SetFloatProperty("shininess", 32.0f);
+    material->SetFloatProperty("Shininess", 32.0f);
 }
 
 void SandboxGameLayer::CreateSkeletalActors()
@@ -351,7 +355,7 @@ Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, co
     Actor instanceMesh = m_Level->CreateActor("InstancedMesh");
     instanceMesh.AddComponent<InstancedMeshComponent>(ResourceManager::GetStaticMesh(filePath), material);
 
-    material->SetTextureProperty("diffuse1", ResourceManager::GetTexture2D("assets/T_Metal_Steel_D.TGA"));
+    material->SetTextureProperty("Diffuse1", ResourceManager::GetTexture2D("assets/T_Metal_Steel_D.TGA"));
 
     InstancedMeshComponent& instancedMesh = instanceMesh.GetComponent<InstancedMeshComponent>();
 
@@ -388,11 +392,11 @@ void SandboxGameLayer::PlaceLightsAndPlayer()
     player.AddComponent<FpsCounter>();
 
     SpotLightComponent& playerSpotLight = player.GetComponent<SpotLightComponent>();
-    playerSpotLight.CutOffAngle = 10.0f;
+    playerSpotLight.CutOffAngle = 16.0f;
     playerSpotLight.OuterCutOffAngle = 20.0f;
     playerSpotLight.DirectionLength = 120;
     playerSpotLight.Direction = {0, 0, -1};
-    playerSpotLight.Intensity = 10.0f;
+    playerSpotLight.Intensity = 5.0f;
     playerSpotLight.Color = glm::vec4(0.2f, 0.8f, 0.2f, 1.0f);
 
     Actor directionalLight = m_Level->CreateActor("directional_light");

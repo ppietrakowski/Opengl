@@ -1,37 +1,35 @@
 #version 440 core
-layout (location = 0) in vec3 a_position; 
-layout (location = 1) in vec3 a_normal;
-layout (location = 2) in vec2 a_texture_coords;
-layout (location = 3) in ivec4 a_bone_ids;
-layout (location = 4) in vec4 a_bone_weights;
-layout (location = 5) in uint a_texture_id;
+layout (location = 0) in vec3 a_Position; 
+layout (location = 1) in vec3 a_Normal;
+layout (location = 2) in vec2 a_TextureCoords;
+layout (location = 3) in ivec4 a_BoneIds;
+layout (location = 4) in vec4 a_BoneWeights;
+layout (location = 5) in uint a_TextureId;
 
-out vec2 textureCoords;
-out vec3 normal;
-out vec3 frag_pos_ws;
+out vec2 TextureCoords;
+out vec3 Normal;
+out vec3 FragPosWS;
 
-out flat uint textureId;
+out flat uint TextureId;
 
-uniform mat4 u_bone_transforms[200];
-uniform mat4 u_projection_view;
-uniform mat4 u_transform;
-uniform mat4 u_view;
-uniform vec3 u_light_direction;
-uniform vec3 u_light_position_ws;
+uniform mat4 u_BoneTransforms[200];
+uniform mat4 u_ProjectionView;
+uniform mat4 u_Transform;
 
-void main() {
-	vec4 weights = normalize(a_bone_weights);
+void main() 
+{
+	vec4 weights = normalize(a_BoneWeights);
 
-	mat4 bone_transform = u_bone_transforms[int(a_bone_ids.x)] * weights.x;
-	bone_transform  +=    u_bone_transforms[int(a_bone_ids.y)] * weights.y;	
-	bone_transform  +=    u_bone_transforms[int(a_bone_ids.z)] * weights.z;
-	bone_transform  +=    u_bone_transforms[int(a_bone_ids.w)] * weights.w;
+	mat4 transformFromBones = u_BoneTransforms[int(a_BoneIds.x)] * weights.x;
+	transformFromBones  +=    u_BoneTransforms[int(a_BoneIds.y)] * weights.y;	
+	transformFromBones  +=    u_BoneTransforms[int(a_BoneIds.z)] * weights.z;
+	transformFromBones  +=    u_BoneTransforms[int(a_BoneIds.w)] * weights.w;
 
-	vec4 pos = bone_transform * vec4(a_position, 1.0);
-	gl_Position = u_projection_view * u_transform * pos;
-	frag_pos_ws = vec3(u_transform * bone_transform * pos);
+	vec4 pos = transformFromBones * vec4(a_Position, 1.0);
+	gl_Position = u_ProjectionView * u_Transform * pos;
+	FragPosWS = vec3(u_Transform * transformFromBones * pos);
 
-	textureCoords = a_texture_coords;
-	normal = normalize(mat3(transpose(inverse(u_transform * bone_transform))) * a_normal);
-	textureId = a_texture_id;
+	TextureCoords = a_TextureCoords;
+	Normal = normalize(mat3(transpose(inverse(u_Transform * transformFromBones))) * a_Normal);
+	TextureId = a_TextureId;
 }

@@ -5,7 +5,7 @@
 
 namespace
 {
-    constexpr std::string_view MaterialTag = "u_material.";
+    constexpr std::string_view MaterialTag = "u_Material.";
 }
 
 Material::Material(const std::shared_ptr<Shader>& shader) :

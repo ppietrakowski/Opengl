@@ -99,7 +99,7 @@ void Renderer::SubmitSkeleton(const SubmitCommandArgs& submitArgs, std::span<con
     uint32_t textureUnit = submitArgs.UsedMaterial->GetNumTextures();
     UploadUniforms(shader, submitArgs.Transform, textureUnit);
     submitArgs.ApplyMaterialUniforms();
-    shader->SetUniformMat4Array("u_bone_transforms", transforms);
+    shader->SetUniformMat4Array("u_BoneTransforms", transforms);
 
     RenderCommand::DrawIndexed(submitArgs.TargetVertexArray, submitArgs.NumIndices);
 }
@@ -153,16 +153,16 @@ void Renderer::Quit()
 
 void Renderer::UploadUniforms(const std::shared_ptr<Shader>& shader, const glm::mat4& transform, uint32_t cubeMapTextureUnit)
 {
-    shader->SetUniform("u_projection_view", s_RendererData.ProjectionViewMatrix);
-    shader->SetUniform("u_transform", transform);
-    shader->SetUniform("u_view", s_RendererData.ViewMatrix);
-    shader->SetUniform("u_camera_location", s_RendererData.CameraPosition);
+    shader->SetUniform("u_ProjectionView", s_RendererData.ProjectionViewMatrix);
+    shader->SetUniform("u_Transform", transform);
+    shader->SetUniform("u_View", s_RendererData.ViewMatrix);
+    shader->SetUniform("u_CameraLocation", s_RendererData.CameraPosition);
 
     glm::mat3 normalMatrix = glm::inverseTranspose(transform);
-    shader->SetUniform("u_normal_transform", normalMatrix);
+    shader->SetUniform("u_NormalTransform", normalMatrix);
     s_LightBuffer->BindBuffer(*shader, "Lights");
-    shader->SetUniform("u_num_lights", s_LightBuffer->ActualNumLights);
+    shader->SetUniform("u_NumLights", s_LightBuffer->ActualNumLights);
 
     Skybox::s_Instance->GetCubeMap()->Bind(cubeMapTextureUnit);
-    shader->SetSamplerUniform("u_skybox_texture", Skybox::s_Instance->GetCubeMap(), cubeMapTextureUnit);
+    shader->SetSamplerUniform("u_SkyboxTexture", Skybox::s_Instance->GetCubeMap(), cubeMapTextureUnit);
 }

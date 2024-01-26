@@ -1,45 +1,48 @@
 #version 430 core
 
-struct Material {
-    sampler2D diffuse1;
-    sampler2D diffuse2;
-    float reflection_factor;
-    float shininess;
+struct Material 
+{
+    sampler2D Diffuse1;
+    sampler2D Diffuse2;
+    float ReflectionFactor;
+    float Shininess;
 };
 
-in flat uint textureId;
-in vec2 textureCoords;
-in vec3 frag_pos_ws;
-in vec3 normal;
+in flat uint TextureId;
+in vec2 TextureCoords;
+in vec3 FragPosWS;
+in vec3 Normal;
 
-uniform Material u_material;
-uniform vec3 u_camera_location;
-uniform samplerCube u_skybox_texture; 
+uniform Material u_Material;
+uniform vec3 u_CameraLocation;
+uniform samplerCube u_SkyboxTexture; 
 
-struct Light {
-    vec3 position;
+struct Light 
+{
+    vec3 Position;
     vec3 Direction;
-    vec3 color;
+    vec3 Color;
     float DirectionLength;
-    int type;
+    int Type;
     float cutoff;
     float Intensity;
     float OuterCutOff;
 };
 
-layout(std140, binding=0) uniform Lights {
-    Light u_lights[32];
+layout(std140, binding=0) uniform Lights 
+{
+    Light u_Lights[32];
 };
 
-const int kLightTypeDirectional = 0;
-const int kLightTypePoint = 1;
-const int kLightTypeSpot = 2;
+const int LightTypeDirectional = 0;
+const int LightTypePoint = 1;
+const int LightTypeSpot = 2;
 
-uniform int u_num_lights;
+uniform int u_NumLights;
 
 float CalculateAttentuation(vec3 lightPosition, float lightLength)
 {
-    float dist = distance(lightPosition, frag_pos_ws);
+    float dist = distance(lightPosition, FragPosWS);
     float attenuation = 0.0f;
 
     if (dist <= 0.01f) 
@@ -64,54 +67,51 @@ vec3 CalculateSpecular(vec3 lightDir, vec3 viewDir, vec3 norm, Light light)
         vec3 refl = reflect(-lightDir, norm);
         float fi = dot(viewDir, refl);
         
-        specular = light.Intensity * light.color * pow(max(0.0, fi), u_material.shininess);
+        specular = light.Intensity * light.Color * pow(max(0.0, fi), u_Material.Shininess);
     }
 
     return specular;
 }
 
 // Calculates color of fragment when specific light illuminates it. Calculation are using Phong shading model
-vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec4 texel, vec3 reflect_skybox) 
+vec3 CalculateLight(Light light, vec3 norm, vec3 viewDir, vec4 texel) 
 {
-    // Diffuse lighting
+    // find lightDir, which points towards light 
+    vec3 lightDir = vec3(0, 0, 0);
 
-    // find light_dir, which points towards light 
-    vec3 light_dir = vec3(0, 0, 0);
-
-    if (light.type == kLightTypePoint)
+    if (light.Type == LightTypePoint)
     {
-        // find light
-        light_dir = normalize(light.position - frag_pos_ws);
+        lightDir = normalize(light.Position - FragPosWS);
     }
     else
     {
         // in spot light the position is included in it's lighting calculation
-        light_dir = normalize(-light.Direction);
+        lightDir = normalize(-light.Direction);
     }
 
     // __________
     // cos(theta)
-    float diff = max(dot(light_dir, norm), 0.0f);
+    float diff = max(dot(lightDir, norm), 0.0f);
 
-    vec3 diffuse = light.Intensity * texel.xyz * light.color * diff;
+    vec3 diffuse = light.Intensity * texel.xyz * light.Color * diff;
 
-    vec3 specular = CalculateSpecular(light_dir, view_dir, norm, light);
+    vec3 specular = CalculateSpecular(lightDir, viewDir, norm, light);
 
     // apply attentuation, if can be applied
-    if (light.type != kLightTypeDirectional) 
+    if (light.Type != LightTypeDirectional) 
     {
-        float attenuation = CalculateAttentuation(light.position, light.DirectionLength);
+        float attenuation = CalculateAttentuation(light.Position, light.DirectionLength);
         diffuse *= attenuation;
         specular *= attenuation;
     } 
 
-    if (light.type == kLightTypeSpot) 
+    if (light.Type == LightTypeSpot) 
     {
-        vec3 light_to_fragment = normalize(frag_pos_ws - light.position);
-        float spot_factor = dot(light_to_fragment, light.Direction);
+        vec3 lightToFragment = normalize(FragPosWS - light.Position);
+        float spotFactor = dot(lightToFragment, light.Direction);
 
         float epsilon = light.cutoff - light.OuterCutOff;
-        float intensity = clamp((spot_factor - light.OuterCutOff) / epsilon, 0.0, 1.0);    
+        float intensity = clamp((spotFactor - light.OuterCutOff) / epsilon, 0.0, 1.0);    
 
         diffuse *= intensity;
         specular *= intensity;
@@ -121,35 +121,35 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 view_dir, vec4 texel, vec3 refl
     return clamp(diffuse + specular, 0.0, 1.0);
 }
 
-out vec4 frag_color;
+out vec4 FragColor;
 
-void main() {
+void main() 
+{
     vec4 texel = vec4(0, 0, 0, 1);
 
-    if (textureId == 0u) 
+    if (TextureId == 0u) 
     {
-        texel = texture(u_material.diffuse1, textureCoords);
+        texel = texture(u_Material.Diffuse1, TextureCoords);
     } 
-    else if (textureId == 1u) 
+    else if (TextureId == 1u) 
     {
-        texel = texture(u_material.diffuse2, textureCoords);
+        texel = texture(u_Material.Diffuse2, TextureCoords);
     }
     
-    
-    vec3 norm = normalize(normal);
-    vec3 view_dir = normalize(u_camera_location - frag_pos_ws);
-    vec3 eye_dir = normalize(frag_pos_ws - u_camera_location);
-    vec3 reflect_vec = reflect(eye_dir, normalize(norm));
+    vec3 norm = normalize(Normal);
+    vec3 viewDir = normalize(u_CameraLocation - FragPosWS);
+    vec3 eyeDir = normalize(FragPosWS - u_CameraLocation);
+    vec3 reflectDir = reflect(eyeDir, normalize(norm));
 
     // apply ambient lighting first
     vec3 color = 0.05f * texel.xyz;
 
-    for (int i = 0; i < u_num_lights; ++i) 
+    for (int i = 0; i < u_NumLights; ++i) 
     {
-        color += CalculateLight(u_lights[i], norm, view_dir, texel, reflect_vec);
+        color += CalculateLight(u_Lights[i], norm, viewDir, texel);
     }
     
-    color += vec3(u_material.reflection_factor * texture(u_skybox_texture, reflect_vec));
+    color += vec3(u_Material.ReflectionFactor * texture(u_SkyboxTexture, reflectDir));
 
-    frag_color = vec4(color, 1.0);
+    FragColor = vec4(color, 1.0);
 }
