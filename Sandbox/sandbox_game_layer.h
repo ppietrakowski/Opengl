@@ -50,6 +50,8 @@ private:
 
     std::vector<std::string> paths;
 
+    std::unique_ptr<IMaterialParameterVisitor> m_GuiDisplayVisitor;
+
 private:
     void MoveForward(Actor& player, float axisValue);
     void MoveRight(Actor& player, float axisValue);

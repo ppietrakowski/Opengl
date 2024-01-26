@@ -42,6 +42,9 @@ public:
         return m_NumTextureUnits;
     }
 
+    
+    void VisitForEachParam(IMaterialParameterVisitor& visitor);
+
 public:
 
     bool bCullFaces : 1{ true };

@@ -72,6 +72,11 @@ public:
 
     void Clear();
 
+    std::shared_ptr<Material> GetMaterial()
+    {
+        return m_Material;
+    }
+
 private:
     std::shared_ptr<StaticMesh> m_StaticMesh;
     int m_NumInstances{0};

@@ -80,6 +80,14 @@ void Material::SetTextureProperty(const char* name, const std::shared_ptr<Textur
     GetParam(name).SetTexture(value);
 }
 
+void Material::VisitForEachParam(IMaterialParameterVisitor& visitor)
+{
+    for (auto& [name, param] : m_MaterialParams)
+    {
+        param.Accept(visitor, name);
+    }
+}
+
 void Material::TryAddNewProperty(const UniformInfo& info)
 {
     bool bIsMaterialUniform = ContainsString(info.Name, MaterialTag.data());

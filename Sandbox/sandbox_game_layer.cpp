@@ -14,6 +14,54 @@ static void SetupDefaultProperties(const std::shared_ptr<Material>& material)
     material->SetFloatProperty("Shininess", 32.0f);
 }
 
+class MaterialGuiDisplay : public IMaterialParameterVisitor
+{
+    // Inherited via IMaterialParameterVisitor
+    void Visit(PrimitiveParameter<int>& param, const std::string& name) override
+    {
+    }
+
+    void Visit(PrimitiveParameter<float>& param, const std::string& name) override
+    {
+        float value = param.GetPrimitiveValue();
+        if (ImGui::InputFloat(name.c_str(), &value, 0.1f))
+        {
+            param.SetValue(value);
+        }
+    }
+
+    void Visit(PrimitiveParameter<glm::vec2>& param, const std::string& name) override
+    {
+        glm::vec2 value = param.GetPrimitiveValue();
+        if (ImGui::InputFloat2(name.c_str(), &value[0]))
+        {
+            param.SetValue(value);
+        }
+    }
+
+    void Visit(PrimitiveParameter<glm::vec3>& param, const std::string& name) override
+    {
+        glm::vec3 value = param.GetPrimitiveValue();
+        if (ImGui::InputFloat3(name.c_str(), &value[0]))
+        {
+            param.SetValue(value);
+        }
+    }
+
+    void Visit(PrimitiveParameter<glm::vec4>& param, const std::string& name) override
+    {
+        glm::vec4 value = param.GetPrimitiveValue();
+        if (ImGui::ColorEdit4(name.c_str(), &value[0]))
+        {
+            param.SetValue(value);
+        }
+    }
+
+    void Visit(TextureParameter& param, const std::string& name) override
+    {
+    }
+};
+
 struct FpsCounter
 {
     float AccumulatedFrameTime = 1.0f;
@@ -79,6 +127,7 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
         "assets/skybox/back.jpg"
     };
 
+    m_GuiDisplayVisitor = std::make_unique<MaterialGuiDisplay>();
     m_Skybox = std::make_unique<Skybox>(std::make_shared<CubeMap>(texturePaths), ResourceManager::GetShader("assets/shaders/skybox.shd"));
 }
 
@@ -237,17 +286,9 @@ void SandboxGameLayer::OnImguiFrame()
 
     ImGui::Begin("Test image");
 
-    std::shared_ptr<Texture2D> texture = ResourceManager::GetTexture2D("assets/fireworks.png");
+    auto material = m_InstancedMesh->GetMaterial();
 
-    ImGui::Image((void*)texture->GetRendererId(), ImVec2(600, 400), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 0, 1, 1));
-
-    std::filesystem::directory_iterator it(std::filesystem::current_path());
-
-    for (const auto& entry : it)
-    {
-        std::string str = std::filesystem::relative(entry.path(), std::filesystem::current_path()).string();
-        ImGui::Button(str.c_str());
-    }
+    material->VisitForEachParam(*m_GuiDisplayVisitor);
 
     ImGui::End();
 
@@ -396,7 +437,7 @@ void SandboxGameLayer::PlaceLightsAndPlayer()
     playerSpotLight.OuterCutOffAngle = 20.0f;
     playerSpotLight.DirectionLength = 120;
     playerSpotLight.Direction = {0, 0, -1};
-    playerSpotLight.Intensity = 5.0f;
+    playerSpotLight.Intensity = 0.0f;
     playerSpotLight.Color = glm::vec4(0.2f, 0.8f, 0.2f, 1.0f);
 
     Actor directionalLight = m_Level->CreateActor("directional_light");

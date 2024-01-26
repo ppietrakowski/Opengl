@@ -130,6 +130,12 @@ void MaterialParam::SetTexture(const std::shared_ptr<Texture>& value)
     m_Getter(m_Parameter)->SetValue(value);
 }
 
+void MaterialParam::Accept(IMaterialParameterVisitor& visitor, const std::string& name)
+{
+    Parameter* paramater = m_Getter(m_Parameter);
+    paramater->Accept(visitor, name);
+}
+
 void TextureParameter::SetUniform(Shader& shader) const
 {
     m_Texture->Bind(m_TextureUnit);

@@ -25,6 +25,29 @@ enum class MaterialParamType : int8_t
     NumMaterialParamsType
 };
 
+class Parameter;
+class TextureParameter;
+
+template<typename>
+class PrimitiveParameter;
+
+class IMaterialParameterVisitor
+{
+public:
+    virtual ~IMaterialParameterVisitor() = default;
+
+    virtual void Visit(const Parameter& defaultParam, const std::string& name)
+    {
+    }
+
+    virtual void Visit(PrimitiveParameter<int>& param, const std::string& name) = 0;
+    virtual void Visit(PrimitiveParameter<float>& param, const std::string& name) = 0;
+    virtual void Visit(PrimitiveParameter<glm::vec2>& param, const std::string& name) = 0;
+    virtual void Visit(PrimitiveParameter<glm::vec3>& param, const std::string& name) = 0;
+    virtual void Visit(PrimitiveParameter<glm::vec4>& param, const std::string& name) = 0;
+    virtual void Visit(TextureParameter& param, const std::string& name) = 0;
+};
+
 class Parameter
 {
 public:
@@ -52,6 +75,11 @@ public:
 
     virtual void SetValue(std::shared_ptr<Texture> texture)
     {
+    }
+
+    virtual void Accept(IMaterialParameterVisitor& visitor, const std::string& name)
+    {
+        visitor.Visit(*this, name);
     }
 
     virtual std::any GetValue() const
@@ -90,6 +118,16 @@ public:
         return m_Value;
     }
 
+    T GetPrimitiveValue() const
+    {
+        return m_Value;
+    }
+
+    void Accept(IMaterialParameterVisitor& visitor, const std::string& name) override
+    {
+        visitor.Visit(*this, name);
+    }
+
 private:
     std::string m_UniformName;
     T m_Value;
@@ -118,6 +156,22 @@ public:
     {
         return m_Texture;
     }
+
+    std::shared_ptr<Texture> GetPrimitiveValue() const
+    {
+        return m_Texture;
+    }
+    
+    uint32_t GetTextureUnitAssigned() const
+    {
+        return m_TextureUnit;
+    }
+
+    void Accept(IMaterialParameterVisitor& visitor, const std::string& name) override
+    {
+        visitor.Visit(*this, name);
+    }
+
 
 private:
     std::string m_UniformName;
@@ -171,6 +225,8 @@ public:
     void SetVector3(glm::vec3 value);
     void SetVector4(glm::vec4 value);
     void SetTexture(const std::shared_ptr<Texture>& value);
+
+    void Accept(IMaterialParameterVisitor& visitor, const std::string& name);
 
 private:
     ParamVariant m_Parameter{UnknownParameter{}};
