@@ -6,6 +6,7 @@ layout (location = 2) in vec2 a_TextureCoords;
 layout (location = 3) in uint a_TextureId;
 
 uniform mat4 u_ProjectionView;
+uniform mat4 u_Transform;
 
 layout(std140, binding=0) uniform Transforms 
 {
@@ -19,10 +20,11 @@ out flat uint TextureId;
 
 void main() 
 {
-    FragPosWS = vec3(u_Transforms[gl_InstanceID] * vec4(a_Position, 1));
+    mat4 transform = u_Transform * u_Transforms[gl_InstanceID];
+    FragPosWS = vec3(transform * vec4(a_Position, 1));
     gl_Position = u_ProjectionView * vec4(FragPosWS, 1);
     TextureCoords = a_TextureCoords;
-    mat3 normalTransform = mat3(transpose(inverse(u_Transforms[gl_InstanceID])));
+    mat3 normalTransform = mat3(transpose(inverse(transform)));
 
     Normal = normalize(normalTransform * a_Normal);
     TextureId = a_TextureId;

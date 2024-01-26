@@ -5,6 +5,10 @@
 #include <algorithm>
 #include <vector>
 
+#include <ctime>
+#include <iomanip>
+
+
 static constexpr LogDeviceID StdLoggerId = 0;
 
 IMPLEMENT_LOG_CATEGORY(CORE);
@@ -31,9 +35,9 @@ static LogDeviceID LastLogDeviceId = 1;
 namespace
 {
 #define CASE(x) case LogLevel::##x: return #x
-    const char* ToString(LogLevel log_level)
+    const char* ToString(LogLevel logLevel)
     {
-        switch (log_level)
+        switch (logLevel)
         {
             CASE(Info);
             CASE(Warning);
@@ -59,7 +63,8 @@ public:
     {
         const SourceLocation& location = info.CodeLocation;
 
-        *m_Logger << "[" << info.CategoryName << " " << ToString(info.Level) << "] \"" <<
+        *m_Logger << "[" << std::chrono::system_clock::now() << "] ";
+        *m_Logger << info.CategoryName << " " << ToString(info.Level) << ": \"" <<
             info.Message << "\" in " << location.FunctionName << " in " << location.FileName << ": " << location.Line << std::endl << std::endl;
     }
 

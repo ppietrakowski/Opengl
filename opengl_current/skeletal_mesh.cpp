@@ -8,6 +8,7 @@
 
 #include "Core.h"
 #include "resouce_manager.h"
+#include "logging.h"
 
 static void FindAabCollision(std::span<const SkeletonMeshVertex> vertices, glm::vec3& outBoxMin, glm::vec3& outBoxMax);
 
@@ -125,7 +126,9 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
     Assimp::Importer importer;
 
-    const aiScene* scene = importer.ReadFile(path.string(), AssimpImportFlags);
+    std::string filePath = path.string();
+    const aiScene* scene = importer.ReadFile(filePath, AssimpImportFlags);
+    ELOG_VERBOSE(LOG_ASSET_LOADING, "Loading %s skeletal mesh", filePath.c_str());
     CRASH_EXPECTED_NOT_NULL(scene);
 
     // used for reserve enough indices to decrease allocating overhead
@@ -205,6 +208,14 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     m_Animations[DefaultAnimationName] = SkeletalAnimation{};
     m_Animations[DefaultAnimationName].TicksPerSecond = 30;
     m_Animations[DefaultAnimationName].Duration = 10;
+
+    ELOG_VERBOSE(LOG_ASSET_LOADING, "Loaded skeletal mesh %s, got anims: ", filePath.c_str());
+
+    for (auto& [name, animation] : m_Animations)
+    {
+        ELOG_VERBOSE(LOG_ASSET_LOADING, "Animation %s {Duration: %f, TicksPerSecond: %f, NumTracks: %i}", name.c_str(), animation.Duration, animation.TicksPerSecond,
+            (int)animation.BoneNameToTracks.size());
+    }
 
     m_RootBone.AssignHierarchy(scene->mRootNode, bonesInfo);
     m_VertexArray->AddVertexBuffer(std::make_shared<VertexBuffer>(vertices.data(), static_cast<int>(vertices.size() * sizeof(SkeletonMeshVertex))), SkeletonMeshVertex::DataFormat);

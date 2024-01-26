@@ -35,7 +35,6 @@ Game::Game(const WindowSettings& settings) :
 
     Debug::InitializeDebugDraw(ResourceManager::GetShader("assets/shaders/unshaded.shd"));
     Renderer2D::SetDrawShader(ResourceManager::GetShader("assets/shaders/sprite_2d.shd"));
-
     ImGuizmo::SetOrthographic(false);
 }
 

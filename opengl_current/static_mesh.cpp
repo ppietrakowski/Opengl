@@ -4,6 +4,7 @@
 #include "assimp_utils.h"
 
 #include "resouce_manager.h"
+#include "logging.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
@@ -139,6 +140,9 @@ void StaticMesh::LoadLod(const std::string& filePath, int lod)
     {
         m_Entries[lod] = StaticMeshEntry(vertices, indices);
     }
+
+
+    ELOG_VERBOSE(LOG_ASSET_LOADING, "Loaded static mesh %s with lod=%i", filePath.c_str(), lod);
 }
 
 StaticMeshEntry::StaticMeshEntry(const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices) :

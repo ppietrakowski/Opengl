@@ -5,6 +5,8 @@
 #include <cassert>
 #include <array>
 
+#include "logging.h"
+
 std::vector<std::string> SplitString(const std::string& string, std::string_view delimiter)
 {
     std::vector<std::string> tokens;
@@ -25,7 +27,17 @@ std::vector<std::string> SplitString(const std::string& string, std::string_view
 
 std::string LoadFileContent(const std::filesystem::path& filePath)
 {
-    std::ifstream file(filePath.string());
+    std::string path = filePath.string();
+
+    if (!std::filesystem::exists(filePath))
+    {
+        ELOG_ERROR(LOG_CORE, "File %s not exists opening will fail", path.c_str());
+    }
+
+    std::ifstream file(path.c_str());
+
+    ELOG_VERBOSE(LOG_CORE, "Loading file %s", path.c_str());
+
     file.exceptions(std::ios::failbit | std::ios::badbit);
     std::ostringstream content;
     content << file.rdbuf();
@@ -35,7 +47,7 @@ std::string LoadFileContent(const std::filesystem::path& filePath)
 std::string FormatSize(size_t numBytes)
 {
     std::array<char, 100> strSize = {};
-    static const char* kUnits[] =
+    static const char* Units[] =
     {
         "B", "KB", "MB", "GB", "TB", "PB"
     };
@@ -49,7 +61,7 @@ std::string FormatSize(size_t numBytes)
         temp /= 1024.0f;
     }
 
-    int lastIndex = sprintf(strSize.data(), "%.3f %s", temp, kUnits[unitIndex]);
+    int lastIndex = sprintf(strSize.data(), "%.3f %s", temp, Units[unitIndex]);
     assert(lastIndex >= 0 && lastIndex < strSize.size());
     strSize.back() = 0;
     std::string str = strSize.data();
