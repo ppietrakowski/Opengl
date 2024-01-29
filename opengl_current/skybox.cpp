@@ -1,5 +1,6 @@
 #include "skybox.h"
 #include "renderer.h"
+#include "logging.h"
 
 static glm::vec3 SkyboxVertices[] = {
     // positions          
@@ -60,6 +61,8 @@ Skybox::Skybox(const std::shared_ptr<CubeMap>& cubeMap, const std::shared_ptr<Sh
         });
 
     s_Instance = this;
+
+    ELOG_INFO(LOG_RENDERER, "Using cubemap %s", cubeMap->GetName());
 }
 
 void Skybox::Draw()
