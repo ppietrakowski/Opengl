@@ -183,6 +183,12 @@
     <ClCompile Include="vertex_buffer.cpp">
       <Filter>Source Files\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="SpriteBatch.cpp">
+      <Filter>Source Files\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite2D.cpp">
+      <Filter>Source Files\renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Imgui\imconfig.h">
@@ -378,6 +384,18 @@
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
     <ClInclude Include="vertex_buffer.h">
+      <Filter>Header Files\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialInterface.h">
+      <Filter>Header Files\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteBatch.h">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform2D.hpp">
+      <Filter>Header Files\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite2D.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
   </ItemGroup>
