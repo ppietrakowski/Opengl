@@ -15,21 +15,21 @@ InstancedMesh::InstancedMesh(const std::shared_ptr<StaticMesh>& staticMesh, cons
 void InstancedMesh::Draw(const glm::mat4& transform)
 {
     std::shared_ptr<Shader> shader = m_Material->GetShader();
-    int blockIndex = shader->GetUniformBlockIndex("Transforms");
+    int32_t blockIndex = shader->GetUniformBlockIndex("Transforms");
 
     for (InstancingTransformBuffer& transformBuffer : m_TransformBuffers)
     {
         shader->BindUniformBuffer(blockIndex, *transformBuffer.Buffer);
 
-        Renderer::SubmitMeshInstanced(InstancedDrawArgs{SubmitCommandArgs{m_Material, 0, m_StaticMesh->GetStaticMeshEntry(m_Lod).m_VertexArray, transform},
-            transformBuffer.Buffer, transformBuffer.NumTransformsOccupied});
+        Renderer::SubmitMeshInstanced(InstancedDrawArgs{SubmitCommandArgs{*m_Material, *m_StaticMesh->GetStaticMeshEntry(m_Lod).m_VertexArray, 0, transform},
+            *transformBuffer.Buffer, transformBuffer.NumTransformsOccupied});
     }
 }
 
-int InstancedMesh::AddInstance(const Transform& transform, int textureId)
+int InstancedMesh::AddInstance(const Transform& transform, int32_t textureId)
 {
     auto it = m_TransformBuffers.begin();
-    int id = m_NumInstances;
+    int32_t id = m_NumInstances;
 
     bool bShouldRecycleTransform = !m_RecyclingMeshIndices.empty();
     if (bShouldRecycleTransform)
@@ -68,7 +68,7 @@ int InstancedMesh::AddInstance(const Transform& transform, int textureId)
     return m_NumInstances++;
 }
 
-void InstancedMesh::RemoveInstance(int index)
+void InstancedMesh::RemoveInstance(int32_t index)
 {
     m_NumInstances--;
     ASSERT(m_NumInstances >= 0);
@@ -81,10 +81,10 @@ void InstancedMesh::RemoveInstance(int index)
     UpdateInstance(index, transform);
 }
 
-void InstancedMesh::UpdateInstance(int index, const Transform& newTransform)
+void InstancedMesh::UpdateInstance(int32_t index, const Transform& newTransform)
 {
     auto it = m_TransformBuffers.begin();
-    int id = index;
+    int32_t id = index;
 
     // find relative index and coresponding uniform buffer
     while (id >= NumInstancesTransform)

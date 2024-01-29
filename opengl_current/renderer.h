@@ -23,11 +23,39 @@ struct RendererData
     CameraProjection Projection;
 };
 
-struct InstancedDrawArgs
+class InstancedDrawArgs
 {
-    SubmitCommandArgs SubmitArgs;
-    std::shared_ptr<UniformBuffer> TransformBuffer;
-    int NumInstances;
+public:
+    InstancedDrawArgs(const SubmitCommandArgs& submitArgs, const UniformBuffer& transformBuffer, int32_t numInstances) noexcept:
+        m_SubmitArgs(submitArgs),
+        m_TransformBuffer(&transformBuffer),
+        m_NumInstances(numInstances)
+    {
+    }
+
+    InstancedDrawArgs(const InstancedDrawArgs&) noexcept = default;
+    InstancedDrawArgs& operator=(const InstancedDrawArgs&) noexcept = default;
+
+public:
+    const SubmitCommandArgs& GetSubmitArgs() const
+    {
+        return m_SubmitArgs;
+    }
+
+    int32_t GetNumInstances() const
+    {
+        return m_NumInstances;
+    }
+
+    void UploadTransform(Shader& shader) const
+    {
+        shader.BindUniformBuffer(shader.GetUniformBlockIndex("Transforms"), *m_TransformBuffer);
+    }
+
+private:
+    SubmitCommandArgs m_SubmitArgs;
+    const UniformBuffer* m_TransformBuffer{nullptr};
+    int32_t m_NumInstances{0};
 };
 
 class Renderer
@@ -74,6 +102,7 @@ private:
 private:
     static void Initialize();
     static void Quit();
+    static void StartSubmiting(const SubmitCommandArgs& submitArgs);
     static void UploadUniforms(const std::shared_ptr<Shader>& shader, const glm::mat4& transform, uint32_t cubeMapTextureUnit);
 };
 

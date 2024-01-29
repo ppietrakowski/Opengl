@@ -3,11 +3,10 @@
 #include <algorithm>
 #include <cstring>
 
-ImageRgba::ImageRgba(uint8_t* image, int width, int height, void(*deleter)(uint8_t*)) :
-    m_ImageData{image},
+ImageRgba::ImageRgba(uint8_t* image, int32_t width, int32_t height, void(*deleter)(uint8_t*)) :
+    m_ImageData{image, deleter},
     m_Width{width},
-    m_Height{height},
-    m_Deleter{deleter}
+    m_Height{height}
 {
 }
 
@@ -18,31 +17,25 @@ ImageRgba::ImageRgba(ImageRgba&& image) noexcept
 
 ImageRgba& ImageRgba::operator=(ImageRgba&& image) noexcept
 {
-    m_ImageData = image.m_ImageData;
+    m_ImageData = std::move(image.m_ImageData);
     m_Width = image.m_Width;
     m_Height = image.m_Height;
-    m_Deleter = image.m_Deleter;
     memset(&image, 0, sizeof(image));
 
     return *this;
 }
 
-ImageRgba::~ImageRgba()
-{
-    m_Deleter(m_ImageData);
-}
-
 const uint8_t* ImageRgba::GetRawImageData() const
 {
-    return m_ImageData;
+    return m_ImageData.get();
 }
 
-int ImageRgba::GetWidth() const
+int32_t ImageRgba::GetWidth() const
 {
     return m_Width;
 }
 
-int ImageRgba::GetHeight() const
+int32_t ImageRgba::GetHeight() const
 {
     return m_Height;
 }

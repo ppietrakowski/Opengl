@@ -23,6 +23,7 @@ public:
     {
         return s_ProjectionViewMatrix;
     }
+
     static void InitializeDebugDraw(const std::shared_ptr<Shader>& debugShader);
 
 private:

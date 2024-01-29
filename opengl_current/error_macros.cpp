@@ -1,27 +1,26 @@
 #include "error_macros.h"
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-
-#include <array>
+#include <iostream>
 
 #if defined(_WIN32) || defined(WIN32)     /* _Win32 is usually defined by compilers targeting 32 or   64 bit Windows systems */
 #include <Windows.h>
 #endif
 
-void Crash(const SourceLocation* location, const char* description)
+void Crash(const SourceLocation& location, std::string_view description)
 {
     PrintError(location, description);
 #if defined(_WIN32) || defined(WIN32)     /* _Win32 is usually defined by compilers targeting 32 or   64 bit Windows systems */
-    MessageBoxA(nullptr, description, "Crash report", MB_OK);
+    std::string message(description.begin(), description.end());
+    MessageBoxA(nullptr, message.c_str(), "Crash report", MB_OK);
 #endif
     std::exit(EXIT_FAILURE);
 }
 
-void PrintError(const SourceLocation* location, const char* message)
+void PrintError(const SourceLocation& location, std::string_view message)
 {
 #if defined(DEBUG) || defined(_DEBUG)
-    printf("Error in %s: %u in %s msg: %s\n", location->FileName, location->Line, location->FunctionName, message);
+    std::clog << "Error in " << location.FileName;
+    std::clog << ": " << location.Line << " in " << location.FunctionName;
+    std::clog << "msg: " << message << std::endl;
 #endif
 }

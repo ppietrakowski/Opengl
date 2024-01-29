@@ -114,11 +114,11 @@ std::shared_ptr<Shader> ResourceManagerImpl::LoadShader(const std::string& fileP
     std::filesystem::path path = filePath;
     path = path.remove_filename();
 
-    auto insertAt = [&shaderSources](const std::string& source, std::int32_t index)
+    auto insertAt = [&shaderSources](const std::string& source, int32_t index)
     {
         if (shaderSources.size() <= index)
         {
-            std::int32_t newSize = index + 1;
+            int32_t newSize = index + 1;
             shaderSources.resize(newSize);
         }
 

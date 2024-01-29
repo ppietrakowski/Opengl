@@ -38,7 +38,7 @@ public:
 
     void SetMouseVisible(bool bMouseVisible);
 
-    void AddLayer(std::unique_ptr<Layer>&& gameLayer);
+    void AddLayer(std::unique_ptr<Layer> gameLayer);
     void RemoveLayer(std::type_index index);
 
     bool IsMouseVisible() const

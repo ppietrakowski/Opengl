@@ -51,7 +51,7 @@ Game::~Game()
     Logging::Quit();
 }
 
-using DeltaTimeClock = delta_clock_base<ChronoDeltaTimeClock>;
+using DeltaTimeClock = DeltaClockBase<ChronoDeltaTimeClock>;
 
 void Game::Run()
 {
@@ -186,7 +186,7 @@ void Game::SetMouseVisible(bool bMouseVisible)
     m_Window->SetMouseVisible(bMouseVisible);
 }
 
-void Game::AddLayer(std::unique_ptr<Layer>&& gameLayer)
+void Game::AddLayer(std::unique_ptr<Layer> gameLayer)
 {
     m_Layers.emplace_back(std::move(gameLayer));
 }

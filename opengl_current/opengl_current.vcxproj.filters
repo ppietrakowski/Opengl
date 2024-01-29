@@ -386,9 +386,6 @@
     <ClInclude Include="vertex_buffer.h">
       <Filter>Header Files\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="MaterialInterface.h">
-      <Filter>Header Files\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="SpriteBatch.h">
       <Filter>Header Files\scene</Filter>
     </ClInclude>

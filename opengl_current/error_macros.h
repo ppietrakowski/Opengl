@@ -6,9 +6,9 @@
 
 struct SourceLocation
 {
-    const char* FileName;
-    int Line;
-    const char* FunctionName;
+    std::string FileName;
+    int32_t Line;
+    std::string FunctionName;
 };
 
 #ifdef _MSC_VER
@@ -23,8 +23,8 @@ struct SourceLocation
 #define DEBUG_BREAK() __builtin_trap()
 #endif
 
-void Crash(const SourceLocation* location, const char* description);
-void PrintError(const SourceLocation* location, const char* message);
+void Crash(const SourceLocation& location, std::string_view description);
+void PrintError(const SourceLocation& location, std::string_view message);
 
 #define CURRENT_SOURCE_LOCATION                                       \
     SourceLocation {                                                                 \
@@ -32,21 +32,17 @@ void PrintError(const SourceLocation* location, const char* message);
     }
 
 #define ERR_FAIL()                                            \
-    SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION; \
-    PrintError(&sourceLocation, "Method/function failed");   \
+    PrintError(CURRENT_SOURCE_LOCATION, "Method/function failed");   \
     return
 #define ERR_FAIL_V(RetVal)                                    \
-    SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION; \
-    PrintError(&sourceLocation, "Method/function failed");   \
+    PrintError(CURRENT_SOURCE_LOCATION, "Method/function failed");   \
     return RetVal
 
 #define ERR_FAIL_MSG(Msg)                                     \
-    SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION; \
-    PrintError(&sourceLocation, Msg);                        \
+    PrintError(CURRENT_SOURCE_LOCATION, Msg);                        \
     return
 #define ERR_FAIL_MSG_V(Msg, RetVal)                           \
-    SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION; \
-    PrintError(&sourceLocation, Msg);                        \
+    PrintError(CURRENT_SOURCE_LOCATION, Msg);                        \
     return (RetVal)
 
 #define ERR_FAIL_NULL(Param)                                             \
@@ -98,8 +94,7 @@ void PrintError(const SourceLocation* location, const char* message);
 #ifdef ALLOW_MAYBE_CONTINUE_EXECUTION
 #define MAYBE_MSG(Condition, Msg)                                \
     if (!(Condition)) {                                          \
-        const SourceLocation location = CURRENT_SOURCE_LOCATION; \
-        PrintError(&location, Msg);                              \
+        PrintError(CURRENT_SOURCE_LOCATION, Msg);                              \
     }
 #define MAYBE(Condition) MAYBE_MSG(Condition, "Condition " #Condition " is false")
 #else
@@ -119,8 +114,7 @@ void PrintError(const SourceLocation* location, const char* message);
 #define CRASH_EXPECTED_TRUE_MSG(Condition, Msg)                   \
     if (!(Condition)) {                                           \
         DEBUG_BREAK();                                            \
-        SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION; \
-        Crash(&sourceLocation, Msg);                             \
+        Crash(CURRENT_SOURCE_LOCATION, Msg);                             \
     }
 
 #define CRASH_EXPECTED_TRUE(Condition) CRASH_EXPECTED_TRUE_MSG(Condition, "Fatal condition \"" #Condition "\" is false ")
@@ -129,7 +123,7 @@ void PrintError(const SourceLocation* location, const char* message);
 #define CRASH_EXPECTED_FALSE_MSG(Condition, Msg) \
     if (Condition) {                             \
         DEBUG_BREAK();                           \
-        Crash();                                 \
+        Crash(CURRENT_SOURCE_LOCATION, Msg);                                 \
     }
 
 #define CRASH_EXPECTED_FALSE(Condition) CRASH_EXPECTED_FALSE_MSG(Condition, "Fatal condition \"" #Condition "\" is true ")
@@ -151,8 +145,7 @@ void PrintError(const SourceLocation* location, const char* message);
 #if defined(_DEBUG) || defined(DEBUG)
 #define ASSERT(Condition)                                                            \
     if (!(Condition)) {                                                              \
-        SourceLocation sourceLocation = CURRENT_SOURCE_LOCATION;                    \
-        PrintError(&sourceLocation, "Assertion " #Condition " evaluates to false"); \
+        PrintError(CURRENT_SOURCE_LOCATION, "Assertion " #Condition " evaluates to false"); \
         DEBUG_BREAK();                                                               \
         THROW_ERROR("Fatal condition " #Condition " evaluates to false");            \
     }

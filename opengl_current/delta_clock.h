@@ -2,13 +2,13 @@
 
 
 template<typename chrono_clock, typename duration = chrono_clock::duration>
-class delta_clock_base
+class DeltaClockBase
 {
 public:
     using time_point_t = chrono_clock::time_point;
     using duration_t = duration;
 
-    delta_clock_base()
+    DeltaClockBase()
     {
         PerformTick();
         PerformTick();

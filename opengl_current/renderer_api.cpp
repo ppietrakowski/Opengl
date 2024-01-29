@@ -9,7 +9,7 @@ static void OpenGlErrorCallback(
     unsigned type,
     unsigned id,
     unsigned severity,
-    int length,
+    int32_t length,
     const char* message,
     const void* userParam)
 {
@@ -65,36 +65,36 @@ void RendererApi::SetClearColor(const RgbaColor& clearColor)
     }
 }
 
-static FORCE_INLINE void DrawIndexedUsingGlPrimitives(const std::shared_ptr<VertexArray>& vertexArray, int numIndices, GLenum primitiveType)
+static FORCE_INLINE void DrawIndexedUsingGlPrimitives(const VertexArray& vertexArray, int32_t numIndices, GLenum primitiveType)
 {
     ASSERT(numIndices >= 0);
 
-    vertexArray->Bind();
+    vertexArray.Bind();
     glDrawElements(primitiveType, numIndices, GL_UNSIGNED_INT, nullptr);
 }
 
-void RendererApi::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, int numIndices)
+void RendererApi::DrawIndexed(const VertexArray& vertexArray, int32_t numIndices)
 {
     DrawIndexedUsingGlPrimitives(vertexArray, numIndices, GL_TRIANGLES);
 }
 
-void RendererApi::DrawArrays(const std::shared_ptr<VertexArray>& vertexArray, int numVertices)
+void RendererApi::DrawArrays(const VertexArray& vertexArray, int32_t numVertices)
 {
-    vertexArray->Bind();
+    vertexArray.Bind();
     glDrawArrays(GL_TRIANGLES, 0, numVertices);
 }
 
-void RendererApi::DrawLines(const std::shared_ptr<VertexArray>& vertexArray, int numIndices)
+void RendererApi::DrawLines(const VertexArray& vertexArray, int32_t numIndices)
 {
     DrawIndexedUsingGlPrimitives(vertexArray, numIndices, GL_LINES);
 }
 
-void RendererApi::DrawIndexedInstanced(const std::shared_ptr<VertexArray>& vertexArray, int numInstances)
+void RendererApi::DrawIndexedInstanced(const VertexArray& vertexArray, int32_t numInstances)
 {
     ASSERT(numInstances >= 0);
 
-    vertexArray->Bind();
-    glDrawElementsInstanced(GL_TRIANGLES, vertexArray->GetNumIndices(),
+    vertexArray.Bind();
+    glDrawElementsInstanced(GL_TRIANGLES, vertexArray.GetNumIndices(),
         GL_UNSIGNED_INT, nullptr, numInstances);
 }
 
@@ -131,7 +131,7 @@ void RendererApi::ClearBufferBindings_Debug()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void RendererApi::SetViewport(int x, int y, int width, int height)
+void RendererApi::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     glViewport(x, y, width, height);
     glScissor(x, y, width, height);

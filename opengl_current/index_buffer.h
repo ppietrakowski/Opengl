@@ -10,18 +10,17 @@
 class IndexBuffer
 {
 public:
-    IndexBuffer(const uint32_t* data,
-        int numIndices, bool bDynamic = false);
-    IndexBuffer(int maxNumIndices);
+    IndexBuffer(std::span<uint32_t> data, bool bDynamic = false);
+    IndexBuffer(int32_t maxNumIndices);
     ~IndexBuffer();
 
 public:
     void Bind() const;
     void Unbind() const;
-    int GetNumIndices() const;
+    int32_t GetNumIndices() const;
 
-    void UpdateIndices(const uint32_t* data, int offset, int size);
-    void UpdateIndices(const uint32_t* data, int size);
+    void UpdateIndices(const uint32_t* data, int32_t offset, int32_t size);
+    void UpdateIndices(const uint32_t* data, int32_t size);
 
     uint32_t GetOpenGlIdentifier() const;
 
@@ -29,16 +28,19 @@ public:
 
 private:
     uint32_t m_RendererId;
-    int m_NumIndices;
+    int32_t m_NumIndices;
+
+private:
+    void GenerateRendererId(const uint32_t *indices, bool bDynamic);
 };
 
 
-FORCE_INLINE int IndexBuffer::GetNumIndices() const
+FORCE_INLINE int32_t IndexBuffer::GetNumIndices() const
 {
     return m_NumIndices;
 }
 
-FORCE_INLINE void IndexBuffer::UpdateIndices(const uint32_t* data, int size)
+FORCE_INLINE void IndexBuffer::UpdateIndices(const uint32_t* data, int32_t size)
 {
     UpdateIndices(data, 0, size);
 }

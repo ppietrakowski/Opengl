@@ -49,7 +49,7 @@ SpriteBatch::SpriteBatch(std::shared_ptr<Material> material, const glm::mat4& pr
         startIndex += NumQuadVertices;
     }
 
-    std::shared_ptr<IndexBuffer> indexBuffer = std::make_shared<IndexBuffer>(batchedIndices.data(), STD_ARRAY_NUM_ELEMENTS(batchedIndices));
+    std::shared_ptr<IndexBuffer> indexBuffer = std::make_shared<IndexBuffer>(batchedIndices);
     m_SpriteVertexArray->SetIndexBuffer(indexBuffer);
 }
 
@@ -68,7 +68,7 @@ void SpriteBatch::FlushDraw(const glm::mat4& projection)
     m_SpriteVertexArray->Bind();
     vertexBuffer->UpdateVertices(m_Sprites.data(), static_cast<int>(sizeof(SpriteVertex) * m_Sprites.size()));
 
-    RenderCommand::DrawIndexed(m_SpriteVertexArray, m_NumIndicesToDraw);
+    RenderCommand::DrawIndexed(*m_SpriteVertexArray, m_NumIndicesToDraw);
     Reset();
 
     m_ProjectionCopy = projection;

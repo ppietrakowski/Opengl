@@ -11,8 +11,8 @@ public:
     Material& operator=(const Material&) = default;
 
 public:
-    int GetIntProperty(const char* name) const;
-    void SetIntProperty(const char* name, int value);
+    int32_t GetIntProperty(const char* name) const;
+    void SetIntProperty(const char* name, int32_t value);
 
     float GetFloatProperty(const char* name) const;
     void SetFloatProperty(const char* name, float value);

@@ -17,8 +17,8 @@ static const uint32_t BaseBoxIndices[24] =
     0, 4, 1, 5, 2, 6, 3, 7
 };
 
-constexpr int MaxNumDebugVertices = 2000;
-constexpr int MaxNumDebugIndices = 3 * 2000;
+constexpr int32_t MaxNumDebugVertices = 2000;
+constexpr int32_t MaxNumDebugIndices = 3 * 2000;
 
 glm::mat4 Debug::s_ProjectionViewMatrix{1.0f};
 
@@ -110,7 +110,7 @@ public:
         shader->Use();
         shader->SetUniform("u_ProjectionView", Debug::GetProjectionViewMatrix());
 
-        RenderCommand::DrawLines(m_VertexArray, m_NumDrawIndices);
+        RenderCommand::DrawLines(*m_VertexArray, m_NumDrawIndices);
 
         m_NumDrawIndices = 0;
         m_NumDrawVertices = 0;

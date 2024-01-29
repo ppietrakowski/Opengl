@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 
 inline void DefaultImageDataDeleter(uint8_t* data)
 {
@@ -10,20 +11,18 @@ inline void DefaultImageDataDeleter(uint8_t* data)
 class ImageRgba
 {
 public:
-    ImageRgba(uint8_t* image, int width, int height, void (*deleter)(uint8_t*) = &DefaultImageDataDeleter);
+    ImageRgba(uint8_t* image, int32_t width, int32_t height, void (*deleter)(uint8_t*) = &DefaultImageDataDeleter);
 
     ImageRgba(ImageRgba&& image) noexcept;
     ImageRgba& operator=(ImageRgba&& image) noexcept;
-    ~ImageRgba();
 
     const uint8_t* GetRawImageData() const;
 
-    int GetWidth() const;
-    int GetHeight() const;
+    int32_t GetWidth() const;
+    int32_t GetHeight() const;
 
 private:
-    uint8_t* m_ImageData;
-    int m_Width;
-    int m_Height;
-    void (*m_Deleter)(uint8_t*);
+    std::unique_ptr<uint8_t, decltype(&DefaultImageDataDeleter)> m_ImageData{nullptr, &DefaultImageDataDeleter};
+    int32_t m_Width;
+    int32_t m_Height;
 };

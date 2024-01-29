@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#define DECLARE_LOG_CATEGORY(LogCategoryName) struct LogCategory_##LogCategoryName { constexpr const char* GetName() const { return #LogCategoryName; } }; extern const LogCategory_##LogCategoryName LOG_##LogCategoryName
+#define DECLARE_LOG_CATEGORY(LogCategoryName) struct LogCategory_##LogCategoryName { constexpr std::string_view GetName() const { return #LogCategoryName; } }; extern const LogCategory_##LogCategoryName LOG_##LogCategoryName
 #define IMPLEMENT_LOG_CATEGORY(LogCategoryName) const LogCategory_##LogCategoryName LOG_##LogCategoryName
 
 DECLARE_LOG_CATEGORY(CORE);
@@ -32,7 +32,7 @@ enum class LogLevel
 struct LogInfo
 {
     SourceLocation CodeLocation;
-    const char* CategoryName;
+    std::string_view CategoryName;
     LogLevel Level;
     std::string Message;
 };
@@ -67,7 +67,7 @@ public:
     static void EnableStdLogging();
 
 private:
-    static int s_IgnoredLogLevels;
+    static int32_t s_IgnoredLogLevels;
 
 private:
     static void SortLogDeviceIDs();

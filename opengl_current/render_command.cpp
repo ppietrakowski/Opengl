@@ -25,33 +25,28 @@ void RenderCommand::ClearBufferBindings_Debug()
     s_RendererApi.ClearBufferBindings_Debug();
 }
 
-static FORCE_INLINE int GetNumIndices(int numIndices, const std::shared_ptr<VertexArray>& vertexArray)
-{
-    return numIndices == 0 ? vertexArray->GetNumIndices() : numIndices;
-}
-
-void RenderCommand::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, int numIndices)
+void RenderCommand::DrawIndexed(const VertexArray& vertexArray, int32_t numIndices)
 {
     ASSERT(s_bRenderCommandInitialized);
-    s_RendererApi.DrawIndexed(vertexArray, GetNumIndices(numIndices, vertexArray));
+    s_RendererApi.DrawIndexed(vertexArray, numIndices);
     s_RenderStats.NumDrawcalls++;
 }
 
-void RenderCommand::DrawArrays(const std::shared_ptr<VertexArray>& vertexArray, int numVertices)
+void RenderCommand::DrawArrays(const VertexArray& vertexArray, int32_t numVertices)
 {
     s_RendererApi.DrawArrays(vertexArray, numVertices);
     s_RenderStats.NumDrawcalls++;
 }
 
-void RenderCommand::DrawLines(const std::shared_ptr<VertexArray>& vertexArray, int numIndices)
+void RenderCommand::DrawLines(const VertexArray& vertexArray, int32_t numIndices)
 {
     ASSERT(s_bRenderCommandInitialized);
 
-    s_RendererApi.DrawLines(vertexArray, GetNumIndices(numIndices, vertexArray));
+    s_RendererApi.DrawLines(vertexArray, numIndices);
     s_RenderStats.NumDrawcalls++;
 }
 
-void RenderCommand::DrawIndexedInstanced(const std::shared_ptr<VertexArray>& vertexArray, int numInstances)
+void RenderCommand::DrawIndexedInstanced(const VertexArray& vertexArray, int32_t numInstances)
 {
     s_RendererApi.DrawIndexedInstanced(vertexArray, numInstances);
     s_RenderStats.NumDrawcalls++;
@@ -96,7 +91,7 @@ void RenderCommand::SetLineWidth(float lineWidth)
     s_RendererApi.SetLineWidth(lineWidth);
 }
 
-void RenderCommand::SetViewport(int x, int y, int width, int height)
+void RenderCommand::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     s_RendererApi.SetViewport(x, y, width, height);
 }

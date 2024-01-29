@@ -82,7 +82,7 @@ void Skybox::Draw()
     m_CubeMap->Bind(0);
     m_Shader->SetSamplerUniform("u_skybox_texture", m_CubeMap, 0);
 
-    RenderCommand::DrawArrays(m_VertexArray, ARRAY_NUM_ELEMENTS(SkyboxVertices));
+    RenderCommand::DrawArrays(*m_VertexArray, ARRAY_NUM_ELEMENTS(SkyboxVertices));
 
     // switch back basic depth test
     RenderCommand::SetDepthFunc(DepthFunction::Less);

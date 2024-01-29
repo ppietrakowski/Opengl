@@ -6,8 +6,8 @@
 #include <cstdint>
 #include <glm/glm.hpp>
 
-using MouseButton = int;
-using KeyCode = int;
+using MouseButton = int32_t;
+using KeyCode = int32_t;
 
 enum class EventType
 {
@@ -28,14 +28,14 @@ struct Event
 {
     struct SizeEvent
     {
-        int Width;
-        int Height;
+        int32_t Width;
+        int32_t Height;
     };
 
     struct KeyEvent
     {
         KeyCode Key;
-        int Scancode;
+        int32_t Scancode;
         bool bAltClicked : 1;
         bool bControlClicked : 1;
         bool bShiftClicked : 1;

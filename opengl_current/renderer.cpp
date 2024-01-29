@@ -16,31 +16,40 @@ std::shared_ptr<Texture2D> Renderer::s_DefaultTexture;
 static constexpr RgbColor Black{0, 0, 0};
 static constexpr RgbColor Magenta{255, 0, 255};
 
-struct LightBuffer
+class LightBuffer
 {
-    UniformBuffer Buffer;
-    int ActualNumLights{0};
-
-    LightBuffer(int num_lights) :
-        Buffer(num_lights * sizeof(LightData))
+public:
+    LightBuffer(int numLights) :
+        m_UniformBuffer(std::make_shared<UniformBuffer>(static_cast<int32_t>(numLights * sizeof(LightData))))
     {
     }
 
+public:
+
     void AddLight(const LightData& lightData)
     {
-        Buffer.UpdateBuffer(&lightData, sizeof(LightData), ActualNumLights * sizeof(LightData));
-        ActualNumLights++;
+        m_UniformBuffer->UpdateBuffer(&lightData, sizeof(LightData), m_ActualNumLights * sizeof(LightData));
+        m_ActualNumLights++;
     }
 
     void Clear()
     {
-        ActualNumLights = 0;
+        m_ActualNumLights = 0;
     }
 
     void BindBuffer(Shader& shader, const std::string& bindingName) const
     {
-        shader.BindUniformBuffer(shader.GetUniformBlockIndex(bindingName), Buffer);
+        shader.BindUniformBuffer(shader.GetUniformBlockIndex(bindingName), *m_UniformBuffer);
     }
+
+    int32_t GetNumLights() const
+    {
+        return m_ActualNumLights;
+    }
+
+private:
+    std::shared_ptr<UniformBuffer> m_UniformBuffer;
+    int32_t m_ActualNumLights{0};
 };
 
 static LightBuffer* s_LightBuffer = nullptr;
@@ -75,49 +84,27 @@ void Renderer::EndScene()
 
 void Renderer::Submit(const SubmitCommandArgs& submitArgs)
 {
-    ASSERT(submitArgs.NumIndices <= submitArgs.TargetVertexArray->GetNumIndices());
-
-    submitArgs.SetupShader();
-    std::shared_ptr<Shader> shader = submitArgs.GetShader();
-    shader->Use();
-
-    uint32_t textureUnit = submitArgs.UsedMaterial->GetNumTextures();
-    UploadUniforms(shader, submitArgs.Transform, textureUnit);
-    submitArgs.ApplyMaterialUniforms();
-
-    RenderCommand::DrawIndexed(submitArgs.TargetVertexArray, submitArgs.NumIndices);
+    StartSubmiting(submitArgs);
+    RenderCommand::DrawIndexed(submitArgs.GetVertexArray(), submitArgs.GetNumIndices());
 }
 
 void Renderer::SubmitSkeleton(const SubmitCommandArgs& submitArgs, std::span<const glm::mat4> transforms)
 {
-    ASSERT(submitArgs.NumIndices <= submitArgs.TargetVertexArray->GetNumIndices());
-
-    submitArgs.SetupShader();
     std::shared_ptr<Shader> shader = submitArgs.GetShader();
-    shader->Use();
-
-    uint32_t textureUnit = submitArgs.UsedMaterial->GetNumTextures();
-    UploadUniforms(shader, submitArgs.Transform, textureUnit);
-    submitArgs.ApplyMaterialUniforms();
+    StartSubmiting(submitArgs);
     shader->SetUniformMat4Array("u_BoneTransforms", transforms);
 
-    RenderCommand::DrawIndexed(submitArgs.TargetVertexArray, submitArgs.NumIndices);
+    RenderCommand::DrawIndexed(submitArgs.GetVertexArray(), submitArgs.GetNumIndices());
 }
 
 void Renderer::SubmitMeshInstanced(const InstancedDrawArgs& instancedDrawArgs)
 {
-    const SubmitCommandArgs& submitArgs = instancedDrawArgs.SubmitArgs;
-
-    submitArgs.SetupShader();
+    const SubmitCommandArgs& submitArgs = instancedDrawArgs.GetSubmitArgs();
     std::shared_ptr<Shader> shader = submitArgs.GetShader();
-    shader->Use();
+    StartSubmiting(submitArgs);
 
-    uint32_t textureUnit = submitArgs.UsedMaterial->GetNumTextures();
-    UploadUniforms(shader, submitArgs.Transform, textureUnit);
-    submitArgs.ApplyMaterialUniforms();;
-
-    shader->BindUniformBuffer(shader->GetUniformBlockIndex("Transforms"), *instancedDrawArgs.TransformBuffer);
-    RenderCommand::DrawIndexedInstanced(submitArgs.TargetVertexArray, instancedDrawArgs.NumInstances);
+    instancedDrawArgs.UploadTransform(*shader);
+    RenderCommand::DrawIndexedInstanced(submitArgs.GetVertexArray(), instancedDrawArgs.GetNumInstances());
 }
 
 void Renderer::Initialize()
@@ -131,8 +118,8 @@ void Renderer::Initialize()
         {Magenta, Magenta, Black, Black}
     };
 
-    int colorsWidth = 4;
-    int colorsHeight = 4;
+    int32_t colorsWidth = 4;
+    int32_t colorsHeight = 4;
 
     s_DefaultTexture = std::make_shared<Texture2D>(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::Rgb});
     s_DefaultTexture->SetFilteringType(FilteringType::Nearest);
@@ -152,6 +139,17 @@ void Renderer::Quit()
     RenderCommand::Quit();
 }
 
+void Renderer::StartSubmiting(const SubmitCommandArgs& submitArgs)
+{
+    submitArgs.SetupRenderState();
+    std::shared_ptr<Shader> shader = submitArgs.GetShader();
+    shader->Use();
+
+    uint32_t cubeMapTextureUnit = submitArgs.GetNumTexturesUsed();
+    UploadUniforms(shader, submitArgs.GetTransform(), cubeMapTextureUnit);
+    submitArgs.ApplyMaterialUniforms();
+}
+
 void Renderer::UploadUniforms(const std::shared_ptr<Shader>& shader, const glm::mat4& transform, uint32_t cubeMapTextureUnit)
 {
     shader->SetUniform("u_ProjectionView", s_RendererData.ProjectionViewMatrix);
@@ -162,8 +160,9 @@ void Renderer::UploadUniforms(const std::shared_ptr<Shader>& shader, const glm::
     glm::mat3 normalMatrix = glm::inverseTranspose(transform);
     shader->SetUniform("u_NormalTransform", normalMatrix);
     s_LightBuffer->BindBuffer(*shader, "Lights");
-    shader->SetUniform("u_NumLights", s_LightBuffer->ActualNumLights);
+    shader->SetUniform("u_NumLights", s_LightBuffer->GetNumLights());
 
-    Skybox::s_Instance->GetCubeMap()->Bind(cubeMapTextureUnit);
+    std::shared_ptr<CubeMap> cubeMap = Skybox::s_Instance->GetCubeMap();
+    cubeMap->Bind(cubeMapTextureUnit);
     shader->SetSamplerUniform("u_SkyboxTexture", Skybox::s_Instance->GetCubeMap(), cubeMapTextureUnit);
 }

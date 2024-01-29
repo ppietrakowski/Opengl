@@ -20,12 +20,12 @@ Material::Material(const std::shared_ptr<Shader>& shader) :
     }
 }
 
-int Material::GetIntProperty(const char* name) const
+int32_t Material::GetIntProperty(const char* name) const
 {
     return GetParam(name).GetInt();
 }
 
-void Material::SetIntProperty(const char* name, int value)
+void Material::SetIntProperty(const char* name, int32_t value)
 {
     GetParam(name).SetInt(value);
 }
@@ -90,7 +90,7 @@ void Material::VisitForEachParam(IMaterialParameterVisitor& visitor)
 
 void Material::TryAddNewProperty(const UniformInfo& info)
 {
-    bool bIsMaterialUniform = ContainsString(info.Name, MaterialTag.data());
+    bool bIsMaterialUniform = ContainsString(info.Name, MaterialTag);
 
     if (bIsMaterialUniform)
     {

@@ -7,23 +7,16 @@
 #include "renderer_api.h"
 
 
-IndexBuffer::IndexBuffer(const uint32_t* data, int numIndices, bool bDynamic) :
-    m_NumIndices{numIndices}
+IndexBuffer::IndexBuffer(std::span<uint32_t> data, bool bDynamic) :
+    m_NumIndices{static_cast<int32_t>(data.size())}
 {
-    GLenum bufferUsage = bDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
-
-    glBindVertexArray(0);
-
-    glGenBuffers(1, &m_RendererId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(uint32_t), data, bufferUsage);
-
-    s_IndexBufferMemoryAllocation += numIndices * sizeof(uint32_t);
+    GenerateRendererId(data.data(), bDynamic);
 }
 
-IndexBuffer::IndexBuffer(int maxNumIndices) :
-    IndexBuffer{nullptr, maxNumIndices, true}
+IndexBuffer::IndexBuffer(int32_t maxNumIndices) :
+    m_NumIndices(maxNumIndices)
 {
+    GenerateRendererId(nullptr, true);
 }
 
 IndexBuffer::~IndexBuffer()
@@ -42,12 +35,25 @@ void IndexBuffer::Unbind() const
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void IndexBuffer::UpdateIndices(const uint32_t* data, int offset, int size)
+void IndexBuffer::UpdateIndices(const uint32_t* data, int32_t offset, int32_t size)
 {
     ERR_FAIL_EXPECTED_TRUE_MSG(size <= m_NumIndices, "Size over declared is causing memory allocation -> may occur memory leak");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
-    int sizeBytes = size * sizeof(uint32_t);
+    int32_t sizeBytes = size * sizeof(uint32_t);
 
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, sizeBytes, data);
+}
+
+void IndexBuffer::GenerateRendererId(const uint32_t* indices, bool bDynamic)
+{
+    GLenum bufferUsage = bDynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+
+    glBindVertexArray(0);
+
+    glGenBuffers(1, &m_RendererId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_NumIndices * sizeof(uint32_t), indices, bufferUsage);
+
+    s_IndexBufferMemoryAllocation += m_NumIndices * sizeof(uint32_t);
 }

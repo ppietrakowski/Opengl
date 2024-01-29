@@ -304,7 +304,6 @@
     <ClInclude Include="light_component.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="material.h" />
-    <ClInclude Include="MaterialInterface.h" />
     <ClInclude Include="material_parameter.h" />
     <ClInclude Include="player_controller.h" />
     <ClInclude Include="renderer.h" />

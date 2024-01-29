@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <filesystem>
+#include <optional>
 
 #define ARRAY_NUM_ELEMENTS(Array) static_cast<int>(sizeof(Array) / sizeof(Array[0]))
 #define STD_ARRAY_NUM_ELEMENTS(Array) static_cast<int>(Array.size())
@@ -20,7 +21,7 @@
 #define ISIZE_OF(Object) static_cast<int>(sizeof(Object))
 
 template <typename CharType>
-FORCE_INLINE bool ContainsString(const std::basic_string<CharType>& str, const CharType* s)
+FORCE_INLINE bool ContainsString(const std::basic_string<CharType>& str, std::basic_string_view<CharType> s)
 {
     size_t pos = str.find(s);
     return pos != std::basic_string<CharType>::npos;

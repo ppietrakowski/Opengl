@@ -23,10 +23,10 @@ public:
 
     static void ClearBufferBindings_Debug();
 
-    static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, int numIndices);
-    static void DrawArrays(const std::shared_ptr<VertexArray>& vertexArray, int numVertices);
-    static void DrawLines(const std::shared_ptr<VertexArray>& vertexArray, int numIndices);
-    static void DrawIndexedInstanced(const std::shared_ptr<VertexArray>& vertexArray, int numInstances);
+    static void DrawIndexed(const VertexArray& vertexArray, int32_t numIndices);
+    static void DrawArrays(const VertexArray& vertexArray, int32_t numVertices);
+    static void DrawLines(const VertexArray& vertexArray, int32_t numIndices);
+    static void DrawIndexedInstanced(const VertexArray& vertexArray, int32_t numInstances);
 
     static void BeginScene();
     static void EndScene();
@@ -37,7 +37,7 @@ public:
     static bool DoesCullFaces();
 
     static void SetLineWidth(float line_width);
-    static void SetViewport(int x, int y, int width, int height);
+    static void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height);
 
     static RenderStats GetRenderStats();
 

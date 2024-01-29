@@ -219,7 +219,7 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
 
     m_RootBone.AssignHierarchy(scene->mRootNode, bonesInfo);
     m_VertexArray->AddVertexBuffer(std::make_shared<VertexBuffer>(vertices.data(), static_cast<int>(vertices.size() * sizeof(SkeletonMeshVertex))), SkeletonMeshVertex::DataFormat);
-    m_VertexArray->SetIndexBuffer(std::make_shared<IndexBuffer>(indices.data(), static_cast<int>(indices.size())));
+    m_VertexArray->SetIndexBuffer(std::make_shared<IndexBuffer>(indices));
 
     // find global transform for converting from bone space back to local space
     m_GlobalInverseTransform = glm::inverse(ToGlm(scene->mRootNode->mTransformation));
@@ -277,7 +277,7 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, int animationIndex)
 
 void SkeletalMesh::Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& worldTransform)
 {
-    Renderer::SubmitSkeleton(SubmitCommandArgs{MainMaterial, 0, m_VertexArray, worldTransform}, transforms);
+    Renderer::SubmitSkeleton(SubmitCommandArgs{*MainMaterial, *m_VertexArray, 0, worldTransform}, transforms);
 }
 
 std::vector<std::string> SkeletalMesh::GetAnimationNames() const
