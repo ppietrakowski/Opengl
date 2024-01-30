@@ -12,6 +12,9 @@
 #include "box.h"
 #include "viewport.h"
 
+#include "static_mesh.h"
+#include "skeletal_mesh.h"
+
 #include <cstdint>
 
 struct RendererData
@@ -21,41 +24,6 @@ struct RendererData
     glm::mat4 ProjectionMatrix = glm::identity<glm::mat4>();
     glm::vec3 CameraPosition{0, 0, 0};
     CameraProjection Projection;
-};
-
-class InstancedDrawArgs
-{
-public:
-    InstancedDrawArgs(const SubmitCommandArgs& submitArgs, const UniformBuffer& transformBuffer, int32_t numInstances) noexcept:
-        m_SubmitArgs(submitArgs),
-        m_TransformBuffer(&transformBuffer),
-        m_NumInstances(numInstances)
-    {
-    }
-
-    InstancedDrawArgs(const InstancedDrawArgs&) noexcept = default;
-    InstancedDrawArgs& operator=(const InstancedDrawArgs&) noexcept = default;
-
-public:
-    const SubmitCommandArgs& GetSubmitArgs() const
-    {
-        return m_SubmitArgs;
-    }
-
-    int32_t GetNumInstances() const
-    {
-        return m_NumInstances;
-    }
-
-    void UploadTransform(Shader& shader) const
-    {
-        shader.BindUniformBuffer(shader.GetUniformBlockIndex("Transforms"), *m_TransformBuffer);
-    }
-
-private:
-    SubmitCommandArgs m_SubmitArgs;
-    const UniformBuffer* m_TransformBuffer{nullptr};
-    int32_t m_NumInstances{0};
 };
 
 class Renderer
@@ -68,10 +36,10 @@ public:
     static void BeginScene(glm::vec3 cameraPosition, glm::quat cameraRotation, const std::vector<LightData>& lights);
     static void EndScene();
 
-    static void Submit(const SubmitCommandArgs& submitArgs);
-    static void SubmitSkeleton(const SubmitCommandArgs& submitArgs, std::span<const glm::mat4> transforms);
+    static void Submit(const StaticMeshEntry& meshEntry, const glm::mat4& transform);
+    static void SubmitSkeleton(const SkeletalMesh& skeletalMesh, const glm::mat4& transform, std::span<const glm::mat4> boneTransforms);
 
-    static void SubmitMeshInstanced(const InstancedDrawArgs& instancedDrawArgs);
+    static void SubmitMeshInstanced(const StaticMeshEntry& mesh, const Material& material, const UniformBuffer& buffer, int32_t numInstances, const glm::mat4& transform);
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();
 
@@ -102,7 +70,7 @@ private:
 private:
     static void Initialize();
     static void Quit();
-    static void StartSubmiting(const SubmitCommandArgs& submitArgs);
+    static void StartSubmiting(const Material& material, const glm::mat4& transform);
     static void UploadUniforms(const std::shared_ptr<Shader>& shader, const glm::mat4& transform, uint32_t cubeMapTextureUnit);
 };
 

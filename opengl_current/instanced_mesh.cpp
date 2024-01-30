@@ -15,14 +15,10 @@ InstancedMesh::InstancedMesh(const std::shared_ptr<StaticMesh>& staticMesh, cons
 void InstancedMesh::Draw(const glm::mat4& transform)
 {
     std::shared_ptr<Shader> shader = m_Material->GetShader();
-    int32_t blockIndex = shader->GetUniformBlockIndex("Transforms");
 
     for (InstancingTransformBuffer& transformBuffer : m_TransformBuffers)
     {
-        shader->BindUniformBuffer(blockIndex, *transformBuffer.Buffer);
-
-        Renderer::SubmitMeshInstanced(InstancedDrawArgs{SubmitCommandArgs{*m_Material, *m_StaticMesh->GetStaticMeshEntry(m_Lod).m_VertexArray, 0, transform},
-            *transformBuffer.Buffer, transformBuffer.NumTransformsOccupied});
+        Renderer::SubmitMeshInstanced(m_StaticMesh->GetStaticMeshEntry(m_Lod), *m_Material, *transformBuffer.Buffer, transformBuffer.NumTransformsOccupied, transform);
     }
 }
 

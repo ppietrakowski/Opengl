@@ -18,5 +18,5 @@ void SkeletalMeshComponent::UpdateAnimation(float deltaSeconds, const Transform&
 
 void SkeletalMeshComponent::Draw(const glm::mat4& worldTransform) const
 {
-    TargetSkeletalMesh->Draw(BoneTransforms, worldTransform);
+    Renderer::SubmitSkeleton(*TargetSkeletalMesh, worldTransform, BoneTransforms);
 }

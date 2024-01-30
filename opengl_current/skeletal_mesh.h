@@ -176,6 +176,12 @@ public:
 
     std::vector<std::string> TextureNames;
 
+public:
+    const VertexArray& GetVertexArray() const
+    {
+        return *m_VertexArray;
+    }
+
 private:
     std::shared_ptr<VertexArray> m_VertexArray;
     Bone m_RootBone;
@@ -191,8 +197,6 @@ private:
     void CalculateTransform(const BoneAnimationUpdateArgs& updateArgs) const;
     std::shared_ptr<Texture2D> LoadTexturesFromMaterial(const aiScene* scene, int materialIndex);
     void LoadAnimation(const aiScene* scene, int animationIndex);
-
-    void Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& worldTransform);
 };
 
 template<>

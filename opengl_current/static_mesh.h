@@ -30,14 +30,36 @@ class StaticMeshEntry
 {
     friend class InstancedMesh;
 public:
-    StaticMeshEntry(const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices);
+    StaticMeshEntry(const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices, const std::shared_ptr<Material>& material);
 
+public:
     std::vector<StaticMeshVertex> Vertices;
     std::vector<uint32_t> Indices;
 
+    const VertexArray& GetVertexArray() const
+    {
+        return *m_VertexArray;
+    }
+
+    int32_t GetNumIndices() const
+    {
+        return static_cast<int32_t>(Indices.size());
+    }
+
+    const Material& GetMaterial() const
+    {
+        return *m_Material;
+    }
+
+    void UpdateMaterial(std::shared_ptr<Material> material)
+    {
+        m_Material = material;
+    }
+
 private:
     std::shared_ptr<VertexArray> m_VertexArray;
-    int m_NumTriangles;
+    std::shared_ptr<Material> m_Material;
+    int32_t m_NumTriangles;
 };
 
 class StaticMesh
@@ -52,7 +74,6 @@ public:
 
     std::string_view GetName() const;
 
-    std::shared_ptr<Material> MainMaterial;
     std::vector<std::string> TextureNames;
 
     Box GetBoundingBox() const;
@@ -66,10 +87,13 @@ public:
 
     void LoadLod(const std::string& filePath, int lod);
 
+    void SetMaterial(std::shared_ptr<Material> material);
+
 private:
     std::vector<StaticMeshEntry> m_Entries;
     Box m_BoundingBox;
     std::string m_MeshName;
+    std::shared_ptr<Material> m_MainMaterial;
 };
 
 struct MeshKey
@@ -128,4 +152,13 @@ FORCE_INLINE Box StaticMesh::GetBoundingBox() const
 inline const StaticMeshEntry& StaticMesh::GetStaticMeshEntry(int lod)
 {
     return m_Entries.at(lod);
+}
+
+inline void StaticMesh::SetMaterial(std::shared_ptr<Material> material)
+{
+    m_MainMaterial = material;
+    for (StaticMeshEntry& entry : m_Entries)
+    {
+        entry.UpdateMaterial(material);
+    }
 }

@@ -10,7 +10,7 @@ uniform mat4 u_Transform;
 
 layout(std140, binding=0) uniform Transforms 
 {
-    mat4 u_Transforms[400];
+    mat4 u_Transforms[800];
 };
 
 out vec2 TextureCoords;

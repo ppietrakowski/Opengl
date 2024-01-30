@@ -113,7 +113,7 @@ SandboxGameLayer::SandboxGameLayer(Game* game) :
     defaultMaterial->SetFloatProperty("Shininess", 32.0f);
 
     std::shared_ptr<StaticMesh> staticMesh = ResourceManager::GetStaticMesh("assets/box.fbx");
-    staticMesh->MainMaterial = defaultMaterial;
+    staticMesh->SetMaterial(defaultMaterial);
 
     CreateSkeletalActors();
 
@@ -410,9 +410,9 @@ Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, co
 
     InstancedMeshComponent& instancedMesh = instanceMesh.GetComponent<InstancedMeshComponent>();
 
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 5; ++i)
     {
-        for (int j = 0; j < 400; ++j)
+        for (int j = 0; j < 800; ++j)
         {
             Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
             instancedMesh.AddInstance(transform);

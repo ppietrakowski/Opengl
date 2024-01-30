@@ -1,5 +1,4 @@
 #include "skeletal_mesh.h"
-#include "renderer.h"
 #include "assimp_utils.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -273,11 +272,6 @@ void SkeletalMesh::LoadAnimation(const aiScene* scene, int animationIndex)
     std::string animationName = anim->mName.C_Str();
     animationName = SplitString(animationName, "|").back();
     m_Animations[animationName] = animation;
-}
-
-void SkeletalMesh::Draw(const std::vector<glm::mat4>& transforms, const glm::mat4& worldTransform)
-{
-    Renderer::SubmitSkeleton(SubmitCommandArgs{*MainMaterial, *m_VertexArray, 0, worldTransform}, transforms);
 }
 
 std::vector<std::string> SkeletalMesh::GetAnimationNames() const

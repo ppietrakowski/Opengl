@@ -1,5 +1,4 @@
 #include "static_mesh.h"
-#include "Renderer.h"
 #include "error_macros.h"
 #include "assimp_utils.h"
 
@@ -49,7 +48,7 @@ static void FindAabCollision(std::span<const StaticMeshVertex> vertices, glm::ve
 }
 
 StaticMesh::StaticMesh(const std::filesystem::path& filePath, const std::shared_ptr<Material>& material) :
-    MainMaterial{material}
+    m_MainMaterial{material}
 {
     LoadLod(filePath.string(), 0);
 }
@@ -134,21 +133,21 @@ void StaticMesh::LoadLod(const std::string& filePath, int32_t lod)
 
     if (m_Entries.size() == lod)
     {
-        m_Entries.emplace_back(vertices, indices);
+        m_Entries.emplace_back(vertices, indices, m_MainMaterial);
     }
     else if (m_Entries.size() >= lod)
     {
-        m_Entries[lod] = StaticMeshEntry(vertices, indices);
+        m_Entries[lod] = StaticMeshEntry(vertices, indices, m_MainMaterial);
     }
-
 
     ELOG_VERBOSE(LOG_ASSET_LOADING, "Loaded static mesh %s with lod=%i", filePath.c_str(), lod);
 }
 
-StaticMeshEntry::StaticMeshEntry(const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices) :
+StaticMeshEntry::StaticMeshEntry(const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices, const std::shared_ptr<Material>& material) :
     m_VertexArray(std::make_shared<VertexArray>()),
     Vertices(vertices),
-    Indices(indices)
+    Indices(indices),
+    m_Material(material)
 {
     std::shared_ptr<IndexBuffer> indexBuffer = std::make_shared<IndexBuffer>(Indices);
 

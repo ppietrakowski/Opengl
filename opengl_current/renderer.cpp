@@ -8,8 +8,6 @@
 #include <glm/gtc/matrix_access.hpp>
 #include <array>
 
-#include <GL/glew.h>
-
 RendererData Renderer::s_RendererData{};
 std::shared_ptr<Texture2D> Renderer::s_DefaultTexture;
 
@@ -82,29 +80,32 @@ void Renderer::EndScene()
     RenderCommand::EndScene();
 }
 
-void Renderer::Submit(const SubmitCommandArgs& submitArgs)
+void Renderer::Submit(const StaticMeshEntry& meshEntry, const glm::mat4& transform)
 {
-    StartSubmiting(submitArgs);
-    RenderCommand::DrawIndexed(submitArgs.GetVertexArray(), submitArgs.GetNumIndices());
+    StartSubmiting(meshEntry.GetMaterial(), transform);
+    RenderCommand::DrawIndexed(meshEntry.GetVertexArray(), meshEntry.GetNumIndices());
 }
 
-void Renderer::SubmitSkeleton(const SubmitCommandArgs& submitArgs, std::span<const glm::mat4> transforms)
+void Renderer::SubmitSkeleton(const SkeletalMesh& skeletalMesh, const glm::mat4& transform, std::span<const glm::mat4> boneTransforms)
 {
-    std::shared_ptr<Shader> shader = submitArgs.GetShader();
-    StartSubmiting(submitArgs);
-    shader->SetUniformMat4Array("u_BoneTransforms", transforms);
+    const Material& material = *skeletalMesh.MainMaterial;
 
-    RenderCommand::DrawIndexed(submitArgs.GetVertexArray(), submitArgs.GetNumIndices());
+    std::shared_ptr<Shader> shader = material.GetShader();
+    StartSubmiting(material, transform);
+    shader->SetUniformMat4Array("u_BoneTransforms", boneTransforms);
+
+    const VertexArray& vertexArray = skeletalMesh.GetVertexArray();
+    RenderCommand::DrawIndexed(vertexArray, vertexArray.GetNumIndices());
 }
 
-void Renderer::SubmitMeshInstanced(const InstancedDrawArgs& instancedDrawArgs)
+void Renderer::SubmitMeshInstanced(const StaticMeshEntry& mesh, const Material& material, const UniformBuffer& buffer, int32_t numInstances, const glm::mat4& transform)
 {
-    const SubmitCommandArgs& submitArgs = instancedDrawArgs.GetSubmitArgs();
-    std::shared_ptr<Shader> shader = submitArgs.GetShader();
-    StartSubmiting(submitArgs);
+    std::shared_ptr<Shader> shader = material.GetShader();
+    StartSubmiting(material, transform);
 
-    instancedDrawArgs.UploadTransform(*shader);
-    RenderCommand::DrawIndexedInstanced(submitArgs.GetVertexArray(), instancedDrawArgs.GetNumInstances());
+    shader->BindUniformBuffer(shader->GetUniformBlockIndex("Transforms"), buffer);
+
+    RenderCommand::DrawIndexedInstanced(mesh.GetVertexArray(), numInstances);
 }
 
 void Renderer::Initialize()
@@ -139,15 +140,15 @@ void Renderer::Quit()
     RenderCommand::Quit();
 }
 
-void Renderer::StartSubmiting(const SubmitCommandArgs& submitArgs)
+void Renderer::StartSubmiting(const Material& material, const glm::mat4& transform)
 {
-    submitArgs.SetupRenderState();
-    std::shared_ptr<Shader> shader = submitArgs.GetShader();
+    material.SetupRenderState();
+    std::shared_ptr<Shader> shader = material.GetShader();
     shader->Use();
 
-    uint32_t cubeMapTextureUnit = submitArgs.GetNumTexturesUsed();
-    UploadUniforms(shader, submitArgs.GetTransform(), cubeMapTextureUnit);
-    submitArgs.ApplyMaterialUniforms();
+    uint32_t cubeMapTextureUnit = material.GetNumTextures();
+    UploadUniforms(shader, transform, cubeMapTextureUnit);
+    material.SetShaderUniforms();
 }
 
 void Renderer::UploadUniforms(const std::shared_ptr<Shader>& shader, const glm::mat4& transform, uint32_t cubeMapTextureUnit)

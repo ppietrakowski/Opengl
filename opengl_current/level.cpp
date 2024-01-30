@@ -143,7 +143,6 @@ void Level::BroadcastRender()
 
     for (auto&& [entity, pointLight, transform] : pointLightView.each())
     {
-
         LightData lightData{transform.Position, 1.0f, glm::vec3{0.0f},
             1.0f, pointLight.Color, pointLight.DirectionLength, LightType::Point, 0.0f, pointLight.Intensity};
 

@@ -8,7 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-constexpr uint32_t NumInstancesTransform = 400;
+constexpr uint32_t NumInstancesTransform = 800;
 
 // struct representing same transforms as there are in shader
 struct InstancingTransforms
