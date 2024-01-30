@@ -25,7 +25,7 @@ VertexBuffer::VertexBuffer(int maxSizeBytes) :
 VertexBuffer::~VertexBuffer()
 {
     glDeleteBuffers(1, &m_RendererId);
-    s_NumVertexBufferMemoryAllocated += m_BufferSize;
+    s_NumVertexBufferMemoryAllocated -= m_BufferSize;
 }
 
 void VertexBuffer::Bind() const
