@@ -1,11 +1,11 @@
 #pragma once
 
-struct GLFWwindow;
+class Window;
 
 class GraphicsContext
 {
 public:
-    GraphicsContext(GLFWwindow* contextWindow);
+    GraphicsContext(const Window& contextWindow);
     ~GraphicsContext() = default;
 
 public:
@@ -19,6 +19,6 @@ public:
     void SetVsync(bool bVsyncEnabled);
 
 private:
-    GLFWwindow* m_Window;
+    void* m_Window;
 };
 

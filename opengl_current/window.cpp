@@ -43,7 +43,7 @@ Window::Window(const WindowSettings& settings)
     m_WindowData.WindowSize = windowSize;
 
     BindWindowCallbacks();
-    m_GraphicsContext = new GraphicsContext(m_Window);
+    m_GraphicsContext = new GraphicsContext(*this);
     m_Input = new Input(m_Window);
 }
 

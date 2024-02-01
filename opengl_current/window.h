@@ -61,6 +61,11 @@ public:
     void ImGuiDrawFrame();
     void ImGuiUpdateViewport();
 
+    void* GetNativeWindow() const
+    {
+        return m_Window;
+    }
+
 private:
     GLFWwindow* m_Window;
     Input* m_Input;

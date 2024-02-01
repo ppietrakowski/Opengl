@@ -4,13 +4,16 @@
 #include <GL/glew.h>
 
 #include "Imgui/imgui_impl_opengl3.h"
+#include "window.h"
 
 #include <GLFW/glfw3.h>
 
-GraphicsContext::GraphicsContext(GLFWwindow* contextWindow) :
-    m_Window{contextWindow}
+#define UNWRAP_WINDOW(X) reinterpret_cast<GLFWwindow*>(X)
+
+GraphicsContext::GraphicsContext(const Window& contextWindow) :
+    m_Window{contextWindow.GetNativeWindow()}
 {
-    glfwMakeContextCurrent(m_Window);
+    glfwMakeContextCurrent(UNWRAP_WINDOW(m_Window));
     glfwSwapInterval(1);
     GLenum errorCode = glewInit();
     CRASH_EXPECTED_TRUE_MSG(errorCode == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(errorCode)));
@@ -45,7 +48,7 @@ void GraphicsContext::UpdateImGuiViewport()
 
 void GraphicsContext::SwapBuffers()
 {
-    glfwSwapBuffers(m_Window);
+    glfwSwapBuffers(UNWRAP_WINDOW(m_Window));
 }
 
 void GraphicsContext::SetVsync(bool bVsyncEnabled)
