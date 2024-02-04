@@ -10,15 +10,15 @@ struct DebugVertex
     RgbaColor Color;
 };
 
-static const uint32_t BaseBoxIndices[24] =
+static constexpr uint32_t BaseBoxIndices[24] =
 {
     0u, 1, 1, 2, 2, 3, 3, 0,
     4, 5, 5, 6, 6, 7, 7, 4,
     0, 4, 1, 5, 2, 6, 3, 7
 };
 
-constexpr int32_t MaxNumDebugVertices = 2000;
-constexpr int32_t MaxNumDebugIndices = 3 * 2000;
+constexpr int32_t MaxNumDebugVertices{2000};
+constexpr int32_t MaxNumDebugIndices{3 * 2000};
 
 glm::mat4 Debug::s_ProjectionViewMatrix{1.0f};
 
@@ -26,23 +26,26 @@ class DebugRendererBatch
 {
 public:
     DebugRendererBatch(std::shared_ptr<Shader> debugShader) :
-        m_Material(std::make_shared<Material>(debugShader))
+        m_Material{std::make_shared<Material>(debugShader)}
     {
         m_Material->bCullFaces = false;
         m_VertexArray = std::make_shared<VertexArray>();
 
-        std::shared_ptr<VertexBuffer> vertexBuffer = std::make_shared<VertexBuffer>(static_cast<int>(MaxNumDebugVertices * sizeof(DebugVertex)));
-        std::shared_ptr<IndexBuffer> indexBuffer = std::make_shared<IndexBuffer>(MaxNumDebugIndices);
+        auto vertexBuffer = std::make_shared<VertexBuffer>(static_cast<int>(MaxNumDebugVertices * sizeof(DebugVertex)));
+        auto indexBuffer = std::make_shared<IndexBuffer>(MaxNumDebugIndices);
 
         m_Vertices.resize(MaxNumDebugVertices);
         m_Indices.resize(MaxNumDebugIndices);
-        m_VertexArray->AddVertexBuffer(vertexBuffer, std::array{VertexAttribute{3, PrimitiveVertexType::Float}, VertexAttribute{1, PrimitiveVertexType::UnsignedInt}});
+
+        constexpr std::array<VertexAttribute, 2> DebugVertexDataFormat{VertexAttribute{3, PrimitiveVertexType::Float}, VertexAttribute{1, PrimitiveVertexType::UnsignedInt}};
+
+        m_VertexArray->AddVertexBuffer(vertexBuffer, DebugVertexDataFormat);
         m_VertexArray->SetIndexBuffer(indexBuffer);
     }
 
     void AddBoxInstance(const Box& box, const Transform& transform, const glm::vec4& color)
     {
-        RgbaColor packedColor(color);
+        RgbaColor packedColor{color};
 
         std::array<DebugVertex, 8> boxVertices = {
             DebugVertex{glm::vec3{box.MinBounds[0], box.MinBounds[1], box.MinBounds[2]}, packedColor},
@@ -62,14 +65,14 @@ public:
 
     void AddLineInstance(const Line& line, const Transform& transform, const glm::vec4& color)
     {
-        RgbaColor packedColor(color);
+        RgbaColor packedColor{color};
 
         std::array vertices = {
             DebugVertex{line.StartPos, packedColor},
             DebugVertex{line.EndPos, packedColor},
         };
 
-        const uint32_t LineIndices[] = {0, 1};
+        constexpr uint32_t LineIndices[] = {0, 1};
         glm::mat4 combinedTransform = transform.CalculateTransformMatrix();
         AddGeometry(vertices, LineIndices, combinedTransform);
     }
@@ -79,14 +82,14 @@ public:
         // Offset to add to prevent flickering when camera moves
         constexpr float FlickeringStopOffset = 0.5f;
 
-        RgbaColor packedColor(color);
+        RgbaColor packedColor{color};
 
         // rect data initialized with screen space vertices
         std::array vertices = {
-            DebugVertex{glm::vec3(position, 0), packedColor},
-            DebugVertex{glm::vec3(position.x + size.x, position.y, FlickeringStopOffset), packedColor},
-            DebugVertex{glm::vec3(position.x + size.x, position.y + size.y, FlickeringStopOffset), packedColor},
-            DebugVertex{glm::vec3(position.x, position.y + size.y, FlickeringStopOffset), packedColor},
+            DebugVertex{glm::vec3{position, 0}, packedColor},
+            DebugVertex{glm::vec3{position.x + size.x, position.y, FlickeringStopOffset}, packedColor},
+            DebugVertex{glm::vec3{position.x + size.x, position.y + size.y, FlickeringStopOffset}, packedColor},
+            DebugVertex{glm::vec3{position.x, position.y + size.y, FlickeringStopOffset}, packedColor},
         };
 
         // DebugVertexBatch requires vertices to be in world space so project every point to world
@@ -95,9 +98,9 @@ public:
             vertex.Position = LevelInterface::ProjectScreenToWorld(vertex.Position);
         }
 
-        const uint32_t rectIndices[] = {0, 1, 1, 2, 2, 3, 3, 0};
+        constexpr uint32_t RectIndices[] = {0, 1, 1, 2, 2, 3, 3, 0};
         glm::mat4 combinedTransform = transform.CalculateTransformMatrix();
-        AddGeometry(vertices, rectIndices, combinedTransform);
+        AddGeometry(vertices, RectIndices, combinedTransform);
     }
 
     void FlushDraw()
@@ -122,8 +125,8 @@ private:
     std::vector<uint32_t> m_Indices;
     std::shared_ptr<VertexArray> m_VertexArray;
 
-    int m_NumDrawVertices{0};
-    int m_NumDrawIndices{0};
+    int32_t m_NumDrawVertices{0};
+    int32_t m_NumDrawIndices{0};
     std::shared_ptr<Material> m_Material;
     bool m_bBuffersDirty{false};
 
@@ -145,15 +148,16 @@ private:
     {
         for (uint32_t index : indices)
         {
-            // set though indexing is faster than emplace_back so use it
-            m_Indices[m_NumDrawIndices++] = index + m_NumDrawVertices;
+            m_Indices[m_NumDrawIndices] = index + m_NumDrawVertices;
+            m_NumDrawIndices++;
         }
 
         for (const DebugVertex& vertex : vertices)
         {
-            DebugVertex v = vertex;
-            v.Position = transform * glm::vec4(vertex.Position, 1.0f);
-            m_Vertices[m_NumDrawVertices++] = v;
+            DebugVertex transformedVertex = vertex;
+            transformedVertex.Position = transform * glm::vec4{vertex.Position, 1.0f};
+            m_Vertices[m_NumDrawVertices] = transformedVertex;
+            m_NumDrawVertices++;
         }
 
         m_bBuffersDirty = true;
@@ -182,7 +186,7 @@ void Debug::DrawDebugLine(const Line& line, const Transform& transform, const gl
     s_DebugRenderBatch->AddLineInstance(line, transform, color);
 }
 
-void Debug::DrawDebugRect(const glm::vec2& position, const glm::vec2& size, const Transform& transform, const glm::vec4& color)
+void Debug::DrawDebugRect(glm::vec2 position, glm::vec2 size, const Transform& transform, const glm::vec4& color)
 {
     s_DebugRenderBatch->AddRectInstance(position, size, transform, color);
 }

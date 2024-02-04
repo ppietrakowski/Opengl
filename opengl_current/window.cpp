@@ -43,14 +43,12 @@ Window::Window(const WindowSettings& settings)
     m_WindowData.WindowSize = windowSize;
 
     BindWindowCallbacks();
-    m_GraphicsContext = new GraphicsContext(*this);
-    m_Input = new Input(m_Window);
+    m_GraphicsContext = std::make_unique<GraphicsContext>(*this);
+    m_Input = std::make_unique<Input>(m_Window);
 }
 
 Window::~Window()
 {
-    SafeDelete(m_GraphicsContext);
-    SafeDelete(m_Input);
     glfwDestroyWindow(m_Window);
 }
 

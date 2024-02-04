@@ -8,6 +8,25 @@ inline void DefaultImageDataDeleter(uint8_t* data)
     delete[] data;
 }
 
+struct DefaultImageDeleter
+{
+    using DeleterFunc = void (*)(uint8_t* data);
+
+    DeleterFunc Func{&DefaultImageDataDeleter};
+
+    DefaultImageDeleter() = default;
+    DefaultImageDeleter(DeleterFunc deleteFunc) :
+        Func{deleteFunc}
+    {
+    }
+
+    void operator()(uint8_t* data)
+    {
+        Func(data);
+    }
+};
+
+
 class ImageRgba
 {
 public:
@@ -22,7 +41,7 @@ public:
     int32_t GetHeight() const;
 
 private:
-    std::unique_ptr<uint8_t, decltype(&DefaultImageDataDeleter)> m_ImageData{nullptr, &DefaultImageDataDeleter};
+    std::unique_ptr<uint8_t, DefaultImageDeleter> m_ImageData;
     int32_t m_Width;
     int32_t m_Height;
 };

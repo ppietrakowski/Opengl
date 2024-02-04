@@ -68,8 +68,8 @@ public:
 
 private:
     GLFWwindow* m_Window;
-    Input* m_Input;
-    GraphicsContext* m_GraphicsContext;
+    std::unique_ptr<Input> m_Input;
+    std::unique_ptr<GraphicsContext> m_GraphicsContext;
     GlfwWindowData m_WindowData;
 
 private:

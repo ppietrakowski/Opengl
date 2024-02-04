@@ -27,7 +27,7 @@ std::vector<std::string> SplitString(const std::string& string, std::string_view
 
 std::string LoadFileContent(const std::filesystem::path& filePath)
 {
-    std::string path = filePath.string();
+    auto path = filePath.string();
     std::ifstream file(path.c_str());
 
     file.exceptions(std::ios::failbit | std::ios::badbit);
@@ -40,24 +40,19 @@ std::string LoadFileContent(const std::filesystem::path& filePath)
 
 std::string FormatSize(size_t numBytes)
 {
-    std::array<char, 100> strSize = {};
     static const char* Units[] =
     {
         "B", "KB", "MB", "GB", "TB", "PB"
     };
 
-    float temp = static_cast<float>(numBytes);
-    size_t unitIndex = 0;
+    float numUnits = static_cast<float>(numBytes);
+    int64_t unitIndex = 0;
 
-    while (temp > 1024)
+    while (numUnits > 1024)
     {
         ++unitIndex;
-        temp /= 1024.0f;
+        numUnits /= 1024.0f;
     }
 
-    int lastIndex = sprintf(strSize.data(), "%.3f %s", temp, Units[unitIndex]);
-    assert(lastIndex >= 0 && lastIndex < strSize.size());
-    strSize.back() = 0;
-    std::string str = strSize.data();
-    return str;
+    return std::format("{:.2f} {}", numUnits, Units[unitIndex]);
 }

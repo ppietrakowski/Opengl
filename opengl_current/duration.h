@@ -42,7 +42,7 @@ public:
         return std::chrono::duration_cast<milliseconds_duration_t>(m_DurationTime).count();
     }
 
-    std::int64_t GetNanoSeconds() const
+    int64_t GetNanoSeconds() const
     {
         return m_DurationTime.count();
     }

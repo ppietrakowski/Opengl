@@ -4,7 +4,7 @@
 #include <cstring>
 
 ImageRgba::ImageRgba(uint8_t* image, int32_t width, int32_t height, void(*deleter)(uint8_t*)) :
-    m_ImageData{image, deleter},
+    m_ImageData{image, DefaultImageDeleter{deleter}},
     m_Width{width},
     m_Height{height}
 {
