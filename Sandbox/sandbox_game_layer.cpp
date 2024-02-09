@@ -62,7 +62,7 @@ class MaterialGuiDisplay : public IMaterialParameterVisitor
 
     void Visit(TextureParameter& param, const std::string& name) override
     {
-        std::shared_ptr<Texture> texture = param.GetPrimitiveValue();
+        std::shared_ptr<ITexture> texture = param.GetPrimitiveValue();
 
         ImGui::Text("%s", name.c_str());
         ImGui::Image(TEXTURE_ID_TO_IMGUI_TEXTURE_ID(texture->GetRendererId()), ImVec2(300, 300));
@@ -97,17 +97,24 @@ struct FpsCounter
 DECLARE_COMPONENT_TICKABLE(FpsCounter);
 
 SandboxGameLayer::SandboxGameLayer(std::shared_ptr<Game> game) :
-    m_Game(game)
+    m_Game(game),
+    m_Skybox(std::make_shared<CubeMap>(std::array<std::string, 6> {
+    "assets/skybox/right.jpg",
+        "assets/skybox/left.jpg",
+        "assets/skybox/top.jpg",
+        "assets/skybox/bottom.jpg",
+        "assets/skybox/front.jpg",
+        "assets/skybox/back.jpg"
+    }), ResourceManager::GetShader("assets/shaders/skybox.shd")),
+    m_GuiDisplayVisitor(std::make_unique<MaterialGuiDisplay>())
 {
     m_Level = game->GetCurrentLevel();
 
-    m_DefaultShader = ResourceManager::GetShader("assets/shaders/default.shd");
-    m_DebugShader = ResourceManager::GetShader("assets/shaders/unshaded.shd");
+    auto defaultShader = ResourceManager::GetShader("assets/shaders/default.shd");
+    auto debugShader = ResourceManager::GetShader("assets/shaders/unshaded.shd");
 
     ResourceManager::CreateMaterial("assets/shaders/default.shd", "default");
     InitializeSkeletalMesh();
-
-    m_CurrentUsedShader = m_DefaultShader;
 
     auto defaultMaterial = ResourceManager::CreateMaterial("assets/shaders/default.shd", "postac_material");
     defaultMaterial->SetFloatProperty("Shininess", 32.0f);
@@ -119,23 +126,9 @@ SandboxGameLayer::SandboxGameLayer(std::shared_ptr<Game> game) :
 
     std::shared_ptr<Material> instancedMeshMaterial = ResourceManager::CreateMaterial("assets/shaders/instanced.shd", "instanced");
     SetupDefaultProperties(instancedMeshMaterial);
-    m_InstancedMesh = std::make_shared<InstancedMesh>(staticMesh, instancedMeshMaterial);
-
     CreateInstancedMeshActor("assets/box.fbx", instancedMeshMaterial);
 
     PlaceLightsAndPlayer();
-
-    std::array<std::string, 6> texturePaths = {
-        "assets/skybox/right.jpg",
-        "assets/skybox/left.jpg",
-        "assets/skybox/top.jpg",
-        "assets/skybox/bottom.jpg",
-        "assets/skybox/front.jpg",
-        "assets/skybox/back.jpg"
-    };
-
-    m_GuiDisplayVisitor = std::make_unique<MaterialGuiDisplay>();
-    m_Skybox = std::make_unique<Skybox>(std::make_shared<CubeMap>(texturePaths), ResourceManager::GetShader("assets/shaders/skybox.shd"));
 }
 
 void SandboxGameLayer::Update(Duration deltaTime)
@@ -157,24 +150,18 @@ void SandboxGameLayer::Render()
     glm::vec3 lightPosition{0.0f};
 
     {
-        Actor directionalLight;
+        std::optional<Actor> directionalLight = m_Level->TryFindActor("directional_light");
 
-        if (m_Level->TryFindActor("directional_light", directionalLight))
+        if (directionalLight.has_value())
         {
-            lightPosition = directionalLight.GetTransform().Position;
+            lightPosition = directionalLight->GetTransform().Position;
         }
     }
 
-    m_CurrentUsedShader->Use();
-    m_CurrentUsedShader->SetUniform("u_material.diffuse", glm::vec3{0.34615f, 0.3143f, 0.0903f});
-
-    m_DebugShader->Use();
-    m_DebugShader->SetUniform("u_material.diffuse", glm::vec3{1, 0, 0});
-    Actor characterActor;
-
-    if (m_Level->TryFindActor("SkeletalMesh0", characterActor))
+    std::optional<Actor> characterActor = m_Level->TryFindActor("SkeletalMesh0");
+    if (characterActor.has_value())
     {
-        Transform transform = characterActor.GetTransform().GetAsTransform();
+        Transform transform = characterActor->GetTransform().GetAsTransform();
         transform.Scale = {1, 1, 1};
         Debug::DrawDebugBox(m_TestSkeletalMesh->GetBoundingBox(), transform);
     }
@@ -223,7 +210,7 @@ void SandboxGameLayer::Render()
     ResourceManager::GetTexture2D("assets/fireworks.png")->SetFilteringType(FilteringType::Nearest);
     Renderer2D::DrawSprite(spriteDefinition);
 
-    m_Skybox->Draw();
+    m_Skybox.Draw();
 }
 
 void SandboxGameLayer::OnImguiFrame()
@@ -285,9 +272,15 @@ void SandboxGameLayer::OnImguiFrame()
 
     ImGui::Begin("Test image");
 
-    auto material = m_InstancedMesh->GetMaterial();
+    std::optional<Actor> instancedMeshActor = m_Level->TryFindActor("InstancedMesh");
 
-    material->VisitForEachParam(*m_GuiDisplayVisitor);
+    if (instancedMeshActor.has_value())
+    {
+        auto& instancedMesh = instancedMeshActor->GetComponent<InstancedMeshComponent>();
+
+        auto material = instancedMesh.TargetInstancedMesh->GetMaterial();
+        material->VisitForEachParam(*m_GuiDisplayVisitor);
+    }
 
     ImGui::End();
 
@@ -428,11 +421,11 @@ Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, co
 
     for (int i = 0; i < 200; ++i)
     {
-            Transform transform{glm::vec3{distribution(m), distribution(m), distribution(m)}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
-            Actor actor = m_Level->CreateActor("StaticMesh" + std::to_string(i));
+        Transform transform{glm::vec3{distribution(m), distribution(m), distribution(m)}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
+        Actor actor = m_Level->CreateActor("StaticMesh" + std::to_string(i));
 
-            actor.AddComponent<StaticMeshComponent>(filePath);
-            actor.GetTransform().Position = transform.Position;
+        actor.AddComponent<StaticMeshComponent>(filePath);
+        actor.GetTransform().Position = transform.Position;
     }
 
     return instanceMesh;

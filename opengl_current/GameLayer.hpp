@@ -8,10 +8,10 @@
 #include <chrono>
 
 
-class Layer : public IWindowMessageHandler
+class IGameLayer : public IWindowMessageHandler
 {
 public:
-    virtual ~Layer() = default;
+    virtual ~IGameLayer() = default;
 
 public:
     virtual void Update(Duration deltaTime) = 0;

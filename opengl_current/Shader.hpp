@@ -63,7 +63,7 @@ struct ShaderIndex
     };
 };
 
-class Texture;
+class ITexture;
 
 static constexpr int32_t MinTextureUnits = 32;
 
@@ -88,8 +88,8 @@ public:
     void SetUniform(const char* name, const glm::mat3& value);
 
     std::vector<UniformInfo> GetUniformsInfo() const;
-    void SetSamplerUniform(const char* uniformName, const std::shared_ptr<Texture>& textures, uint32_t startTextureUnit = 0);
-    void SetSamplersUniform(const char* uniformName, std::span<const std::shared_ptr<Texture>> textures, uint32_t startTextureUnit = 0);
+    void SetSamplerUniform(const char* uniformName, const std::shared_ptr<ITexture>& textures, uint32_t startTextureUnit = 0);
+    void SetSamplersUniform(const char* uniformName, std::span<const std::shared_ptr<ITexture>> textures, uint32_t startTextureUnit = 0);
 
     void BindUniformBuffer(int32_t blockIndex, const UniformBuffer& buffer);
     int32_t GetUniformBlockIndex(const std::string& name) const;

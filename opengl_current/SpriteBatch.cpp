@@ -88,7 +88,7 @@ void SpriteBatch::AddSpriteInstance(const std::array<SpriteVertex, NumQuadVertic
     m_NumIndicesToDraw += 6;
 }
 
-void SpriteBatch::BindNewTexture(std::shared_ptr<Texture> texture)
+void SpriteBatch::BindNewTexture(std::shared_ptr<ITexture> texture)
 {
     if (m_NumBindedTextures >= MinTextureUnits)
     {
@@ -116,7 +116,7 @@ void SpriteBatch::BindSpriteUniforms(const glm::mat4& projection)
         m_BindTextures[i]->Bind(i);
     }
 
-    shader->SetSamplersUniform("u_Textures", std::span<const std::shared_ptr<Texture>>{m_BindTextures.begin(), (size_t)m_NumBindedTextures});
+    shader->SetSamplersUniform("u_Textures", std::span<const std::shared_ptr<ITexture>>{m_BindTextures.begin(), (size_t)m_NumBindedTextures});
     shader->SetUniform("u_Projection", projection);
 }
 

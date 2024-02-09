@@ -29,10 +29,10 @@ enum class FilteringType : uint8_t
     Nearest
 };
 
-class Texture
+class ITexture
 {
 public:
-    virtual ~Texture() = default;
+    virtual ~ITexture() = default;
 
 public:
     virtual int32_t GetWidth() const = 0;
@@ -52,7 +52,7 @@ public:
     virtual const char* GetName() const = 0;
 };
 
-class Texture2D : public Texture
+class Texture2D : public ITexture
 {
 public:
     Texture2D(const std::filesystem::path& filePath);
@@ -109,7 +109,7 @@ struct CubeMapTextureIndex
     };
 };
 
-class CubeMap : public Texture
+class CubeMap : public ITexture
 {
 public:
     CubeMap(std::span<const std::string> paths);

@@ -54,7 +54,7 @@ MaterialParam::MaterialParam(const char* uniformName, glm::vec4 value) :
     };
 }
 
-MaterialParam::MaterialParam(const char* uniformName, std::shared_ptr<Texture> value, uint32_t textureUnit) :
+MaterialParam::MaterialParam(const char* uniformName, std::shared_ptr<ITexture> value, uint32_t textureUnit) :
     m_Parameter{TextureParameter{uniformName, value, textureUnit}}
 {
     m_ParamType = MaterialParamType::Sampler2D;
@@ -95,9 +95,9 @@ glm::vec4 MaterialParam::GetVector4() const
     return std::any_cast<glm::vec4>(m_Getter(m_Parameter)->GetValue());
 }
 
-std::shared_ptr<Texture> MaterialParam::GetTexture() const
+std::shared_ptr<ITexture> MaterialParam::GetTexture() const
 {
-    return std::any_cast<std::shared_ptr<Texture>>(m_Getter(m_Parameter)->GetValue());
+    return std::any_cast<std::shared_ptr<ITexture>>(m_Getter(m_Parameter)->GetValue());
 }
 
 void MaterialParam::SetInt(int32_t value)
@@ -125,7 +125,7 @@ void MaterialParam::SetVector4(glm::vec4 value)
     m_Getter(m_Parameter)->SetValue(value);
 }
 
-void MaterialParam::SetTexture(const std::shared_ptr<Texture>& value)
+void MaterialParam::SetTexture(const std::shared_ptr<ITexture>& value)
 {
     m_Getter(m_Parameter)->SetValue(value);
 }

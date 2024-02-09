@@ -41,7 +41,7 @@ public:
 
     void SetMouseVisible(bool bMouseVisible);
 
-    void AddLayer(std::unique_ptr<Layer> gameLayer);
+    void AddLayer(std::unique_ptr<IGameLayer> gameLayer);
     void RemoveLayer(std::type_index index);
 
     bool IsMouseVisible() const
@@ -59,7 +59,7 @@ public:
 private:
     std::unique_ptr<Window> m_Window;
     ImGuiContext* m_ImguiContext;
-    std::vector<std::unique_ptr<Layer>> m_Layers;
+    std::vector<std::unique_ptr<IGameLayer>> m_Layers;
     LevelContext m_LevelContext;
 
 private:

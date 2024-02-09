@@ -5,7 +5,7 @@
 
 #include "Level.hpp"
 
-class SandboxGameLayer : public Layer
+class SandboxGameLayer : public IGameLayer
 {
 public:
     SandboxGameLayer(std::shared_ptr<Game> game);
@@ -25,13 +25,7 @@ public:
     virtual bool OnKeyDown(KeyCode::Index keyCode) override;
 
 private:
-    std::shared_ptr<Shader> m_DefaultShader;
-    std::shared_ptr<Shader> m_DebugShader;
-    std::shared_ptr<Shader> m_CurrentUsedShader;
-
-    std::shared_ptr<Material> m_DebugMaterial;
-    std::shared_ptr<InstancedMesh> m_InstancedMesh;
-    std::unique_ptr<Skybox> m_Skybox;
+    Skybox m_Skybox;
 
     float m_CameraYaw = 0.0f;
     float m_CameraPitch = 0.0f;
@@ -48,8 +42,6 @@ private:
     
     std::shared_ptr<Level> m_Level;
     std::weak_ptr<Game> m_Game;
-
-    std::vector<std::string> paths;
 
     std::unique_ptr<IMaterialParameterVisitor> m_GuiDisplayVisitor;
 

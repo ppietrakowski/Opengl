@@ -18,9 +18,8 @@ ImageRgba::ImageRgba(ImageRgba&& image) noexcept
 ImageRgba& ImageRgba::operator=(ImageRgba&& image) noexcept
 {
     m_ImageData = std::move(image.m_ImageData);
-    m_Width = image.m_Width;
-    m_Height = image.m_Height;
-    memset(&image, 0, sizeof(image));
+    m_Width = std::exchange(image.m_Width, 0);
+    m_Height = std::exchange(image.m_Height, 0);
 
     return *this;
 }

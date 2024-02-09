@@ -219,13 +219,13 @@ std::vector<UniformInfo> Shader::GetUniformsInfo() const
     return uniformsInfo;
 }
 
-void Shader::SetSamplerUniform(const char* uniformName, const std::shared_ptr<Texture>& textures, uint32_t startTextureUnit)
+void Shader::SetSamplerUniform(const char* uniformName, const std::shared_ptr<ITexture>& textures, uint32_t startTextureUnit)
 {
     ASSERT(startTextureUnit < MinTextureUnits);
     glUniform1i(GetUniformLocation(uniformName), static_cast<GLint>(startTextureUnit));
 }
 
-void Shader::SetSamplersUniform(const char* uniformName, std::span<const std::shared_ptr<Texture>> textures, uint32_t startTextureUnit)
+void Shader::SetSamplersUniform(const char* uniformName, std::span<const std::shared_ptr<ITexture>> textures, uint32_t startTextureUnit)
 {
 
     std::array<int32_t, MinTextureUnits> textureUnits;

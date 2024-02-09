@@ -23,7 +23,7 @@ public:
     void FlushDraw(const glm::mat4& projection);
 
     void AddSpriteInstance(const std::array<SpriteVertex, NumQuadVertices>& definition, const Transform2D& transform);
-    void BindNewTexture(std::shared_ptr<Texture> texture);
+    void BindNewTexture(std::shared_ptr<ITexture> texture);
 
     std::int32_t GetNumBindedTextures() const;
 
@@ -31,7 +31,7 @@ private:
     std::shared_ptr<VertexArray> m_SpriteVertexArray;
     std::vector<SpriteVertex> m_Sprites;
 
-    std::array<std::shared_ptr<Texture>, MinTextureUnits> m_BindTextures;
+    std::array<std::shared_ptr<ITexture>, MinTextureUnits> m_BindTextures;
     int m_NumBindedTextures = 0;
 
     int m_LastIndex = 0;

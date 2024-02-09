@@ -26,8 +26,8 @@ public:
     glm::vec4 GetVector4Property(const char* name) const;
     void SetVector4Property(const char* name, glm::vec4 value);
 
-    std::shared_ptr<Texture> GetTextureProperty(const char* name) const;
-    void SetTextureProperty(const char* name, std::shared_ptr<Texture> value);
+    std::shared_ptr<ITexture> GetTextureProperty(const char* name) const;
+    void SetTextureProperty(const char* name, std::shared_ptr<ITexture> value);
 
     void SetupRenderState() const;
     void SetShaderUniforms() const;

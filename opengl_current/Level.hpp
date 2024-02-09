@@ -6,6 +6,8 @@
 #include "InstancedMesh.hpp"
 #include "Lights.hpp"
 
+#include <optional>
+
 class ResourceManagerImpl;
 
 class Level : public LevelInterface
@@ -49,7 +51,7 @@ public:
 
     void AddNewStaticMesh(const std::string& meshName, const Transform& transform);
 
-    bool TryFindActor(const std::string& name, Actor& outActor);
+    std::optional<Actor> TryFindActor(const std::string& name);
 
     const CameraComponent& FindCameraComponent() const;
 

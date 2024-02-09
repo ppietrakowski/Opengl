@@ -73,7 +73,7 @@ public:
     {
     }
 
-    virtual void SetValue(std::shared_ptr<Texture> texture)
+    virtual void SetValue(std::shared_ptr<ITexture> texture)
     {
     }
 
@@ -136,14 +136,14 @@ private:
 class TextureParameter : public Parameter
 {
 public:
-    TextureParameter(std::string uniformName, std::shared_ptr<Texture> value, uint32_t textureUnit) :
+    TextureParameter(std::string uniformName, std::shared_ptr<ITexture> value, uint32_t textureUnit) :
         m_UniformName{uniformName},
         m_Texture{value},
         m_TextureUnit{textureUnit}
     {
     }
 
-    void SetValue(std::shared_ptr<Texture> texture) override
+    void SetValue(std::shared_ptr<ITexture> texture) override
     {
         m_Texture = texture;
     }
@@ -157,7 +157,7 @@ public:
         return m_Texture;
     }
 
-    std::shared_ptr<Texture> GetPrimitiveValue() const
+    std::shared_ptr<ITexture> GetPrimitiveValue() const
     {
         return m_Texture;
     }
@@ -175,7 +175,7 @@ public:
 
 private:
     std::string m_UniformName;
-    std::shared_ptr<Texture> m_Texture;
+    std::shared_ptr<ITexture> m_Texture;
     uint32_t m_TextureUnit;
 };
 
@@ -206,7 +206,7 @@ public:
     MaterialParam(const char* uniformName, glm::vec2 value);
     MaterialParam(const char* uniformName, glm::vec3 value);
     MaterialParam(const char* uniformName, glm::vec4 value);
-    MaterialParam(const char* uniformName, std::shared_ptr<Texture> value, uint32_t textureUnit);
+    MaterialParam(const char* uniformName, std::shared_ptr<ITexture> value, uint32_t textureUnit);
 
     MaterialParam& operator=(const MaterialParam&) = default;
     void SetUniform(Shader& shader) const;
@@ -217,14 +217,14 @@ public:
     glm::vec3 GetVector3() const;
     glm::vec4 GetVector4() const;
 
-    std::shared_ptr<Texture> GetTexture() const;
+    std::shared_ptr<ITexture> GetTexture() const;
 
     void SetInt(int32_t value);
     void SetFloat(float value);
     void SetVector2(glm::vec2 value);
     void SetVector3(glm::vec3 value);
     void SetVector4(glm::vec4 value);
-    void SetTexture(const std::shared_ptr<Texture>& value);
+    void SetTexture(const std::shared_ptr<ITexture>& value);
 
     void Accept(IMaterialParameterVisitor& visitor, const std::string& name);
 

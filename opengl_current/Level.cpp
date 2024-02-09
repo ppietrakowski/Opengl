@@ -221,17 +221,16 @@ void Level::AddNewStaticMesh(const std::string& meshName, const Transform& trans
 }
 
 
-bool Level::TryFindActor(const std::string& name, Actor& outActor)
+std::optional<Actor> Level::TryFindActor(const std::string& name)
 {
     auto it = m_Actors.find(name);
 
     if (it != m_Actors.end())
     {
-        outActor = it->second;
-        return true;
+        return it->second;
     }
 
-    return false;
+    return std::nullopt;
 }
 
 const CameraComponent& Level::FindCameraComponent() const

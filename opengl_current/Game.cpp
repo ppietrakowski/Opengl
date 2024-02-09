@@ -75,7 +75,7 @@ void Game::Run()
         {
             auto deltaTime = std::clamp(frameTime, MinMillisecondsDeltaTime, MaxMillisecondsDeltaTime);
 
-            for (const std::unique_ptr<Layer>& layer : m_Layers)
+            for (const std::unique_ptr<IGameLayer>& layer : m_Layers)
             {
                 layer->Update(Duration{deltaTime});
             }
@@ -95,7 +95,7 @@ void Game::Run()
         m_LevelContext.CurrentLevel->BroadcastRender();
 
         // broadcast render command
-        for (const std::unique_ptr<Layer>& layer : m_Layers)
+        for (const std::unique_ptr<IGameLayer>& layer : m_Layers)
         {
             layer->Render();
         }
@@ -163,12 +163,12 @@ void Game::RunImguiFrame()
     ImGuizmo::BeginFrame();
 
     // broadcast imgui frame draw
-    for (const std::unique_ptr<Layer>& layer : m_Layers)
+    for (const std::unique_ptr<IGameLayer>& layer : m_Layers)
     {
         layer->OnImguiFrame();
     }
 
-    for (const std::unique_ptr<Layer>& layer : m_Layers)
+    for (const std::unique_ptr<IGameLayer>& layer : m_Layers)
     {
         layer->OnImgizmoFrame();
     }
@@ -212,7 +212,7 @@ void Game::SetMouseVisible(bool bMouseVisible)
     m_Window->SetMouseVisible(bMouseVisible);
 }
 
-void Game::AddLayer(std::unique_ptr<Layer> gameLayer)
+void Game::AddLayer(std::unique_ptr<IGameLayer> gameLayer)
 {
     m_Layers.emplace_back(std::move(gameLayer));
 }
@@ -221,7 +221,7 @@ void Game::RemoveLayer(std::type_index index)
 {
     auto it = std::remove_if(m_Layers.begin(),
         m_Layers.end(),
-        [index](const std::unique_ptr<Layer>& layer)
+        [index](const std::unique_ptr<IGameLayer>& layer)
     {
         return layer->GetTypeIndex() == index;
     });

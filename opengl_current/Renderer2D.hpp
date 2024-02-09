@@ -25,5 +25,5 @@ public:
     static void DrawSprite(const Sprite2D& sprite);
     static void FlushDraw();
 
-    static std::int32_t BindTextureToDraw(const std::shared_ptr<Texture>& texture);
+    static std::int32_t BindTextureToDraw(const std::shared_ptr<ITexture>& texture);
 };

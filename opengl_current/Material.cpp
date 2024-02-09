@@ -70,12 +70,12 @@ void Material::SetVector4Property(const char* name, glm::vec4 value)
     GetParam(name).SetVector4(value);
 }
 
-std::shared_ptr<Texture> Material::GetTextureProperty(const char* name) const
+std::shared_ptr<ITexture> Material::GetTextureProperty(const char* name) const
 {
     return GetParam(name).GetTexture();
 }
 
-void Material::SetTextureProperty(const char* name, std::shared_ptr<Texture> value)
+void Material::SetTextureProperty(const char* name, std::shared_ptr<ITexture> value)
 {
     GetParam(name).SetTexture(value);
 }
