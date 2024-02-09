@@ -164,7 +164,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;PROFILING; GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS;PROFILING;GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -178,7 +178,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;PROFILING; GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS;PROFILING; GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <Optimization>MaxSpeed</Optimization>
@@ -199,7 +199,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS;GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -212,14 +212,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="actor.cpp" />
-    <ClCompile Include="core.cpp" />
-    <ClCompile Include="debug.cpp" />
-    <ClCompile Include="error_macros.cpp" />
-    <ClCompile Include="event.cpp" />
-    <ClCompile Include="game.cpp" />
-    <ClCompile Include="graphics_context.cpp" />
-    <ClCompile Include="image_rgba.cpp" />
+    <ClCompile Include="Actor.cpp" />
+    <ClCompile Include="Core.cpp" />
+    <ClCompile Include="Debug.cpp" />
+    <ClCompile Include="ErrorMacros.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GraphicsContext.cpp" />
+    <ClCompile Include="ImageRgba.cpp" />
     <ClCompile Include="imgizmo\GraphEditor.cpp" />
     <ClCompile Include="imgizmo\ImCurveEdit.cpp" />
     <ClCompile Include="imgizmo\ImGradient.cpp" />
@@ -232,53 +231,52 @@
     <ClCompile Include="Imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Imgui\imgui_tables.cpp" />
     <ClCompile Include="Imgui\imgui_widgets.cpp" />
-    <ClCompile Include="index_buffer.cpp" />
-    <ClCompile Include="input.cpp" />
-    <ClCompile Include="instanced_mesh.cpp" />
-    <ClCompile Include="instanced_mesh_component.cpp" />
-    <ClCompile Include="level.cpp" />
-    <ClCompile Include="level_interface.cpp" />
-    <ClCompile Include="logging.cpp" />
-    <ClCompile Include="material.cpp" />
-    <ClCompile Include="material_parameter.cpp" />
-    <ClCompile Include="player_controller.cpp" />
-    <ClCompile Include="renderer.cpp" />
-    <ClCompile Include="renderer_2d.cpp" />
-    <ClCompile Include="renderer_api.cpp" />
-    <ClCompile Include="render_command.cpp" />
-    <ClCompile Include="resouce_manager.cpp" />
-    <ClCompile Include="shader.cpp" />
-    <ClCompile Include="skeletal_mesh.cpp" />
-    <ClCompile Include="skeletal_mesh_component.cpp" />
-    <ClCompile Include="skybox.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
+    <ClCompile Include="Input.cpp" />
+    <ClCompile Include="InstancedMesh.cpp" />
+    <ClCompile Include="InstancedMeshComponent.cpp" />
+    <ClCompile Include="Level.cpp" />
+    <ClCompile Include="LevelInterface.cpp" />
+    <ClCompile Include="Logging.cpp" />
+    <ClCompile Include="Material.cpp" />
+    <ClCompile Include="MaterialParameter.cpp" />
+    <ClCompile Include="PlayerController.cpp" />
+    <ClCompile Include="RenderCommand.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Renderer2D.cpp" />
+    <ClCompile Include="RendererApi.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="SkeletalMesh.cpp" />
+    <ClCompile Include="SkeletalMeshComponent.cpp" />
+    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Sprite2D.cpp" />
     <ClCompile Include="SpriteBatch.cpp" />
-    <ClCompile Include="static_mesh.cpp" />
-    <ClCompile Include="static_mesh_component.cpp" />
-    <ClCompile Include="texture.cpp" />
-    <ClCompile Include="uniform_buffer.cpp" />
-    <ClCompile Include="vertex_buffer.cpp" />
-    <ClCompile Include="vertex_array.cpp" />
-    <ClCompile Include="window.cpp" />
+    <ClCompile Include="StaticMesh.cpp" />
+    <ClCompile Include="StaticMeshComponent.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="UniformBuffer.cpp" />
+    <ClCompile Include="VertexArray.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="actor.h" />
-    <ClInclude Include="actor_tag_component.h" />
-    <ClInclude Include="assimp_utils.h" />
-    <ClInclude Include="box.h" />
-    <ClInclude Include="camera_projection.h" />
-    <ClInclude Include="core.h" />
-    <ClInclude Include="debug.h" />
-    <ClInclude Include="delta_clock.h" />
-    <ClInclude Include="duration.h" />
-    <ClInclude Include="engine.h" />
-    <ClInclude Include="error_macros.h" />
-    <ClInclude Include="event.h" />
-    <ClInclude Include="game.h" />
-    <ClInclude Include="game_layer.h" />
-    <ClInclude Include="glfw_window_data.h" />
-    <ClInclude Include="graphics_context.h" />
-    <ClInclude Include="image_rgba.h" />
+    <ClInclude Include="Actor.hpp" />
+    <ClInclude Include="ActorTagComponent.hpp" />
+    <ClInclude Include="AssimpUtils.hpp" />
+    <ClInclude Include="Box.hpp" />
+    <ClInclude Include="CameraProjection.hpp" />
+    <ClInclude Include="Core.hpp" />
+    <ClInclude Include="Debug.hpp" />
+    <ClInclude Include="DeltaClock.hpp" />
+    <ClInclude Include="Duration.hpp" />
+    <ClInclude Include="Engine.hpp" />
+    <ClInclude Include="ErrorMacros.hpp" />
+    <ClInclude Include="Game.hpp" />
+    <ClInclude Include="GameLayer.hpp" />
+    <ClInclude Include="GlfwWindowData.hpp" />
+    <ClInclude Include="GraphicsContext.hpp" />
+    <ClInclude Include="ImageRgba.hpp" />
     <ClInclude Include="imgizmo\GraphEditor.h" />
     <ClInclude Include="imgizmo\ImCurveEdit.h" />
     <ClInclude Include="imgizmo\ImGradient.h" />
@@ -294,42 +292,43 @@
     <ClInclude Include="Imgui\imstb_rectpack.h" />
     <ClInclude Include="Imgui\imstb_textedit.h" />
     <ClInclude Include="Imgui\imstb_truetype.h" />
-    <ClInclude Include="index_buffer.h" />
-    <ClInclude Include="input.h" />
-    <ClInclude Include="instanced_mesh.h" />
-    <ClInclude Include="instanced_mesh_component.h" />
-    <ClInclude Include="level.h" />
-    <ClInclude Include="level_interface.h" />
-    <ClInclude Include="lights.h" />
-    <ClInclude Include="light_component.h" />
-    <ClInclude Include="logging.h" />
-    <ClInclude Include="material.h" />
-    <ClInclude Include="material_parameter.h" />
-    <ClInclude Include="player_controller.h" />
-    <ClInclude Include="renderer.h" />
-    <ClInclude Include="renderer_2d.h" />
-    <ClInclude Include="renderer_api.h" />
-    <ClInclude Include="render_command.h" />
-    <ClInclude Include="resouce_manager.h" />
-    <ClInclude Include="shader.h" />
-    <ClInclude Include="skeletal_mesh.h" />
-    <ClInclude Include="skeletal_mesh_component.h" />
-    <ClInclude Include="skybox.h" />
-    <ClInclude Include="Sprite2D.h" />
-    <ClInclude Include="SpriteBatch.h" />
-    <ClInclude Include="static_mesh.h" />
-    <ClInclude Include="static_mesh_component.h" />
+    <ClInclude Include="IndexBuffer.hpp" />
+    <ClInclude Include="Input.hpp" />
+    <ClInclude Include="InstancedMesh.hpp" />
+    <ClInclude Include="InstancedMeshComponent.hpp" />
+    <ClInclude Include="Keys.hpp" />
+    <ClInclude Include="Level.hpp" />
+    <ClInclude Include="LevelInterface.hpp" />
+    <ClInclude Include="LightComponent.hpp" />
+    <ClInclude Include="Lights.hpp" />
+    <ClInclude Include="Logging.hpp" />
+    <ClInclude Include="Material.hpp" />
+    <ClInclude Include="MaterialParameter.hpp" />
+    <ClInclude Include="PlayerController.hpp" />
+    <ClInclude Include="RenderCommand.hpp" />
+    <ClInclude Include="Renderer.hpp" />
+    <ClInclude Include="Renderer2D.hpp" />
+    <ClInclude Include="RendererApi.hpp" />
+    <ClInclude Include="ResourceManager.hpp" />
+    <ClInclude Include="Shader.hpp" />
+    <ClInclude Include="SkeletalMesh.hpp" />
+    <ClInclude Include="SkeletalMeshComponent.hpp" />
+    <ClInclude Include="Skybox.hpp" />
+    <ClInclude Include="Sprite2D.hpp" />
+    <ClInclude Include="SpriteBatch.hpp" />
+    <ClInclude Include="StaticMesh.hpp" />
+    <ClInclude Include="StaticMeshComponent.hpp" />
     <ClInclude Include="stb_image.h" />
-    <ClInclude Include="submit_args.h" />
-    <ClInclude Include="texture.h" />
-    <ClInclude Include="transform.h" />
+    <ClInclude Include="Texture.hpp" />
+    <ClInclude Include="Transform.hpp" />
     <ClInclude Include="Transform2D.hpp" />
-    <ClInclude Include="transform_component.h" />
-    <ClInclude Include="uniform_buffer.h" />
-    <ClInclude Include="vertex_array.h" />
-    <ClInclude Include="vertex_buffer.h" />
-    <ClInclude Include="viewport.h" />
-    <ClInclude Include="window.h" />
+    <ClInclude Include="TransformComponent.hpp" />
+    <ClInclude Include="UniformBuffer.hpp" />
+    <ClInclude Include="VertexArray.hpp" />
+    <ClInclude Include="VertexBuffer.hpp" />
+    <ClInclude Include="Viewport.hpp" />
+    <ClInclude Include="Window.hpp" />
+    <ClInclude Include="WindowMessageHandler.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

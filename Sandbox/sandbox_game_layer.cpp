@@ -1,10 +1,10 @@
 #include "sandbox_game_layer.h"
 
 #include <functional>
-#include "renderer.h"
+#include "Renderer.hpp"
 #include "Imgui/imgui.h"
-#include "error_macros.h"
-#include "logging.h"
+#include "ErrorMacros.hpp"
+#include "Logging.hpp"
 
 #include <glm/gtx/matrix_decompose.hpp>
 #include <random>
@@ -96,7 +96,7 @@ struct FpsCounter
 
 DECLARE_COMPONENT_TICKABLE(FpsCounter);
 
-SandboxGameLayer::SandboxGameLayer(Game* game) :
+SandboxGameLayer::SandboxGameLayer(std::shared_ptr<Game> game) :
     m_Game(game)
 {
     m_Level = game->GetCurrentLevel();
@@ -226,18 +226,10 @@ void SandboxGameLayer::Render()
     m_Skybox->Draw();
 }
 
-bool SandboxGameLayer::OnEvent(const Event& event)
-{
-    if (event.Type == EventType::KeyPressed && event.Key.Key == GLFW_KEY_P)
-    {
-        m_Game->SetMouseVisible(!m_Game->IsMouseVisible());
-    }
-
-    return false;
-}
-
 void SandboxGameLayer::OnImguiFrame()
 {
+    ImGui::ShowDemoWindow();
+
     {
         FpsCounter& counter = m_Level->FindActor("player").GetComponent<FpsCounter>();
 
@@ -330,6 +322,16 @@ void SandboxGameLayer::OnImgizmoFrame()
     }
 }
 
+bool SandboxGameLayer::OnKeyDown(KeyCode::Index keyCode)
+{
+    if (keyCode == KeyCode::P)
+    {
+        m_Game.lock()->SetMouseVisible(!m_Game.lock()->IsMouseVisible());
+    }
+
+    return true;
+}
+
 void SandboxGameLayer::MoveForward(Actor& player, float axisValue)
 {
     TransformComponent& transform = player.GetComponent<TransformComponent>();
@@ -346,7 +348,7 @@ void SandboxGameLayer::MoveRight(Actor& player, float axisValue)
 
 void SandboxGameLayer::RotateCamera(Actor& player, glm::vec2 mouseMoveDelta)
 {
-    if (m_Game->IsMouseVisible())
+    if (auto game = m_Game.lock(); game->IsMouseVisible())
     {
         return;
     }

@@ -1,19 +1,18 @@
 #pragma once
 
-#include <engine.h>
+#include <Engine.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include "level.h"
+#include "Level.hpp"
 
 class SandboxGameLayer : public Layer
 {
 public:
-    SandboxGameLayer(Game* game);
+    SandboxGameLayer(std::shared_ptr<Game> game);
 
     // Inherited via IGameLayer
     void Update(Duration deltaTime) override;
     void Render() override;
-    bool OnEvent(const Event& event) override;
     void OnImguiFrame() override;
 
     void OnImgizmoFrame() override;
@@ -22,6 +21,8 @@ public:
     {
         return typeid(SandboxGameLayer);
     }
+
+    virtual bool OnKeyDown(KeyCode::Index keyCode) override;
 
 private:
     std::shared_ptr<Shader> m_DefaultShader;
@@ -46,7 +47,7 @@ private:
     Actor m_SelectedActor;
     
     std::shared_ptr<Level> m_Level;
-    Game* m_Game{nullptr};
+    std::weak_ptr<Game> m_Game;
 
     std::vector<std::string> paths;
 

@@ -1,5 +1,5 @@
-#include "Sprite2D.h"
-#include "error_macros.h"
+#include "Sprite2D.hpp"
+#include "ErrorMacros.hpp"
 
 SpriteSheetData::SpriteSheetData(glm::uvec2 numFrames, glm::vec2 margin, glm::vec2 spriteSheetSize, const std::shared_ptr<Texture2D>& texture) :
     m_NumFrames(numFrames),

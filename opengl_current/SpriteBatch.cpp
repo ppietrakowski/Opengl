@@ -1,4 +1,4 @@
-#include "SpriteBatch.h"
+#include "SpriteBatch.hpp"
 
 static const std::array<VertexAttribute, 4> SpriteVertexAttributes{
     VertexAttribute{2, PrimitiveVertexType::Float},
