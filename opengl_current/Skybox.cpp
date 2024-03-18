@@ -48,11 +48,11 @@ static glm::vec3 SkyboxVertices[] = {
 };
 
 
-Skybox::Skybox(const std::shared_ptr<CubeMap>& cubeMap, const std::shared_ptr<Shader>& shader) :
+Skybox::Skybox(std::shared_ptr<CubeMap> cubeMap, std::shared_ptr<Shader> shader) :
     m_CubeMap(cubeMap),
     m_Shader(shader)
 {
-    m_VertexArray = std::make_shared<VertexArray>();
+    m_VertexArray = std::make_unique<VertexArray>();
 
     std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(SkyboxVertices, ISIZE_OF(SkyboxVertices));
 

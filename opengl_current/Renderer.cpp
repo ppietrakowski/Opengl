@@ -18,7 +18,7 @@ class LightBuffer
 {
 public:
     LightBuffer(int numLights) :
-        m_UniformBuffer(std::make_shared<UniformBuffer>(static_cast<int32_t>(numLights * sizeof(LightData))))
+        m_UniformBuffer(std::make_unique<UniformBuffer>(static_cast<int32_t>(numLights * sizeof(LightData))))
     {
     }
 
@@ -46,7 +46,7 @@ public:
     }
 
 private:
-    std::shared_ptr<UniformBuffer> m_UniformBuffer;
+    std::unique_ptr<UniformBuffer> m_UniformBuffer;
     int32_t m_ActualNumLights{0};
 };
 

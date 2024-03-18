@@ -20,7 +20,7 @@ Level::~Level()
 
 Actor Level::CreateActor(const std::string& name)
 {
-    Actor actor(this, entt::handle{m_Registry, m_Registry.create()});
+    Actor actor(shared_from_this(), entt::handle{m_Registry, m_Registry.create()});
     actor.AddComponent<TransformComponent>();
     actor.AddComponent<ActorTagComponent>();
     actor.AddComponent<ActorNativeTickable>(actor.m_EntityHandle);

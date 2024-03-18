@@ -31,7 +31,7 @@ public:
         m_Material{std::make_shared<Material>(debugShader)}
     {
         m_Material->bCullFaces = false;
-        m_VertexArray = std::make_shared<VertexArray>();
+        m_VertexArray = std::make_unique<VertexArray>();
 
         auto vertexBuffer = std::make_shared<VertexBuffer>(static_cast<int>(MaxNumDebugVertices * sizeof(DebugVertex)));
         auto indexBuffer = std::make_shared<IndexBuffer>(MaxNumDebugIndices);
@@ -125,7 +125,7 @@ public:
 private:
     std::vector<DebugVertex> m_Vertices;
     std::vector<uint32_t> m_Indices;
-    std::shared_ptr<VertexArray> m_VertexArray;
+    std::unique_ptr<VertexArray> m_VertexArray;
 
     int32_t m_NumDrawVertices{0};
     int32_t m_NumDrawIndices{0};

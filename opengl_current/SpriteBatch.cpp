@@ -24,7 +24,7 @@ SpriteBatch::SpriteBatch(std::shared_ptr<Material> material, const glm::mat4& pr
     m_Material2d(material),
     m_ProjectionCopy(projectionCopy)
 {
-    m_SpriteVertexArray = std::make_shared<VertexArray>();
+    m_SpriteVertexArray = std::make_unique<VertexArray>();
 
     material->bCullFaces = false;
     m_Sprites.reserve(MaxSpritesDisplayed * NumQuadVertices);

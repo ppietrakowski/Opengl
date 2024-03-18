@@ -91,7 +91,7 @@ class Actor
     friend class Level;
 public:
     Actor() = default;
-    Actor(LevelInterface* level, const entt::handle& entityHandle);
+    Actor(std::weak_ptr<LevelInterface> level, const entt::handle& entityHandle);
     Actor(const Actor&) = default;
     Actor& operator=(const Actor&) = default;
 
@@ -128,15 +128,7 @@ public:
     const std::string& GetName() const;
     void SetName(const std::string& name);
 
-    const Level* GetHomeLevel() const
-    {
-        return (const Level*)m_HomeLevel;
-    }
-
-    Level* GetHomeLevel()
-    {
-        return (Level*)m_HomeLevel;
-    }
+    std::shared_ptr<Level> GetHomeLevel() const;
 
     void DestroyActor();
     bool IsAlive() const;
@@ -163,5 +155,10 @@ public:
 
 private:
     entt::handle m_EntityHandle;
-    LevelInterface* m_HomeLevel{nullptr};
+    std::weak_ptr<LevelInterface> m_HomeLevel;
+
+    std::shared_ptr<LevelInterface> GetLevelImpl() const
+    {
+        return m_HomeLevel.lock();
+    }
 };

@@ -28,7 +28,7 @@ public:
     std::int32_t GetNumBindedTextures() const;
 
 private:
-    std::shared_ptr<VertexArray> m_SpriteVertexArray;
+    std::unique_ptr<VertexArray> m_SpriteVertexArray;
     std::vector<SpriteVertex> m_Sprites;
 
     std::array<std::shared_ptr<ITexture>, MinTextureUnits> m_BindTextures;

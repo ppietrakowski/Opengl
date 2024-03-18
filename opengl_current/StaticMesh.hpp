@@ -26,6 +26,7 @@ struct StaticMeshVertex
     StaticMeshVertex& operator=(const StaticMeshVertex&) = default;
 };
 
+/* Entry for one LOD for mesh. This class must be copy-constructible */
 class StaticMeshEntry
 {
     friend class InstancedMesh;

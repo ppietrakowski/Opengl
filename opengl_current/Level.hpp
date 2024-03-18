@@ -10,7 +10,7 @@
 
 class ResourceManagerImpl;
 
-class Level : public LevelInterface
+class Level : public LevelInterface, public std::enable_shared_from_this<Level>
 {
 public:
     Level();
@@ -77,7 +77,7 @@ private:
 
     Actor ConstructFromEntity(entt::entity entity) const
     {
-        return Actor{const_cast<Level*>(this), entt::handle{const_cast<entt::registry&>(m_Registry), entity}};
+        return Actor{std::const_pointer_cast<Level>(shared_from_this()), entt::handle{const_cast<entt::registry&>(m_Registry), entity}};
     }
 };
 

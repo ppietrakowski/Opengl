@@ -7,7 +7,7 @@
 class Skybox
 {
 public:
-    Skybox(const std::shared_ptr<CubeMap>& cubeMap, const std::shared_ptr<Shader>& shader);
+    Skybox(std::shared_ptr<CubeMap> cubeMap, std::shared_ptr<Shader> shader);
 
     void Draw();
 
@@ -19,7 +19,7 @@ public:
     }
 
 private:
-    std::shared_ptr<VertexArray> m_VertexArray;
+    std::unique_ptr<VertexArray> m_VertexArray;
     std::shared_ptr<CubeMap> m_CubeMap;
     std::shared_ptr<Shader> m_Shader;
 };

@@ -3,7 +3,7 @@
 
 #include "ErrorMacros.hpp"
 
-Actor::Actor(LevelInterface* level, const entt::handle& entityHandle) :
+Actor::Actor(std::weak_ptr<LevelInterface> level, const entt::handle& entityHandle) :
     m_HomeLevel{level},
     m_EntityHandle{entityHandle}
 {
@@ -23,12 +23,17 @@ void Actor::SetName(const std::string& name)
     std::string oldName = tag_component.Name;
     tag_component.Name = name;
 
-    m_HomeLevel->NotifyActorNameChanged(oldName, name);
+    GetLevelImpl()->NotifyActorNameChanged(oldName, name);
+}
+
+std::shared_ptr<Level> Actor::GetHomeLevel() const
+{
+    return std::reinterpret_pointer_cast<Level>(GetLevelImpl());
 }
 
 void Actor::DestroyActor()
 {
-    m_HomeLevel->RemoveActor(GetName());
+    GetLevelImpl()->RemoveActor(GetName());
 }
 
 bool Actor::IsAlive() const
