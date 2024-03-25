@@ -347,10 +347,10 @@ void BaseEntity::UpdateWorldTransform()
 
 glm::mat4 BaseEntity::GetTransformMatrix()
 {
-    FORCE_UPDATE_WORLD_TRANSFORM();
-
+    
     if (auto parent = m_Parent.lock(); parent)
     {
+        parent->UpdateWorldTransform();
         return parent->GetTransformMatrix() * m_LocalMatrix;
     }
 

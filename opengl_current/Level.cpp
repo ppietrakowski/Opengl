@@ -21,6 +21,8 @@ Level::~Level()
 Actor Level::CreateActor(const std::string& name)
 {
     Actor actor;
+    actor.m_EntityHandle = entt::handle(m_Registry, m_Registry.create());
+    actor.m_HomeLevel = shared_from_this();
     actor.AddComponent<TransformComponent>();
     actor.AddComponent<ActorTagComponent>();
     actor.AddComponent<ActorNativeTickable>(actor.m_EntityHandle);
@@ -186,6 +188,15 @@ void Level::BroadcastRender()
     for (auto&& [entity, transform, staticMesh] : instancedMeshComponentView.each())
     {
         staticMesh.Draw(transform.GetWorldTransformMatrix());
+    }
+
+    for (auto& mesh : m_StaticMeshEntity)
+    {
+        Transform transform;
+        transform.Position = mesh->GetLocalOrigin();
+        transform.Rotation = mesh->GetLocalAngles();
+
+        AddNewStaticMesh(mesh->StaticMeshPath, transform);
     }
 }
 

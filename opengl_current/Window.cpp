@@ -278,6 +278,17 @@ void Window::BindWindowCallbacks()
     });
 }
 
+void Window::ClearWindowCallbacks()
+{
+    glfwSetCursorPosCallback(m_Window, NULL);
+    glfwSetKeyCallback(m_Window, NULL);
+    glfwSetMouseButtonCallback(m_Window, NULL);
+    glfwSetScrollCallback(m_Window, NULL);
+    glfwSetWindowSizeCallback(m_Window, NULL);
+    glfwSetWindowCloseCallback(m_Window, NULL);
+}
+
 void Window::ExecuteKeyEvent(KeyCode::Index keyCode, bool bPressed)
 {
+    m_Input.OnKeyEvent(keyCode, bPressed);
 }

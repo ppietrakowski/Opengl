@@ -129,8 +129,6 @@ SandboxGameLayer::SandboxGameLayer(std::shared_ptr<Game> game) :
     CreateInstancedMeshActor("assets/box.fbx", instancedMeshMaterial);
 
     PlaceLightsAndPlayer();
-
-    m_Level->SaveLevel("Game.tscn");
 }
 
 void SandboxGameLayer::Update(Duration deltaTime)
@@ -409,19 +407,19 @@ Actor SandboxGameLayer::CreateInstancedMeshActor(const std::string& filePath, co
 
     for (int i = 0; i < 5; ++i)
     {
-        for (int j = 0; j < 800; ++j)
+        for (int j = 0; j < 0; ++j)
         {
             Transform transform{glm::vec3{5.0f * i, 2.0f, 3.0f * j}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
             instancedMesh.AddInstance(transform);
         }
     }
 
-    instancedMesh.AddInstance(Transform(glm::vec3(25, 4, -40)));
+    //instancedMesh.AddInstance(Transform(glm::vec3(25, 4, -40)));
 
     std::mt19937 m{};
     std::uniform_real_distribution<float> distribution{-10.0f, 10.0f};
 
-    for (int i = 0; i < 200; ++i)
+    for (int i = 0; i < 0; ++i)
     {
         Transform transform{glm::vec3{distribution(m), distribution(m), distribution(m)}, glm::quat{glm::vec3{0, 0, 0}}, glm::vec3{1, 1, 1}};
         Actor actor = m_Level->CreateActor("StaticMesh" + std::to_string(i));
@@ -470,4 +468,9 @@ void SandboxGameLayer::PlaceLightsAndPlayer()
     controller.BindForwardCallback(std::bind(&SandboxGameLayer::MoveForward, this, std::placeholders::_1, std::placeholders::_2));
     controller.BindRightCallback(std::bind(&SandboxGameLayer::MoveRight, this, std::placeholders::_1, std::placeholders::_2));
     controller.BindMouseMoveCallback(std::bind(&SandboxGameLayer::RotateCamera, this, std::placeholders::_1, std::placeholders::_2));
+
+    m_Entity = m_Level->CreateEntity<StaticMeshEntity>("TestEntity");
+    m_Entity->StaticMeshPath = "assets/box.fbx";
+
+    m_Entity->SetLocalOrigin(glm::vec3(10, 0, -10));
 }

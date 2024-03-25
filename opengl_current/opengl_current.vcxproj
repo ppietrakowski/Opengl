@@ -260,6 +260,7 @@
     <ClCompile Include="SpriteBatch.cpp" />
     <ClCompile Include="StaticMesh.cpp" />
     <ClCompile Include="StaticMeshComponent.cpp" />
+    <ClCompile Include="StaticMeshEntity.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UniformBuffer.cpp" />
     <ClCompile Include="VertexArray.cpp" />
@@ -331,6 +332,7 @@
     <ClInclude Include="SpriteBatch.hpp" />
     <ClInclude Include="StaticMesh.hpp" />
     <ClInclude Include="StaticMeshComponent.hpp" />
+    <ClInclude Include="StaticMeshEntity.hpp" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.hpp" />
     <ClInclude Include="Transform.hpp" />

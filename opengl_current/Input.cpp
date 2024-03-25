@@ -55,7 +55,7 @@ void Input::Initialize(GLFWwindow* window)
     m_MousePosition = {(float)x, (float)y};
     s_Instance = this;
 
-    for (int i = 0; i < MaxNumKeys; ++i)
+    for (int i = GLFW_KEY_SPACE; i < MaxNumKeys; ++i)
     {
         m_KeysMap[i].bCurrentState = glfwGetKey(window, i);
     }

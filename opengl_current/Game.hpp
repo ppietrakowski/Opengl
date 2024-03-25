@@ -90,4 +90,7 @@ private:
     void RunImguiFrame();
 
     void BindWindowEvents();
+
+
+    virtual bool OnWindowClose() override;
 };

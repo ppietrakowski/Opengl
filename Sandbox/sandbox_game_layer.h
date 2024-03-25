@@ -44,6 +44,7 @@ private:
     std::weak_ptr<Game> m_Game;
 
     std::unique_ptr<IMaterialParameterVisitor> m_GuiDisplayVisitor;
+    std::shared_ptr<StaticMeshEntity> m_Entity;
 
 private:
     void MoveForward(Actor& player, float axisValue);

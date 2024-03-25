@@ -2,6 +2,8 @@
 
 #include "Actor.hpp"
 #include "Duration.hpp"
+#include "Entity.hpp"
+#include "StaticMeshEntity.hpp"
 
 #include "InstancedMesh.hpp"
 #include "Lights.hpp"
@@ -67,6 +69,23 @@ public:
 
     void SaveLevel(std::string_view path);
 
+    template <typename T>
+    std::shared_ptr<T> CreateEntity(std::string_view name)
+    {
+        std::shared_ptr<BaseEntity> obj = std::dynamic_pointer_cast<BaseEntity>(T::CreateNewInstance(name));
+
+        if constexpr (std::is_same_v<T, StaticMeshEntity>)
+        {
+            m_StaticMeshEntity.emplace_back(std::dynamic_pointer_cast<StaticMeshEntity>(obj));
+        }
+
+        obj->Init(0, weak_from_this());
+        m_EntityNameToIndex[std::string(name.begin(), name.end())] = m_Entities.size();
+
+        m_Entities.emplace_back(obj);
+        return std::dynamic_pointer_cast<T>(obj);
+    }
+
 private:
     entt::registry m_Registry;
     std::map<std::string, Actor> m_Actors;
@@ -74,6 +93,11 @@ private:
 
     std::unordered_map<MeshKey, std::shared_ptr<InstancedMesh>> m_MeshNameToInstancedMesh;
     std::vector<LightData> m_Lights;
+
+    std::vector<std::shared_ptr<BaseEntity>> m_Entities;
+    std::unordered_map<std::string, size_t> m_EntityNameToIndex;
+
+    std::vector<std::shared_ptr<StaticMeshEntity>> m_StaticMeshEntity;
 
 private:
     void UpdateSkeletalMeshesAnimation(Duration duration);

@@ -25,6 +25,7 @@ class Window
 public:
     struct WindowDataImpl;
     friend struct Window::WindowDataImpl;
+    friend class Game;
 
     Window(const WindowSettings& settings);
     ~Window();
@@ -78,6 +79,8 @@ private:
     
 private:
     void BindWindowCallbacks();
+    void ClearWindowCallbacks();
+
     void ExecuteKeyEvent(KeyCode::Index keyCode, bool bPressed);
 };
 

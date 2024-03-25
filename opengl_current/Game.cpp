@@ -82,6 +82,7 @@ Game::~Game()
     Debug::Quit();
     Renderer::Quit();
 
+    m_Window.ClearWindowCallbacks();
     m_Window.DeinitializeImGui();
     ImGui::DestroyContext();
 }
@@ -233,6 +234,12 @@ void Game::BindWindowEvents()
         }
     });
 #endif
+}
+
+bool Game::OnWindowClose()
+{
+    std::exit(EXIT_SUCCESS);
+    return false;
 }
 
 void Game::SetMouseVisible(bool bMouseVisible)
