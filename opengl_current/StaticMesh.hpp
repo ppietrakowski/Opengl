@@ -91,11 +91,16 @@ public:
     void LoadLod(const std::string& filePath, int lod);
 
     void SetMaterial(std::shared_ptr<Material> material);
+    const std::string& GetPath() const
+    {
+        return m_Path;
+    }
 
 private:
     std::vector<StaticMeshEntry> m_Entries;
     Box m_BoundingBox;
     std::string m_MeshName;
+    std::string m_Path;
     std::shared_ptr<Material> m_MainMaterial;
 };
 

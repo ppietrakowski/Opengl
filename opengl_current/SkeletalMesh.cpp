@@ -93,7 +93,8 @@ bool SkeletonMeshVertex::AddBoneData(int boneId, float weight)
 SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material) :
     MainMaterial{material},
     m_NumBones{0},
-    m_VertexArray{}
+    m_VertexArray{},
+    m_Path(path.string())
 {
     // maps bone name to boneID
     std::unordered_map<std::string, int> boneNameToIndex;

@@ -2,6 +2,7 @@
 
 #include "SkeletalMesh.hpp"
 #include "Transform.hpp"
+#include "Datapack.hpp"
 
 struct SkeletalMeshComponent
 {
@@ -17,6 +18,8 @@ struct SkeletalMeshComponent
 
     void UpdateAnimation(float deltaSeconds, const Transform& transform);
     void Draw(const glm::mat4& worldTransform) const;
+
+    Datapack Archived() const;
 };
 
 

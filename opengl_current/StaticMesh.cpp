@@ -129,6 +129,7 @@ void StaticMesh::LoadLod(const std::string& filePath, int lod)
     {
         m_MeshName = scene->mName.C_Str();
         FindAabCollision(vertices, m_BoundingBox.MinBounds, m_BoundingBox.MaxBounds);
+        m_Path = filePath;
     }
 
     if (m_Entries.size() == lod)

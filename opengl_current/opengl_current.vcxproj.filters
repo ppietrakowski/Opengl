@@ -186,10 +186,13 @@
     <ClCompile Include="Window.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="ActorComponent.cpp">
-      <Filter>Source Files\scene</Filter>
-    </ClCompile>
     <ClCompile Include="Datapack.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Archive.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="AsciiArchive.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -402,6 +405,12 @@
       <Filter>Header Files\scene</Filter>
     </ClInclude>
     <ClInclude Include="Datapack.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="AsciiArchive.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Archive.hpp">
       <Filter>Header Files\core</Filter>
     </ClInclude>
   </ItemGroup>

@@ -175,6 +175,10 @@ public:
     }
 
     std::vector<std::string> TextureNames;
+    const std::string& GetPath() const
+    {
+        return m_Path;
+    }
 
 public:
     const VertexArray& GetVertexArray() const
@@ -188,7 +192,7 @@ private:
     std::unordered_map<std::string, SkeletalAnimation> m_Animations;
     glm::mat4 m_GlobalInverseTransform;
     uint32_t m_NumBones;
-
+    std::string m_Path;
     Box m_BoundingBox;
 
 private:

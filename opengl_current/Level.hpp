@@ -6,6 +6,8 @@
 #include "InstancedMesh.hpp"
 #include "Lights.hpp"
 
+#include "Archive.hpp"
+
 #include <optional>
 
 class ResourceManagerImpl;
@@ -63,13 +65,14 @@ public:
         return m_Lights;
     }
 
+    void SaveLevel(std::string_view path);
+
 private:
     entt::registry m_Registry;
     std::map<std::string, Actor> m_Actors;
     std::shared_ptr<ResourceManagerImpl> m_ResourceManager;
 
     std::unordered_map<MeshKey, std::shared_ptr<InstancedMesh>> m_MeshNameToInstancedMesh;
-
     std::vector<LightData> m_Lights;
 
 private:
@@ -79,5 +82,8 @@ private:
     {
         return Actor{std::const_pointer_cast<Level>(shared_from_this()), entt::handle{const_cast<entt::registry&>(m_Registry), entity}};
     }
+
+    void Serialize(IArchive& archive);
+    void SerializeActor(const Actor& actor, IArchive& archive, const std::string& name);
 };
 

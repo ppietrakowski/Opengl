@@ -213,7 +213,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
-    <ClCompile Include="ActorComponent.cpp" />
+    <ClCompile Include="Archive.cpp" />
+    <ClCompile Include="AsciiArchive.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="Datapack.cpp" />
     <ClCompile Include="Debug.cpp" />
@@ -266,6 +267,8 @@
     <ClInclude Include="Actor.hpp" />
     <ClInclude Include="ActorComponent.hpp" />
     <ClInclude Include="ActorTagComponent.hpp" />
+    <ClInclude Include="Archive.hpp" />
+    <ClInclude Include="AsciiArchive.hpp" />
     <ClInclude Include="AssimpUtils.hpp" />
     <ClInclude Include="Box.hpp" />
     <ClInclude Include="CameraProjection.hpp" />

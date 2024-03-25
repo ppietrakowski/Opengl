@@ -129,6 +129,8 @@ SandboxGameLayer::SandboxGameLayer(std::shared_ptr<Game> game) :
     CreateInstancedMeshActor("assets/box.fbx", instancedMeshMaterial);
 
     PlaceLightsAndPlayer();
+
+    m_Level->SaveLevel("Game.tscn");
 }
 
 void SandboxGameLayer::Update(Duration deltaTime)

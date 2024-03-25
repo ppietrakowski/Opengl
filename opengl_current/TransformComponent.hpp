@@ -86,28 +86,12 @@ FORCE_INLINE Transform TransformComponent::GetAsTransform() const
     return Transform{Position, Rotation, Scale};
 }
 
-inline void Archive(glm::vec3 v, Datapack& p)
-{
-    p.SetNumber(v[0],0);
-    p.SetNumber(v[1],1);
-    p.SetNumber(v[2],2);
-}
-
-inline void Archive(glm::quat v, Datapack& p)
-{
-    p.SetNumber(v[0], 0);
-    p.SetNumber(v[1], 1);
-    p.SetNumber(v[2], 2);
-    p.SetNumber(v[3], 3);
-}
-
 inline Datapack TransformComponent::Archived() const
 {
     Datapack pack;
-    pack["Class"] = "Transform";
-    Archive(Scale, pack["Scale"]);
-    Archive(Position, pack["Position"]);
-    Archive(Rotation, pack["Rotation"]);
+    Serialize(Scale, pack["Scale"]);
+    Serialize(Position, pack["Position"]);
+    Serialize(Rotation, pack["Rotation"]);
     return pack;
 }
 

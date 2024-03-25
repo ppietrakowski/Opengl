@@ -240,6 +240,13 @@ const CameraComponent& Level::FindCameraComponent() const
     return m_Registry.get<CameraComponent>(view.front());
 }
 
+void Level::SaveLevel(std::string_view path)
+{
+    auto archive = CreateEmptyAsciiArchive(path);
+    Serialize(*archive);
+    archive->Save(path);
+}
+
 void Level::UpdateSkeletalMeshesAnimation(Duration duration)
 {
     auto skeletalMeshView = m_Registry.view<SkeletalMeshComponent, TransformComponent>();
@@ -250,4 +257,44 @@ void Level::UpdateSkeletalMeshesAnimation(Duration duration)
     {
         skeletalMesh.UpdateAnimation(seconds, transform.GetAsTransform());
     }
+}
+
+void Level::Serialize(IArchive& archive)
+{
+    for (auto& [name, actor] : m_Actors)
+    {
+        SerializeActor(actor, archive, name);
+    }
+}
+
+#define TYPE_NAME_TO_CLASS_NAME(Type) (#Type)
+
+void Level::SerializeActor(const Actor& actor, IArchive& archive, const std::string& name)
+{
+    const TransformComponent& transform = actor.GetComponent<TransformComponent>();
+
+    Datapack pack;
+    pack[TYPE_NAME_TO_CLASS_NAME(TransformComponent)] = transform.Archived();
+
+    if (m_Registry.any_of<StaticMeshComponent>(actor.m_EntityHandle))
+    {
+        const StaticMeshComponent& static_mesh = actor.GetComponent<StaticMeshComponent>();
+        std::shared_ptr<StaticMesh> mesh = ResourceManager::GetStaticMesh(static_mesh.MeshName);
+        pack[TYPE_NAME_TO_CLASS_NAME(StaticMeshComponent)] = Datapack{};
+        pack[TYPE_NAME_TO_CLASS_NAME(StaticMeshComponent)]["path"] = mesh->GetPath();
+    }
+
+    if (m_Registry.any_of<SkeletalMeshComponent>(actor.m_EntityHandle))
+    {
+        const SkeletalMeshComponent& skel_mesh = actor.GetComponent<SkeletalMeshComponent>();
+        pack[TYPE_NAME_TO_CLASS_NAME(SkeletalMeshComponent)] = skel_mesh.Archived();
+    }
+
+    if (m_Registry.any_of<InstancedMeshComponent>(actor.m_EntityHandle))
+    {
+        const InstancedMeshComponent& static_mesh = actor.GetComponent<InstancedMeshComponent>();
+        pack[TYPE_NAME_TO_CLASS_NAME(InstancedMeshComponent)] = static_mesh.Archived();
+    }
+
+    archive.WriteObject(name, pack);
 }

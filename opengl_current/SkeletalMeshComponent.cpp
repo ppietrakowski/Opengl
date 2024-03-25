@@ -20,3 +20,12 @@ void SkeletalMeshComponent::Draw(const glm::mat4& worldTransform) const
 {
     Renderer::SubmitSkeleton(*TargetSkeletalMesh, worldTransform, BoneTransforms);
 }
+
+Datapack SkeletalMeshComponent::Archived() const
+{
+    Datapack p;
+    p["AnimationName"] = AnimationName;
+    p["SkeletalMesh"] = TargetSkeletalMesh->GetPath();
+    p["AnimationTime"] = AnimationTime;
+    return p;
+}
