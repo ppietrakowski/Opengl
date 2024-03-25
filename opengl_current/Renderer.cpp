@@ -18,7 +18,7 @@ class LightBuffer
 {
 public:
     LightBuffer(int numLights) :
-        m_UniformBuffer(std::make_unique<UniformBuffer>(static_cast<int32_t>(numLights * sizeof(LightData))))
+        m_UniformBuffer(static_cast<int>(numLights * sizeof(LightData)))
     {
     }
 
@@ -26,7 +26,7 @@ public:
 
     void AddLight(const LightData& lightData)
     {
-        m_UniformBuffer->UpdateBuffer(&lightData, sizeof(LightData), m_ActualNumLights * sizeof(LightData));
+        m_UniformBuffer.UpdateElement(lightData, m_ActualNumLights);
         m_ActualNumLights++;
     }
 
@@ -37,17 +37,17 @@ public:
 
     void BindBuffer(Shader& shader, const std::string& bindingName) const
     {
-        shader.BindUniformBuffer(shader.GetUniformBlockIndex(bindingName), *m_UniformBuffer);
+        shader.BindUniformBuffer(shader.GetUniformBlockIndex(bindingName), m_UniformBuffer);
     }
 
-    int32_t GetNumLights() const
+    int GetNumLights() const
     {
         return m_ActualNumLights;
     }
 
 private:
-    std::unique_ptr<UniformBuffer> m_UniformBuffer;
-    int32_t m_ActualNumLights{0};
+    UniformBuffer m_UniformBuffer;
+    int m_ActualNumLights{0};
 };
 
 static LightBuffer* s_LightBuffer = nullptr;
@@ -98,7 +98,7 @@ void Renderer::SubmitSkeleton(const SkeletalMesh& skeletalMesh, const glm::mat4&
     RenderCommand::DrawIndexed(vertexArray, vertexArray.GetNumIndices());
 }
 
-void Renderer::SubmitMeshInstanced(const StaticMeshEntry& mesh, const Material& material, const UniformBuffer& buffer, int32_t numInstances, const glm::mat4& transform)
+void Renderer::SubmitMeshInstanced(const StaticMeshEntry& mesh, const Material& material, const UniformBuffer& buffer, int numInstances, const glm::mat4& transform)
 {
     std::shared_ptr<Shader> shader = material.GetShader();
     StartSubmiting(material, transform);
@@ -119,8 +119,8 @@ void Renderer::Initialize()
         {Magenta, Magenta, Black, Black}
     };
 
-    int32_t colorsWidth = 4;
-    int32_t colorsHeight = 4;
+    int colorsWidth = 4;
+    int colorsHeight = 4;
 
     s_DefaultTexture = std::make_shared<Texture2D>(colors, TextureSpecification{colorsWidth, colorsHeight, TextureFormat::Rgb});
     s_DefaultTexture->SetFilteringType(FilteringType::Nearest);

@@ -22,10 +22,10 @@ void InstancedMesh::Draw(const glm::mat4& transform)
     }
 }
 
-int InstancedMesh::AddInstance(const Transform& transform, int32_t textureId)
+int InstancedMesh::AddInstance(const Transform& transform, int textureId)
 {
     auto it = m_TransformBuffers.begin();
-    int32_t id = m_NumInstances;
+    int id = m_NumInstances;
 
     bool bShouldRecycleTransform = !m_RecyclingMeshIndices.empty();
     if (bShouldRecycleTransform)
@@ -64,7 +64,7 @@ int InstancedMesh::AddInstance(const Transform& transform, int32_t textureId)
     return m_NumInstances++;
 }
 
-void InstancedMesh::RemoveInstance(int32_t index)
+void InstancedMesh::RemoveInstance(int index)
 {
     m_NumInstances--;
     ASSERT(m_NumInstances >= 0);
@@ -77,10 +77,10 @@ void InstancedMesh::RemoveInstance(int32_t index)
     UpdateInstance(index, transform);
 }
 
-void InstancedMesh::UpdateInstance(int32_t index, const Transform& newTransform)
+void InstancedMesh::UpdateInstance(int index, const Transform& newTransform)
 {
     auto it = m_TransformBuffers.begin();
-    int32_t id = index;
+    int id = index;
 
     // find relative index and coresponding uniform buffer
     while (id >= NumInstancesTransform)

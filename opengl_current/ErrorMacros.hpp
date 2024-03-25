@@ -7,7 +7,7 @@
 struct SourceLocation
 {
     std::string FileName;
-    int32_t Line;
+    int Line;
     std::string FunctionName;
 };
 

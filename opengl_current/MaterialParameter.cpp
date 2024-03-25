@@ -4,13 +4,13 @@
 
 #include <cstring>
 
-MaterialParam::MaterialParam(const char* uniformName, int32_t value) :
-    m_Parameter{PrimitiveParameter<std::int32_t>{uniformName, value}}
+MaterialParam::MaterialParam(const char* uniformName, int value) :
+    m_Parameter{PrimitiveParameter<int>{uniformName, value}}
 {
     m_ParamType = MaterialParamType::Int;
     m_Getter = [](const ParamVariant& value) -> Parameter*
     {
-        return const_cast<PrimitiveParameter<int32_t>*>(&std::get<PrimitiveParameter<int32_t>>(value));
+        return const_cast<PrimitiveParameter<int>*>(&std::get<PrimitiveParameter<int>>(value));
     };
 }
 
@@ -70,9 +70,9 @@ void MaterialParam::SetUniform(Shader& shader) const
     m_Getter(m_Parameter)->SetUniform(shader);
 }
 
-int32_t MaterialParam::GetInt() const
+int MaterialParam::GetInt() const
 {
-    return std::any_cast<int32_t>(m_Getter(m_Parameter)->GetValue());
+    return std::any_cast<int>(m_Getter(m_Parameter)->GetValue());
 }
 
 float MaterialParam::GetFloat() const
@@ -100,7 +100,7 @@ std::shared_ptr<ITexture> MaterialParam::GetTexture() const
     return std::any_cast<std::shared_ptr<ITexture>>(m_Getter(m_Parameter)->GetValue());
 }
 
-void MaterialParam::SetInt(int32_t value)
+void MaterialParam::SetInt(int value)
 {
     m_Getter(m_Parameter)->SetValue(value);
 }

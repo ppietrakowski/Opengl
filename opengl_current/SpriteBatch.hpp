@@ -4,14 +4,14 @@
 #include "VertexArray.hpp"
 #include "Renderer2D.hpp"
 
-constexpr size_t NumQuadVertices = 4;
-constexpr size_t MaxSpritesDisplayed = 400;
+constexpr int NumQuadVertices = 4;
+constexpr int MaxSpritesDisplayed = 400;
 
 struct SpriteVertex
 {
     glm::vec2 Position;
     glm::vec2 TextureCoords;
-    std::int32_t TextureId;
+    int TextureId;
     RgbaColor Tint;
 };
 
@@ -25,10 +25,10 @@ public:
     void AddSpriteInstance(const std::array<SpriteVertex, NumQuadVertices>& definition, const Transform2D& transform);
     void BindNewTexture(std::shared_ptr<ITexture> texture);
 
-    std::int32_t GetNumBindedTextures() const;
+    int GetNumBindedTextures() const;
 
 private:
-    std::unique_ptr<VertexArray> m_SpriteVertexArray;
+    VertexArray m_SpriteVertexArray;
     std::vector<SpriteVertex> m_Sprites;
 
     std::array<std::shared_ptr<ITexture>, MinTextureUnits> m_BindTextures;

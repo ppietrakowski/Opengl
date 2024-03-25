@@ -60,10 +60,10 @@ public:
     void Clear();
     void SetClearColor(const RgbaColor& clearColor);
 
-    void DrawIndexed(const VertexArray& vertexArray, int32_t numIndices);
-    void DrawArrays(const VertexArray& vertexArray, int32_t numVertices);
-    void DrawLines(const VertexArray& vertexArray, int32_t numIndices);
-    void DrawIndexedInstanced(const VertexArray& vertexArray, int32_t numInstances);
+    void DrawIndexed(const VertexArray& vertexArray, int numIndices);
+    void DrawArrays(const VertexArray& vertexArray, int numVertices);
+    void DrawLines(const VertexArray& vertexArray, int numIndices);
+    void DrawIndexedInstanced(const VertexArray& vertexArray, int numInstances);
 
     void SetCullFace(bool bCullFaces);
     bool DoesCullFaces() const;
@@ -71,7 +71,7 @@ public:
     void SetLineWidth(float lineWidth);
 
     void ClearBufferBindings_Debug();
-    void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height);
+    void SetViewport(int x, int y, int width, int height);
 
     void SetDepthFunc(DepthFunction depthFunction);
     void SetDepthEnabled(bool bDepthEnabled);

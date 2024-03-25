@@ -52,11 +52,9 @@ Skybox::Skybox(std::shared_ptr<CubeMap> cubeMap, std::shared_ptr<Shader> shader)
     m_CubeMap(cubeMap),
     m_Shader(shader)
 {
-    m_VertexArray = std::make_unique<VertexArray>();
+    std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(SkyboxVertices, GetContainerSizeInt(SkyboxVertices));
 
-    std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(SkyboxVertices, ISIZE_OF(SkyboxVertices));
-
-    m_VertexArray->AddVertexBuffer(buffer, std::array{
+    m_VertexArray.AddVertexBuffer(buffer, std::array{
         VertexAttribute{3, PrimitiveVertexType::Float}
         });
 
@@ -82,9 +80,9 @@ void Skybox::Draw()
     m_CubeMap->Bind(0);
     m_Shader->SetSamplerUniform("u_skybox_texture", m_CubeMap, 0);
 
-    RenderCommand::DrawArrays(*m_VertexArray, ARRAY_NUM_ELEMENTS(SkyboxVertices));
+    RenderCommand::DrawArrays(m_VertexArray, ARRAY_NUM_ELEMENTS(SkyboxVertices));
 
     // switch back basic depth test
     RenderCommand::SetDepthFunc(DepthFunction::Less);
-    m_VertexArray->Unbind();
+    m_VertexArray.Unbind();
 }

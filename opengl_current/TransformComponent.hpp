@@ -1,12 +1,14 @@
 #pragma once
 
 #include "Transform.hpp"
+#include "Datapack.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-struct TransformComponent
+class TransformComponent
 {
+public:
     glm::vec3 Position{0, 0, 0};
     glm::quat Rotation{glm::vec3{0, 0, 0}};
     glm::vec3 Scale{1, 1, 1};
@@ -26,6 +28,10 @@ struct TransformComponent
     glm::vec3 GetUpVector() const;
 
     Transform GetAsTransform() const;
+
+
+    Datapack Archived() const;
+    void Unarchive(const Datapack& datapack);
 };
 
 FORCE_INLINE void TransformComponent::Translate(const glm::vec3& pos)
@@ -78,4 +84,43 @@ FORCE_INLINE glm::vec3 TransformComponent::GetUpVector() const
 FORCE_INLINE Transform TransformComponent::GetAsTransform() const
 {
     return Transform{Position, Rotation, Scale};
+}
+
+inline void Archive(glm::vec3 v, Datapack& p)
+{
+    p.SetNumber(v[0],0);
+    p.SetNumber(v[1],1);
+    p.SetNumber(v[2],2);
+}
+
+inline void Archive(glm::quat v, Datapack& p)
+{
+    p.SetNumber(v[0], 0);
+    p.SetNumber(v[1], 1);
+    p.SetNumber(v[2], 2);
+    p.SetNumber(v[3], 3);
+}
+
+inline Datapack TransformComponent::Archived() const
+{
+    Datapack pack;
+    pack["Class"] = "Transform";
+    Archive(Scale, pack["Scale"]);
+    Archive(Position, pack["Position"]);
+    Archive(Rotation, pack["Rotation"]);
+    return pack;
+}
+
+inline void TransformComponent::Unarchive(const Datapack& datapack)
+{
+    for (int i = 0; i < Scale.length(); ++i)
+    {
+        Scale[i] = datapack.GetSafe("Scale").AsFloatNumber(i);
+        Position[i] = datapack.GetSafe("Position").AsFloatNumber(i);
+    }
+
+    for (int i = 0; i < Rotation.length(); ++i)
+    {
+        Rotation[i] = datapack.GetSafe("Rotation").AsFloatNumber(i);
+    }
 }

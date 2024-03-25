@@ -10,6 +10,20 @@ VertexArray::VertexArray() :
     glGenVertexArrays(1, &m_RendererId);
 }
 
+VertexArray::VertexArray(VertexArray&& tempArray) noexcept
+{
+    *this = std::move(tempArray);
+}
+
+VertexArray& VertexArray::operator=(VertexArray&& tempArray) noexcept
+{
+    m_RendererId = std::exchange(tempArray.m_RendererId, 0);
+    m_VertexBuffers = std::move(tempArray.m_VertexBuffers);
+    m_IndexBuffer = std::move(tempArray.m_IndexBuffer);
+    m_Attributes = std::move(tempArray.m_Attributes);
+    return *this;
+}
+
 VertexArray::~VertexArray()
 {
     glDeleteVertexArrays(1, &m_RendererId);
@@ -35,7 +49,7 @@ void VertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuf
     constexpr int MaxAttributes = static_cast<int>(PrimitiveVertexType::MaxPrimitiveVertexType);
 
     // start index for new buffer
-    int attributeStartIndex = STD_ARRAY_NUM_ELEMENTS(m_VertexBuffers);
+    int attributeStartIndex = GetContainerSizeInt(m_VertexBuffers);
     int stride = 0;
 
     constexpr uintptr_t AttributeSizes[MaxAttributes] = {sizeof(int), sizeof(uint32_t), sizeof(float)};
@@ -49,7 +63,7 @@ void VertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuf
         int size_index = GetLookupIndex(attribute);
         ASSERT(size_index < MaxAttributes);
         stride += attribute.NumComponents * static_cast<int>(AttributeSizes[size_index]);
-        attributes_.emplace_back(attribute);
+        m_Attributes.emplace_back(attribute);
     }
 
     uintptr_t offset = 0;

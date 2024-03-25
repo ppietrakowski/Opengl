@@ -24,13 +24,11 @@ SpriteBatch::SpriteBatch(std::shared_ptr<Material> material, const glm::mat4& pr
     m_Material2d(material),
     m_ProjectionCopy(projectionCopy)
 {
-    m_SpriteVertexArray = std::make_unique<VertexArray>();
-
     material->bCullFaces = false;
     m_Sprites.reserve(MaxSpritesDisplayed * NumQuadVertices);
     std::shared_ptr<VertexBuffer> buffer = std::make_shared<VertexBuffer>(static_cast<int>(m_Sprites.capacity() * sizeof(SpriteVertex)));
 
-    m_SpriteVertexArray->AddVertexBuffer(buffer, SpriteVertexAttributes);
+    m_SpriteVertexArray.AddVertexBuffer(buffer, SpriteVertexAttributes);
 
     uint32_t startIndex = 0;
     constexpr std::array<uint32_t, 6> BaseQuatIndices = {0, 1, 2, 0, 2, 3};
@@ -50,7 +48,7 @@ SpriteBatch::SpriteBatch(std::shared_ptr<Material> material, const glm::mat4& pr
     }
 
     std::shared_ptr<IndexBuffer> indexBuffer = std::make_shared<IndexBuffer>(batchedIndices);
-    m_SpriteVertexArray->SetIndexBuffer(indexBuffer);
+    m_SpriteVertexArray.SetIndexBuffer(indexBuffer);
 }
 
 void SpriteBatch::FlushDraw(const glm::mat4& projection)
@@ -63,12 +61,12 @@ void SpriteBatch::FlushDraw(const glm::mat4& projection)
 
     BindSpriteUniforms(projection);
 
-    std::shared_ptr<VertexBuffer> vertexBuffer = m_SpriteVertexArray->GetVertexBufferAt(0);
+    std::shared_ptr<VertexBuffer> vertexBuffer = m_SpriteVertexArray.GetVertexBufferAt(0);
 
-    m_SpriteVertexArray->Bind();
-    vertexBuffer->UpdateVertices(m_Sprites.data(), static_cast<int>(sizeof(SpriteVertex) * m_Sprites.size()));
+    m_SpriteVertexArray.Bind();
+    vertexBuffer->Update(m_Sprites);
 
-    RenderCommand::DrawIndexed(*m_SpriteVertexArray, m_NumIndicesToDraw);
+    RenderCommand::DrawIndexed(m_SpriteVertexArray, m_NumIndicesToDraw);
     Reset();
 
     m_ProjectionCopy = projection;
@@ -99,7 +97,7 @@ void SpriteBatch::BindNewTexture(std::shared_ptr<ITexture> texture)
     m_BindTextures[m_NumBindedTextures++] = texture;
 }
 
-std::int32_t SpriteBatch::GetNumBindedTextures() const
+int SpriteBatch::GetNumBindedTextures() const
 {
     return m_NumBindedTextures;
 }

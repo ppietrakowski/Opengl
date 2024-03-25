@@ -25,20 +25,20 @@ void RenderCommand::ClearBufferBindings_Debug()
     s_RendererApi.ClearBufferBindings_Debug();
 }
 
-void RenderCommand::DrawIndexed(const VertexArray& vertexArray, int32_t numIndices)
+void RenderCommand::DrawIndexed(const VertexArray& vertexArray, int numIndices)
 {
     ASSERT(s_bRenderCommandInitialized);
     s_RendererApi.DrawIndexed(vertexArray, numIndices);
     s_RenderStats.NumDrawcalls++;
 }
 
-void RenderCommand::DrawArrays(const VertexArray& vertexArray, int32_t numVertices)
+void RenderCommand::DrawArrays(const VertexArray& vertexArray, int numVertices)
 {
     s_RendererApi.DrawArrays(vertexArray, numVertices);
     s_RenderStats.NumDrawcalls++;
 }
 
-void RenderCommand::DrawLines(const VertexArray& vertexArray, int32_t numIndices)
+void RenderCommand::DrawLines(const VertexArray& vertexArray, int numIndices)
 {
     ASSERT(s_bRenderCommandInitialized);
 
@@ -46,7 +46,7 @@ void RenderCommand::DrawLines(const VertexArray& vertexArray, int32_t numIndices
     s_RenderStats.NumDrawcalls++;
 }
 
-void RenderCommand::DrawIndexedInstanced(const VertexArray& vertexArray, int32_t numInstances)
+void RenderCommand::DrawIndexedInstanced(const VertexArray& vertexArray, int numInstances)
 {
     s_RendererApi.DrawIndexedInstanced(vertexArray, numInstances);
     s_RenderStats.NumDrawcalls++;
@@ -91,7 +91,7 @@ void RenderCommand::SetLineWidth(float lineWidth)
     s_RendererApi.SetLineWidth(lineWidth);
 }
 
-void RenderCommand::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
+void RenderCommand::SetViewport(int x, int y, int width, int height)
 {
     s_RendererApi.SetViewport(x, y, width, height);
 }
@@ -108,4 +108,5 @@ void RenderCommand::SetDepthFunc(DepthFunction depthFunction)
 
 void RenderCommand::SetDepthEnabled(bool bDepthEnabled)
 {
+    s_RendererApi.SetDepthEnabled(bDepthEnabled);
 }

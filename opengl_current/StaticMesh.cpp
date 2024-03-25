@@ -53,7 +53,7 @@ StaticMesh::StaticMesh(const std::filesystem::path& filePath, const std::shared_
     LoadLod(filePath.string(), 0);
 }
 
-void StaticMesh::LoadLod(const std::string& filePath, int32_t lod)
+void StaticMesh::LoadLod(const std::string& filePath, int lod)
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(filePath, AssimpImportFlags);
@@ -63,8 +63,8 @@ void StaticMesh::LoadLod(const std::string& filePath, int32_t lod)
         throw std::runtime_error{importer.GetErrorString()};
     }
 
-    int32_t totalVertices = 0;
-    int32_t totalIndices = 0;
+    int totalVertices = 0;
+    int totalIndices = 0;
 
     std::vector<StaticMeshVertex> vertices;
     vertices.reserve(scene->mMeshes[0]->mNumVertices);
@@ -144,7 +144,7 @@ void StaticMesh::LoadLod(const std::string& filePath, int32_t lod)
 }
 
 StaticMeshEntry::StaticMeshEntry(const std::vector<StaticMeshVertex>& vertices, const std::vector<uint32_t>& indices, const std::shared_ptr<Material>& material) :
-    m_VertexArray(std::make_shared<VertexArray>()),
+    m_VertexArray(),
     Vertices(vertices),
     Indices(indices),
     m_Material(material)
@@ -152,10 +152,10 @@ StaticMeshEntry::StaticMeshEntry(const std::vector<StaticMeshVertex>& vertices, 
     std::shared_ptr<IndexBuffer> indexBuffer = std::make_shared<IndexBuffer>(Indices);
 
     std::shared_ptr<VertexBuffer> vertexBuffer = std::make_shared<VertexBuffer>(Vertices.data(),
-        STD_ARRAY_NUM_BYTES(Vertices, StaticMeshVertex));
+        GetTotalSizeOf(Vertices));
 
-    m_VertexArray->AddVertexBuffer(vertexBuffer, StaticMeshVertex::DataFormat);
-    m_VertexArray->SetIndexBuffer(indexBuffer);
+    m_VertexArray.AddVertexBuffer(vertexBuffer, StaticMeshVertex::DataFormat);
+    m_VertexArray.SetIndexBuffer(indexBuffer);
 
-    m_NumTriangles = STD_ARRAY_NUM_ELEMENTS(Indices) / 3;
+    m_NumTriangles = GetContainerSizeInt(Indices) / 3;
 }

@@ -162,7 +162,7 @@ void Shader::StopUsing() const
     glUseProgram(0);
 }
 
-void Shader::SetUniform(const char* name, int32_t value)
+void Shader::SetUniform(const char* name, int value)
 {
     glUniform1i(GetUniformLocation(name), value);
 }
@@ -228,9 +228,9 @@ void Shader::SetSamplerUniform(const char* uniformName, const std::shared_ptr<IT
 void Shader::SetSamplersUniform(const char* uniformName, std::span<const std::shared_ptr<ITexture>> textures, uint32_t startTextureUnit)
 {
 
-    std::array<int32_t, MinTextureUnits> textureUnits;
+    std::array<int, MinTextureUnits> textureUnits;
 
-    int32_t last = 0;
+    int last = 0;
     std::generate(textureUnits.begin(), textureUnits.begin() + textures.size(), [&last]()
     {
         return last++;
@@ -239,13 +239,13 @@ void Shader::SetSamplersUniform(const char* uniformName, std::span<const std::sh
     glUniform1iv(GetUniformLocation(uniformName), static_cast<GLsizei>(textures.size()), textureUnits.data());
 }
 
-void Shader::BindUniformBuffer(int32_t blockIndex, const UniformBuffer& buffer)
+void Shader::BindUniformBuffer(int blockIndex, const UniformBuffer& buffer)
 {
     buffer.Bind(blockIndex);
     glUniformBlockBinding(m_ShaderProgram, blockIndex, blockIndex);
 }
 
-int32_t Shader::GetUniformBlockIndex(const std::string& name) const
+int Shader::GetUniformBlockIndex(const std::string& name) const
 {
     auto it = m_UniformNameToLocation.find(name);
 
@@ -306,7 +306,7 @@ void Shader::GenerateShaders(std::span<const std::string> sources)
     GenerateShaders(std::span<std::string_view>{srcs.begin(), index});
 }
 
-int32_t Shader::GetUniformLocation(const char* uniformName) const
+int Shader::GetUniformLocation(const char* uniformName) const
 {
     auto it = m_UniformNameToLocation.find(uniformName);
 
@@ -321,9 +321,9 @@ int32_t Shader::GetUniformLocation(const char* uniformName) const
     return it->second;
 }
 
-void Shader::AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, int32_t location) const
+void Shader::AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, int location) const
 {
-    const int32_t MaxNameLength = 96;
+    const int MaxNameLength = 96;
     const GLTypeToUniformType GlTypesToUniformTypes[] =
     {
         {GL_FLOAT, UniformType::Float},
@@ -353,7 +353,7 @@ void Shader::AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, int32_
 
     if (it != std::end(GlTypesToUniformTypes))
     {
-        outUniformsInfo.emplace_back(UniformInfo{it->Type, name, location, static_cast<int32_t>(size)});
+        outUniformsInfo.emplace_back(UniformInfo{it->Type, name, location, static_cast<int>(size)});
     }
 }
 

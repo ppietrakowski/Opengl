@@ -1,13 +1,14 @@
 #include "ImageRgba.hpp"
-
 #include <algorithm>
 #include <cstring>
 
-ImageRgba::ImageRgba(uint8_t* image, int32_t width, int32_t height, void(*deleter)(uint8_t*)) :
-    m_ImageData{image, DefaultImageDeleter{deleter}},
+ImageRgba::ImageRgba(const uint8_t* image, int width, int height) :
+    m_ImageData{},
     m_Width{width},
     m_Height{height}
 {
+    int length = 4 * width * height;
+    m_ImageData.insert(m_ImageData.begin(), image, image + length);
 }
 
 ImageRgba::ImageRgba(ImageRgba&& image) noexcept
@@ -26,15 +27,15 @@ ImageRgba& ImageRgba::operator=(ImageRgba&& image) noexcept
 
 const uint8_t* ImageRgba::GetRawImageData() const
 {
-    return m_ImageData.get();
+    return m_ImageData.data();
 }
 
-int32_t ImageRgba::GetWidth() const
+int ImageRgba::GetWidth() const
 {
     return m_Width;
 }
 
-int32_t ImageRgba::GetHeight() const
+int ImageRgba::GetHeight() const
 {
     return m_Height;
 }

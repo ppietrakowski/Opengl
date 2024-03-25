@@ -29,7 +29,7 @@ struct SkeletonMeshVertex
     glm::vec3 Position{0, 0,0};
     glm::vec3 Normal{0, 0, 0};
     glm::vec2 TextureCoords{0, 0};
-    int BoneIds[NumBonesPerVertex] = {0, 0, 0, 0};
+    int32_t BoneIds[NumBonesPerVertex] = {0, 0, 0, 0};
     float BoneWeights[NumBonesPerVertex] = {0, 0, 0, 0};
     uint32_t TextureId{0};
 
@@ -179,15 +179,14 @@ public:
 public:
     const VertexArray& GetVertexArray() const
     {
-        return *m_VertexArray;
+        return m_VertexArray;
     }
 
 private:
-    std::unique_ptr<VertexArray> m_VertexArray;
+    VertexArray m_VertexArray;
     Bone m_RootBone;
     std::unordered_map<std::string, SkeletalAnimation> m_Animations;
     glm::mat4 m_GlobalInverseTransform;
-
     uint32_t m_NumBones;
 
     Box m_BoundingBox;

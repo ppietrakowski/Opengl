@@ -43,7 +43,6 @@ bool Actor::IsAlive() const
 
 void ActorNativeTickable::ExecuteTick(Duration deltaSeconds)
 {
-
     for (ActorTickFunction& tick_function : TickFunctions)
     {
         tick_function.ExecuteTick(deltaSeconds, TickableActor);

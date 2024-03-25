@@ -6,12 +6,12 @@
 #include "RenderCommand.hpp"
 
 IndexBuffer::IndexBuffer(std::span<uint32_t> data, bool bDynamic) :
-    m_NumIndices{static_cast<int32_t>(data.size())}
+    m_NumIndices{static_cast<int>(data.size())}
 {
     GenerateRendererId(data.data(), bDynamic);
 }
 
-IndexBuffer::IndexBuffer(int32_t maxNumIndices) :
+IndexBuffer::IndexBuffer(int maxNumIndices) :
     m_NumIndices(maxNumIndices)
 {
     GenerateRendererId(nullptr, true);
@@ -33,12 +33,12 @@ void IndexBuffer::Unbind() const
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void IndexBuffer::UpdateIndices(const uint32_t* data, int32_t offset, int32_t size)
+void IndexBuffer::UpdateIndices(const uint32_t* data, int offset, int size)
 {
     ERR_FAIL_EXPECTED_TRUE_MSG(size <= m_NumIndices, "Size over declared is causing memory allocation -> may occur memory leak");
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererId);
-    int32_t sizeBytes = size * sizeof(uint32_t);
+    int sizeBytes = size * sizeof(uint32_t);
 
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, sizeBytes, data);
 }

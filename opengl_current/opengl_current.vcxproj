@@ -213,7 +213,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
+    <ClCompile Include="ActorComponent.cpp" />
     <ClCompile Include="Core.cpp" />
+    <ClCompile Include="Datapack.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="ErrorMacros.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -262,11 +264,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.hpp" />
+    <ClInclude Include="ActorComponent.hpp" />
     <ClInclude Include="ActorTagComponent.hpp" />
     <ClInclude Include="AssimpUtils.hpp" />
     <ClInclude Include="Box.hpp" />
     <ClInclude Include="CameraProjection.hpp" />
     <ClInclude Include="Core.hpp" />
+    <ClInclude Include="Datapack.hpp" />
     <ClInclude Include="Debug.hpp" />
     <ClInclude Include="DeltaClock.hpp" />
     <ClInclude Include="Duration.hpp" />

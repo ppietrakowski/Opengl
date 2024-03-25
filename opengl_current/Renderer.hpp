@@ -38,7 +38,7 @@ public:
     static void Submit(const StaticMeshEntry& meshEntry, const glm::mat4& transform);
     static void SubmitSkeleton(const SkeletalMesh& skeletalMesh, const glm::mat4& transform, std::span<const glm::mat4> boneTransforms);
 
-    static void SubmitMeshInstanced(const StaticMeshEntry& mesh, const Material& material, const UniformBuffer& buffer, int32_t numInstances, const glm::mat4& transform);
+    static void SubmitMeshInstanced(const StaticMeshEntry& mesh, const Material& material, const UniformBuffer& buffer, int numInstances, const glm::mat4& transform);
 
     static std::shared_ptr<Texture2D> GetDefaultTexture();
 

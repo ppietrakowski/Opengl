@@ -20,12 +20,12 @@ Material::Material(std::shared_ptr<Shader> shader) :
     }
 }
 
-int32_t Material::GetIntProperty(const char* name) const
+int Material::GetIntProperty(const char* name) const
 {
     return GetParam(name).GetInt();
 }
 
-void Material::SetIntProperty(const char* name, int32_t value)
+void Material::SetIntProperty(const char* name, int value)
 {
     GetParam(name).SetInt(value);
 }

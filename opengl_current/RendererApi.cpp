@@ -9,7 +9,7 @@ static void OpenGlErrorCallback(
     unsigned type,
     unsigned id,
     unsigned severity,
-    int32_t length,
+    int length,
     const char* message,
     const void* userParam)
 {
@@ -65,7 +65,7 @@ void RendererApi::SetClearColor(const RgbaColor& clearColor)
     }
 }
 
-static FORCE_INLINE void DrawIndexedUsingGlPrimitives(const VertexArray& vertexArray, int32_t numIndices, GLenum primitiveType)
+static FORCE_INLINE void DrawIndexedUsingGlPrimitives(const VertexArray& vertexArray, int numIndices, GLenum primitiveType)
 {
     ASSERT(numIndices >= 0);
 
@@ -73,23 +73,23 @@ static FORCE_INLINE void DrawIndexedUsingGlPrimitives(const VertexArray& vertexA
     glDrawElements(primitiveType, numIndices, GL_UNSIGNED_INT, nullptr);
 }
 
-void RendererApi::DrawIndexed(const VertexArray& vertexArray, int32_t numIndices)
+void RendererApi::DrawIndexed(const VertexArray& vertexArray, int numIndices)
 {
     DrawIndexedUsingGlPrimitives(vertexArray, numIndices, GL_TRIANGLES);
 }
 
-void RendererApi::DrawArrays(const VertexArray& vertexArray, int32_t numVertices)
+void RendererApi::DrawArrays(const VertexArray& vertexArray, int numVertices)
 {
     vertexArray.Bind();
     glDrawArrays(GL_TRIANGLES, 0, numVertices);
 }
 
-void RendererApi::DrawLines(const VertexArray& vertexArray, int32_t numIndices)
+void RendererApi::DrawLines(const VertexArray& vertexArray, int numIndices)
 {
     DrawIndexedUsingGlPrimitives(vertexArray, numIndices, GL_LINES);
 }
 
-void RendererApi::DrawIndexedInstanced(const VertexArray& vertexArray, int32_t numInstances)
+void RendererApi::DrawIndexedInstanced(const VertexArray& vertexArray, int numInstances)
 {
     ASSERT(numInstances >= 0);
 
@@ -131,7 +131,7 @@ void RendererApi::ClearBufferBindings_Debug()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void RendererApi::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
+void RendererApi::SetViewport(int x, int y, int width, int height)
 {
     glViewport(x, y, width, height);
     glScissor(x, y, width, height);

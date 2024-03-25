@@ -93,7 +93,7 @@ bool SkeletonMeshVertex::AddBoneData(int boneId, float weight)
 SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_ptr<Material>& material) :
     MainMaterial{material},
     m_NumBones{0},
-    m_VertexArray{std::make_unique<VertexArray>()}
+    m_VertexArray{}
 {
     // maps bone name to boneID
     std::unordered_map<std::string, int> boneNameToIndex;
@@ -217,8 +217,8 @@ SkeletalMesh::SkeletalMesh(const std::filesystem::path& path, const std::shared_
     }
 
     m_RootBone.AssignHierarchy(scene->mRootNode, bonesInfo);
-    m_VertexArray->AddVertexBuffer(std::make_shared<VertexBuffer>(vertices.data(), static_cast<int>(vertices.size() * sizeof(SkeletonMeshVertex))), SkeletonMeshVertex::DataFormat);
-    m_VertexArray->SetIndexBuffer(std::make_shared<IndexBuffer>(indices));
+    m_VertexArray.AddVertexBuffer(std::make_shared<VertexBuffer>(vertices.data(), static_cast<int>(vertices.size() * sizeof(SkeletonMeshVertex))), SkeletonMeshVertex::DataFormat);
+    m_VertexArray.SetIndexBuffer(std::make_shared<IndexBuffer>(indices));
 
     // find global transform for converting from bone space back to local space
     m_GlobalInverseTransform = glm::inverse(ToGlm(scene->mRootNode->mTransformation));

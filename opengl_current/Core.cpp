@@ -7,7 +7,7 @@
 
 #include "Logging.hpp"
 
-std::vector<std::string> SplitString(const std::string& string, std::string_view delimiter)
+std::vector<std::string> SplitString(std::string_view string, std::string_view delimiter)
 {
     std::vector<std::string> tokens;
     size_t startOffset = 0;
@@ -15,13 +15,16 @@ std::vector<std::string> SplitString(const std::string& string, std::string_view
 
     while (delimiterPos != std::string::npos)
     {
-        tokens.emplace_back(string.substr(startOffset, delimiterPos - startOffset));
+        auto s = string.substr(startOffset, delimiterPos - startOffset);
+        tokens.emplace_back(s.begin(), s.end());
 
         startOffset = delimiterPos + delimiter.length();
         delimiterPos = string.find(delimiter, startOffset);
     }
+    
+    auto s = string.substr(startOffset);
 
-    tokens.emplace_back(string.substr(startOffset));
+    tokens.emplace_back(s.begin(), s.end());
     return tokens;
 }
 

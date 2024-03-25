@@ -36,8 +36,8 @@ struct UniformInfo
 {
     UniformType Type;
     std::string Name;
-    int32_t Location;
-    int32_t ArraySize{1};
+    int Location;
+    int ArraySize{1};
 };
 
 struct ShaderCompilationFailedException : public std::runtime_error
@@ -65,7 +65,7 @@ struct ShaderIndex
 
 class ITexture;
 
-static constexpr int32_t MinTextureUnits = 32;
+static constexpr int MinTextureUnits = 32;
 
 class Shader
 {
@@ -77,7 +77,7 @@ public:
     void Use() const;
     void StopUsing() const;
 
-    void SetUniform(const char* name, int32_t value);
+    void SetUniform(const char* name, int value);
     void SetUniform(const char* name, float value);
     void SetUniform(const char* name, glm::vec2 value);
     void SetUniform(const char* name, const glm::vec3& value);
@@ -91,8 +91,8 @@ public:
     void SetSamplerUniform(const char* uniformName, const std::shared_ptr<ITexture>& textures, uint32_t startTextureUnit = 0);
     void SetSamplersUniform(const char* uniformName, std::span<const std::shared_ptr<ITexture>> textures, uint32_t startTextureUnit = 0);
 
-    void BindUniformBuffer(int32_t blockIndex, const UniformBuffer& buffer);
-    int32_t GetUniformBlockIndex(const std::string& name) const;
+    void BindUniformBuffer(int blockIndex, const UniformBuffer& buffer);
+    int GetUniformBlockIndex(const std::string& name) const;
 
     uint32_t GetOpenGlIdentifier() const
     {
@@ -101,7 +101,7 @@ public:
 
 private:
     uint32_t m_ShaderProgram{0};
-    mutable std::unordered_map<std::string, int32_t> m_UniformNameToLocation;
+    mutable std::unordered_map<std::string, int> m_UniformNameToLocation;
 
 private:
     Shader() = default;
@@ -110,8 +110,8 @@ private:
     void GenerateShaders(std::span<std::string_view> sources);
     void GenerateShaders(std::span<const std::string> sources);
 
-    int32_t GetUniformLocation(const char* uniformName) const;
-    void AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, int32_t location) const;
+    int GetUniformLocation(const char* uniformName) const;
+    void AddNewUniformInfo(std::vector<UniformInfo>& outUniformsInfo, int location) const;
 };
 
 inline ShaderCompilationFailedException::ShaderCompilationFailedException(const char* errorMessage) :

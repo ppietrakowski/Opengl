@@ -8,10 +8,12 @@
 #include "Window.hpp"
 
 #include "Level.hpp"
+#include "Logging.hpp"
 #include "imgizmo/ImGuizmo.h"
 
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 
 #include <chrono>
 #include <glm/glm.hpp>
@@ -24,13 +26,26 @@ struct LevelContext
     void CreateNewEmpty();
 };
 
-class Game : public std::enable_shared_from_this<Game>, public IWindowMessageHandler
+struct LoggingInitializer
+{
+    LoggingInitializer()
+    {
+        Logging::Initialize();
+    }
+
+    ~LoggingInitializer()
+    {
+        Logging::Quit();
+    }
+};
+
+struct GlfwLib;
+
+class Game : public IWindowMessageHandler
 {
 
 public:
-    Game(const WindowSettings& settings);
     static std::shared_ptr<Game> CreateGame(const WindowSettings& settings);
-
     ~Game();
 
 public:
@@ -46,7 +61,7 @@ public:
 
     bool IsMouseVisible() const
     {
-        return m_Window->IsMouseVisible();
+        return m_Window.IsMouseVisible();
     }
 
     std::shared_ptr<Level> GetCurrentLevel() const
@@ -57,10 +72,18 @@ public:
     virtual bool OnKeyDown(KeyCode::Index keyCode) override;
 
 private:
-    std::unique_ptr<Window> m_Window;
+    LoggingInitializer m_LoggingInitializer;
+    std::unique_ptr<GlfwLib> m_GlfwLib;
+    Window m_Window;
     ImGuiContext* m_ImguiContext;
     std::vector<std::unique_ptr<IGameLayer>> m_Layers;
+    std::unordered_map<std::type_index, size_t> m_TypeIndexToLayerIndex;
     LevelContext m_LevelContext;
+
+    static inline std::weak_ptr<Game> s_GameInstance;
+
+private:
+    Game(const WindowSettings& settings);
 
 private:
     bool InitializeImGui();

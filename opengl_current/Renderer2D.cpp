@@ -57,7 +57,7 @@ void Renderer2D::FlushDraw()
     s_SpriteBatch->FlushDraw(s_Projection);
 }
 
-std::int32_t Renderer2D::BindTextureToDraw(const std::shared_ptr<ITexture>& texture)
+int Renderer2D::BindTextureToDraw(const std::shared_ptr<ITexture>& texture)
 {
     s_SpriteBatch->BindNewTexture(texture);
     return s_SpriteBatch->GetNumBindedTextures() - 1;

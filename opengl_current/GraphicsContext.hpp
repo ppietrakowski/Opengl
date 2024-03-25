@@ -4,8 +4,10 @@ class Window;
 
 class GraphicsContext
 {
+    friend class Window;
+
 public:
-    GraphicsContext(const Window& contextWindow);
+    GraphicsContext() = default;
     ~GraphicsContext() = default;
 
 public:
@@ -20,5 +22,7 @@ public:
 
 private:
     void* m_Window;
+
+    void Initialize(const Window& contextWindow);
 };
 

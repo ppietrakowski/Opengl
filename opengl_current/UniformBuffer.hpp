@@ -1,20 +1,33 @@
 #pragma once
 
 #include <cstdint>
+#include "Core.hpp"
 
 class UniformBuffer {
 public:
-    UniformBuffer(int32_t maxSize);
+    UniformBuffer(int maxSize);
     ~UniformBuffer();
 
-    void UpdateBuffer(const void* data, int32_t sizeBytes);
-    void UpdateBuffer(const void* data, int32_t sizeBytes, int32_t offset);
+    void UpdateBuffer(const void* data, int sizeBytes);
+    void UpdateBuffer(const void* data, int sizeBytes, int offset);
 
-    void Bind(int32_t bindingId) const;
+    template <typename T>
+    void UpdateElement(const T& value, int startIndex)
+    {
+        UpdateBuffer(&value, sizeof(value), startIndex * sizeof(T));
+    }
+
+    template <typename T>
+    void UpdateRange(std::span<const T> values, int startIndex)
+    {
+        UpdateBuffer(values.data(), GetTotalSizeOf(values), startIndex * sizeof(T));
+    }
+
+    void Bind(int bindingId) const;
 
     static inline size_t s_NumBytesAllocated = 0;
 
 private:
     uint32_t m_RendererId;
-    int32_t m_MaxSize;
+    int m_MaxSize;
 };

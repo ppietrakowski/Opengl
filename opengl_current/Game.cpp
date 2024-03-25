@@ -12,16 +12,45 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <thread>
 
+#include <GLFW/glfw3.h>
+
 using ChronoDeltaTimeClock = std::chrono::steady_clock;
 constexpr ChronoDeltaTimeClock::duration MaxMillisecondsDeltaTime = std::chrono::duration_cast<ChronoDeltaTimeClock::duration>(milliseconds_float_t(1000.0f));
 constexpr ChronoDeltaTimeClock::duration MinMillisecondsDeltaTime = std::chrono::duration_cast<ChronoDeltaTimeClock::duration>(milliseconds_float_t(16.66667));
 
+
+struct GlfwLib
+{
+    GlfwLib()
+    {
+        glfwSetErrorCallback([](int code, const char* description)
+        {
+            ENG_LOG_ERROR("Glfw error {} : {}", code, description);
+        });
+
+        CRASH_EXPECTED_TRUE_MSG(glfwInit(), "Glfw initialization failed");
+
+#if defined(DEBUG) || defined(_DEBUG)
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    }
+
+    ~GlfwLib()
+    {
+        glfwTerminate();
+    }
+};
+
 Game::Game(const WindowSettings& settings) :
+    m_LoggingInitializer{},
+    m_GlfwLib(std::make_unique<GlfwLib>()),
+    m_Window(settings),
     m_ImguiContext{nullptr}
 {
-    Logging::Initialize();
-    m_Window = std::make_unique<Window>(settings);
-
     // initialize subsystems
     Renderer::Initialize();
     Renderer2D::Initialize();
@@ -39,7 +68,8 @@ Game::Game(const WindowSettings& settings) :
 
 std::shared_ptr<Game> Game::CreateGame(const WindowSettings& settings)
 {
-    std::shared_ptr<Game> game = std::make_shared<Game>(settings);
+    std::shared_ptr<Game> game(new Game(settings));
+    s_GameInstance = game;
     game->BindWindowEvents();
 
     return game;
@@ -52,10 +82,8 @@ Game::~Game()
     Debug::Quit();
     Renderer::Quit();
 
-    m_Window->DeinitializeImGui();
+    m_Window.DeinitializeImGui();
     ImGui::DestroyContext();
-
-    Logging::Quit();
 }
 
 using DeltaTimeClock = DeltaClockBase<ChronoDeltaTimeClock>;
@@ -65,7 +93,7 @@ void Game::Run()
     DeltaTimeClock clock{};
     auto frameTime = clock.GetDelta();
 
-    while (m_Window->IsOpen())
+    while (m_Window.IsOpen())
     {
         // calculate delta time using chrono library
         frameTime = (frameTime + clock.GetDelta()) / 2;
@@ -106,18 +134,18 @@ void Game::Run()
         RunImguiFrame();
         Renderer::EndScene();
 
-        m_Window->Update();
+        m_Window.Update();
     }
 }
 
 bool Game::IsRunning() const
 {
-    return m_Window->IsOpen();
+    return m_Window.IsOpen();
 }
 
 void Game::Quit()
 {
-    m_Window->Close();
+    m_Window.Close();
 }
 
 bool Game::OnKeyDown(KeyCode::Index keyCode)
@@ -146,16 +174,16 @@ bool Game::InitializeImGui()
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-    m_Window->InitializeImGui();
+    m_Window.InitializeImGui();
     return true;
 }
 
 void Game::RunImguiFrame()
 {
-    m_Window->ImGuiBeginFrame();
+    m_Window.ImGuiBeginFrame();
     ImGuizmo::SetOrthographic(false);
     ImGuiIO& io = ImGui::GetIO();
-    io.DisplaySize = ImVec2(static_cast<float>(m_Window->GetWidth()), static_cast<float>(m_Window->GetHeight()));
+    io.DisplaySize = ImVec2(static_cast<float>(m_Window.GetWidth()), static_cast<float>(m_Window.GetHeight()));
 
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
@@ -174,14 +202,14 @@ void Game::RunImguiFrame()
     }
 
     ImGui::Render();
-    m_Window->ImGuiDrawFrame();
+    m_Window.ImGuiDrawFrame();
     ImGui::EndFrame();
-    m_Window->ImGuiUpdateViewport();
+    m_Window.ImGuiUpdateViewport();
 }
 
 void Game::BindWindowEvents()
 {
-    m_Window->SetWindowMessageHandler(shared_from_this());
+    m_Window.SetWindowMessageHandler(s_GameInstance.lock());
 
 #if 0
     m_Window->SetEventCallback([this](const Event& evt)
@@ -209,26 +237,29 @@ void Game::BindWindowEvents()
 
 void Game::SetMouseVisible(bool bMouseVisible)
 {
-    m_Window->SetMouseVisible(bMouseVisible);
+    m_Window.SetMouseVisible(bMouseVisible);
 }
 
 void Game::AddLayer(std::unique_ptr<IGameLayer> gameLayer)
 {
+    m_TypeIndexToLayerIndex.try_emplace(gameLayer->GetTypeIndex(), m_Layers.size());
     m_Layers.emplace_back(std::move(gameLayer));
 }
 
 void Game::RemoveLayer(std::type_index index)
 {
-    auto it = std::remove_if(m_Layers.begin(),
-        m_Layers.end(),
-        [index](const std::unique_ptr<IGameLayer>& layer)
-    {
-        return layer->GetTypeIndex() == index;
-    });
+    const size_t* i = FindMap(m_TypeIndexToLayerIndex, index);
 
-    if (it != m_Layers.end())
+    if (i)
     {
-        m_Layers.erase(it);
+        m_Layers.erase(m_Layers.begin() + *i);
+        m_TypeIndexToLayerIndex.clear();
+
+        size_t idx = 0;
+        for (auto& layer : m_Layers)
+        {
+            m_TypeIndexToLayerIndex[layer->GetTypeIndex()] = idx++;
+        }
     }
 }
 

@@ -9,6 +9,8 @@
 #include <filesystem>
 #include <memory>
 
+#include "Core.hpp"
+
 struct StaticMeshVertex
 {
     glm::vec3 Position{0, 0,0};
@@ -39,12 +41,12 @@ public:
 
     const VertexArray& GetVertexArray() const
     {
-        return *m_VertexArray;
+        return m_VertexArray;
     }
 
-    int32_t GetNumIndices() const
+    int GetNumIndices() const
     {
-        return static_cast<int32_t>(Indices.size());
+        return static_cast<int>(Indices.size());
     }
 
     const Material& GetMaterial() const
@@ -58,9 +60,9 @@ public:
     }
 
 private:
-    std::shared_ptr<VertexArray> m_VertexArray;
+    VertexArray m_VertexArray;
     std::shared_ptr<Material> m_Material;
-    int32_t m_NumTriangles;
+    int m_NumTriangles;
 };
 
 class StaticMesh

@@ -26,6 +26,9 @@ class VertexArray
 {
 public:
     VertexArray();
+    VertexArray(VertexArray&& tempArray) noexcept;
+    VertexArray& operator=(VertexArray&& tempArray) noexcept;
+
     ~VertexArray();
 
 public:
@@ -48,10 +51,10 @@ private:
     uint32_t m_RendererId;
     std::vector<std::shared_ptr<VertexBuffer>> m_VertexBuffers;
     std::shared_ptr<IndexBuffer> m_IndexBuffer;
-    std::vector<VertexAttribute> attributes_;
+    std::vector<VertexAttribute> m_Attributes;
 };
 
 FORCE_INLINE AttributesView VertexArray::GetAttributes() const
 {
-    return attributes_;
+    return m_Attributes;
 }

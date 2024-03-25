@@ -19,8 +19,8 @@ static constexpr uint32_t BaseBoxIndices[24] =
     0, 4, 1, 5, 2, 6, 3, 7
 };
 
-constexpr int32_t MaxNumDebugVertices{2000};
-constexpr int32_t MaxNumDebugIndices{3 * 2000};
+constexpr int MaxNumDebugVertices{2000};
+constexpr int MaxNumDebugIndices{3 * 2000};
 
 glm::mat4 Debug::s_ProjectionViewMatrix{1.0f};
 
@@ -31,7 +31,6 @@ public:
         m_Material{std::make_shared<Material>(debugShader)}
     {
         m_Material->bCullFaces = false;
-        m_VertexArray = std::make_unique<VertexArray>();
 
         auto vertexBuffer = std::make_shared<VertexBuffer>(static_cast<int>(MaxNumDebugVertices * sizeof(DebugVertex)));
         auto indexBuffer = std::make_shared<IndexBuffer>(MaxNumDebugIndices);
@@ -41,8 +40,8 @@ public:
 
         constexpr std::array<VertexAttribute, 2> DebugVertexDataFormat{VertexAttribute{3, PrimitiveVertexType::Float}, VertexAttribute{1, PrimitiveVertexType::UnsignedInt}};
 
-        m_VertexArray->AddVertexBuffer(vertexBuffer, DebugVertexDataFormat);
-        m_VertexArray->SetIndexBuffer(indexBuffer);
+        m_VertexArray.AddVertexBuffer(vertexBuffer, DebugVertexDataFormat);
+        m_VertexArray.SetIndexBuffer(indexBuffer);
     }
 
     void AddBoxInstance(const Box& box, const Transform& transform, const glm::vec4& color)
@@ -107,7 +106,7 @@ public:
 
     void FlushDraw()
     {
-        m_VertexArray->Bind();
+        m_VertexArray.Bind();
         UploadBufferData();
 
         std::shared_ptr<Shader> shader = m_Material->GetShader();
@@ -115,20 +114,20 @@ public:
         shader->Use();
         shader->SetUniform("u_ProjectionView", Debug::GetProjectionViewMatrix());
 
-        RenderCommand::DrawLines(*m_VertexArray, m_NumDrawIndices);
+        RenderCommand::DrawLines(m_VertexArray, m_NumDrawIndices);
 
         m_NumDrawIndices = 0;
         m_NumDrawVertices = 0;
-        m_VertexArray->Unbind();
+        m_VertexArray.Unbind();
     }
 
 private:
     std::vector<DebugVertex> m_Vertices;
     std::vector<uint32_t> m_Indices;
-    std::unique_ptr<VertexArray> m_VertexArray;
+    VertexArray m_VertexArray;
 
-    int32_t m_NumDrawVertices{0};
-    int32_t m_NumDrawIndices{0};
+    int m_NumDrawVertices{0};
+    int m_NumDrawIndices{0};
     std::shared_ptr<Material> m_Material;
     bool m_bBuffersDirty{false};
 
@@ -137,10 +136,10 @@ private:
     {
         if (m_bBuffersDirty)
         {
-            std::shared_ptr<VertexBuffer> vertexBuffer = m_VertexArray->GetVertexBufferAt(0);
-            std::shared_ptr<IndexBuffer> indexBuffer = m_VertexArray->GetIndexBuffer();
+            std::shared_ptr<VertexBuffer> vertexBuffer = m_VertexArray.GetVertexBufferAt(0);
+            std::shared_ptr<IndexBuffer> indexBuffer = m_VertexArray.GetIndexBuffer();
 
-            vertexBuffer->UpdateVertices(m_Vertices.data(), m_NumDrawVertices * sizeof(DebugVertex));
+            vertexBuffer->Update(std::span<const DebugVertex>{m_Vertices.data(), static_cast<size_t>(m_NumDrawVertices)});
             indexBuffer->UpdateIndices(m_Indices.data(), m_NumDrawIndices);
             m_bBuffersDirty = false;
         }

@@ -19,7 +19,7 @@ public:
     }
 
 private:
-    std::unique_ptr<VertexArray> m_VertexArray;
+    VertexArray m_VertexArray;
     std::shared_ptr<CubeMap> m_CubeMap;
     std::shared_ptr<Shader> m_Shader;
 };

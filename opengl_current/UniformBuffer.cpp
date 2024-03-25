@@ -2,7 +2,7 @@
 
 #include <GL/glew.h>
 
-UniformBuffer::UniformBuffer(int32_t maxSize) :
+UniformBuffer::UniformBuffer(int maxSize) :
     m_MaxSize(maxSize)
 {
     glGenBuffers(1, &m_RendererId);
@@ -18,19 +18,19 @@ UniformBuffer::~UniformBuffer()
     s_NumBytesAllocated -= m_MaxSize;
 }
 
-void UniformBuffer::UpdateBuffer(const void* data, int32_t sizeBytes)
+void UniformBuffer::UpdateBuffer(const void* data, int sizeBytes)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, m_RendererId);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeBytes, data);
 }
 
-void UniformBuffer::UpdateBuffer(const void* data, int32_t sizeBytes, int32_t offset)
+void UniformBuffer::UpdateBuffer(const void* data, int sizeBytes, int offset)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, m_RendererId);
     glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeBytes, data);
 }
 
-void UniformBuffer::Bind(int32_t binding_id) const
+void UniformBuffer::Bind(int binding_id) const
 {
     glBindBufferBase(GL_UNIFORM_BUFFER, binding_id, m_RendererId);
 }

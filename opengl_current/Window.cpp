@@ -8,17 +8,19 @@
 
 #include <GLFW/glfw3.h>
 
+struct Window::WindowDataImpl
+{
+    Window* WindowInstance = NULL;
+    GlfwWindowData* WindowData = NULL;
+
+    void ExecuteInputOnEvent(KeyCode::Index keyCode, bool bPressed)
+    {
+        WindowInstance->ExecuteKeyEvent(keyCode, bPressed);
+    }
+};
 
 Window::Window(const WindowSettings& settings)
 {
-    glfwSetErrorCallback([](std::int32_t code, const char* description)
-    {
-        ENG_LOG_ERROR("Glfw error {} : {}", code, description);
-    });
-
-    // initialize glfw and create window with opengl 4.3 context
-    CRASH_EXPECTED_TRUE(glfwInit());
-
 #if defined(DEBUG) || defined(_DEBUG)
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
@@ -29,6 +31,10 @@ Window::Window(const WindowSettings& settings)
 
     m_Window = glfwCreateWindow(settings.Width, settings.Height, settings.Title.c_str(), nullptr, nullptr);
     CRASH_EXPECTED_NOT_NULL(m_Window);
+
+    m_WindowDataReal = std::make_unique<WindowDataImpl>();
+    m_WindowDataReal->WindowData = &m_WindowData;
+    m_WindowDataReal->WindowInstance = this;
 
     // fill window data
     glm::dvec2 mousePosition;
@@ -43,8 +49,8 @@ Window::Window(const WindowSettings& settings)
     m_WindowData.WindowSize = windowSize;
 
     BindWindowCallbacks();
-    m_GraphicsContext = std::make_unique<GraphicsContext>(*this);
-    m_Input = std::make_unique<Input>(m_Window);
+    m_GraphicsContext.Initialize(*this);
+    m_Input.Initialize(m_Window);
 }
 
 Window::~Window()
@@ -55,8 +61,8 @@ Window::~Window()
 void Window::Update()
 {
     glfwPollEvents();
-    m_GraphicsContext->SwapBuffers();
-    m_Input->Update(m_WindowData);
+    m_GraphicsContext.SwapBuffers();
+    m_Input.Update(m_WindowData);
 }
 
 uint32_t Window::GetWidth() const
@@ -92,13 +98,13 @@ bool Window::IsOpen() const
 void Window::EnableVSync()
 {
     m_WindowData.bVsyncEnabled = true;
-    m_GraphicsContext->SetVsync(true);
+    m_GraphicsContext.SetVsync(true);
 }
 
 void Window::DisableVSync()
 {
     m_WindowData.bVsyncEnabled = false;
-    m_GraphicsContext->SetVsync(false);
+    m_GraphicsContext.SetVsync(false);
 }
 
 bool Window::IsVSyncEnabled() const
@@ -129,24 +135,24 @@ void Window::SetMouseVisible(bool bMouseVisible)
 void Window::InitializeImGui()
 {
     ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
-    m_GraphicsContext->InitializeForImGui();
+    m_GraphicsContext.InitializeForImGui();
 }
 
 void Window::DeinitializeImGui()
 {
-    m_GraphicsContext->DeinitializeImGui();
+    m_GraphicsContext.DeinitializeImGui();
     ImGui_ImplGlfw_Shutdown();
 }
 
 void Window::ImGuiBeginFrame()
 {
-    m_GraphicsContext->ImGuiBeginFrame();
+    m_GraphicsContext.ImGuiBeginFrame();
     ImGui_ImplGlfw_NewFrame();
 }
 
 void Window::ImGuiDrawFrame()
 {
-    m_GraphicsContext->ImGuiDrawFrame();
+    m_GraphicsContext.ImGuiDrawFrame();
 }
 
 void Window::ImGuiUpdateViewport()
@@ -185,11 +191,13 @@ inline static MouseButton GlfwMouseCodeToMouseButton(int code)
 
 void Window::BindWindowCallbacks()
 {
-    glfwSetWindowUserPointer(m_Window, &m_WindowData);
+    glfwSetWindowUserPointer(m_Window, m_WindowDataReal.get());
 
     glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos)
     {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        auto wdata = reinterpret_cast<Window::WindowDataImpl*>(glfwGetWindowUserPointer(window));
+        GlfwWindowData* windowData = wdata->WindowData;
+
         windowData->LastMousePosition = windowData->MousePosition;
         windowData->MousePosition = glm::vec2{xpos, ypos};
 
@@ -199,27 +207,34 @@ void Window::BindWindowCallbacks()
 
     glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
     {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        auto wdata = reinterpret_cast<Window::WindowDataImpl*>(glfwGetWindowUserPointer(window));
+        GlfwWindowData* windowData = wdata->WindowData;
 
         std::shared_ptr<IWindowMessageHandler> messageHandler = windowData->GetWindowMessageHandler();
+
+        KeyCode::Index keyCode = static_cast<KeyCode::Index>(key);
 
         switch (action)
         {
         case GLFW_PRESS:
-            messageHandler->OnKeyDown(static_cast<KeyCode::Index>(key));
+            messageHandler->OnKeyDown(keyCode);
+            wdata->ExecuteInputOnEvent(keyCode, true);
             break;
         case GLFW_REPEAT:
-            messageHandler->OnKeyRepeat(static_cast<KeyCode::Index>(key));
+            messageHandler->OnKeyRepeat(keyCode);
             break;
         case GLFW_RELEASE:
             messageHandler->OnKeyUp(static_cast<KeyCode::Index>(key));
+            wdata->ExecuteInputOnEvent(keyCode, false);
             break;
         }
+
     });
 
     glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
     {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        auto wdata = reinterpret_cast<Window::WindowDataImpl*>(glfwGetWindowUserPointer(window));
+        GlfwWindowData* windowData = wdata->WindowData;
         std::shared_ptr<IWindowMessageHandler> messageHandler = windowData->GetWindowMessageHandler();
 
         MouseButton mouseButton = GlfwMouseCodeToMouseButton(button);
@@ -236,7 +251,8 @@ void Window::BindWindowCallbacks()
 
     glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset)
     {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        auto wdata = reinterpret_cast<Window::WindowDataImpl*>(glfwGetWindowUserPointer(window));
+        GlfwWindowData* windowData = wdata->WindowData;
         std::shared_ptr<IWindowMessageHandler> messageHandler = windowData->GetWindowMessageHandler();
 
         messageHandler->OnMouseWheel(static_cast<float>(xoffset));
@@ -244,7 +260,8 @@ void Window::BindWindowCallbacks()
 
     glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
     {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        auto wdata = reinterpret_cast<Window::WindowDataImpl*>(glfwGetWindowUserPointer(window));
+        GlfwWindowData* windowData = wdata->WindowData;
         std::shared_ptr<IWindowMessageHandler> messageHandler = windowData->GetWindowMessageHandler();
 
         messageHandler->OnSizeChanged(glm::uvec2(width, height));
@@ -252,10 +269,15 @@ void Window::BindWindowCallbacks()
 
     glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
     {
-        GlfwWindowData* windowData = reinterpret_cast<GlfwWindowData*>(glfwGetWindowUserPointer(window));
+        auto wdata = reinterpret_cast<Window::WindowDataImpl*>(glfwGetWindowUserPointer(window));
+        GlfwWindowData* windowData = wdata->WindowData;
         windowData->bGameRunning = false;
 
         std::shared_ptr<IWindowMessageHandler> messageHandler = windowData->GetWindowMessageHandler();
         messageHandler->OnWindowClose();
     });
+}
+
+void Window::ExecuteKeyEvent(KeyCode::Index keyCode, bool bPressed)
+{
 }

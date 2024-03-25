@@ -37,16 +37,16 @@ using StbiImageUniquePtr = std::unique_ptr<uint8_t, StbiDeleter>;
 
 struct StbiImageData
 {
-    int32_t Width{0};
-    int32_t Height{0};
-    int32_t NumComps{0};
+    int Width{0};
+    int Height{0};
+    int NumComps{0};
 
     bool IsRgb() const
     {
         return NumComps == 3;
     }
 
-    int32_t GetNumPixels() const
+    int GetNumPixels() const
     {
         return Width * Height;
     }
@@ -90,7 +90,7 @@ static GLenum ConvertTextureFormatToInternalFormat(TextureFormat format)
     return 0;
 }
 
-static StbiImageUniquePtr MakeImageUniquePtrFromMemory(const void* data, int32_t length, StbiImageData& outImageData);
+static StbiImageUniquePtr MakeImageUniquePtrFromMemory(const void* data, int length, StbiImageData& outImageData);
 
 static StbiImageUniquePtr LoadImageFromFilePath(const std::string& filePath, StbiImageData& outImageData)
 {
@@ -148,7 +148,7 @@ Texture2D::Texture2D(const TextureSpecification& specification) :
 
 Texture2D::~Texture2D()
 {
-    int32_t numComponents = 3;
+    int numComponents = 3;
 
     if (m_DataFormat == GL_RGBA)
     {
@@ -159,12 +159,12 @@ Texture2D::~Texture2D()
     glDeleteTextures(1, &m_RendererId);
 }
 
-int32_t Texture2D::GetWidth() const
+int Texture2D::GetWidth() const
 {
     return m_Width;
 }
 
-int32_t Texture2D::GetHeight() const
+int Texture2D::GetHeight() const
 {
     return m_Height;
 }
@@ -258,11 +258,11 @@ static StbiImageUniquePtr ConvertRgbToRgbaImage(const uint8_t* rgbImage, const S
         throw std::runtime_error("Cannot convert image to RGBA out of memory");
     }
 
-    for (int32_t x = 0; x < imageData.Width; ++x)
+    for (int x = 0; x < imageData.Width; ++x)
     {
-        for (int32_t y = 0; y < imageData.Height; ++y)
+        for (int y = 0; y < imageData.Height; ++y)
         {
-            int32_t index = x + y * imageData.Width;
+            int index = x + y * imageData.Width;
 
             const RgbColor& c = rgbColor[index];
             imgData[index] = RgbaColor(c.Red, c.Green, c.Blue);
@@ -272,7 +272,7 @@ static StbiImageUniquePtr ConvertRgbToRgbaImage(const uint8_t* rgbImage, const S
     return StbiImageUniquePtr(reinterpret_cast<uint8_t*>(imgData));
 }
 
-StbiImageUniquePtr MakeImageUniquePtrFromMemory(const void* data, int32_t length, StbiImageData& outImageData)
+StbiImageUniquePtr MakeImageUniquePtrFromMemory(const void* data, int length, StbiImageData& outImageData)
 {
     ASSERT(data);
 
@@ -288,7 +288,7 @@ StbiImageUniquePtr MakeImageUniquePtrFromMemory(const void* data, int32_t length
     return StbiImageUniquePtr(imageData);
 }
 
-ImageRgba LoadRgbaImageFromMemory(const void* data, int32_t length)
+ImageRgba LoadRgbaImageFromMemory(const void* data, int length)
 {
     StbiImageData imageData;
     StbiImageUniquePtr img = MakeImageUniquePtrFromMemory(data, length, imageData);
@@ -298,7 +298,7 @@ ImageRgba LoadRgbaImageFromMemory(const void* data, int32_t length)
         img = ConvertRgbToRgbaImage(img.get(), imageData);
     }
 
-    return ImageRgba{img.release(), imageData.Width, imageData.Height, &StbiDeleteFunc};
+    return ImageRgba{img.get(), imageData.Width, imageData.Height};
 }
 
 CubeMap::CubeMap(std::span<const std::string> paths)

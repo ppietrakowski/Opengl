@@ -13,15 +13,6 @@ FORCE_INLINE GLFWwindow* UnwrapWindow(void* windowHandle)
     return reinterpret_cast<GLFWwindow*>(windowHandle);
 }
 
-GraphicsContext::GraphicsContext(const Window& contextWindow) :
-    m_Window{std::any_cast<GLFWwindow*>(contextWindow.GetNativeWindow())}
-{
-    glfwMakeContextCurrent(UnwrapWindow(m_Window));
-    glfwSwapInterval(1);
-    GLenum errorCode = glewInit();
-    CRASH_EXPECTED_TRUE_MSG(errorCode == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(errorCode)));
-}
-
 constexpr const char* kGlslVersion = "#version 430 core";
 
 void GraphicsContext::InitializeForImGui()
@@ -46,7 +37,6 @@ void GraphicsContext::ImGuiDrawFrame()
 
 void GraphicsContext::UpdateImGuiViewport()
 {
-
 }
 
 void GraphicsContext::SwapBuffers()
@@ -57,4 +47,13 @@ void GraphicsContext::SwapBuffers()
 void GraphicsContext::SetVsync(bool bVsyncEnabled)
 {
     glfwSwapInterval(bVsyncEnabled ? 1 : 0);
+}
+
+void GraphicsContext::Initialize(const Window& contextWindow)
+{
+    m_Window = std::any_cast<GLFWwindow*>(contextWindow.GetNativeWindow());
+    glfwMakeContextCurrent(UnwrapWindow(m_Window));
+    glfwSwapInterval(1);
+    GLenum errorCode = glewInit();
+    CRASH_EXPECTED_TRUE_MSG(errorCode == GLEW_OK, reinterpret_cast<const char*>(glewGetErrorString(errorCode)));
 }

@@ -40,7 +40,7 @@ public:
     {
     }
 
-    virtual void Visit(PrimitiveParameter<int32_t>& param, const std::string& name) = 0;
+    virtual void Visit(PrimitiveParameter<int>& param, const std::string& name) = 0;
     virtual void Visit(PrimitiveParameter<float>& param, const std::string& name) = 0;
     virtual void Visit(PrimitiveParameter<glm::vec2>& param, const std::string& name) = 0;
     virtual void Visit(PrimitiveParameter<glm::vec3>& param, const std::string& name) = 0;
@@ -53,7 +53,7 @@ class Parameter
 public:
     virtual ~Parameter() = default;
 
-    virtual void SetValue(int32_t value)
+    virtual void SetValue(int value)
     {
     }
 
@@ -186,7 +186,7 @@ class UnknownParameter : public Parameter
 };
 
 using ParamVariant = std::variant<TextureParameter,
-    PrimitiveParameter<int32_t>,
+    PrimitiveParameter<int>,
     PrimitiveParameter<float>,
     PrimitiveParameter<glm::vec2>,
     PrimitiveParameter<glm::vec3>,
@@ -201,7 +201,7 @@ class MaterialParam
 public:
     MaterialParam() = default;
     MaterialParam(const MaterialParam&) = default;
-    MaterialParam(const char* uniformName, int32_t value);
+    MaterialParam(const char* uniformName, int value);
     MaterialParam(const char* uniformName, float value);
     MaterialParam(const char* uniformName, glm::vec2 value);
     MaterialParam(const char* uniformName, glm::vec3 value);
@@ -211,7 +211,7 @@ public:
     MaterialParam& operator=(const MaterialParam&) = default;
     void SetUniform(Shader& shader) const;
 
-    int32_t GetInt() const;
+    int GetInt() const;
     float GetFloat() const;
     glm::vec2 GetVector2() const;
     glm::vec3 GetVector3() const;
@@ -219,7 +219,7 @@ public:
 
     std::shared_ptr<ITexture> GetTexture() const;
 
-    void SetInt(int32_t value);
+    void SetInt(int value);
     void SetFloat(float value);
     void SetVector2(glm::vec2 value);
     void SetVector3(glm::vec3 value);

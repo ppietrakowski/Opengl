@@ -9,13 +9,12 @@
 
 #include "GraphicsContext.hpp"
 #include "GlfwWindowData.hpp"
-
-struct GLFWwindow;
+#include "Input.hpp"
 
 struct WindowSettings
 {
-    uint32_t Width;
-    uint32_t Height;
+    int Width;
+    int Height;
     std::string Title;
 };
 
@@ -24,6 +23,9 @@ class Input;
 class Window
 {
 public:
+    struct WindowDataImpl;
+    friend struct Window::WindowDataImpl;
+
     Window(const WindowSettings& settings);
     ~Window();
 
@@ -69,11 +71,13 @@ public:
 
 private:
     GLFWwindow* m_Window;
-    std::unique_ptr<Input> m_Input;
-    std::unique_ptr<GraphicsContext> m_GraphicsContext;
+    Input m_Input;
+    GraphicsContext m_GraphicsContext;
     GlfwWindowData m_WindowData;
+    std::unique_ptr<WindowDataImpl> m_WindowDataReal;
     
 private:
     void BindWindowCallbacks();
+    void ExecuteKeyEvent(KeyCode::Index keyCode, bool bPressed);
 };
 

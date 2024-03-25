@@ -384,7 +384,7 @@ void SandboxGameLayer::InitializeSkeletalMesh()
 
 void SandboxGameLayer::CreateSkeletalActors()
 {
-    for (std::int32_t i = 0; i < 2; ++i)
+    for (int i = 0; i < 2; ++i)
     {
         Actor skeletalMeshActor = m_Level->CreateActor("SkeletalMesh" + std::to_string(i));
         skeletalMeshActor.AddComponent<SkeletalMeshComponent>(m_TestSkeletalMesh);

@@ -35,8 +35,8 @@ public:
     virtual ~ITexture() = default;
 
 public:
-    virtual int32_t GetWidth() const = 0;
-    virtual int32_t GetHeight() const = 0;
+    virtual int GetWidth() const = 0;
+    virtual int GetHeight() const = 0;
 
     virtual void Bind(uint32_t textureUnit) const = 0;
     virtual void Unbind(uint32_t textureUnit) = 0;
@@ -62,8 +62,8 @@ public:
     virtual ~Texture2D();
 
 public:
-    virtual int32_t GetWidth() const override;
-    virtual int32_t GetHeight() const override;
+    virtual int GetWidth() const override;
+    virtual int GetHeight() const override;
 
     virtual void Bind(uint32_t textureUnit) const override;
     virtual void Unbind(uint32_t textureUnit) override;
@@ -83,8 +83,8 @@ public:
 
 private:
     uint32_t m_RendererId;
-    int32_t m_Width;
-    int32_t m_Height;
+    int m_Width;
+    int m_Height;
     uint32_t m_DataFormat{0};
     uint32_t m_InternalDataFormat{0};
     bool m_bHasMipmaps : 1{false};
@@ -116,8 +116,8 @@ public:
     ~CubeMap();
 
 public:
-    virtual int32_t GetWidth() const override;
-    virtual int32_t GetHeight() const override;
+    virtual int GetWidth() const override;
+    virtual int GetHeight() const override;
     virtual void Bind(uint32_t textureUnit) const override;
     virtual void Unbind(uint32_t textureUnit) override;
     virtual bool IsMipmapped() const override;
@@ -134,7 +134,7 @@ private:
     std::string m_Name;
 };
 
-ImageRgba LoadRgbaImageFromMemory(const void* data, int32_t length);
+ImageRgba LoadRgbaImageFromMemory(const void* data, int length);
 
 inline uint32_t Texture2D::GetRendererId() const
 {

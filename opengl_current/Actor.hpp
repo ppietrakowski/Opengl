@@ -17,7 +17,15 @@ struct ActorTickTrait
     static constexpr inline bool bIsTickable = false;
 };
 
+template <typename T>
+struct ActorSpawnedTrait
+{
+    static constexpr inline bool bSpawned = false;
+};
+
 #define DECLARE_COMPONENT_TICKABLE(ComponentClass) template<> struct ActorTickTrait<ComponentClass> { static constexpr inline bool bIsTickable = true; }
+
+#define DECLARE_COMPONENT_SPAWNED(ComponentClass) template<> struct ActorSpawnedTrait<ComponentClass> { static constexpr inline bool bSpawned = true; }
 
 typedef void(*ActorTickFn)(Duration deltaSeconds, entt::handle& actor);
 
@@ -85,6 +93,15 @@ struct CameraComponent
     glm::quat Rotation;
 };
 
+class ActorComponent;
+class Actor;
+
+struct NativeComponentCollection
+{
+    using GetterFunc = ActorComponent* (*)(Actor& actor);
+    std::vector<GetterFunc> NativeComponents;
+};
+
 // Basic gameplay object. This class is copy constructible
 class Actor
 {
@@ -116,6 +133,25 @@ public:
         {
             auto& tickable = m_EntityHandle.get<ActorNativeTickable>();
             tickable.Bind<T>();
+        }
+
+
+        if constexpr (ActorSpawnedTrait<T>::bSpawned)
+        {
+            T& c = GetComponent<T>();
+            c.Spawned();
+        }
+
+        if constexpr (std::is_base_of_v<ActorComponent, T>)
+        {
+            auto& c = GetComponent<NativeComponentCollection>();
+
+            c.NativeComponents.emplace_back([](Actor& actor)
+            {
+                return static_cast<ActorComponent*>(&actor.GetComponent<T>());
+            });
+
+            c.NativeComponents.back()(*this)->m_Actor = *this;
         }
     }
 
