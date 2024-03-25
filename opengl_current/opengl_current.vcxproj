@@ -215,9 +215,11 @@
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Archive.cpp" />
     <ClCompile Include="AsciiArchive.cpp" />
+    <ClCompile Include="ClassRegistry.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="Datapack.cpp" />
     <ClCompile Include="Debug.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="ErrorMacros.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GraphicsContext.cpp" />
@@ -243,6 +245,7 @@
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MaterialParameter.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="PlayerController.cpp" />
     <ClCompile Include="RenderCommand.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -272,12 +275,14 @@
     <ClInclude Include="AssimpUtils.hpp" />
     <ClInclude Include="Box.hpp" />
     <ClInclude Include="CameraProjection.hpp" />
+    <ClInclude Include="ClassRegistry.hpp" />
     <ClInclude Include="Core.hpp" />
     <ClInclude Include="Datapack.hpp" />
     <ClInclude Include="Debug.hpp" />
     <ClInclude Include="DeltaClock.hpp" />
     <ClInclude Include="Duration.hpp" />
     <ClInclude Include="Engine.hpp" />
+    <ClInclude Include="Entity.hpp" />
     <ClInclude Include="ErrorMacros.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="GameLayer.hpp" />
@@ -311,6 +316,7 @@
     <ClInclude Include="Logging.hpp" />
     <ClInclude Include="Material.hpp" />
     <ClInclude Include="MaterialParameter.hpp" />
+    <ClInclude Include="Object.hpp" />
     <ClInclude Include="PlayerController.hpp" />
     <ClInclude Include="RenderCommand.hpp" />
     <ClInclude Include="Renderer.hpp" />
